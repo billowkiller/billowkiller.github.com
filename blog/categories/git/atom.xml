@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Billowkiller's Blog]]></title>
-  <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
+  <title><![CDATA[Category: git | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/categories/git/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
   <updated>2013-05-12T11:00:08-04:00</updated>
   <id>http://billowkiller.github.io/</id>
