@@ -1,0 +1,73 @@
+---
+layout: post
+title: "Linux下DHCP服务器配置"
+date: 2013-05-14 01:09
+comments: true
+categories: [linux,dhcp]
+---
+
+环境为Ubuntu 12.10，机器为3网卡，需要再eth2上配置一个dhcp服务。
+
+因为eth2后接一个交换机，交换机上的机器需要自动分配网址，并且对于某一台或多台机器需要固定网址，例如打印机。
+
+###  1.   安装DHCP服务
+
+    sudo apt-get install dhcp3-server
+
+但是安装的是
+isp-dhcp-server。可能是ubuntu进行的版本替换。但是不影响后面的操作。
+
+服务器上用友3块网卡，需要选择哪一块网卡用来监听DHCP服务。
+
+输入下面命令修改配置文件
+
+    vim /etc/default/isc-dhcp-server
+
+在文件的注释部分可以看到dhcpd的配置文件在
+
+    /etc/dhcp/dhcpd.conf
+
+其他注释部分为格外选项，下面要修改INTERFACES
+
+    INTERFACES=“eth2”
+<!--more-->
+### 2.  配置DHCP服务
+
+修改在上一步查到的dhcpd文件
+
+修改的部分如下：
+
+    default-lease-time 600;
+     max-lease-time 7200;
+     option subnet-mask 255.255.255.0;
+     option broadcast-address 192.168.1.255;
+     option routers 192.168.1.254;
+     option domain-name-servers 192.168.1.1, 192.168.1.2;
+     subnet 192.168.1.0 netmask 255.255.255.0 {
+     　　range 192.168.1.10 192.168.1.200;
+     }
+
+注意：不要忘了每句后面加上分号，当时我就粗心了，花了好久时间查出。
+
+这样修改自动分配的地址范围就在
+
+    192.168.1.10 与 192.168.1.200
+
+还需要绑定MAC地址与ip地址，在添加代码
+
+    host printer1 {
+     　　hardware ethernet 00:0a:95:f5:8f:b3;
+     　　fixed-address 192.168.1.23;
+     }
+
+重启电脑，就ok了。
+
+需要找到DHCP服务器的IP地址，使用下面的命令
+
+    sudo dhclient
+
+或者
+
+    tail -n 15 /var/lib/dhcp3/dhclient.*.leases
+
+ 
