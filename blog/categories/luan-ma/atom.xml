@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 乱码 | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/categories/luan-ma/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2013-05-14T01:55:26-04:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[Wutao]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[zip文件乱码解决]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue/"/>
+    <updated>2013-05-14T01:09:00-04:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue</id>
+    <content type="html"><![CDATA[<p>在windows上压缩的文件，是以系统默认编码中文来压缩文件。由于zip文件中没有声明其编码，所以linux上的unzip一般以默认编码解压，中文文件名会出现乱码。</p>
+
+<p>虽然2005年就有人把这报告为bug,
+但是info-zip的官方网站没有把自动识别编码列入计划，可能他们不认为这是个问题。Sun对java中存在N年的zip编码问题，采用了同样的处理方式。</p>
+
+<p>1.1 通过unzip行命令解压，指定字符集\
+unzip -O CP936 xxx.zip (用GBK, GB18030也可以)\
+有趣的是unzip的manual中并无这个选项的说明, unzip
+&mdash;help对这个参数有一行简单的说明。</p>
+
+<p>1.2 在环境变量中，指定unzip参数，总是以指定的字符集显示和解压文件\
+解决办法：\
+引用</p>
+
+<pre><code>[sourcecode language="bash"]vi /etc/environment[/sourcecode]
+</code></pre>
+
+<p>再最后加入后面的代码即可\
+UNZIP=&ldquo;-O CP936&rdquo;\
+ZIPINFO=&ldquo;-O CP936&rdquo;</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[linux下解决中文乱码——文件，标签]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-%2Cbiao-qian/"/>
+    <updated>2013-05-14T01:09:00-04:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-,biao-qian</id>
+    <content type="html"><![CDATA[<p>文件是在WIndows 下创建的,Windows
+的文件名中文编码默认为GBK,而Linux中默认文件名编码为UTF8,由于编码不一致所以导致了文件名乱码的问题，解决这个问题需要对文件名进行转码。</p>
+
+<ul>
+<li><strong>文件与文件夹乱码，使用convmv来解决</strong></li>
+</ul>
+
+
+<p>convmv 使用方法：</p>
+
+<p>convmv -f 源编码 -t 新编码 [选项] 文件名</p>
+
+<p>常用参数：\
+-r 递归处理子文件夹\
+–notest 真正进行操作，默认情况下是不对文件进行真实操作\
+–list 显示所有支持的编码\
+–unescap 可以做一下转义，比如把%20变成空格</p>
+
+<p>举例：</p>
+
+<p>在当前目录下</p>
+
+<pre><code>convmv -f GBK -t UTF-8 --notest * //所有文件转gbk为utf8
+</code></pre>
+
+<ul>
+<li><strong>转换 mp3 标签编码，使用mutagen</strong></li>
+</ul>
+
+
+<p>安装：</p>
+
+<pre><code>sudo apt-get install python-mutagen
+</code></pre>
+
+<p>举例：<!--more--></p>
+
+<pre><code>mid3iconv -e gbk *.mp3 //当前目录下的mp3文件
+
+find . -iname “*.mp3” -execdir mid3iconv -e GBK {} \; //所有文件包括子文件夹
+</code></pre>
+
+<p> </p>
+]]></content>
+  </entry>
+  
+</feed>

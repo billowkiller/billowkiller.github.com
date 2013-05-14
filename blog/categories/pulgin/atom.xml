@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: pulgin | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/categories/pulgin/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2013-05-14T01:55:26-04:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[Wutao]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[sublime text2 说明]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/13/sublime-text2-shuo-ming/"/>
+    <updated>2013-05-13T03:05:00-04:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/13/sublime-text2-shuo-ming</id>
+    <content type="html"><![CDATA[<p><strong><em>Infomation Included：</em></strong></p>
+
+<ol>
+<li>快捷键</li>
+<li>插件</li>
+</ol>
+
+
+<hr />
+
+<h3> </h3>
+
+<h3>快捷键</h3>
+
+<p><strong>Ctrl+L</strong></p>
+
+<p><strong>选择整行</strong><strong>(</strong><strong>按住</strong><strong>&ndash;</strong><strong>继续选择下行</strong><strong>)</strong></p>
+
+<p><strong>Ctrl+KK</strong></p>
+
+<p>从光标处删除至行尾</p>
+
+<p><strong>Ctrl+Shift+K</strong></p>
+
+<p>删除整行</p>
+
+<p><strong>Ctrl+Shift+D</strong></p>
+
+<p>复制光标所在整行，插入在该行之前</p>
+
+<p><strong>Ctrl+J</strong></p>
+
+<p>合并行(已选择需要合并的多行时)</p>
+
+<p><strong>Ctrl+KU</strong></p>
+
+<p>改为大写</p>
+
+<p><strong>Ctrl+KL</strong></p>
+
+<p>改为小写</p>
+
+<p><strong>Ctrl+D</strong></p>
+
+<p>选词(按住-继续选择下个相同的字符串)</p>
+
+<!--more-->
+
+
+<p><strong>Ctrl+M</strong></p>
+
+<p>光标移动至括号内开始或结束的位置</p>
+
+<p><strong>Ctrl+Shift+M</strong></p>
+
+<p>选择括号内的内容(按住-继续选择父括号)</p>
+
+<p><strong>Ctrl+/</strong></p>
+
+<p>注释整行(如已选择内容，同“Ctrl+Shift+/”效果)</p>
+
+<p><strong>Ctrl+Shift+/</strong></p>
+
+<p>注释已选择内容</p>
+
+<p><strong>Ctrl+Space</strong></p>
+
+<p>自动完成(win与系统快捷键冲突，需修改)</p>
+
+<p><strong>Ctrl+Z</strong></p>
+
+<p>撤销</p>
+
+<p><strong>Ctrl+Y</strong></p>
+
+<p>恢复撤销</p>
+
+<p><strong>Ctrl+Shift+V</strong></p>
+
+<p>粘贴并自动缩进(其它兄弟写的，实测win系统自动缩进无效)</p>
+
+<p><strong>Ctrl+M</strong></p>
+
+<p>光标跳至对应的括号</p>
+
+<p><strong>Alt+.</strong></p>
+
+<p>闭合当前标签</p>
+
+<p><strong>Ctrl+Shift+A</strong></p>
+
+<p>选择光标位置父标签对儿</p>
+
+<p><strong>Ctrl+Shift+[</strong></p>
+
+<p>折叠代码</p>
+
+<p><strong>Ctrl+Shift+]</strong></p>
+
+<p>展开代码</p>
+
+<p><strong>Ctrl+KT</strong></p>
+
+<p>折叠属性</p>
+
+<p><strong>Ctrl+K0</strong></p>
+
+<p>展开所有</p>
+
+<p><strong>Ctrl+U</strong></p>
+
+<p>软撤销</p>
+
+<p><strong>Ctrl+T</strong></p>
+
+<p>词互换</p>
+
+<p><strong>Ctrl+Enter</strong></p>
+
+<p>插入行后</p>
+
+<p><strong>Ctrl+Shift Enter</strong></p>
+
+<p>插入行前</p>
+
+<p><strong>Ctrl+K Backspace</strong></p>
+
+<p>从光标处删除至行首</p>
+
+<p><strong>Ctrl+Shift+UP</strong></p>
+
+<p>与上行互换</p>
+
+<p><strong>Ctrl+Shift+DOWN</strong></p>
+
+<p>与下行互换</p>
+
+<p><strong>Shift+Tab</strong></p>
+
+<p>去除缩进</p>
+
+<p><strong>Tab</strong></p>
+
+<p>缩进</p>
+
+<p><strong>F9</strong></p>
+
+<p>行排序(按a-z)</p>
+
+<p> </p>
+]]></content>
+  </entry>
+  
+</feed>

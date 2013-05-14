@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: compile | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/categories/compile/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2013-05-14T01:55:26-04:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[Wutao]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[linux内核编译安装及卸载]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/linuxnei-he-bian-yi-an-zhuang-ji-xie-zai/"/>
+    <updated>2013-05-14T01:09:00-04:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/linuxnei-he-bian-yi-an-zhuang-ji-xie-zai</id>
+    <content type="html"><![CDATA[<p>编译安装：</p>
+
+<p>下载需要的包</p>
+
+<p>apt-get install kernel-package libncurses5-dev fakeroot wget bzip2</p>
+
+<p> </p>
+
+<p>cp linux-3.x.x /usr/src</p>
+
+<p>cd /usr/src/linux-3.x.x</p>
+
+<p>make menuconfig</p>
+
+<p>make modules</p>
+
+<p>make modules_install</p>
+
+<p>make</p>
+
+<p>make install</p>
+
+<p>sudo mkinitramfs -o /boot/initrd.img-3.x.x</p>
+
+<p>sudo update-initramfs -c -k 3.x.x</p>
+
+<p>sudo update-grub2</p>
+
+<hr />
+
+<p> <!--more--></p>
+
+<p>卸载：</p>
+
+<p> custom compiled kernel you need to remove following files/dirs:</p>
+
+<ul>
+<li>/boot/vmlinuz*KERNEL-VERSION*</li>
+<li>/boot/initrd*KERNEL-VERSION*</li>
+<li>/boot/System-map*KERNEL-VERSION*</li>
+<li>/boot/config-*KERNEL-VERSION*</li>
+<li>/lib/modules/*KERNEL-VERSION*/</li>
+<li>Update grub configuration file /etc/grub.conf or /boot/grub/menu.lst
+to point to correct kernel version.</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

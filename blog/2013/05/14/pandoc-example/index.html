@@ -1,0 +1,325 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>pandoc example - Billowkiller's Blog</title>
+	<meta name="author" content="Wutao">
+
+	
+	<meta name="description" content="from pondoc    To see the output created by each of the commands below, click on the
+name of the output file: HTML fragment: pandoc README -o &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">Billowkiller's Blog</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/blog/categories">Categories</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/blog/categories">Categories</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:billowkiller.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		
+		<a class="github" href="https://github.com/billowkiller" title="GitHub">GitHub</a>
+		
+    
+		
+		
+		
+		
+		<a class="delicious" href="http://delicious.com/billowkiller" title="Delicious">Delicious</a>
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:billowkiller.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Pandoc Example</h2>
+	<div class="entry-content"><p>from <a href="http://johnmacfarlane.net/pandoc/demos.html">pondoc </a></p>
+
+<hr />
+
+<p> </p>
+
+<p>To see the output created by each of the commands below, click on the
+name of the output file:</p>
+
+<ol>
+<li><p>HTML fragment:</p>
+
+<pre><code>pandoc README -o example1.html
+</code></pre></li>
+<li><p>Standalone HTML file:</p>
+
+<pre><code>pandoc -s README -o example2.html
+</code></pre></li>
+<li><p>HTML with smart quotes, table of contents, CSS, and custom footer:</p>
+
+<pre><code>pandoc -s -S --toc -c pandoc.css -A footer.html README -o example3.html
+</code></pre></li>
+<li><p>LaTeX:</p>
+
+<pre><code>pandoc -s README -o example4.tex
+</code></pre></li>
+<li><p>From LaTeX to markdown:</p>
+
+<pre><code>pandoc -s example4.tex -o example5.text
+</code></pre></li>
+<li><p>reStructuredText:<!--more--></p>
+
+<pre><code>pandoc -s -w rst --toc README -o example6.text
+</code></pre></li>
+<li><p>Rich text format (RTF):</p>
+
+<pre><code>pandoc -s README -o example7.rtf
+</code></pre></li>
+<li><p>Beamer slide show:</p>
+
+<pre><code>pandoc -t beamer SLIDES -o example8.pdf
+</code></pre></li>
+<li><p>DocBook XML:</p>
+
+<pre><code>pandoc -s -S -w docbook README -o example9.db
+</code></pre>
+
+<p>Chunked XHTML via DocBook
+and <a href="http://cyberelk.net/tim/xmlto/">xmlto</a>:</p>
+
+<pre><code>xmlto xhtml -m config.xsl example9.db -o example9/
+</code></pre></li>
+<li><p>Man page:</p>
+
+<pre><code>pandoc -s -w man pandoc.1.md -o example10.1
+</code></pre></li>
+<li><p>ConTeXt:</p>
+
+<pre><code>pandoc -s -w context README -o example11.tex
+</code></pre>
+
+<p>PDF via pandoc and ConTeXt’s <code>texexec</code>:</p>
+
+<pre><code>texexec --pdf example11.tex # produces example11.pdf
+</code></pre></li>
+<li><p>Converting a web page to markdown:</p>
+
+<pre><code>pandoc -s -r html http://www.gnu.org/software/make/ -o example12.text
+</code></pre></li>
+<li><p>From markdown to PDF:</p>
+
+<pre><code>pandoc README -o example13.pdf
+</code></pre></li>
+<li><p>PDF with numbered sections and a custom LaTeX header:</p>
+
+<pre><code>pandoc -N --template=mytemplate.tex --variable mainfont=Georgia --variable sansfont=Arial --variable monofont="Bitstream Vera Sans Mono" --variable fontsize=12pt --variable version=1.9 README --latex-engine=xelatex --toc -o example14.pdf
+</code></pre></li>
+<li><p>A wiki program using <a href="http://happstack.com/">Happstack</a> and
+pandoc: <a href="http://gitit.net/">gitit</a></p></li>
+<li><p>HTML slide shows:</p>
+
+<pre><code>pandoc -s --mathml -i -t dzslides SLIDES -o example16a.html
+
+pandoc -s --webtex -i -t slidy SLIDES -o example16b.html
+
+pandoc -s --self-contained --webtex -i -t s5 SLIDES -o example16c.html
+
+pandoc -s --mathjax -i -t slideous SLIDES -o example16d.html
+</code></pre></li>
+<li><p>TeX math in HTML:</p>
+
+<pre><code>pandoc math.text -s -o mathDefault.html
+
+pandoc math.text -s --mathml -o mathMathML.html
+
+pandoc math.text -s --webtex -o mathWebTeX.html
+
+pandoc math.text -s --mathjax -o mathMathJax.html
+
+pandoc math.text -s --latexmathml -o mathLaTeXMathML.html
+</code></pre></li>
+<li><p>Syntax highlighting of delimited code blocks:</p>
+
+<pre><code>pandoc code.text -s --highlight-style pygments -o example18a.html
+
+pandoc code.text -s --highlight-style kate -o example18b.html
+
+pandoc code.text -s --highlight-style monochrome -o example18c.html
+
+pandoc code.text -s --highlight-style espresso -o example18d.html
+
+pandoc code.text -s --highlight-style haddock -o example18e.html
+
+pandoc code.text -s --highlight-style tango -o example18f.html
+
+pandoc code.text -s --highlight-style zenburn -o example18g.html
+</code></pre></li>
+<li><p>GNU Texinfo, converted to info, HTML, and PDF formats:</p>
+
+<pre><code>pandoc README -s -o example19.texi
+
+makeinfo example19.texi -o example19.info
+
+makeinfo example19.texi --html -o example19
+
+texi2pdf example19.texi # produces example19.pdf
+</code></pre></li>
+<li><p>OpenDocument XML:</p>
+
+<pre><code>pandoc README -s -w opendocument -o example20.xml
+</code></pre></li>
+<li><p>ODT (OpenDocument Text, readable by OpenOffice):</p>
+
+<pre><code>pandoc README -o example21.odt
+</code></pre></li>
+<li><p>MediaWiki markup:</p>
+
+<pre><code>pandoc -s -S -w mediawiki --toc README -o example22.wiki
+</code></pre></li>
+<li><p>EPUB ebook:</p>
+
+<pre><code>pandoc -S README -o README.epub
+</code></pre></li>
+<li><p>Markdown citations:</p>
+
+<pre><code>pandoc -s -S --biblio biblio.bib --csl chicago-author-date.csl CITATIONS -o example24a.html
+
+pandoc -s -S --biblio biblio.bib --csl mhra.csl CITATIONS -o example24b.html
+
+pandoc -s -S --biblio biblio.bib --csl ieee.csl CITATIONS -t man -o example24c.1
+</code></pre></li>
+<li><p>Textile writer:</p>
+
+<pre><code>pandoc -s -S README -t textile -o example25.textile
+</code></pre></li>
+<li><p>Textile reader:</p>
+
+<pre><code>pandoc -s -S example25.textile -f textile -t html -o example26.html
+</code></pre></li>
+<li><p>Org-mode:</p>
+
+<pre><code>pandoc -s -S README -o example27.org
+</code></pre></li>
+<li><p>AsciiDoc:</p>
+
+<pre><code>pandoc -s -S README -t asciidoc -o example28.txt
+</code></pre></li>
+<li><p>Word docx:</p>
+
+<pre><code>pandoc -s -S README -o example29.docx
+</code></pre></li>
+<li><p>LaTeX math to docx:</p>
+
+<pre><code>pandoc -s math.tex -o example30.docx
+</code></pre></li>
+<li><p>DocBook to markdown:</p>
+
+<pre><code>pandoc -f docbook -t markdown -s howto.xml -o example31.text
+</code></pre></li>
+</ol>
+
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/command/'>command</a>, <a class='category' href='/blog/categories/pandoc/'>pandoc</a>
+
+
+</div>
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2013
+
+    Wutao
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+
+<center>
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.</center>
+</body>
+</html>

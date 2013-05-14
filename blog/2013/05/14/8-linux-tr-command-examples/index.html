@@ -1,0 +1,283 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>8 Linux TR Command Examples - Billowkiller's Blog</title>
+	<meta name="author" content="Wutao">
+
+	
+	<meta name="description" content="from
+TheGeekStuff   tr is an UNIX utility for translating, or deleting, or squeezing
+repeated characters. It will read from STDIN and write to STDOUT &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">Billowkiller's Blog</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/blog/categories">Categories</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/blog/categories">Categories</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:billowkiller.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		
+		<a class="github" href="https://github.com/billowkiller" title="GitHub">GitHub</a>
+		
+    
+		
+		
+		
+		
+		<a class="delicious" href="http://delicious.com/billowkiller" title="Delicious">Delicious</a>
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:billowkiller.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">8 Linux TR Command Examples</h2>
+	<div class="entry-content"><p><strong><em>from
+<a href="http://www.thegeekstuff.com/2012/12/linux-tr-command/?utm_source=feedburner&amp;utm_medium=email&amp;utm_campaign=Feed%3A+TheGeekStuff+%28The+Geek+Stuff%29">TheGeekStuff</a></em></strong></p>
+
+<hr />
+
+<p> </p>
+
+<p>tr is an UNIX utility for translating, or deleting, or squeezing
+repeated characters. It will read from STDIN and write to STDOUT.</p>
+
+<p>tr stands for translate.</p>
+
+<h3>Syntax</h3>
+
+<p>The syntax of tr command is:</p>
+
+<pre><code>$ tr [OPTION] SET1 [SET2]
+</code></pre>
+
+<h3>Translation</h3>
+
+<p>If both the SET1 and SET2 are specified and ‘-d’ OPTION is not
+specified, then tr command will replace each characters in SET1 with
+each character in same position in SET2.</p>
+
+<!--more-->
+
+
+<h3>1. Convert lower case to upper case</h3>
+
+<p>The following tr command is used to convert the lower case to upper case</p>
+
+<pre><code>$ tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ
+ thegeekstuff
+ THEGEEKSTUFF
+</code></pre>
+
+<p>The following command will also convert lower case to upper case</p>
+
+<pre><code>$ tr [:lower:] [:upper:]
+ thegeekstuff
+ THEGEEKSTUFF
+</code></pre>
+
+<p>You can also use ranges in tr. The following command uses ranges to
+convert lower to upper case.</p>
+
+<pre><code>$ tr a-z A-Z
+ thegeekstuff
+ THEGEEKSTUFF
+</code></pre>
+
+<h3>2. Translate braces into parenthesis</h3>
+
+<p>You can also translate from and to a file. In this example we will
+translate braces in a file with parenthesis.</p>
+
+<pre><code>$ tr '{}' '()' &lt; inputfile &gt; outputfile
+</code></pre>
+
+<p>The above command will read each character from “inputfile”, translate
+if it is a brace, and write the output in “outputfile”.</p>
+
+<h3>3. Translate white-space to tabs</h3>
+
+<p>The following command will translate all the white-space to tabs</p>
+
+<pre><code>$ echo "This is for testing" | tr [:space:] '\t'
+ This   is  for testing
+</code></pre>
+
+<h3>4. Squeeze repetition of characters using -s</h3>
+
+<p>In Example 3, we see how to translate space with tabs. But if there are
+two are more spaces present continuously, then the previous command will
+translate each spaces to a tab as follows.</p>
+
+<pre><code>$ echo "This is for testing" | tr [:space:] '\t'
+ This    is  for    testing
+</code></pre>
+
+<p>We can use -s option to squeeze the repetition of characters.</p>
+
+<pre><code>$ echo "This is for testing" | tr -s [:space:] '\t'
+ This   is  for testing
+</code></pre>
+
+<p>Similarly you can convert multiple continuous spaces with a single space</p>
+
+<pre><code>$ echo "This is for testing" | tr -s [:space:] ' '
+ This is for testing
+</code></pre>
+
+<h3>5. Delete specified characters using -d option</h3>
+
+<p>tr can also be used to remove particular characters using -d option.</p>
+
+<pre><code>$ echo "the geek stuff" | tr -d 't'
+ he geek suff
+</code></pre>
+
+<p>To remove all the digits from the string, use</p>
+
+<pre><code>$ echo "my username is 432234" | tr -d [:digit:]
+ my username is
+</code></pre>
+
+<p>Also, if you like to delete lines from file, you can use <a href="http://www.thegeekstuff.com/2009/09/unix-sed-tutorial-delete-file-lines-using-address-and-patterns/">sed d
+command</a>.</p>
+
+<h3>6. Complement the sets using -c option</h3>
+
+<p>You can complement the SET1 using -c option. For example, to remove all
+characters except digits, you can use the following.</p>
+
+<pre><code>$ echo "my username is 432234" | tr -cd [:digit:]
+ 432234
+</code></pre>
+
+<h3>7. Remove all non-printable character from a file</h3>
+
+<p>The following command can be used to remove all non-printable characters
+from a file.</p>
+
+<pre><code>$ tr -cd [:print:] &lt; file.txt
+</code></pre>
+
+<h3>8. Join all the lines in a file into a single line</h3>
+
+<p>The below command will translate all newlines into spaces and make the
+result as a single line.</p>
+
+<pre><code>$ tr -s '\n' ' ' &lt; file.txt
+</code></pre>
+
+<hr />
+
+<p> </p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/command/'>command</a>, <a class='category' href='/blog/categories/linux/'>linux</a>, <a class='category' href='/blog/categories/tr/'>tr</a>
+
+
+</div>
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2013
+
+    Wutao
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+
+<center>
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.</center>
+</body>
+</html>

@@ -1,0 +1,210 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>最短路径算法 - Billowkiller's Blog</title>
+	<meta name="author" content="Wutao">
+
+	
+	<meta name="description" content="单源最短路径 ​1. Dijkstra  Dijkstra算法解决有向图上带权的单源最短路径问题，要求所有边的权值非负。 用到了顶点的最小优先队列，排序关键字为顶点的d值。即开始出了根为0，其他 顶点为正无穷，后来d值根据松弛算法变化。 总计运行时间为O((V+E)lgV)，如果所有顶点都可达的话 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">Billowkiller's Blog</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/blog/categories">Categories</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/blog/categories">Categories</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:billowkiller.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		
+		<a class="github" href="https://github.com/billowkiller" title="GitHub">GitHub</a>
+		
+    
+		
+		
+		
+		
+		<a class="delicious" href="http://delicious.com/billowkiller" title="Delicious">Delicious</a>
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:billowkiller.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">最短路径算法</h2>
+	<div class="entry-content"><p><strong>单源最短路径</strong></p>
+
+<p>​1. Dijkstra</p>
+
+<p> Dijkstra算法解决有向图上带权的单源最短路径问题，要求所有边的权值非负。</p>
+
+<p>用到了顶点的最小优先队列，排序关键字为顶点的d值。即开始出了根为0，其他</p>
+
+<p>顶点为正无穷，后来d值根据松弛算法变化。</p>
+
+<p>总计运行时间为O((V+E)lgV)，如果所有顶点都可达的话，则为O(ElgV)。</p>
+
+<p> </p>
+
+<p>​2. Bellman-ford</p>
+
+<p>算法用来解决一般，即边的权值可以为负的单源最短路径问题。算法同时也可以检查</p>
+
+<p>是否有从源点可达的负权回路。</p>
+
+<p>算法的运行时间为O(VE)。</p>
+
+<p> <!--more--></p>
+
+<p>在Dijkstra算法以及关于有向无回路图的最短路径算法中，对每条边执行一次松弛操作。</p>
+
+<p>在Bellman-Ford算法中，对每条边要执行多次松弛操作。</p>
+
+<p> </p>
+
+<p><strong>每对顶点间的最短路径</strong></p>
+
+<p>​1. Floyd-Wallshall</p>
+
+<p>属于动态规划方案，允许存在权值为负的边，但不存在权值为负的回路。</p>
+
+<p>算法考虑最短路径上的中间顶点，自底向上利用中间顶点K值递增的顺序计算权值</p>
+
+<p>利用的递归式为</p>
+
+<p><em>D~i,j,k~ = min(D~i,k,k −\ 1~ + D~k,j,k −\ 1~,D~i,j,k −\ 1~)　　K >=
+1</em></p>
+
+<p><em>　　　= W~i,j~                                 　　　　  K = 0</em></p>
+
+<p><em>\
+</em>算法运行时间为Φ(n<sup>3</sup>^)。</p>
+
+<p>利用Floyd算法可以计算出有向图的传递闭包，即确定对所有顶点对，图中是否都存在一条</p>
+
+<p>从 i 到 j 的路径。</p>
+
+<p>用相应的逻辑运算或和并来替换 min 和 + 用以增加运算速度。</p>
+
+<p> </p>
+
+<p>​2. 稀疏图上的Johnson算法</p>
+
+<p>对于稀疏图改算法在渐进意义上要好于矩阵的重复平方或Floyd-Wallshall算法。</p>
+
+<p>Johnson算法吧Dijkstra算法和Bellman-Ford算法作为其的子程序。</p>
+
+<p>通过重新赋权值保持最短路径和产生非负的权。</p>
+
+<p>若采用斐波那契堆来实现Dijkstra算法的最小优先队列则运算时间是</p>
+
+<p>O(V<sup>2</sup><sup>lgV</sup> + VE)。更简单的二叉堆实现，则可以得到O(VElgV)的运行时间。</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/algorithm/'>algorithm</a>, <a class='category' href='/blog/categories/shortest-path/'>shortest path</a>
+
+
+</div>
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2013
+
+    Wutao
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+
+<center>
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.</center>
+</body>
+</html>

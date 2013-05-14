@@ -1,0 +1,791 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Billowkiller's Blog</title>
+	<meta name="author" content="Wutao">
+
+	
+	<meta name="description" content="edited
+from vbird 
+                                                                 All
+picture
+© vbird 在windows中我们可以很容易的发现磁盘盘符C，D，E等，这些盘符到底是什么呢， &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">Billowkiller's Blog</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/blog/categories">Categories</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/blog/categories">Categories</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:billowkiller.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		
+		<a class="github" href="https://github.com/billowkiller" title="GitHub">GitHub</a>
+		
+    
+		
+		
+		
+		
+		<a class="delicious" href="http://delicious.com/billowkiller" title="Delicious">Delicious</a>
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:billowkiller.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/05/14/hard-disk-partition/">
+		
+			Hard Disk Partition</a>
+	</h2>
+	<div class="entry-content">
+		<p><strong><em>edited
+from </em><a href="http://vbird.dic.ksu.edu.tw/linux_basic/0130designlinux.php#partition_name">vbird</a> 
+                                                                 <em>All
+picture
+© <a href="http://vbird.dic.ksu.edu.tw/linux_basic/0130designlinux.php#partition_name">vbird</a></em></strong></p>
+
+<hr />
+
+<p>在windows中我们可以很容易的发现磁盘盘符C，D，E等，这些盘符到底是什么呢，从磁盘管理器中又可以知道有主分区，逻辑分区，扩展分区等分区，这些东东也就是Partition了，那么他们又是一些什么东西呢，记得以前装windows用时，发现给C盘分配的盘符太小了，想要扩大一些C盘，试了好长时间，才发现要从临近的盘符，也就是D盘划分一部分给C盘，其他盘符都不行，而D盘就是所谓的逻辑分区，这个逻辑分区要先变成扩展分区，然后再又扩展分区转化为主分区，接下来这两个主分区也就是C盘和分割下来的一部分空间也就可以合并了。那么又是为什么这么麻烦呢？这就是接下来要说的了。</p>
+
+<p>在磁盘的第一分区中，装载有MBR(Master Boot
+Record)，这是可以安装启动管理程序的地方，有446 bytes；还有分割表(partition
+table)：记录整颗硬盘分割的状态，有64
+bytes。MBR是系统在启动的时候会主动去读取的内容，多系统就是靠这块来选择的；分割表就是系统用来确定分区的，也就是分区地址的索引，它将硬盘进行逻辑上的切割，然后用分割表来记录所包含的逻辑地址。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/partition-1.png" title="分区" alt="" /></p>
+
+<p>假设上面的硬盘装置档名为/dev/hda时，那么这四个分割槽在Linux系统中的装置档名如下所示:</p>
+
+<ul>
+<li>P1:/dev/hda1</li>
+<li>P1:/dev/hda2</li>
+<li>P1:/dev/hda3</li>
+<li>P1:/dev/hda4</li>
+</ul>
+
+
+
+		
+		<a href="/blog/2013/05/14/hard-disk-partition/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/disk-partition/'>disk partition</a>, <a class='category' href='/blog/categories/linux/'>linux</a>
+
+
+</div>
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/05/14/grep-example/">
+		
+			Grep Example</a>
+	</h2>
+	<div class="entry-content">
+		<p><a href="http://blog.csdn.net/pan_tian/article/details/7685815">http://blog.csdn.net/pan_tian/article/details/7685815</a></p>
+
+<hr />
+
+<h2><a href="http://www.linuxso.com/command/grep.html">grep</a> 语法</h2>
+
+<p><del> {.bash}
+grep &lsquo;word&rsquo; filename
+ grep &lsquo;string1 string2&rsquo; filename
+ cat otherfile | grep &lsquo;something&rsquo;
+ command | grep &lsquo;something&rsquo;
+ command option1 | grep &lsquo;data&rsquo;
+ grep &mdash;color &lsquo;data&rsquo; fileName
+</del></p>
+
+<h2> </h2>
+
+<h2>基本的用法</h2>
+
+<p>在某个文件里搜索error字符串\
+<code>$ grep "error" log.txt</code></p>
+
+
+		
+		<a href="/blog/2013/05/14/grep-example/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/command/'>command</a>, <a class='category' href='/blog/categories/grep/'>grep</a>, <a class='category' href='/blog/categories/linux/'>linux</a>
+
+
+</div>
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/05/14/googlelun-wen-%3Amapreduce/">
+		
+			google论文：MapReduce</a>
+	</h2>
+	<div class="entry-content">
+		<p>论文：<a href="http://static.googleusercontent.com/external_content/untrusted_dlcp/research.google.com/en//archive/mapreduce-osdi04.pdf">英文版</a>，<a href="http://blademaster.ixiezi.com/2010/03/27/google-mapreduce%E4%B8%AD%E6%96%87%E7%89%88/">中文版</a></p>
+
+<hr />
+
+<h2>1. 导论</h2>
+
+<h3>1.1 定义</h3>
+
+<p>先给个定义：
+MapReduce是一个编程模型，也是一个处理和生成超大数据集的算法模型的相关实现。用户首先创建一个Map函数处理一个基于key/value
+pair的数据集合，输出中间的基于key/value
+pair的数据集合；然后再创建一个Reduce函数用来合并所有的具有相同中间key值的中间value值。</p>
+
+<p>使用这个抽象模型，我们只要表述我们想要执行的简单运算即可，而不必关心并行计算、容错、数据分布、负载均衡等复杂的细节，这些问题都被封装在了一个库里面。设计这个抽象模型的灵感来自Lisp和许多其他函数式语言的Map和Reduce的原语。</p>
+
+
+		
+		<a href="/blog/2013/05/14/googlelun-wen-%3Amapreduce/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/google/'>google</a>, <a class='category' href='/blog/categories/mapreduce/'>mapreduce</a>, <a class='category' href='/blog/categories/paper/'>paper</a>
+
+
+</div>
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/05/14/googlelun-wen-%3Agfs/">
+		
+			google论文：GFS</a>
+	</h2>
+	<div class="entry-content">
+		<p>论文：<a href="http://www.cs.rochester.edu/meetings/sosp2003/papers/p125-ghemawat.pdf">英文版</a>，<a href="http://blademaster.ixiezi.com/2010/03/27/the-google-file-system%E4%B8%AD%E6%96%87%E7%89%88/">中文版</a></p>
+
+<hr />
+
+<h2>1. 导论</h2>
+
+<p> 先给个定义：GFS是一个可扩展的分布式文件系统，用于大型的、分布式的、对大量数据进行访问的应用。它运行于廉价的普通硬件上，但可以提供容错功能。它可以给大量的用户提供总体性能较高的服务。</p>
+
+<p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/GoogleFileSystemGFS.svg/500px-GoogleFileSystemGFS.svg.png" alt="" /></p>
+
+<p><em>Google File System. Designed for system-to-system interaction, and not
+for user-to-system interaction. The chunk servers replicate the data
+automatically.</em></p>
+
+<p><strong>Assumptions in Google File System (GFS)</strong></p>
+
+<ul>
+<li><p>GFS should be built with commodity hardware</p>
+
+<ul>
+<li>Inexpensive disks and machines</li>
+</ul>
+</li>
+<li><p>GSF stores a modest number of large files</p>
+
+<ul>
+<li><p>GSF stores a modest number of large files</p>
+
+<ul>
+<li>e.g. Big-table, Map-Reduce records</li>
+</ul>
+</li>
+<li><p>Do not optimize for small files</p></li>
+</ul>
+</li>
+<li><p>Workloads</p>
+
+<ul>
+<li>Large streaming reads (1MB or more) and small random reads (a
+few KBs)</li>
+<li>Sequential appends to files by hundreds of data producers
+
+<ul>
+<li>Utilizing the fact that files are seldom modified again</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>High sustained bandwidth is more important than latency</p>
+
+<ul>
+<li>Response time for individual read and write is not critical</li>
+</ul>
+</li>
+</ul>
+
+
+
+		
+		<a href="/blog/2013/05/14/googlelun-wen-%3Agfs/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/gfs/'>gfs</a>, <a class='category' href='/blog/categories/google/'>google</a>, <a class='category' href='/blog/categories/paper/'>paper</a>
+
+
+</div>
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/05/14/googlelun-wen-%3Abig-table/">
+		
+			Google论文：big Table</a>
+	</h2>
+	<div class="entry-content">
+		<p>论文：<a href="http://static.googleusercontent.com/external_content/untrusted_dlcp/research.google.com/en//archive/bigtable-osdi06.pdf">英文版</a>，
+<a href="http://dblab.xmu.edu.cn/sites/default/files/20120508_172346_207.pdf">中文版</a></p>
+
+<hr />
+
+<h3> 1. 导论</h3>
+
+<p>BigTable is a compressed, high performance, and proprietary data storage
+system built on Google File System, Chubby Lock Service, SSTable
+(log-structured storage like LevelDB) and a few other Google
+technologies.（这句是wikipedia摘抄的定义）</p>
+
+<p> 构成：</p>
+
+<ul>
+<li>Scheduler</li>
+<li><a href="http://www.cnblogs.com/billowkiller/archive/2013/04/10/3012085.html">GFS</a></li>
+<li>Chubby Lock service</li>
+<li>Sawzall</li>
+<li><a href="http://www.cnblogs.com/billowkiller/archive/2013/04/15/3022035.html">MapReduce</a></li>
+<li>SSTable</li>
+<li>some compression algorithms</li>
+</ul>
+
+
+<p>先通俗几个名词：</p>
+
+
+		
+		<a href="/blog/2013/05/14/googlelun-wen-%3Abig-table/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/big-table/'>big table</a>, <a class='category' href='/blog/categories/googe/'>googe</a>, <a class='category' href='/blog/categories/paper/'>paper</a>
+
+
+</div>
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/05/14/google-pagerank/">
+		
+			Google PageRank</a>
+	</h2>
+	<div class="entry-content">
+		<p><strong>edited</strong>from<strong><em>How Google Finds Your Needle in the Web&rsquo;s Haystack</em></strong></p>
+
+<hr />
+
+<p> Google搜索的核心算法当然不止是PageRank，但PageRank确实是其中的核心部分。Google就曾经说过：“the
+heart of our software is PageRank”.</p>
+
+<p>Google的PageRank算法声称他们比较了一个月来网页的受欢迎程度从而确定哪个网页显得比较重要。根据Sergey
+Brin和Lawrence
+Page的说法，一个网页的重要性不仅仅包括他们自身的重要程度，还包括链接向这个网页的其他网页数目。</p>
+
+<p>综合公式为：</p>
+
+<p><img src="http://www.ams.org/featurecolumn/images/december2006/index_1.gif" alt="\[ I(P_i)=\sum_{P_j\in B_i} \frac{I(P_j)}{l_j} \]
+" /></p>
+
+<p>呵呵，看到这个公式我第一反应就是，“我靠，这怎么整啊，这不是鸡生蛋，蛋生鸡”的问题吗？果然，下面就有解决办法。</p>
+
+<p>我们将这个问题转化为一个数学问题。</p>
+
+
+		
+		<a href="/blog/2013/05/14/google-pagerank/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/algorithm/'>algorithm</a>, <a class='category' href='/blog/categories/google/'>google</a>, <a class='category' href='/blog/categories/page-rank/'>page rank</a>
+
+
+</div>
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/05/14/design-pattern-principle/">
+		
+			Design Pattern&#8211;Principle</a>
+	</h2>
+	<div class="entry-content">
+		<p>Head First Design Patterns</p>
+
+<hr />
+
+<p> </p>
+
+<p>​1. Identify the aspects of your application that vary and separate them
+from what stays the same.</p>
+
+<p>　　Take the parts that vary and encapsulate them, so that later you can
+alter or extend the parts that vary without affecting those that don&rsquo;t.</p>
+
+<p> </p>
+
+<p>​2. Program to an interface, not an implementation.</p>
+
+<p>　　Our intuition to solve problems is relying on an implementation,
+either in the superclass or in the subclass itself. We were locked into
+using that specific implementation and there was no room for changing
+out the behavior other than writing more code.</p>
+
+<p>　　With a new design, the subclasses will use a behavior represented by
+an interface, so that the actual implementation of the behavior won&rsquo;t be
+locked.</p>
+
+<p>　　ps: <em>program to an interface </em>really means <em>program to a
+supertype. </em>In JAVA, it means interface or abstract class.</p>
+
+<p>　　　　Even better, you can assign the concrete implementation object
+at runtime.</p>
+
+<p> 
+		
+		<a href="/blog/2013/05/14/design-pattern-principle/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/design-patterns/'>Design Patterns</a>, <a class='category' href='/blog/categories/book/'>book</a>, <a class='category' href='/blog/categories/programming/'>programming</a>
+
+
+</div>
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/05/14/cheng-xu-yuan-de-shi-jian-huan-suan-biao/">
+		
+			程序员的时间换算表</a>
+	</h2>
+	<div class="entry-content">
+		<p> 摘自<a href="http://www.ituring.com.cn/">图灵社区</a></p>
+
+<hr />
+
+<p> </p>
+
+<p>估算时间</p>
+
+<p>程序员所想象的</p>
+
+<p>程序员所忘记的</p>
+
+<p>实际时间</p>
+
+<p>30秒</p>
+
+<p>只需要做一个很小的代码改动。我准确地知道怎么改，在哪里改。花费30秒敲键盘即可。</p>
+
+<p>启动计算机，开发环境和获取正确源码的时间。用于构件，测试，检查和文档修复的时间。</p>
+
+<p>1小时</p>
+
+<p>5分钟</p>
+
+
+		
+		<a href="/blog/2013/05/14/cheng-xu-yuan-de-shi-jian-huan-suan-biao/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/manage/'>manage</a>, <a class='category' href='/blog/categories/programmer/'>programmer</a>, <a class='category' href='/blog/categories/time/'>time</a>
+
+
+</div>
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/05/14/%3C%3Ckan-jian-%3E%3E-shu-zhai/">
+		
+			《看见》书摘</a>
+	</h2>
+	<div class="entry-content">
+		<p>隐隐有个感 觉，为了一个目的&mdash;哪怕是一个正义的
+目的，就像车轮一样狠狠辗过人的心， 也是另一种戾气。\
+\
+文战之前，明 知他腰里有银子，但被衣衫盖着，不知
+道该怎么出剑，但经验告诉我，那就别 动。风动，树梢动，月光动，你别动，
+就会看到端倪。
+ 
+阿甘是看见了什么，就走过去。别 的人，是看见一个目标，先订一个作战
+计划，然后匍匐前进，往左闪，往右躲， 再弄个掩体……一辈子就看他闪转腾挪
+活得那叫一个花哨，最后哪儿也没到 达\
+\
+ 当一个人表现得很有涵养， 其实是传递着不以为然的意思。
+ 
+一个过于主动甚至 积极坦白自己内心阴暗面的人，往往会
+让原本想去挖掘他内心弱点的人感到尴 尬和一丝不安。\
+\
+雨下得又轻又细，深 青的群山全被濡湿了，去年的裂缝里青
+草簌簌地拱动，湿黑的山坡上一层一层 墨绿的杉树林，梨花浅白，空气里都是
+水滴和鸟叫。\
+&lt;!&mdash;more&mdash;>
+ 你 有 自 己 认 识 事 物 的 坐 标 系\
+\
+ “在市场经济中，有一条众所周知的 柴静 看见 678
+规则：自由地买和卖，等价交换。在三 十年的改革开放之后，中国已经因为尊
+重和适用这条规律，得到巨大的发展， 但是却在影响人口最多的土地问题上有
+了一些例外。” 多么寻常的一句话，我敝帚自珍，
+看了又看。一个人从小到大拾人牙慧， 写日记的时候抄格言，做电台的时候念
+别人文章，做电视了摸仿别人提问，像 是一直拄着拐杖的人，现在试着脱手，
+踉踉跄跄，想站起来。\
+\
+ 地拿过来了你去 发展市场经济，拿地的时候你是计划经
+济，这事儿农民就吃亏了。\
+\
+ “如果一方总占便宜，另一方总吃亏， 那么这样的商品交换，是不能持续下去 的。”
+不能持续下去的结果是什么？ 我握着笔，字歪歪斜斜写得飞快，
+像扔了拐杖的人迈开打晃的腿往前跑。 “不能持续下去的结果，就是中国大地
+上，因此而起的各种冲突和群体性事件， 以至于‘征地’这样一个普通的经济行
+为，演变成为我们这个转型时代最重要 柴静 看见 680 的社会问题之一。”\
+\
+ 多读书。”老爷子说，“另外，存在即合理，你要接受。”\
+\
+ 听到自己经验之外或者与自己 观点相悖的意见，她脸上会流露出诧异、
+惊奇、反感、不屑，想通过提问去评判 对方，刺激别人，想让对方纠正，那种
+冷峻的正直里暗含着自负。\
+\
+ 谓专制，就是坚信自己是不会错的想 法”\
+\
+ 日后工作上学，换了不少地方，去 哪儿都是拎箱子就走，不动感情，觉得
+那样脆弱，认为独立就是脱离集体，不 依不附。亲近的人之间，一且触及自尊
+心就会尖锐起来，绝不低头。\
+\
+ 年底我生日，老郝开了瓶酒，做了 一大桌菜。吃完饭，灯忽然黑了，电视
+上放出个片子，是老范瞒着我，拿只 DV 到处去采访人，片子配了我从小到大的
+照片，还有音乐和烟花。我是真尴尬， 这么大了，没在私人生活里成为主角，
+这么肉麻过。</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/book/'>book</a>, <a class='category' href='/blog/categories/kan-jian/'>看见</a>
+
+
+</div>
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/05/14/%3C%3Ccai-kang-yong-shuo-hua-zhi-dao-%3E%3E-shu-zhai/">
+		
+			《蔡康永说话之道》书摘</a>
+	</h2>
+	<div class="entry-content">
+		<p>古古会说什么样的话，决定于她要在阿男的眼中，扮演什么样的人。她要扮的是欧巴桑，她就会说出欧巴桑爱说的话．她要扮未婚妻，就会说出未婚妻该说的话，她要扮美眉，就会说出美眉应说的话。
+很多人以为你说什么样的话，透露出你是什么样的人。
+但我觉得不只如此。我觉得：你说什么样的话，你就是什么样的人。 “You are what
+you say.”
+你老是觉得你是可怜虫，别人都在欺负你，你确实就会常常说出可怜虫心态的话。但不只如此，反过来也一样你每句话都说可怜虫才会说的话，说久了，你就会是可怜虫。</p>
+
+<p> </p>
+
+
+		
+		<a href="/blog/2013/05/14/%3C%3Ccai-kang-yong-shuo-hua-zhi-dao-%3E%3E-shu-zhai/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/book/'>book</a>, <a class='category' href='/blog/categories/skill/'>skill</a>, <a class='category' href='/blog/categories/cai-kang-yong-shuo-hua-zhi-dao/'>蔡康永说话之道</a>
+
+
+</div>
+	
+</div></article>
+
+<nav id="pagenavi">
+    
+        <a href="/blog/page/2/" class="prev">Prev</a>
+    
+    
+        <a href="/blog/page/4/" class="next">Next</a>
+    
+    <div class="center"><a href="/blog/archives">Blog Archives</a></div>
+</nav></div>
+	<footer id="footer" class="inner">Copyright &copy; 2013
+
+    Wutao
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+
+<center>
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.</center>
+</body>
+</html>

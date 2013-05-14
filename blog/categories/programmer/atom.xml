@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: programmer | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/categories/programmer/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2013-05-14T01:55:26-04:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[Wutao]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[程序员的时间换算表]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/cheng-xu-yuan-de-shi-jian-huan-suan-biao/"/>
+    <updated>2013-05-14T01:09:00-04:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/cheng-xu-yuan-de-shi-jian-huan-suan-biao</id>
+    <content type="html"><![CDATA[<p> 摘自<a href="http://www.ituring.com.cn/">图灵社区</a></p>
+
+<hr />
+
+<p> </p>
+
+<p>估算时间</p>
+
+<p>程序员所想象的</p>
+
+<p>程序员所忘记的</p>
+
+<p>实际时间</p>
+
+<p>30秒</p>
+
+<p>只需要做一个很小的代码改动。我准确地知道怎么改，在哪里改。花费30秒敲键盘即可。</p>
+
+<p>启动计算机，开发环境和获取正确源码的时间。用于构件，测试，检查和文档修复的时间。</p>
+
+<p>1小时</p>
+
+<p>5分钟</p>
+
+<!--more-->
+
+
+<p>小事一桩，我只要上谷歌查一下语法就可以修复它了。</p>
+
+<p>很少有一次就能找到完全正确的信息。即使找到，在它能工作前，也需要做一些调整。外加构件，测试等等时间。</p>
+
+<p>2小时</p>
+
+<p>1 小时</p>
+
+<p>我知道怎么做，但是写这些代码需要花费一些时间。</p>
+
+<p>面对未来可能发生的问题，1小时稍纵即逝。有些东西总是会出错。</p>
+
+<p>2小时</p>
+
+<p>4小时</p>
+
+<p>需要写一些代码，但是我粗略地知道步骤。我知道标准框架中的Wizzabanga模块可以做到，不过我得查看文档，了解它的准确地调用方式。</p>
+
+<p>这个大概是唯一现实的估算。它为意外的错误留下了足够大的余地，而这个任务也小到足以把握。</p>
+
+<p>4小时</p>
+
+<p>8 小时</p>
+
+<p>我先要把Balunga类重构成2个，然后为Wizzabanga模块加一个调用，最后为GUI加一些字段。</p>
+
+<p>总会有许多系统的不同部分依赖着Balunga类。大概有40个不同的文件需要修改。为GUI新加的字段，同样也需要加到数据库中。8小时太长，无法完全把握。总会有比程序员估算时更多的步骤出现。</p>
+
+<p>12-16小时</p>
+
+<p>2 天</p>
+
+<p>真的有一大堆代码要写。我需要往数据库里加一些新table，显示table的GUI，还有读写table的代码逻辑。</p>
+
+<p>对于大多数开发者来说，两天的工作量已经大到难以估算了。肯定会有什么东西被遗漏掉。不仅仅是一些小事情，而是整个一大块主要功能会被遗忘在估算中。</p>
+
+<p>5 天</p>
+
+<p>1 周</p>
+
+<p>哎哟，这真是一项艰巨的任务。虽然我还没有思路，但我不能说我不知道。一周应该够了，我希望，我真心希望，但是我不能要求更多了，否则他们会认为我不够称职。</p>
+
+<p>这个任务已经大到超过大多数程序员的理解了。它应该被发回给架构师，帮忙将它划分成更小的部分，然后提供一些解决问题的方向。架构师可能会发现一种更简单的方法来完成它，或者发现其实有更多超乎想象的工作。。。</p>
+
+<p>2-20 天</p>
+
+<p> </p>
+]]></content>
+  </entry>
+  
+</feed>
