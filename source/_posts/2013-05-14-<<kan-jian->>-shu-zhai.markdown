@@ -1,10 +1,10 @@
 ---
-layout:post
-title:"《看见》书摘"
-date:2013-05-1401:09
-comments:true
-categories:book
-tags:[book,看见]
+layout: post
+title: "《看见》书摘"
+date: 2013-05-14 01:09
+comments: true
+categories: book
+tags: [book, 看见]
 ---
 
 隐隐有个感觉，为了一个目的--哪怕是一个正义的

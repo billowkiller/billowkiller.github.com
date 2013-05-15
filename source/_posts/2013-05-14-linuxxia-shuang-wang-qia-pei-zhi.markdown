@@ -4,7 +4,7 @@ title: "linux下双网卡配置"
 date: 2013-05-14 01:09
 comments: true
 categories: tools
-tags: [linux,双网卡]
+tags: [linux, 双网卡]
 ---
 
 **需求**： 一台PC1拥有双网卡，另外一台PC2需要通过这台pc上网。

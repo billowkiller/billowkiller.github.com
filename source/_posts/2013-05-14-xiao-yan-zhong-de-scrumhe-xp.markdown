@@ -4,7 +4,7 @@ title: "硝烟中的Scrum和XP"
 date: 2013-05-14 01:09
 comments: true
 categories: rework
-tags: [scrum,xp,software engineering]
+tags: [scrum,xp, software engineering]
 ---
 
 **refine from** *硝烟中的Scrum和XP--我们如何实施Scrum*
