@@ -7,8 +7,8 @@
 	<meta name="author" content="Wutao">
 
 	
-	<meta name="description" content="from pondoc    To see the output created by each of the commands below, click on the
-name of the output file: HTML fragment: pandoc README -o &hellip;">
+	<meta name="description" content="from pondoc To see the output created by each of the commands below, click on the
+name of the output file: HTML fragment: pandoc README -o example1. &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -26,7 +26,8 @@ name of the output file: HTML fragment: pandoc README -o &hellip;">
 <nav id="main-nav"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -35,7 +36,8 @@ name of the output file: HTML fragment: pandoc README -o &hellip;">
 		<div class="container"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -80,11 +82,9 @@ name of the output file: HTML fragment: pandoc README -o &hellip;">
 	
 	<div id="content" class="inner"><article class="post">
 	<h2 class="title">Pandoc Example</h2>
-	<div class="entry-content"><p>from <a href="http://johnmacfarlane.net/pandoc/demos.html">pondoc </a></p>
+	<div class="entry-content"><p>from <a href="http://johnmacfarlane.net/pandoc/demos.html">pondoc </a></p>
 
 <hr />
-
-<p> </p>
 
 <p>To see the output created by each of the commands below, click on the
 name of the output file:</p>
@@ -128,7 +128,7 @@ name of the output file:</p>
 </code></pre>
 
 <p>Chunked XHTML via DocBook
-and <a href="http://cyberelk.net/tim/xmlto/">xmlto</a>:</p>
+and <a href="http://cyberelk.net/tim/xmlto/">xmlto</a>:</p>
 
 <pre><code>xmlto xhtml -m config.xsl example9.db -o example9/
 </code></pre></li>
@@ -141,7 +141,7 @@ and <a href="http://cyberelk.net/tim/xmlto/">xmlto</a>:</p>
 <pre><code>pandoc -s -w context README -o example11.tex
 </code></pre>
 
-<p>PDF via pandoc and ConTeXt’s <code>texexec</code>:</p>
+<p>PDF via pandoc and ConTeXt’s <code>texexec</code>:</p>
 
 <pre><code>texexec --pdf example11.tex # produces example11.pdf
 </code></pre></li>
@@ -157,8 +157,8 @@ and <a href="http://cyberelk.net/tim/xmlto/">xmlto</a>:</p>
 
 <pre><code>pandoc -N --template=mytemplate.tex --variable mainfont=Georgia --variable sansfont=Arial --variable monofont="Bitstream Vera Sans Mono" --variable fontsize=12pt --variable version=1.9 README --latex-engine=xelatex --toc -o example14.pdf
 </code></pre></li>
-<li><p>A wiki program using <a href="http://happstack.com/">Happstack</a> and
-pandoc: <a href="http://gitit.net/">gitit</a></p></li>
+<li><p>A wiki program using <a href="http://happstack.com/">Happstack</a> and
+pandoc: <a href="http://gitit.net/">gitit</a></p></li>
 <li><p>HTML slide shows:</p>
 
 <pre><code>pandoc -s --mathml -i -t dzslides SLIDES -o example16a.html
@@ -278,13 +278,24 @@ pandoc -s -S --biblio biblio.bib --csl ieee.csl CITATIONS -t man -o example24c.1
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/command/'>command</a>, <a class='category' href='/blog/categories/pandoc/'>pandoc</a>
+	<a class='category' href='/blog/categories/tools/'>tools</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/command/'>command</a>, <a class='tag' href='/blog/tags/pandoc/'>pandoc</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/pandoc-example/#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -301,11 +312,18 @@ pandoc -s -S --biblio biblio.bib --csl ieee.csl CITATIONS -t man -o example24c.1
 </div>
 
 
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2013
 
     Wutao
 
+- Powered by Octopress, Pandoc and Slash
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>
@@ -315,6 +333,22 @@ pandoc -s -S --biblio biblio.bib --csl ieee.csl CITATIONS -t man -o example24c.1
 })(jQuery);
 </script> <!-- Delete or comment this line to disable Fancybox -->
 
+
+<script type="text/javascript">
+      var disqus_shortname = 'jonesdavid';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/05/14/pandoc-example/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/05/14/pandoc-example/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
 
 
 

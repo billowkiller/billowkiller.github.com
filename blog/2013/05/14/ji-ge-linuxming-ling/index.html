@@ -7,10 +7,7 @@
 	<meta name="author" content="Wutao">
 
 	
-	<meta name="description" content="转换文件到pdf unoconv -f pdf mydocument.odt\
-zip乱码解压 unzip -O CP936 xx.zip\
-mp3 乱码 mid3iconv -e gbk *.mp3 //当前目录下的mp3文件\
-视频转码 mencoder *.rmvb -o output. &hellip;">
+	<meta name="description" content="转换文件到pdf unoconv -f pdf mydocument.odt zip乱码解压 unzip -O CP936 xx.zip mp3 乱码 mid3iconv -e gbk *.mp3 //当前目录下的mp3文件 视频转码 mencoder *.rmvb -o output.avi - &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -28,7 +25,8 @@ mp3 乱码 mid3iconv -e gbk *.mp3 //当前目录下的mp3文件\
 <nav id="main-nav"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -37,7 +35,8 @@ mp3 乱码 mid3iconv -e gbk *.mp3 //当前目录下的mp3文件\
 		<div class="container"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -82,20 +81,31 @@ mp3 乱码 mid3iconv -e gbk *.mp3 //当前目录下的mp3文件\
 	
 	<div id="content" class="inner"><article class="post">
 	<h2 class="title">几个linux命令</h2>
-	<div class="entry-content"><p>转换文件到pdf unoconv -f pdf mydocument.odt\
-zip乱码解压 unzip -O CP936 xx.zip\
-mp3 乱码 mid3iconv -e gbk *.mp3 //当前目录下的mp3文件\
-视频转码 mencoder *.rmvb -o output.avi -oac mp3lame -lameopts cbr:br=32
+	<div class="entry-content"><p>转换文件到pdf</p>
+
+<p>unoconv -f pdf mydocument.odt</p>
+
+<p>zip乱码解压</p>
+
+<p>unzip -O CP936 xx.zip</p>
+
+<p>mp3 乱码</p>
+
+<p>mid3iconv -e gbk *.mp3 //当前目录下的mp3文件</p>
+
+<p>视频转码</p>
+
+<p>mencoder *.rmvb -o output.avi -oac mp3lame -lameopts cbr:br=32
 -ovc x264 -x264encopts bitrate=440 -vf scale=320:-3</p>
 
-<p>linux 声音调节  alsamixer</p>
+<p>linux 声音调节  alsamixer</p>
 
 <p>gedit 乱码：</p>
 
 <pre><code>gsettings set org.gnome.gedit.preferences.encodings auto-detected "['UTF-8','CURRENT','GB18030','ISO-8859-15','UTF-16']"
 </code></pre>
 
-<p>SSH 远程登录：   ssh -l root 192.168.0.150</p>
+<p>SSH 远程登录：   ssh -l root 192.168.0.150</p>
 
 <p>vim 中文乱码：</p>
 
@@ -118,13 +128,24 @@ set fileencodings=utf-8,gbk</p>
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/command/'>command</a>, <a class='category' href='/blog/categories/linux/'>linux</a>
+	<a class='category' href='/blog/categories/linux/'>linux</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/command/'>command</a>, <a class='tag' href='/blog/tags/linux/'>linux</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/ji-ge-linuxming-ling/#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -141,11 +162,18 @@ set fileencodings=utf-8,gbk</p>
 </div>
 
 
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2013
 
     Wutao
 
+- Powered by Octopress, Pandoc and Slash
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>
@@ -155,6 +183,22 @@ set fileencodings=utf-8,gbk</p>
 })(jQuery);
 </script> <!-- Delete or comment this line to disable Fancybox -->
 
+
+<script type="text/javascript">
+      var disqus_shortname = 'jonesdavid';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/05/14/ji-ge-linuxming-ling/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/05/14/ji-ge-linuxming-ling/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
 
 
 

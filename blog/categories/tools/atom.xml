@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: tools | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/categories/tools/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2013-05-15T01:43:19-04:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[Wutao]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[pandoc example]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/pandoc-example/"/>
+    <updated>2013-05-14T01:09:00-04:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/pandoc-example</id>
+    <content type="html"><![CDATA[<p>from <a href="http://johnmacfarlane.net/pandoc/demos.html">pondoc </a></p>
+
+<hr />
+
+<p>To see the output created by each of the commands below, click on the
+name of the output file:</p>
+
+<ol>
+<li><p>HTML fragment:</p>
+
+<pre><code>pandoc README -o example1.html
+</code></pre></li>
+<li><p>Standalone HTML file:</p>
+
+<pre><code>pandoc -s README -o example2.html
+</code></pre></li>
+<li><p>HTML with smart quotes, table of contents, CSS, and custom footer:</p>
+
+<pre><code>pandoc -s -S --toc -c pandoc.css -A footer.html README -o example3.html
+</code></pre></li>
+<li><p>LaTeX:</p>
+
+<pre><code>pandoc -s README -o example4.tex
+</code></pre></li>
+<li><p>From LaTeX to markdown:</p>
+
+<pre><code>pandoc -s example4.tex -o example5.text
+</code></pre></li>
+<li><p>reStructuredText:<!--more--></p>
+
+<pre><code>pandoc -s -w rst --toc README -o example6.text
+</code></pre></li>
+<li><p>Rich text format (RTF):</p>
+
+<pre><code>pandoc -s README -o example7.rtf
+</code></pre></li>
+<li><p>Beamer slide show:</p>
+
+<pre><code>pandoc -t beamer SLIDES -o example8.pdf
+</code></pre></li>
+<li><p>DocBook XML:</p>
+
+<pre><code>pandoc -s -S -w docbook README -o example9.db
+</code></pre>
+
+<p>Chunked XHTML via DocBook
+and <a href="http://cyberelk.net/tim/xmlto/">xmlto</a>:</p>
+
+<pre><code>xmlto xhtml -m config.xsl example9.db -o example9/
+</code></pre></li>
+<li><p>Man page:</p>
+
+<pre><code>pandoc -s -w man pandoc.1.md -o example10.1
+</code></pre></li>
+<li><p>ConTeXt:</p>
+
+<pre><code>pandoc -s -w context README -o example11.tex
+</code></pre>
+
+<p>PDF via pandoc and ConTeXt’s <code>texexec</code>:</p>
+
+<pre><code>texexec --pdf example11.tex # produces example11.pdf
+</code></pre></li>
+<li><p>Converting a web page to markdown:</p>
+
+<pre><code>pandoc -s -r html http://www.gnu.org/software/make/ -o example12.text
+</code></pre></li>
+<li><p>From markdown to PDF:</p>
+
+<pre><code>pandoc README -o example13.pdf
+</code></pre></li>
+<li><p>PDF with numbered sections and a custom LaTeX header:</p>
+
+<pre><code>pandoc -N --template=mytemplate.tex --variable mainfont=Georgia --variable sansfont=Arial --variable monofont="Bitstream Vera Sans Mono" --variable fontsize=12pt --variable version=1.9 README --latex-engine=xelatex --toc -o example14.pdf
+</code></pre></li>
+<li><p>A wiki program using <a href="http://happstack.com/">Happstack</a> and
+pandoc: <a href="http://gitit.net/">gitit</a></p></li>
+<li><p>HTML slide shows:</p>
+
+<pre><code>pandoc -s --mathml -i -t dzslides SLIDES -o example16a.html
+
+pandoc -s --webtex -i -t slidy SLIDES -o example16b.html
+
+pandoc -s --self-contained --webtex -i -t s5 SLIDES -o example16c.html
+
+pandoc -s --mathjax -i -t slideous SLIDES -o example16d.html
+</code></pre></li>
+<li><p>TeX math in HTML:</p>
+
+<pre><code>pandoc math.text -s -o mathDefault.html
+
+pandoc math.text -s --mathml -o mathMathML.html
+
+pandoc math.text -s --webtex -o mathWebTeX.html
+
+pandoc math.text -s --mathjax -o mathMathJax.html
+
+pandoc math.text -s --latexmathml -o mathLaTeXMathML.html
+</code></pre></li>
+<li><p>Syntax highlighting of delimited code blocks:</p>
+
+<pre><code>pandoc code.text -s --highlight-style pygments -o example18a.html
+
+pandoc code.text -s --highlight-style kate -o example18b.html
+
+pandoc code.text -s --highlight-style monochrome -o example18c.html
+
+pandoc code.text -s --highlight-style espresso -o example18d.html
+
+pandoc code.text -s --highlight-style haddock -o example18e.html
+
+pandoc code.text -s --highlight-style tango -o example18f.html
+
+pandoc code.text -s --highlight-style zenburn -o example18g.html
+</code></pre></li>
+<li><p>GNU Texinfo, converted to info, HTML, and PDF formats:</p>
+
+<pre><code>pandoc README -s -o example19.texi
+
+makeinfo example19.texi -o example19.info
+
+makeinfo example19.texi --html -o example19
+
+texi2pdf example19.texi # produces example19.pdf
+</code></pre></li>
+<li><p>OpenDocument XML:</p>
+
+<pre><code>pandoc README -s -w opendocument -o example20.xml
+</code></pre></li>
+<li><p>ODT (OpenDocument Text, readable by OpenOffice):</p>
+
+<pre><code>pandoc README -o example21.odt
+</code></pre></li>
+<li><p>MediaWiki markup:</p>
+
+<pre><code>pandoc -s -S -w mediawiki --toc README -o example22.wiki
+</code></pre></li>
+<li><p>EPUB ebook:</p>
+
+<pre><code>pandoc -S README -o README.epub
+</code></pre></li>
+<li><p>Markdown citations:</p>
+
+<pre><code>pandoc -s -S --biblio biblio.bib --csl chicago-author-date.csl CITATIONS -o example24a.html
+
+pandoc -s -S --biblio biblio.bib --csl mhra.csl CITATIONS -o example24b.html
+
+pandoc -s -S --biblio biblio.bib --csl ieee.csl CITATIONS -t man -o example24c.1
+</code></pre></li>
+<li><p>Textile writer:</p>
+
+<pre><code>pandoc -s -S README -t textile -o example25.textile
+</code></pre></li>
+<li><p>Textile reader:</p>
+
+<pre><code>pandoc -s -S example25.textile -f textile -t html -o example26.html
+</code></pre></li>
+<li><p>Org-mode:</p>
+
+<pre><code>pandoc -s -S README -o example27.org
+</code></pre></li>
+<li><p>AsciiDoc:</p>
+
+<pre><code>pandoc -s -S README -t asciidoc -o example28.txt
+</code></pre></li>
+<li><p>Word docx:</p>
+
+<pre><code>pandoc -s -S README -o example29.docx
+</code></pre></li>
+<li><p>LaTeX math to docx:</p>
+
+<pre><code>pandoc -s math.tex -o example30.docx
+</code></pre></li>
+<li><p>DocBook to markdown:</p>
+
+<pre><code>pandoc -f docbook -t markdown -s howto.xml -o example31.text
+</code></pre></li>
+</ol>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[linux下双网卡配置]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/linuxxia-shuang-wang-qia-pei-zhi/"/>
+    <updated>2013-05-14T01:09:00-04:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/linuxxia-shuang-wang-qia-pei-zhi</id>
+    <content type="html"><![CDATA[<p><strong>需求</strong>： 一台PC1拥有双网卡，另外一台PC2需要通过这台pc上网。</p>
+
+<p><img src="http://images.cnblogs.com/cnblogs_com/billowkiller/447098/r_ac345982b2b7d0a207325429cbef76094a369a8e.jpg" alt="网络拓扑图"/></p>
+
+<p><strong>配置过程</strong>：</p>
+
+<p>首先需要配置pc1的两个网卡信息以及pc2的网卡信息。这个比较简单，接下里需要配置pc1中的静态路由。</p>
+
+<p>文件ipt.save表示静态路由表的修改文件。</p>
+
+<pre><code># Generated by iptables-save v1.4.2 on Wed Nov 16 15:04:23 2011
+ *filter
+ :INPUT ACCEPT [203:29797]
+ :FORWARD ACCEPT [0:0]
+ :OUTPUT ACCEPT [83:10885]
+ COMMIT
+ # Completed on Wed Nov 16 15:04:23 2011
+ # Generated by iptables-save v1.4.2 on Wed Nov 16 15:04:23 2011
+ *nat
+ :PREROUTING ACCEPT [82:12935]
+ :POSTROUTING ACCEPT [25:1724]
+ :OUTPUT ACCEPT [25:1724]
+ -A POSTROUTING -s 10.0.0.0/8 ! -d 10.0.0.0/8 -j MASQUERADE 
+ COMMIT
+ # s-&gt;source !d-&gt;not distination-&gt;not in the same subset
+ # Completed on Wed Nov 16 15:04:23 2011
+</code></pre>
+
+<p>进入root权限后，执行命令</p>
+
+<pre><code>iptables-restore /home/angel/net_scripts/ipt.save
+</code></pre>
+
+<p>这样就是修改了静态路由表，但还需要将转发开关打开，需要命令如下</p>
+
+<pre><code>echo '1' &gt; /proc/sys/net/ipv4/ip_forward
+</code></pre>
+
+<p>这样修改之后pc2就可以通过pc1上网了。</p>
+
+<!--more-->
+
+
+<p>但是重启后发现<strong>两个问题</strong>：</p>
+
+<ul>
+<li>linux下如果有两个网卡eth0和eth1，系统启动时候会先启动eth0，后启动eth1，这样造成eth0的信息被eth1覆盖。</li>
+<li>以上的两个命令并不是永久的，重启后失效。</li>
+</ul>
+
+
+<p>第一个问题的解决方案是修改/etc/network/interfaces
+文件，修改网卡接口的信息，修改后的文件如下：</p>
+
+<pre><code># interfaces(5) file used by ifup(8) and ifdown(8)
+ auto lo
+ iface lo inet loopback
+
+ auto eth1
+ iface eth1 inet dhcp
+
+ auto eth0
+ iface eth0 inet static
+ address 10.0.0.1
+ netmask 255.0.0.0
+ broadcast 10.255.255.255
+</code></pre>
+
+<p>需要重启生效，也可以使用命令</p>
+
+<pre><code>sudo /etc/init.d/networking restart
+</code></pre>
+
+<p>第二个问题可以写一个简单的脚本iptable.sh来实现，每次开机启动自动执行脚本：</p>
+
+<pre><code>iptables-restore /home/angel/net_scripts/ipt.save
+ echo '1' &gt; /proc/sys/net/ipv4/ip_forward
+</code></pre>
+
+<p>将脚本放在任意的位置，如下放入home文件夹下，修改/etc/rc.local文件：</p>
+
+<pre><code>#!/bin/sh -e
+ #
+ # rc.local
+ #
+ # This script is executed at the end of each multiuser runlevel.
+ # Make sure that the script will "exit 0" on success or any other
+ # value on error.
+ #
+ # In order to enable or disable this script just change the execution
+ # bits.
+ #
+ # By default this script does nothing.
+ sh /home/bk/iptable.sh
+ exit 0
+</code></pre>
+
+<p>这样每次启动都会调用脚本，并且使用root权限。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Linux下DHCP服务器配置]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/linuxxia-dhcpfu-wu-qi-pei-zhi/"/>
+    <updated>2013-05-14T01:09:00-04:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/linuxxia-dhcpfu-wu-qi-pei-zhi</id>
+    <content type="html"><![CDATA[<p>环境为Ubuntu 12.10，机器为3网卡，需要再eth2上配置一个dhcp服务。</p>
+
+<p>因为eth2后接一个交换机，交换机上的机器需要自动分配网址，并且对于某一台或多台机器需要固定网址，例如打印机。</p>
+
+<h3>1.   安装DHCP服务</h3>
+
+<pre><code>sudo apt-get install dhcp3-server
+</code></pre>
+
+<p>但是安装的是
+isp-dhcp-server。可能是ubuntu进行的版本替换。但是不影响后面的操作。</p>
+
+<p>服务器上用友3块网卡，需要选择哪一块网卡用来监听DHCP服务。</p>
+
+<p>输入下面命令修改配置文件</p>
+
+<pre><code>vim /etc/default/isc-dhcp-server
+</code></pre>
+
+<p>在文件的注释部分可以看到dhcpd的配置文件在</p>
+
+<pre><code>/etc/dhcp/dhcpd.conf
+</code></pre>
+
+<p>其他注释部分为格外选项，下面要修改INTERFACES</p>
+
+<pre><code>INTERFACES=“eth2”
+</code></pre>
+
+<!--more-->
+
+
+<h3>2.  配置DHCP服务</h3>
+
+<p>修改在上一步查到的dhcpd文件</p>
+
+<p>修改的部分如下：</p>
+
+<pre><code>default-lease-time 600;
+ max-lease-time 7200;
+ option subnet-mask 255.255.255.0;
+ option broadcast-address 192.168.1.255;
+ option routers 192.168.1.254;
+ option domain-name-servers 192.168.1.1, 192.168.1.2;
+ subnet 192.168.1.0 netmask 255.255.255.0 {
+ 　　range 192.168.1.10 192.168.1.200;
+ }
+</code></pre>
+
+<p>注意：不要忘了每句后面加上分号，当时我就粗心了，花了好久时间查出。</p>
+
+<p>这样修改自动分配的地址范围就在</p>
+
+<pre><code>192.168.1.10 与 192.168.1.200
+</code></pre>
+
+<p>还需要绑定MAC地址与ip地址，在添加代码</p>
+
+<pre><code>host printer1 {
+ 　　hardware ethernet 00:0a:95:f5:8f:b3;
+ 　　fixed-address 192.168.1.23;
+ }
+</code></pre>
+
+<p>重启电脑，就ok了。</p>
+
+<p>需要找到DHCP服务器的IP地址，使用下面的命令</p>
+
+<pre><code>sudo dhclient
+</code></pre>
+
+<p>或者</p>
+
+<pre><code>tail -n 15 /var/lib/dhcp3/dhclient.*.leases
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[sublime text2 说明]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/13/sublime-text2-shuo-ming/"/>
+    <updated>2013-05-13T03:05:00-04:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/13/sublime-text2-shuo-ming</id>
+    <content type="html"><![CDATA[<p><strong><em>Infomation Included：</em></strong></p>
+
+<ol>
+<li>快捷键</li>
+<li>插件</li>
+</ol>
+
+
+<hr />
+
+<h3></h3>
+
+<h3>快捷键</h3>
+
+<p><strong>Ctrl+L</strong></p>
+
+<p>选择整行(按住, 继续选择下行)</p>
+
+<p><strong>Ctrl+KK</strong></p>
+
+<p>从光标处删除至行尾</p>
+
+<p><strong>Ctrl+Shift+K</strong></p>
+
+<p>删除整行</p>
+
+<p><strong>Ctrl+Shift+D</strong></p>
+
+<p>复制光标所在整行，插入在该行之前</p>
+
+<p><strong>Ctrl+J</strong></p>
+
+<p>合并行(已选择需要合并的多行时)</p>
+
+<p><strong>Ctrl+KU</strong></p>
+
+<p>改为大写</p>
+
+<p><strong>Ctrl+KL</strong></p>
+
+<p>改为小写</p>
+
+<p><strong>Ctrl+D</strong></p>
+
+<p>选词(按住-继续选择下个相同的字符串)</p>
+
+<!--more-->
+
+
+<p><strong>Ctrl+M</strong></p>
+
+<p>光标移动至括号内开始或结束的位置</p>
+
+<p><strong>Ctrl+Shift+M</strong></p>
+
+<p>选择括号内的内容(按住-继续选择父括号)</p>
+
+<p><strong>Ctrl+/</strong></p>
+
+<p>注释整行(如已选择内容，同“Ctrl+Shift+/”效果)</p>
+
+<p><strong>Ctrl+Shift+/</strong></p>
+
+<p>注释已选择内容</p>
+
+<p><strong>Ctrl+Space</strong></p>
+
+<p>自动完成(win与系统快捷键冲突，需修改)</p>
+
+<p><strong>Ctrl+Z</strong></p>
+
+<p>撤销</p>
+
+<p><strong>Ctrl+Y</strong></p>
+
+<p>恢复撤销</p>
+
+<p><strong>Ctrl+Shift+V</strong></p>
+
+<p>粘贴并自动缩进(其它兄弟写的，实测win系统自动缩进无效)</p>
+
+<p><strong>Ctrl+M</strong></p>
+
+<p>光标跳至对应的括号</p>
+
+<p><strong>Alt+.</strong></p>
+
+<p>闭合当前标签</p>
+
+<p><strong>Ctrl+Shift+A</strong></p>
+
+<p>选择光标位置父标签对儿</p>
+
+<p><strong>Ctrl+Shift+[</strong></p>
+
+<p>折叠代码</p>
+
+<p><strong>Ctrl+Shift+]</strong></p>
+
+<p>展开代码</p>
+
+<p><strong>Ctrl+KT</strong></p>
+
+<p>折叠属性</p>
+
+<p><strong>Ctrl+K0</strong></p>
+
+<p>展开所有</p>
+
+<p><strong>Ctrl+U</strong></p>
+
+<p>软撤销</p>
+
+<p><strong>Ctrl+T</strong></p>
+
+<p>词互换</p>
+
+<p><strong>Ctrl+Enter</strong></p>
+
+<p>插入行后</p>
+
+<p><strong>Ctrl+Shift Enter</strong></p>
+
+<p>插入行前</p>
+
+<p><strong>Ctrl+K Backspace</strong></p>
+
+<p>从光标处删除至行首</p>
+
+<p><strong>Ctrl+Shift+UP</strong></p>
+
+<p>与上行互换</p>
+
+<p><strong>Ctrl+Shift+DOWN</strong></p>
+
+<p>与下行互换</p>
+
+<p><strong>Shift+Tab</strong></p>
+
+<p>去除缩进</p>
+
+<p><strong>Tab</strong></p>
+
+<p>缩进</p>
+
+<p><strong>F9</strong></p>
+
+<p>行排序(按a-z)</p>
+]]></content>
+  </entry>
+  
+</feed>

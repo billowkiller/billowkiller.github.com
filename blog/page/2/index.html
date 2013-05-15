@@ -7,7 +7,7 @@
 	<meta name="author" content="Wutao">
 
 	
-	<meta name="description" content="项目说明     来源为高等计算机网络的大作业设计。我们组选择的是p2p的流媒体视频点播系统。核心内容的是chord算法。 系统分析     局域网内的任何结点既可以发送媒体压缩信息给其他结点，也可以从其他结点接收视频信息。此外流媒体信息是在网内从多源结点获取，而非单源模式。 &hellip;">
+	<meta name="description" content="项目说明 来源为高等计算机网络的大作业设计。我们组选择的是p2p的流媒体视频点播系统。核心内容的是chord算法。 系统分析 局域网内的任何结点既可以发送媒体压缩信息给其他结点，也可以从其他结点接收视频信息。此外流媒体信息是在网内从多源结点获取，而非单源模式。改变传统的需要中央服务器的查询支持， &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -25,7 +25,8 @@
 <nav id="main-nav"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -34,7 +35,8 @@
 		<div class="container"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -90,16 +92,20 @@
 	<div class="entry-content">
 		<h3>项目说明</h3>
 
-<p>    来源为高等计算机网络的大作业设计。我们组选择的是p2p的流媒体视频点播系统。核心内容的是chord算法。</p>
+<pre><code>来源为高等计算机网络的大作业设计。我们组选择的是p2p的流媒体视频点播系统。核心内容的是chord算法。
+</code></pre>
 
 <h3>系统分析</h3>
 
-<p>    局域网内的任何结点既可以发送媒体压缩信息给其他结点，也可以从其他结点接收视频信息。此外流媒体信息是在网内从多源结点获取，而非单源模式。改变传统的需要中央服务器的查询支持，虽然本系统也需要一个中央服务器进行存储数据源以及节点加入的初始化，但是一旦节点加入了p2p网络，那么中央服务器的功能便会弱化很多，客户端peer可以利用其他peer节点已有的信息进行资源查询，而不用经过中央服务器。
-在理论上，chord是一个纯p2p算法，但是在试验中我们发现，在广域网中实现一个完全对等的p2p网络是不大现实的一件事情，因为根据chord算法，节点的加入需要知道一个已知的节点信息，而这个节点信息无法像在局域网中可以通过广播的方式进行查询，也就是说这个已知的节点就是存在的中央服务器，所有的节点加入都需要知道中央服务器在网络中的位置，通过中央服务器加入到chord网络中。而在局域网中，必存在一个初始信息源，对于一个如上所描述的系统来说，这个初始信息源可以当成一个中央服务器，当然这个中央服务器的功能也被弱化很多。</p>
+<pre><code>局域网内的任何结点既可以发送媒体压缩信息给其他结点，也可以从其他结点接收视频信息。此外流媒体信息是在网内从多源结点获取，而非单源模式。改变传统的需要中央服务器的查询支持，虽然本系统也需要一个中央服务器进行存储数据源以及节点加入的初始化，但是一旦节点加入了p2p网络，那么中央服务器的功能便会弱化很多，客户端peer可以利用其他peer节点已有的信息进行资源查询，而不用经过中央服务器。
+</code></pre>
+
+<p>在理论上，chord是一个纯p2p算法，但是在试验中我们发现，在广域网中实现一个完全对等的p2p网络是不大现实的一件事情，因为根据chord算法，节点的加入需要知道一个已知的节点信息，而这个节点信息无法像在局域网中可以通过广播的方式进行查询，也就是说这个已知的节点就是存在的中央服务器，所有的节点加入都需要知道中央服务器在网络中的位置，通过中央服务器加入到chord网络中。而在局域网中，必存在一个初始信息源，对于一个如上所描述的系统来说，这个初始信息源可以当成一个中央服务器，当然这个中央服务器的功能也被弱化很多。</p>
 
 <h4>项目设计与管理</h4>
 
-<p>    采用JAVA语言作为实现工具，并利用其UDT传输包实现数据传输、JMF视频播放工具包和openchord开源工具包，在局域网内实现基于P2P的流媒体视频点播系统。系统设计主要涉及的工作量包括：服务器端资源管理、P2P资源查询传输机制、客户端缓冲区管理和视频播放软件。预计的工作时间为1个月，总工作量为4人月。开发采用敏捷开发模型，进行迭代式开发，开发讨论为3天一次的站立会议，有效保障小组成员的信息一致性。会议中根据迭代需求列出一周或者近期的任务，小组成员互相监督管理，提高效率。能够有效的保障在规定的时间内完成项目。</p>
+<pre><code>采用JAVA语言作为实现工具，并利用其UDT传输包实现数据传输、JMF视频播放工具包和openchord开源工具包，在局域网内实现基于P2P的流媒体视频点播系统。系统设计主要涉及的工作量包括：服务器端资源管理、P2P资源查询传输机制、客户端缓冲区管理和视频播放软件。预计的工作时间为1个月，总工作量为4人月。开发采用敏捷开发模型，进行迭代式开发，开发讨论为3天一次的站立会议，有效保障小组成员的信息一致性。会议中根据迭代需求列出一周或者近期的任务，小组成员互相监督管理，提高效率。能够有效的保障在规定的时间内完成项目。
+</code></pre>
 
 
 		
@@ -121,13 +127,24 @@
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/p2p/'>p2p</a>, <a class='category' href='/blog/categories/rework/'>rework</a>
+	<a class='category' href='/blog/categories/rework/'>rework</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/p2p/'>p2p</a>, <a class='tag' href='/blog/tags/rework/'>rework</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/p2pliu-mei-ti-shi-pin-dian-bo-xi-tong-de-ge-ren-ji-zhu-bao-gao//blog/page/2/index.html#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -142,7 +159,7 @@
 	<div class="entry-content">
 		<p><strong>需求</strong>： 一台PC1拥有双网卡，另外一台PC2需要通过这台pc上网。</p>
 
-<p><img src="http://images.cnblogs.com/cnblogs_com/billowkiller/447098/r_ac345982b2b7d0a207325429cbef76094a369a8e.jpg" alt="" /></p>
+<p><img src="http://images.cnblogs.com/cnblogs_com/billowkiller/447098/r_ac345982b2b7d0a207325429cbef76094a369a8e.jpg" alt="网络拓扑图"/></p>
 
 <p><strong>配置过程</strong>：</p>
 
@@ -200,13 +217,24 @@
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/linux/'>linux</a>, <a class='category' href='/blog/categories/shuang-wang-qia/'>双网卡</a>
+	<a class='category' href='/blog/categories/tools/'>tools</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/linux/'>linux</a>, <a class='tag' href='/blog/tags/shuang-wang-qia/'>双网卡</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/linuxxia-shuang-wang-qia-pei-zhi//blog/page/2/index.html#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -231,11 +259,15 @@
 
 <p>convmv -f 源编码 -t 新编码 [选项] 文件名</p>
 
-<p>常用参数：\
--r 递归处理子文件夹\
-–notest 真正进行操作，默认情况下是不对文件进行真实操作\
-–list 显示所有支持的编码\
-–unescap 可以做一下转义，比如把%20变成空格</p>
+<p>常用参数：</p>
+
+<ul>
+<li>-r 递归处理子文件夹</li>
+<li>–notest 真正进行操作，默认情况下是不对文件进行真实操作</li>
+<li>–list 显示所有支持的编码</li>
+<li>–unescap 可以做一下转义，比如把%20变成空格</li>
+</ul>
+
 
 <p>举例：</p>
 
@@ -274,13 +306,24 @@
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/linux/'>linux</a>, <a class='category' href='/blog/categories/luan-ma/'>乱码</a>
+	<a class='category' href='/blog/categories/linux/'>linux</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/linux/'>linux</a>, <a class='tag' href='/blog/tags/luan-ma/'>乱码</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-%2Cbiao-qian//blog/page/2/index.html#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -297,7 +340,7 @@
 
 <p>因为eth2后接一个交换机，交换机上的机器需要自动分配网址，并且对于某一台或多台机器需要固定网址，例如打印机。</p>
 
-<h3> 1.   安装DHCP服务</h3>
+<h3>1.   安装DHCP服务</h3>
 
 <pre><code>sudo apt-get install dhcp3-server
 </code></pre>
@@ -342,13 +385,24 @@ isp-dhcp-server。可能是ubuntu进行的版本替换。但是不影响后面�
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/dhcp/'>dhcp</a>, <a class='category' href='/blog/categories/linux/'>linux</a>
+	<a class='category' href='/blog/categories/tools/'>tools</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/dhcp/'>dhcp</a>, <a class='tag' href='/blog/tags/linux/'>linux</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/linuxxia-dhcpfu-wu-qi-pei-zhi//blog/page/2/index.html#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -363,19 +417,15 @@ isp-dhcp-server。可能是ubuntu进行的版本替换。但是不影响后面�
 	<div class="entry-content">
 		<p>Chinese translated version of Documentation/CodingStyle</p>
 
-<p> </p>
-
 <p>If you have any comment or update to the content, please post to LKML
 directly.</p>
 
 <p>However, if you have problem communicating in English you can also ask
 the</p>
 
-<p>Chinese maintainer for help. Contact the Chinese maintainer, if this</p>
+<p>Chinese maintainer for help. Contact the Chinese maintainer, if this</p>
 
 <p>translation is outdated or there is problem with translation.</p>
-
-<p> </p>
 
 <p>Chinese maintainer: Zhang Le &lt;r0bertz@gentoo.org></p>
 
@@ -383,37 +433,30 @@ the</p>
 
 <p>Documentation/CodingStyle的中文翻译</p>
 
-<p> </p>
-
 <p>如果想评论或更新本文的内容，请直接发信到LKML。如果你使用英文交流有困难的话，也可</p>
 
 <p>以向中文版维护者求助。如果本翻译更新不及时或者翻译存在问题，请联系中文版维护者。</p>
 
-<p> </p>
+<p>中文版维护者： 张乐 Zhang Le <a href="&#x6d;&#97;&#x69;&#x6c;&#116;&#x6f;&#58;&#x72;&#x30;&#98;&#x65;&#x72;&#116;&#x7a;&#64;&#x67;&#x65;&#110;&#x74;&#111;&#111;&#x2e;&#111;&#114;&#x67;">&#114;&#x30;&#x62;&#101;&#114;&#116;&#x7a;&#64;&#x67;&#101;&#110;&#116;&#x6f;&#111;&#x2e;&#x6f;&#x72;&#x67;</a></p>
 
-<p>中文版维护者： 张乐 Zhang Le &lt;r0bertz@gentoo.org></p>
+<p>中文版翻译者： 张乐 Zhang Le <a href="&#109;&#97;&#x69;&#x6c;&#x74;&#111;&#x3a;&#114;&#48;&#98;&#101;&#114;&#x74;&#x7a;&#x40;&#103;&#x65;&#110;&#x74;&#111;&#111;&#46;&#x6f;&#x72;&#x67;">&#114;&#x30;&#98;&#x65;&#114;&#x74;&#x7a;&#64;&#x67;&#x65;&#110;&#x74;&#111;&#111;&#x2e;&#111;&#114;&#103;</a></p>
 
-<p>中文版翻译者： 张乐 Zhang Le &lt;r0bertz@gentoo.org></p>
+<p>中文版校译者： 王聪 Wang Cong <a href="&#x6d;&#x61;&#x69;&#x6c;&#116;&#x6f;&#58;&#x78;&#105;&#x79;&#111;&#x75;&#46;&#119;&#97;&#110;&#x67;&#99;&#111;&#x6e;&#103;&#x40;&#103;&#109;&#97;&#105;&#108;&#x2e;&#99;&#x6f;&#x6d;">&#x78;&#105;&#x79;&#111;&#x75;&#46;&#x77;&#97;&#110;&#103;&#99;&#x6f;&#110;&#103;&#x40;&#103;&#x6d;&#x61;&#105;&#108;&#46;&#x63;&#111;&#109;</a></p>
 
-<p>中文版校译者： 王聪 Wang Cong &lt;xiyou.wangcong@gmail.com></p>
+<pre><code>           wheelz &lt;kernel.zeng@gmail.com&gt;
 
-<p>               wheelz &lt;kernel.zeng@gmail.com></p>
+           管旭东 Xudong Guan &lt;xudong.guan@gmail.com&gt;
 
-<p>               管旭东 Xudong Guan &lt;xudong.guan@gmail.com></p>
+           Li Zefan &lt;lizf@cn.fujitsu.com&gt;
 
-<p>               Li Zefan &lt;lizf@cn.fujitsu.com></p>
-
-<p>               Wang Chen &lt;wangchen@cn.fujitsu.com></p>
+           Wang Chen &lt;wangchen@cn.fujitsu.com&gt;
+</code></pre>
 
 <p>以下为正文</p>
 
 <hr />
 
-<p> </p>
-
 <p>Linux内核代码风格</p>
-
-<p> </p>
 
 <p>这是一个简短的文档，描述了linux内核的首选代码风格。代码风格是因人而异的，而且我</p>
 
@@ -443,13 +486,24 @@ the</p>
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/coding-style/'>coding style</a>, <a class='category' href='/blog/categories/kernel/'>kernel</a>, <a class='category' href='/blog/categories/linux/'>linux</a>
+	<a class='category' href='/blog/categories/linux/'>linux</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/coding-style/'>coding style</a>, <a class='tag' href='/blog/tags/kernel/'>kernel</a>, <a class='tag' href='/blog/tags/linux/'>linux</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/linuxnei-he-dai-ma-feng-ge//blog/page/2/index.html#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -466,33 +520,34 @@ the</p>
 
 <p>下载需要的包</p>
 
-<p>apt-get install kernel-package libncurses5-dev fakeroot wget bzip2</p>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>apt-get install kernel-package libncurses5-dev fakeroot wget bzip2
+</span><span class='line'>cp linux-3.x.x /usr/src
+</span><span class='line'><span class="nb">cd</span> /usr/src/linux-3.x.x
+</span><span class='line'>make menuconfig
+</span><span class='line'>make modules
+</span><span class='line'>make modules<span class="se">\_</span>install
+</span><span class='line'>make
+</span><span class='line'>make install
+</span><span class='line'>sudo mkinitramfs -o /boot/initrd.img-3.x.x
+</span><span class='line'>sudo update-initramfs -c -k 3.x.x
+</span><span class='line'>sudo update-grub2
+</span></code></pre></td></tr></table></div></figure>
 
-<p> </p>
-
-<p>cp linux-3.x.x /usr/src</p>
-
-<p>cd /usr/src/linux-3.x.x</p>
-
-<p>make menuconfig</p>
-
-<p>make modules</p>
-
-<p>make modules_install</p>
-
-<p>make</p>
-
-<p>make install</p>
-
-<p>sudo mkinitramfs -o /boot/initrd.img-3.x.x</p>
-
-<p>sudo update-initramfs -c -k 3.x.x</p>
-
-<p>sudo update-grub2</p>
 
 <hr />
 
-<p> 
+<p> 
 		
 		<a href="/blog/2013/05/14/linuxnei-he-bian-yi-an-zhuang-ji-xie-zai/" class="more-link">Read on &rarr;</a>
 	</div>
@@ -512,13 +567,24 @@ the</p>
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/compile/'>compile</a>, <a class='category' href='/blog/categories/kernel/'>kernel</a>, <a class='category' href='/blog/categories/linux/'>linux</a>
+	<a class='category' href='/blog/categories/linux/'>linux</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/compile/'>compile</a>, <a class='tag' href='/blog/tags/kernel/'>kernel</a>, <a class='tag' href='/blog/tags/linux/'>linux</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/linuxnei-he-bian-yi-an-zhuang-ji-xie-zai//blog/page/2/index.html#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -531,17 +597,13 @@ the</p>
 			Linux KVM代码之美</a>
 	</h2>
 	<div class="entry-content">
-		<p> <strong>edited as an essey for <em>程序语言设计原理</em></strong></p>
+		<p> <strong>edited as an essey for <em>程序语言设计原理</em> </strong></p>
 
 <hr />
-
-<p><em> </em></p>
 
 <p>在程序的编写上，我认为编程的难度，也就是可写性是一个次要的角色，而代码的可读性，可维护性一直软件生命周期中的主要部分，尤其是对于大型项目而言，软件的维护绝对是项目管理人员首先要考虑的问题，成本的控制，人月量的降低。在这一点上更为突出表现的我想应该是对于开源项目来说，人员的流动性大，项目时间的不确定性，还有对开发人员的吸引力。开源项目应该关注的不止是软件功能性的强大，思维理念的超前，更应该是代码的可读性，可维护性。毕竟没有人愿意在垃圾场上重新盖一栋漂亮的大楼。所以开源项目应该从一开始就在可读性，可维护性上下工夫，并且需要有一些自己的理念，开发标准在里面，这样可以引导后来的开发人员遵循这些原则，保证代码的可读性，可维护性，避免出现破窗效应。</p>
 
 <p>那么如此看来，代码之美又应该包括哪些方面呢，我想应该需要有程序的可读性，可维护性，另外还需要有一些设计准则。这里就以Linux内核中的KVM代码部分为例，谈谈这些原则。</p>
-
-<p> </p>
 
 <h2>一、可读性、可维护性</h2>
 
@@ -571,13 +633,24 @@ the</p>
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/kvm/'>kvm</a>, <a class='category' href='/blog/categories/linux/'>linux</a>
+	<a class='category' href='/blog/categories/rework/'>rework</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/kvm/'>kvm</a>, <a class='tag' href='/blog/tags/linux/'>linux</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/linux-kvmdai-ma-zhi-mei//blog/page/2/index.html#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -590,20 +663,31 @@ the</p>
 			几个linux命令</a>
 	</h2>
 	<div class="entry-content">
-		<p>转换文件到pdf unoconv -f pdf mydocument.odt\
-zip乱码解压 unzip -O CP936 xx.zip\
-mp3 乱码 mid3iconv -e gbk *.mp3 //当前目录下的mp3文件\
-视频转码 mencoder *.rmvb -o output.avi -oac mp3lame -lameopts cbr:br=32
+		<p>转换文件到pdf</p>
+
+<p>unoconv -f pdf mydocument.odt</p>
+
+<p>zip乱码解压</p>
+
+<p>unzip -O CP936 xx.zip</p>
+
+<p>mp3 乱码</p>
+
+<p>mid3iconv -e gbk *.mp3 //当前目录下的mp3文件</p>
+
+<p>视频转码</p>
+
+<p>mencoder *.rmvb -o output.avi -oac mp3lame -lameopts cbr:br=32
 -ovc x264 -x264encopts bitrate=440 -vf scale=320:-3</p>
 
-<p>linux 声音调节  alsamixer</p>
+<p>linux 声音调节  alsamixer</p>
 
 <p>gedit 乱码：</p>
 
 <pre><code>gsettings set org.gnome.gedit.preferences.encodings auto-detected "['UTF-8','CURRENT','GB18030','ISO-8859-15','UTF-16']"
 </code></pre>
 
-<p>SSH 远程登录：   ssh -l root 192.168.0.150</p>
+<p>SSH 远程登录：   ssh -l root 192.168.0.150</p>
 
 <p>vim 中文乱码：</p>
 
@@ -629,13 +713,24 @@ set fileencodings=utf-8,gbk</p>
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/command/'>command</a>, <a class='category' href='/blog/categories/linux/'>linux</a>
+	<a class='category' href='/blog/categories/linux/'>linux</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/command/'>command</a>, <a class='tag' href='/blog/tags/linux/'>linux</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/ji-ge-linuxming-ling//blog/page/2/index.html#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -652,11 +747,11 @@ set fileencodings=utf-8,gbk</p>
 
 <p>呵呵，电影最近是看了蛮多的，一天差不多至少是一部，两个小时吧。喜欢看泰国片，那种小清新的，没有多少压力和内涵，让人放松，给人一种繁忙后的室外桃园。嗯，还有一些日本片，但是日本的这种电影，给人的感觉不像台湾或者泰国那样的悠闲，自在；可能这么说并不是很恰当，但是日本电影它似乎总想把某种思想哲学，对于人生，对于爱情，对于人性的理解加入到其中，看完后会有一些压抑，脑袋里沉浮了一些东西，所以对于日本片来说，我看的并不像泰国片那么频繁。</p>
 
-<p>最近看的是一部叫&lt;恋空>的电影，回想起来，对于其中的剧情和影片想要表述的意思还是可以回味一二，并且有着不小的余音。但那天看完后并没有写一些东西出来，应该是自己的问题，一方面投入的感情并没有想象中的那么多，所以写出来的东西并不会让我很满意；另一方面应该就是太久未能写影评了，看完电影后也不会去深入挖掘，只是偶尔在脑子里溜达一圈也就罢了，想想好笑，也就是前几天才看的电影，忽然又见到其中的主角，而我却叫不出那部影片的名字，惰性思想还是要不得啊！</p>
+<p>最近看的是一部叫<em>&lt;恋空></em>的电影，回想起来，对于其中的剧情和影片想要表述的意思还是可以回味一二，并且有着不小的余音。但那天看完后并没有写一些东西出来，应该是自己的问题，一方面投入的感情并没有想象中的那么多，所以写出来的东西并不会让我很满意；另一方面应该就是太久未能写影评了，看完电影后也不会去深入挖掘，只是偶尔在脑子里溜达一圈也就罢了，想想好笑，也就是前几天才看的电影，忽然又见到其中的主角，而我却叫不出那部影片的名字，惰性思想还是要不得啊！</p>
 
-<p>今天其实也并没有打算写这篇影评的，我已经是关机上床的状态，但是手机在充电，一时半会开不了机，于是就在脑海里想着今天看过的电影。看了两部，今天晚上，第一部是&lt;宿醉>，嗯，纯粹的商业搞笑片，没有太多的感情，属于那种看过就忘的。</p>
+<p>今天其实也并没有打算写这篇影评的，我已经是关机上床的状态，但是手机在充电，一时半会开不了机，于是就在脑海里想着今天看过的电影。看了两部，今天晚上，第一部是<em>&lt;宿醉></em>，嗯，纯粹的商业搞笑片，没有太多的感情，属于那种看过就忘的。</p>
 
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/17285214112051.jpg" title="hugo" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/17285214112051.jpg" alt="hugo" height="500"/></p>
 
 
 		
@@ -678,13 +773,24 @@ set fileencodings=utf-8,gbk</p>
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
 	<a class='category' href='/blog/categories/film/'>film</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/film/'>film</a>, <a class='tag' href='/blog/tags/hugo/'>hugo</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/hugo//blog/page/2/index.html#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -701,13 +807,9 @@ set fileencodings=utf-8,gbk</p>
 
 <hr />
 
-<p> </p>
-
 <p><img src="http://a.36krcnd.com/photo/c9ef3536af556bb5530af32befaaeae8.png" title="T-E-C-H法则" alt="" /></p>
 
-<p> 在互联网领域，要找到新的创新点，还是需要借鉴美国发展的模式。虽然美国与中国有着各自不同的国情，美国成功的应用在中国不一定可以找到适合它们的土壤，但是从中国几个新兴的创业巨头来看，无一不是根植与美国，由于中国的网络壁垒或者美国应用的本土化不强而创造出在中国的机会。从发展上看来，都是有先有多家startup的成立，在各自独立发展用户，或从相同的客户群中寻找潜在的用户资源，或是在不同的用户群众寻找，但是有一个共同点都是在美国成功的应用中进行借鉴。从《结网》中可以看到，对一个新兴的应用来说最为关键的不止是借鉴先有的成功的应用，还需要找到这个应用idea的起源，因为这里面包含有应用最核心的本质。在各个独立应用发展到一定阶段，圈到了一定的用户之后，关键在与培养用户的黏合度，用户是不是对这个产品有所依赖，是不是形成技术壁垒和用户壁垒即特定的用户群。在成功圈到一定用户之后，开始扩张领域，向其他同类产品拼抢用户资源，开始了互联网中最残酷的战争，这时也是公司最应该小心的时候，水桶中的任何一块木头都可能是潜在的漏洞，给对手带来机会。所以，方向的选择、良好的产品发展思路和绝对的执行力是成功的三大要素。从方向上来看我们习惯盯准美国，而美国的核心是加州，加州的辐射点是硅谷，硅谷的成功很大程度上在standford。关注standford。</p>
-
-<p> </p>
+<p> 在互联网领域，要找到新的创新点，还是需要借鉴美国发展的模式。虽然美国与中国有着各自不同的国情，美国成功的应用在中国不一定可以找到适合它们的土壤，但是从中国几个新兴的创业巨头来看，无一不是根植与美国，由于中国的网络壁垒或者美国应用的本土化不强而创造出在中国的机会。从发展上看来，都是有先有多家startup的成立，在各自独立发展用户，或从相同的客户群中寻找潜在的用户资源，或是在不同的用户群众寻找，但是有一个共同点都是在美国成功的应用中进行借鉴。从《结网》中可以看到，对一个新兴的应用来说最为关键的不止是借鉴先有的成功的应用，还需要找到这个应用idea的起源，因为这里面包含有应用最核心的本质。在各个独立应用发展到一定阶段，圈到了一定的用户之后，关键在与培养用户的黏合度，用户是不是对这个产品有所依赖，是不是形成技术壁垒和用户壁垒即特定的用户群。在成功圈到一定用户之后，开始扩张领域，向其他同类产品拼抢用户资源，开始了互联网中最残酷的战争，这时也是公司最应该小心的时候，水桶中的任何一块木头都可能是潜在的漏洞，给对手带来机会。所以，方向的选择、良好的产品发展思路和绝对的执行力是成功的三大要素。从方向上来看我们习惯盯准美国，而美国的核心是加州，加州的辐射点是硅谷，硅谷的成功很大程度上在standford。关注standford。</p>
 
 
 		
@@ -729,13 +831,24 @@ set fileencodings=utf-8,gbk</p>
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/future/'>future</a>, <a class='category' href='/blog/categories/internet/'>internet</a>, <a class='category' href='/blog/categories/rework/'>rework</a>
+	<a class='category' href='/blog/categories/rework/'>rework</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/future/'>future</a>, <a class='tag' href='/blog/tags/internet/'>internet</a>, <a class='tag' href='/blog/tags/rework/'>rework</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/hu-lian-wang-fa-zhan-fang-xiang-si-kao//blog/page/2/index.html#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -752,6 +865,7 @@ set fileencodings=utf-8,gbk</p>
 
     Wutao
 
+- Powered by Octopress, Pandoc and Slash
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>
@@ -761,6 +875,19 @@ set fileencodings=utf-8,gbk</p>
 })(jQuery);
 </script> <!-- Delete or comment this line to disable Fancybox -->
 
+
+<script type="text/javascript">
+      var disqus_shortname = 'jonesdavid';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
 
 
 

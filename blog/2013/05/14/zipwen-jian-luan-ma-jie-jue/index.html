@@ -26,7 +26,8 @@
 <nav id="main-nav"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -35,7 +36,8 @@
 		<div class="container"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -85,21 +87,31 @@
 <p>虽然2005年就有人把这报告为bug,
 但是info-zip的官方网站没有把自动识别编码列入计划，可能他们不认为这是个问题。Sun对java中存在N年的zip编码问题，采用了同样的处理方式。</p>
 
-<p>1.1 通过unzip行命令解压，指定字符集\
-unzip -O CP936 xxx.zip (用GBK, GB18030也可以)\
-有趣的是unzip的manual中并无这个选项的说明, unzip
+<p>1.1</p>
+
+<p>通过unzip行命令解压，指定字符集</p>
+
+<p>unzip -O CP936 xxx.zip (用GBK, GB18030也可以)</p>
+
+<p>有趣的是unzip的manual中并无这个选项的说明, unzip
 &mdash;help对这个参数有一行简单的说明。</p>
 
-<p>1.2 在环境变量中，指定unzip参数，总是以指定的字符集显示和解压文件\
-解决办法：\
-引用</p>
+<p>1.2</p>
+
+<p>在环境变量中，指定unzip参数，总是以指定的字符集显示和解压文件</p>
+
+<p>解决办法：</p>
+
+<p>引用</p>
 
 <pre><code>[sourcecode language="bash"]vi /etc/environment[/sourcecode]
 </code></pre>
 
-<p>再最后加入后面的代码即可\
-UNZIP=&ldquo;-O CP936&rdquo;\
-ZIPINFO=&ldquo;-O CP936&rdquo;</p>
+<p>再最后加入后面的代码即可</p>
+
+<p>UNZIP=&ldquo;-O CP936&rdquo;</p>
+
+<p>ZIPINFO=&ldquo;-O CP936&rdquo;</p>
 </div>
 
 
@@ -117,13 +129,24 @@ ZIPINFO=&ldquo;-O CP936&rdquo;</p>
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/zip/'>zip</a>, <a class='category' href='/blog/categories/luan-ma/'>乱码</a>
+	<a class='category' href='/blog/categories/linux/'>linux</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/zip/'>zip</a>, <a class='tag' href='/blog/tags/luan-ma/'>乱码</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue/#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -140,11 +163,18 @@ ZIPINFO=&ldquo;-O CP936&rdquo;</p>
 </div>
 
 
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2013
 
     Wutao
 
+- Powered by Octopress, Pandoc and Slash
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>
@@ -154,6 +184,22 @@ ZIPINFO=&ldquo;-O CP936&rdquo;</p>
 })(jQuery);
 </script> <!-- Delete or comment this line to disable Fancybox -->
 
+
+<script type="text/javascript">
+      var disqus_shortname = 'jonesdavid';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
 
 
 

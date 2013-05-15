@@ -7,7 +7,7 @@
 	<meta name="author" content="Wutao">
 
 	
-	<meta name="description" content="论文：英文版，中文版 1. 导论  先给个定义：GFS是一个可扩展的分布式文件系统，用于大型的、分布式的、对大量数据进行访问的应用。它运行于廉价的普通硬件上，但可以提供容错功能。它可以给大量的用户提供总体性能较高的服务。 Google File System. Designed for &hellip;">
+	<meta name="description" content="论文：英文版，中文版 1. 导论 先给个定义：GFS是一个可扩展的分布式文件系统，用于大型的、分布式的、对大量数据进行访问的应用。它运行于廉价的普通硬件上，但可以提供容错功能。它可以给大量的用户提供总体性能较高的服务。 Assumptions in Google File System (GFS &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -25,7 +25,8 @@
 <nav id="main-nav"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -34,7 +35,8 @@
 		<div class="container"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -85,13 +87,9 @@
 
 <h2>1. 导论</h2>
 
-<p> 先给个定义：GFS是一个可扩展的分布式文件系统，用于大型的、分布式的、对大量数据进行访问的应用。它运行于廉价的普通硬件上，但可以提供容错功能。它可以给大量的用户提供总体性能较高的服务。</p>
+<p> 先给个定义：GFS是一个可扩展的分布式文件系统，用于大型的、分布式的、对大量数据进行访问的应用。它运行于廉价的普通硬件上，但可以提供容错功能。它可以给大量的用户提供总体性能较高的服务。</p>
 
-<p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/GoogleFileSystemGFS.svg/500px-GoogleFileSystemGFS.svg.png" alt="" /></p>
-
-<p><em>Google File System. Designed for system-to-system interaction, and not
-for user-to-system interaction. The chunk servers replicate the data
-automatically.</em></p>
+<p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/GoogleFileSystemGFS.svg/500px-GoogleFileSystemGFS.svg.png" alt="Google File System. Designed for system-to-system interaction, and not for user-to-system interaction. The chunk servers replicate the data automatically"/></p>
 
 <p><strong>Assumptions in Google File System (GFS)</strong></p>
 
@@ -148,7 +146,7 @@ few KBs)</li>
 <li><p>应用程序和文件系统API的协同设计提高了整个系统的灵活性。e.g.</p>
 
 <ul>
-<li> 放松了在GFS一致性模型的要求</li>
+<li> 放松了在GFS一致性模型的要求</li>
 <li>引入了原子性的记录追加操作</li>
 <li>三个冗余的数据可以不是位一致，但是要求校验和验证</li>
 </ul>
@@ -190,7 +188,7 @@ few KBs)</li>
 
 <h2><strong>2. 架构</strong></h2>
 
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/ache_zps14a9a2bc.png" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/ache_zps14a9a2bc.png" alt="GFS Achitecture" height="300px"></p>
 
 <ul>
 <li>Files are divided into chunks</li>
@@ -356,7 +354,7 @@ replicas</li>
 </ul>
 
 
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/c_zps5923b611.png" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/c_zps5923b611.png" alt="Write control and Data Flow"></p>
 
 <ol>
 <li>客户机向Master节点询问哪一个Chunk服务器持有当前的租约，以及其它副本的位置。如果没有一个Chunk持有租约，Master节点就选择其中一个副本建立一个租约。</li>
@@ -627,13 +625,24 @@ it to the client or other chunk servers</li>
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/gfs/'>gfs</a>, <a class='category' href='/blog/categories/google/'>google</a>, <a class='category' href='/blog/categories/paper/'>paper</a>
+	<a class='category' href='/blog/categories/google/'>google</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/gfs/'>gfs</a>, <a class='tag' href='/blog/tags/google/'>google</a>, <a class='tag' href='/blog/tags/paper/'>paper</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/googlelun-wen-%3Agfs/#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -650,11 +659,18 @@ it to the client or other chunk servers</li>
 </div>
 
 
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2013
 
     Wutao
 
+- Powered by Octopress, Pandoc and Slash
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>
@@ -664,6 +680,22 @@ it to the client or other chunk servers</li>
 })(jQuery);
 </script> <!-- Delete or comment this line to disable Fancybox -->
 
+
+<script type="text/javascript">
+      var disqus_shortname = 'jonesdavid';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-%3Agfs/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-%3Agfs/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
 
 
 

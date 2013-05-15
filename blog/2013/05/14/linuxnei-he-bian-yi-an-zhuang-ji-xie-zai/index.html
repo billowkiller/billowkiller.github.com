@@ -7,7 +7,20 @@
 	<meta name="author" content="Wutao">
 
 	
-	<meta name="description" content="编译安装： 下载需要的包 apt-get install kernel-package libncurses5-dev fakeroot wget bzip2   cp linux-3.x.x /usr/src cd /usr/src/linux-3.x.x make menuconfig &hellip;">
+	<meta name="description" content="编译安装： 下载需要的包 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+apt-get install kernel-package libncurses5-dev fakeroot wget bzip2
+cp linux-3.x.x /usr/src
+cd /usr/src/linux-3.x &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -25,7 +38,8 @@
 <nav id="main-nav"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -34,7 +48,8 @@
 		<div class="container"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -83,37 +98,38 @@
 
 <p>下载需要的包</p>
 
-<p>apt-get install kernel-package libncurses5-dev fakeroot wget bzip2</p>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>apt-get install kernel-package libncurses5-dev fakeroot wget bzip2
+</span><span class='line'>cp linux-3.x.x /usr/src
+</span><span class='line'><span class="nb">cd</span> /usr/src/linux-3.x.x
+</span><span class='line'>make menuconfig
+</span><span class='line'>make modules
+</span><span class='line'>make modules<span class="se">\_</span>install
+</span><span class='line'>make
+</span><span class='line'>make install
+</span><span class='line'>sudo mkinitramfs -o /boot/initrd.img-3.x.x
+</span><span class='line'>sudo update-initramfs -c -k 3.x.x
+</span><span class='line'>sudo update-grub2
+</span></code></pre></td></tr></table></div></figure>
 
-<p> </p>
-
-<p>cp linux-3.x.x /usr/src</p>
-
-<p>cd /usr/src/linux-3.x.x</p>
-
-<p>make menuconfig</p>
-
-<p>make modules</p>
-
-<p>make modules_install</p>
-
-<p>make</p>
-
-<p>make install</p>
-
-<p>sudo mkinitramfs -o /boot/initrd.img-3.x.x</p>
-
-<p>sudo update-initramfs -c -k 3.x.x</p>
-
-<p>sudo update-grub2</p>
 
 <hr />
 
-<p> <!--more--></p>
+<p> <!--more--></p>
 
 <p>卸载：</p>
 
-<p> custom compiled kernel you need to remove following files/dirs:</p>
+<p> custom compiled kernel you need to remove following files/dirs:</p>
 
 <ul>
 <li>/boot/vmlinuz*KERNEL-VERSION*</li>
@@ -142,13 +158,24 @@ to point to correct kernel version.</li>
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/compile/'>compile</a>, <a class='category' href='/blog/categories/kernel/'>kernel</a>, <a class='category' href='/blog/categories/linux/'>linux</a>
+	<a class='category' href='/blog/categories/linux/'>linux</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/compile/'>compile</a>, <a class='tag' href='/blog/tags/kernel/'>kernel</a>, <a class='tag' href='/blog/tags/linux/'>linux</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/linuxnei-he-bian-yi-an-zhuang-ji-xie-zai/#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -165,11 +192,18 @@ to point to correct kernel version.</li>
 </div>
 
 
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2013
 
     Wutao
 
+- Powered by Octopress, Pandoc and Slash
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>
@@ -179,6 +213,22 @@ to point to correct kernel version.</li>
 })(jQuery);
 </script> <!-- Delete or comment this line to disable Fancybox -->
 
+
+<script type="text/javascript">
+      var disqus_shortname = 'jonesdavid';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/05/14/linuxnei-he-bian-yi-an-zhuang-ji-xie-zai/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/05/14/linuxnei-he-bian-yi-an-zhuang-ji-xie-zai/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
 
 
 

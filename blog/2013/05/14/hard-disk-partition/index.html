@@ -7,11 +7,9 @@
 	<meta name="author" content="Wutao">
 
 	
-	<meta name="description" content="edited
-from vbird 
-                                                                 All
-picture
-© vbird 在windows中我们可以很容易的发现磁盘盘符C，D，E等，这些盘符到底是什么呢， &hellip;">
+	<meta name="description" content="**edited
+from vbird *All picture
+© vbird*** 在windows中我们可以很容易的发现磁盘盘符C，D，E等，这些盘符到底是什么呢，从磁盘管理器中又可以知道有主分区，逻辑分区，扩展分区等分区，这些东东也就是Partition了，那么他们又是一些什么东西呢， &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -29,7 +27,8 @@ picture
 <nav id="main-nav"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -38,7 +37,8 @@ picture
 		<div class="container"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -83,11 +83,14 @@ picture
 	
 	<div id="content" class="inner"><article class="post">
 	<h2 class="title">Hard Disk Partition</h2>
-	<div class="entry-content"><p><strong><em>edited
-from </em><a href="http://vbird.dic.ksu.edu.tw/linux_basic/0130designlinux.php#partition_name">vbird</a> 
-                                                                 <em>All
-picture
-© <a href="http://vbird.dic.ksu.edu.tw/linux_basic/0130designlinux.php#partition_name">vbird</a></em></strong></p>
+	<div class="entry-content"><p><em>**edited
+from </em><a href="http://vbird.dic.ksu.edu.tw/linux_basic/0130designlinux.php#partition_name">vbird</a></p>
+
+<pre><code>                                                             *All
+</code></pre>
+
+<p>picture
+© <a href="http://vbird.dic.ksu.edu.tw/linux_basic/0130designlinux.php#partition_name">vbird</a>***</p>
 
 <hr />
 
@@ -98,7 +101,7 @@ Record)，这是可以安装启动管理程序的地方，有446 bytes；还有�
 table)：记录整颗硬盘分割的状态，有64
 bytes。MBR是系统在启动的时候会主动去读取的内容，多系统就是靠这块来选择的；分割表就是系统用来确定分区的，也就是分区地址的索引，它将硬盘进行逻辑上的切割，然后用分割表来记录所包含的逻辑地址。</p>
 
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/partition-1.png" title="分区" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/partition-1.png" alt="磁盘分区"/></p>
 
 <p>假设上面的硬盘装置档名为/dev/hda时，那么这四个分割槽在Linux系统中的装置档名如下所示:</p>
 
@@ -127,7 +130,7 @@ Partition中，那么为什么要进行分割呢？我想是有以下两点好�
 既然第一个磁区所在的分割表只能记录四笔数据，
 那就利用额外的磁区来记录更多的分割。具体的做法如下：</p>
 
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/partition-2.png" title="更多分区" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/partition-2.png" alt="更多分区"/></p>
 
 <p>在上图当中，我们知道硬盘的四个分割记录区仅使用到两个，P1为主要分割，而P2则为扩展分配。请注意，
 扩展分配的目的是使用额外的磁区来记录分割，扩展分配本身并不能被拿来格式化。
@@ -181,7 +184,7 @@ loader的主要任务有底下这些项目：</p>
 你要如何在启动的时候选择用Windows还是Linux启动呢？假设MBR内安装的是可同时认识Windows/Linux操作系统的启动管理程序，
 那么整个流程可以图示如下：</p>
 
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/loader.gif" title="双系统启动" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/loader.gif" alt="系统启动"/></p>
 
 <p><strong>但是如果要安装多重启动， 最好先安装Windows再安装Linux。</strong></p>
 
@@ -207,13 +210,24 @@ loader里面加入Windows启动的选项；Windows在安装的时候，他的安
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/disk-partition/'>disk partition</a>, <a class='category' href='/blog/categories/linux/'>linux</a>
+	<a class='category' href='/blog/categories/linux/'>linux</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/disk-partition/'>disk partition</a>, <a class='tag' href='/blog/tags/linux/'>linux</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/hard-disk-partition/#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -230,11 +244,18 @@ loader里面加入Windows启动的选项；Windows在安装的时候，他的安
 </div>
 
 
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2013
 
     Wutao
 
+- Powered by Octopress, Pandoc and Slash
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>
@@ -244,6 +265,22 @@ loader里面加入Windows启动的选项；Windows在安装的时候，他的安
 })(jQuery);
 </script> <!-- Delete or comment this line to disable Fancybox -->
 
+
+<script type="text/javascript">
+      var disqus_shortname = 'jonesdavid';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/05/14/hard-disk-partition/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/05/14/hard-disk-partition/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
 
 
 

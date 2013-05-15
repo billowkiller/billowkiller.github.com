@@ -4,7 +4,7 @@
   <title><![CDATA[Category: google | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/google/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2013-05-14T01:56:27-04:00</updated>
+  <updated>2013-05-15T01:43:19-04:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[Wutao]]></name>
@@ -33,10 +33,10 @@ pair的数据集合；然后再创建一个Reduce函数用来合并所有的具�
 
 <p>使用这个抽象模型，我们只要表述我们想要执行的简单运算即可，而不必关心并行计算、容错、数据分布、负载均衡等复杂的细节，这些问题都被封装在了一个库里面。设计这个抽象模型的灵感来自Lisp和许多其他函数式语言的Map和Reduce的原语。</p>
 
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr2_zps9c617225.png" alt="big picture of MapReduce"/></p>
+
 <!--more-->
 
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr2_zps9c617225.png" alt="" /></p>
 
 <h3>1.2 概述</h3>
 
@@ -103,7 +103,7 @@ pair的数据集合；然后再创建一个Reduce函数用来合并所有的具�
 
 <h3>2.1 流程</h3>
 
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr1_zps85dad9ca.png" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr1_zps85dad9ca.png" alt="Execution Overview" height="500px"></p>
 
 <p>上图展示了我们的MapReduce实现中操作的全部流程。</p>
 
@@ -159,12 +159,12 @@ worker程序将这个key值和它相关的中间value值的集合传递给用户
 </ul>
 
 
-<p> <img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr3_zps5ead0c7b.png" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr3_zps5ead0c7b.png" alt="map和Reduce的同步" height="300px"></p>
 
 <h3>2.3 本地聚合</h3>
 
 <ul>
-<li><p>Ideal scaling characteristics:</p>
+<li><p>Ideal scaling characteristics:</p>
 
 <ul>
 <li>Twice the data, twice the running time</li>
@@ -190,7 +190,7 @@ worker程序将这个key值和它相关的中间value值的集合传递给用户
 
 <h3>2.4 Shuffle and Sort</h3>
 
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr4_zps7ee59e35.png" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr4_zps7ee59e35.png" alt="Shuffle and Sort" height="400px"/></p>
 
 <h3>2.5 Master</h3>
 
@@ -290,61 +290,167 @@ completely rerun</li>
 
 <p><strong>术语对照</strong></p>
 
-<p> </p>
+<p> <table border="1" cellspacing="0" cellpadding="0">
+<tbody>
+<tr>
+<td width="109"></p>
 
-<p><strong>翻译</strong></p>
+<p class="TableContents" align="center"><span style="font-size: 14px;"><strong>翻译</strong></span></p>
 
-<p><strong>Hadoop</strong><strong>术语</strong></p>
 
-<p><strong>Google</strong><strong>术语</strong></p>
+<p></td>
+<td width="136"></p>
 
-<p><strong>相关解释</strong></p>
+<p class="TableContents" align="center"><span style="font-size: 14px;"><strong>Hadoop</strong><strong>术语</strong></span></p>
 
-<p>作业</p>
 
-<p>Job</p>
+<p></td>
+<td width="142"></p>
 
-<p>Job</p>
+<p class="TableContents" align="center"><span style="font-size: 14px;"><strong>Google</strong><strong>术语</strong></span></p>
 
-<p>用户的每一个计算请求，就称为一个作业。</p>
 
-<p>作业服务器</p>
+<p></td>
+<td width="277"></p>
 
-<p>JobTracker</p>
+<p class="TableContents" align="center"><span style="font-size: 14px;"><strong>相关解释</strong></span></p>
 
-<p>Master</p>
 
-<p>用户提交作业的服务器，同时，它还负责各个作业任务的分配，管理所有的任务服务器。</p>
+<p></td>
+</tr>
+<tr>
+<td width="109"></p>
 
-<p>任务服务器</p>
+<p class="TableContents" align="center"><span style="font-size: 14px;">作业</span></p>
 
-<p>TaskTracker</p>
 
-<p>Worker</p>
+<p></td>
+<td width="136"></p>
 
-<p>任劳任怨的工蜂，负责执行具体的任务。</p>
+<p class="TableContents" align="center"><span style="font-size: 14px;">Job</span></p>
 
-<p>任务</p>
 
-<p>Task</p>
+<p></td>
+<td width="142"></p>
 
-<p>Task</p>
+<p class="TableContents" align="center"><span style="font-size: 14px;">Job</span></p>
 
-<p>每一个作业，都需要拆分开了，交由多个服务器来完成，拆分出来的执行单位，就称为任务。</p>
 
-<p>备份任务</p>
+<p></td>
+<td width="277"></p>
 
-<p>Speculative Task</p>
+<p class="TableContents"><span style="font-size: 14px;">用户的每一个计算请求，就称为一个作业。</span></p>
 
-<p>Buckup Task</p>
 
-<p>每一个任务，都有可能执行失败或者缓慢，为了降低为此付出的代价，系统会未雨绸缪的实现在另外的任务服务器上执行同样一个任务，这就是备份任务。</p>
+<p></td>
+</tr>
+<tr>
+<td width="109"></p>
 
-<p>具体可以看博文<a href="http://www.cnblogs.com/duguguiyu/archive/2009/02/28/1400278.html">http://www.cnblogs.com/duguguiyu/archive/2009/02/28/1400278.html</a></p>
+<p class="TableContents" align="center"><span style="font-size: 14px;">作业服务器</span></p>
 
-<p> </p>
 
-<p> </p>
+<p></td>
+<td width="136"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">JobTracker</span></p>
+
+
+<p></td>
+<td width="142"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">Master</span></p>
+
+
+<p></td>
+<td width="277"></p>
+
+<p class="TableContents"><span style="font-size: 14px;">用户提交作业的服务器，同时，它还负责各个作业任务的分配，管理所有的任务服务器。</span></p>
+
+
+<p></td>
+</tr>
+<tr>
+<td width="109"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">任务服务器</span></p>
+
+
+<p></td>
+<td width="136"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">TaskTracker</span></p>
+
+
+<p></td>
+<td width="142"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">Worker</span></p>
+
+
+<p></td>
+<td width="277"></p>
+
+<p class="TableContents"><span style="font-size: 14px;">任劳任怨的工蜂，负责执行具体的任务。</span></p>
+
+
+<p></td>
+</tr>
+<tr>
+<td width="109"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">任务</span></p>
+
+
+<p></td>
+<td width="136"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">Task</span></p>
+
+
+<p></td>
+<td width="142"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">Task</span></p>
+
+
+<p></td>
+<td width="277"></p>
+
+<p class="TableContents"><span style="font-size: 14px;">每一个作业，都需要拆分开了，交由多个服务器来完成，拆分出来的执行单位，就称为任务。</span></p>
+
+
+<p></td>
+</tr>
+<tr>
+<td width="109"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">备份任务</span></p>
+
+
+<p></td>
+<td width="136"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">Speculative Task</span></p>
+
+
+<p></td>
+<td width="142"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">Buckup Task</span></p>
+
+
+<p></td>
+<td width="277"></p>
+
+<p class="TableContents"><span style="font-size: 14px;">每一个任务，都有可能执行失败或者缓慢，为了降低为此付出的代价，系统会未雨绸缪的实现在另外的任务服务器上执行同样一个任务，这就是备份任务。</span></p>
+
+
+<p></td>
+</tr>
+</tbody>
+</table>
+具体可以看博文<a href="http://www.cnblogs.com/duguguiyu/archive/2009/02/28/1400278.html">http://www.cnblogs.com/duguguiyu/archive/2009/02/28/1400278.html</a></p>
 ]]></content>
   </entry>
   
@@ -359,13 +465,9 @@ completely rerun</li>
 
 <h2>1. 导论</h2>
 
-<p> 先给个定义：GFS是一个可扩展的分布式文件系统，用于大型的、分布式的、对大量数据进行访问的应用。它运行于廉价的普通硬件上，但可以提供容错功能。它可以给大量的用户提供总体性能较高的服务。</p>
+<p> 先给个定义：GFS是一个可扩展的分布式文件系统，用于大型的、分布式的、对大量数据进行访问的应用。它运行于廉价的普通硬件上，但可以提供容错功能。它可以给大量的用户提供总体性能较高的服务。</p>
 
-<p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/GoogleFileSystemGFS.svg/500px-GoogleFileSystemGFS.svg.png" alt="" /></p>
-
-<p><em>Google File System. Designed for system-to-system interaction, and not
-for user-to-system interaction. The chunk servers replicate the data
-automatically.</em></p>
+<p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/GoogleFileSystemGFS.svg/500px-GoogleFileSystemGFS.svg.png" alt="Google File System. Designed for system-to-system interaction, and not for user-to-system interaction. The chunk servers replicate the data automatically"/></p>
 
 <p><strong>Assumptions in Google File System (GFS)</strong></p>
 
@@ -422,7 +524,7 @@ few KBs)</li>
 <li><p>应用程序和文件系统API的协同设计提高了整个系统的灵活性。e.g.</p>
 
 <ul>
-<li> 放松了在GFS一致性模型的要求</li>
+<li> 放松了在GFS一致性模型的要求</li>
 <li>引入了原子性的记录追加操作</li>
 <li>三个冗余的数据可以不是位一致，但是要求校验和验证</li>
 </ul>
@@ -464,7 +566,7 @@ few KBs)</li>
 
 <h2><strong>2. 架构</strong></h2>
 
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/ache_zps14a9a2bc.png" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/ache_zps14a9a2bc.png" alt="GFS Achitecture" height="300px"></p>
 
 <ul>
 <li>Files are divided into chunks</li>
@@ -630,7 +732,7 @@ replicas</li>
 </ul>
 
 
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/c_zps5923b611.png" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/c_zps5923b611.png" alt="Write control and Data Flow"></p>
 
 <ol>
 <li>客户机向Master节点询问哪一个Chunk服务器持有当前的租约，以及其它副本的位置。如果没有一个Chunk持有租约，Master节点就选择其中一个副本建立一个租约。</li>
@@ -888,15 +990,253 @@ it to the client or other chunk servers</li>
   </entry>
   
   <entry>
+    <title type="html"><![CDATA[google论文：big table]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-%3Abig-table/"/>
+    <updated>2013-05-14T01:09:00-04:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-:big-table</id>
+    <content type="html"><![CDATA[<p>论文：<a href="http://static.googleusercontent.com/external_content/untrusted_dlcp/research.google.com/en//archive/bigtable-osdi06.pdf">英文版</a>，
+<a href="http://dblab.xmu.edu.cn/sites/default/files/20120508_172346_207.pdf">中文版</a></p>
+
+<hr />
+
+<h3>1. 导论</h3>
+
+<p>BigTable is a compressed, high performance, and proprietary data storage
+system built on Google File System, Chubby Lock Service, SSTable
+(log-structured storage like LevelDB) and a few other Google
+technologies.（这句是wikipedia摘抄的定义）</p>
+
+<p> 构成：</p>
+
+<ul>
+<li>Scheduler</li>
+<li><a href="http://www.cnblogs.com/billowkiller/archive/2013/04/10/3012085.html">GFS</a></li>
+<li>Chubby Lock service</li>
+<li>Sawzall</li>
+<li><a href="http://www.cnblogs.com/billowkiller/archive/2013/04/15/3022035.html">MapReduce</a></li>
+<li>SSTable</li>
+<li>some compression algorithms</li>
+</ul>
+
+
+<p>先通俗几个名词：</p>
+
+<!--more-->
+
+
+<p>Google File System</p>
+
+<p>　　• Large-scale distributed “file system”</p>
+
+<p>　　• Master: responsible for metadata</p>
+
+<p>　　• Chunk servers: responsible for reading and writing large chunks of
+data</p>
+
+<p>　　• Chunks replicated on 3 machines, master responsible for ensuring
+replicas exist</p>
+
+<p>Chubby</p>
+
+<p>　　• {lock/file/name} service</p>
+
+<p>　　• Coarse-grained locks, can store small amount of data in a lock</p>
+
+<p>　　• 5 replicas, need a majority vote to be active</p>
+
+<p>SSTable</p>
+
+<p>　　• Immutable, sorted file of key-value pairs</p>
+
+<p>　　• Chunks of data plus an index</p>
+
+<p>　　　　– Index is of block ranges, not values</p>
+
+<p>　　　　– Index loaded into memory when SSTable is opened</p>
+
+<p>　　　　– Lookup is a single disk seek</p>
+
+<p>　　• Alternatively, client can load SSTable into mem</p>
+
+<p><img src="http://images.cnitblog.com/blog/434023/201303/30210501-5a1c2d5da5104b979ea6d2567f37edfb.png" alt="SSTable" height="150px"/></p>
+
+<p>Tablet</p>
+
+<p>　　• Contains some range of rows of the table</p>
+
+<p>　　• Unit of distribution &amp; load balance</p>
+
+<p>　　• Built out of multiple SSTables</p>
+
+<p><img src="http://images.cnitblog.com/blog/434023/201303/30210659-c4b2010c6dee47f6a8f5c2c799ed1114.png" alt="Tablet" height="200px"/></p>
+
+<p>Table</p>
+
+<p>　　• Multiple tablets make up the table</p>
+
+<p>　　• SSTables can be shared</p>
+
+<p>　　• Tablets do not overlap, SSTables can overlap</p>
+
+<p><img src="http://images.cnitblog.com/blog/434023/201303/30210828-a38c1e041a6d4add86c387cda95a24d2.png" alt="Table" height="200px"/></p>
+
+<h3>2. 数据模型</h3>
+
+<p>BigTable不能支持完整的关系型数据模型，只提供一个简单的数据模型，可以支持针对数据部署和格式的动态控制，允许用户区推理底层存储所展现的数据的位置属性。这句话有些玄乎，其实就是nosql的典型存储方式，不管你需要存储的数据有多大，是什么样的格式——图片，音乐或者其他，bigtable都把它们当做字符串存储在GFS中。</p>
+
+<p>这个数据模型世纪上市一个稀疏的、分布的、永久的多位排序图。采用row
+key，column key，timestamp对图进行索引。每个值都是未经解释的字节数组。</p>
+
+<p>(row:string, column string, time:int64)→string</p>
+
+<p>一个表中的行键，是任意的字符串(当前尺寸是64KB)，
+对每一个行键所包含数据的读或写都是一个原子操作，而不管这个行中所包含的的列的数量多少。在行键上根据字典顺序对数据进行维护。对一个表而言，行区间是动态划分的，因为列的大小数量不确定。每一个行区间是一个Tablet，是负载均衡和数据分发的基本单位。</p>
+
+<p>列键被分组为一个称为“Column
+family”的集合，是基本的访问控制单元。存储在一个列家族当中的所有数据通常都属于同一个数据类型。因为通常是对同一个列家族中的数据一起压缩。存储上也是面向列进行的。列键的命名方式为Column family:qualifier。Family
+is heavyweight, qualifier
+lightweight，即为，列家族很少变化，基本上是固定的，但是修饰符可以是任意字符串。</p>
+
+<p>这里给出一个实际的例子。假设我们想要拷贝一个可能被很多项目都是用的、很大的网页集合以及相关的信息，让我们把这个特定的表称为Webtable。在Webtable当中，我们使用URL作为行键，网页的不同方面作为列键，并把网页的内容存储在contents:column中，如图所示。通过对URL地址进行反转，属于同一个领域的网页都会被分组到连续的行中。例如，在键com.google.maps/index.html下面存储maps.google.com/index.html中包含的数据。把来自同一个领域的数据彼此临近存储，使得一些领域分析更加高效。</p>
+
+<p><img src="http://dblab.xmu.edu.cn/sites/default/files/images/datamodel.jpg" alt="Google Bigtable，厦门大学，厦门大学计算机系，数据库实验室，林子雨" height="200px"/></p>
+
+<ul>
+<li>存储了网页数据的Webtable的一个片段。行名称是反转的URL，contents列家族包含了网页内容，anchor列家族包含了任何引用这个页面的anchor文本。CNN的主页被Sports
+Illustrated和MY-look主页同时引用，因此，我们的行包含了名称为”anchor:cnnsi.com”和”anchor:my.look.ca”的列。每个anchor单元格都只有一个版本，contents列有三个版本，分别对应于时间戳t3,t5和t6。</li>
+</ul>
+
+
+<h3>3. 实现</h3>
+
+<p>BigTable实现包括三个主要的功能组件：</p>
+
+<p>(1) 库函数：链接到每个客户端，</p>
+
+<p>(2) 一个主服务器，</p>
+
+<p>(3) 许多Tablet服务器。</p>
+
+<p>主服务器负责把Tablet分配到Tablet服务器，探测Tablet服务器的增加和过期，进行Table服务器的负载均衡，以及GFS文件系统中的垃圾收集。除此以外，它还处理模式变化，比如表和列家族创建。</p>
+
+<p>每个Tablet服务器管理一个Tablet集合，通常，在每个Tablet服务器上，会放置10到1000个Tablet。Tablet服务器处理针对那些已经加载的Tablet而提出的读写请求，并且会对过大的Tablet进行划分。</p>
+
+<p>客户端并不是直接从主服务器读取数据，而是直接从Tablet服务器上读取数据。因为BigTable客户端并不依赖于主服务器来获得Tablet的位置信息，所以，大多数客户端从来不和主服务器通信。从而使得在实际应用中，主服务器负载很小。</p>
+
+<p><img src="http://images.cnitblog.com/blog/434023/201303/30212406-a7b6fa2ced51443eb5d8660694dfae2d.png" alt="big table system structure" height="400px"/></p>
+
+<h3>4. tablet查找</h3>
+
+<p>因为tablet是从一个服务器到另外一个服务器移动的，那么怎么找到一个特定的row在哪个服务器上存储呢？</p>
+
+<p>使用了一个类似于 B+树的三层架构，来存储Tablet位置信息。</p>
+
+<p><img src="http://dblab.xmu.edu.cn/sites/default/files/images/Fig4(1).jpg" alt="big table system structure" height="300px" alt="Google Bigtable，厦门大学，厦门大学计算机系，数据库实验室，林子雨"/></p>
+
+<p>METADATA表中存储了二级信息，包括一个日志，它记载了和每个tablet有关的所有事件，比如，一个服务器什么时候开始提供这个tablet服务。这些信息对于性能分析和程序调试是非常有用的。</p>
+
+<p>客户端函数库会缓存Tablet位置信息。如果客户端不知道一个Tablet的位置信息，或者它发现，它所缓存的Tablet位置信息部正确，那么，它就会在Tablet位置层次结构中依次向上寻找。如果客户端缓存是空的，那么定位算法就需要进行三次轮询，其中就包括一次从Chubby中读取信息。如果客户端的缓存是过期的，定位算法就要进行六次轮询，因为，只有在访问无效的时候才会发现缓存中某个entry是过期的（这里假设METADATA
+Tablets不会频繁移动）。虽然，Tablets位置信息是保存在缓存中，从而不需要访问GFS，但是，仍然通过让客户端库函数预抓取tablet位置信息，来进一步减少代价，具体方法是：每次读取METADATA表时，都要读取至少两条以上的Tablet位置信息。</p>
+
+<p>每个Tablet只能被分配到一个tablet服务器。主服务器跟踪tablet服务器的情况，掌握当前tablet被分配到tablet服务器的情况，其中包括哪个tablet还没有被分配。当一个tablet没有被分配，并且一个具有足够空间可以容纳该tablet的tablet服务器是可用时，主服务器就把当前这个tablet分配给这个tablet服务器，主服务器会向tablet服务器发送一个tablet负载请求。</p>
+
+<p> BigTable使用Chubby来跟踪tablet服务器。当一个Tablet服务器启动的时候，它创建并且获得一个独占的排他锁，这个锁会锁住一个特定的Chubby目录中的一个唯一命名的文件。主服务器监视这个目录（服务器目录），来发现tablet服务器。如果一个tablet服务器停止服务，它就会丢失这个锁，比如，由于网络故障，导致这个tablet服务器丢失了这个Chubby会话。（Chubby提供了一个完善的机制，来允许一个tablet服务器检查自己是否已经丢失了这个独占排他锁）。如果丢失了锁，那么，只要目录中的这个文件还存在，那么一个tablet服务器就会努力去获得这个锁。如果文件不再存在，那么，这个tablet服务器就不再能够对外提供服务，因此，它就自杀。一旦一个tablet服务器终止了服务（比如，簇管理系统把这个tablet服务器从簇中移除），它就会努力释放锁，这样，主服务器就可以更快地重新分配这个tablet。</p>
+
+<p>主服务器需要探测，什么时候tablet服务器不再提供tablet服务，并且要负责尽快对这些tablet进行重新分配。为了探测什么时候tablet服务器不再提供tablet服务，主服务器会周期性地询问每个tablet服务器，了解他们的锁的状态。如果一个tablet服务器报告，它已经丢失了锁；或者，在最近的几次尝试中，主服务器都无法与tablet服务器取得联系，主服务器就会努力获得一个针对这个服务器文件的独占排他锁。如果主服务器可以获得这个锁，那么，Chubby就是可用的，相应地，这个tablet服务器或者已经死亡，或者有些故障导致它无法到达Chubby。因此，主服务器就从Chubby中删除这个tablet服务器的文件，从而确保这个tablet服务器不再能够提供服务。一旦一个服务器文件被删除，主服务器就可以把所有以前分配给该服务器的tablet，都移动到“待分配”tablet集合。为了保证一个BigTable簇不会轻易受到主服务器和Chubby之间的网络故障的影响，如果一个主服务器的Chubby会话过期了，这个主服务器就会自杀。但是，正如上所述，主服务器失效，不会改变tablet到table的分配。</p>
+
+<h3>5. 读写方式</h3>
+
+<p><img src="http://dblab.xmu.edu.cn/sites/default/files/images/Fig5.jpg" height="300px" alt="Google Bigtable，厦门大学，厦门大学计算机系，数据库实验室，林子雨"/></p>
+
+<p> 一个tablet的持久化存储是存在GFS当中，如图5所示。更新被提交到一个提交日志，日志中记录了redo记录。在这些更新当中，最近提交的更新被存放到内存当中的一个被称为memtable的排序缓冲区，比较老的更新被存储在一系列SSTable中。为了恢复一个tablet，tablet服务器从METADATA表当中读取这个tablet的元数据。这个元数据包含了SSTable列表，其中，每个SSTable都包括一个tablet和一个重做点（redo
+point）的集合，这些redo
+point是一些指针，它们指向那些可能包含tablet所需数据的重做日志。服务器把SSTable索引读入内存，并且重构memtable，方法是，执行重做点以后的所有已经提交的更新。</p>
+
+<p>当一个写操作到达tablet服务器，服务器首先检查它是否是良好定义的，并且发送者是否被授权执行该操作。执行授权检查时，会从一个Chubby文件中读取具有访问权限的写入者的列表，这个Chubby文件通常总能够在Chubby客户端缓存中找到。一个有效的变化，会被写到提交日志中。分组提交是为了改进许多小更新[13,16]操作的吞吐量。在写操作已经被提交以后，它的内容就会被插入到memtable。</p>
+
+<p>当一个读操作到达Tablet服务器，与写操作类似，服务器也会首先检查它是否是良好定义和得到授权的。一个有效地读操作是在以下二者的合并的基础上执行的，即一系列SSTable和memtable。由于SSTable和memtable是字典排序的数据结构，合并视图的执行是非常高效的。</p>
+
+<p><img src="http://images.cnitblog.com/blog/434023/201303/30213930-99817ed4d1154148869e43523bcc6f4b.png" height="300px" alt="tablet分解"/></p>
+
+<p>当tablet发生合并或分解操作时，正在到达的读写操作仍然可以继续进行。</p>
+
+<h3></h3>
+
+<h3>6. 压缩</h3>
+
+<p>压缩分为三种：</p>
+
+<p>　　•　　Minor compaction – convert a full memtable into an SSTable, and
+start a new memtable</p>
+
+<p>　　　　　　– Reduce memory usage</p>
+
+<p>　　　　　　– Reduce log traffic on restart</p>
+
+<p>　　•　　Merging compaction</p>
+
+<p>　　　　　　– Reduce number of SSTables</p>
+
+<p>　　　　　　– Good place to apply policy “keep only N versions”</p>
+
+<p>　　•　　Major compaction</p>
+
+<p>　　　　　　– Merging compaction that results in only one SSTable</p>
+
+<p>　　　　　　– No deletion records, only live data</p>
+
+<h3>7. 完善措施</h3>
+
+<ul>
+<li><strong>locality group</strong></li>
+</ul>
+
+
+<p>　　客户端可以把多个列家族一起分组到一个locality
+group中。我们会为每个tablet中的每个locality
+group大都创建一个单独的SSTable。把那些通常不被一起访问的列家族分割到不同的locality
+group，可以实现更高效的读。</p>
+
+<p>　　除此以外，一些有用的参数，可以针对每个locality
+group来设定。例如，一个locality
+group可以设置成存放在内存中。常驻内存的locality
+group的SSTable，采用被动加载的方式被加载tablet服务器的内存，即只有应用请求SSTable中的数据，而这些数据　　　又不在内存中时，才把SSTable加载到内存。一旦加载，属于这些locality
+group的列家族，就可以被应用直接访问，而不需要读取磁盘。这个特性对于那些被频繁访问的小量数据来说是非常有用的。</p>
+
+<ul>
+<li><strong>Compression</strong></li>
+</ul>
+
+
+<p>　　　客户端可以决定是否对相应于某个locality
+group的SSTable进行压缩，如果压缩，应该采用什么格式。用户自定义的压缩格式可以被应用到每个SSTable块中（块的尺寸可以采用与locality
+group相关的参数来进行控制）。虽然对每个块进行单独压缩会损失一些空间，但是，我们可以从另一个方面受益，当解压缩时，只需要对小部分数据进行解压，而不需要解压全部数据。许多客户端都使用“两段自定义压缩模式”。第一遍使用Bentley
+and
+McIlroy[6]模式，它对一个大窗口内的长公共字符串进行压缩。第二遍使用一个快速的压缩算法，这个压缩算法在一个16KB数据量的窗口内寻找重复数据。</p>
+
+<ul>
+<li><strong>Bloom filters</strong></li>
+</ul>
+
+
+<p>　　一个读操作必须从构成一个tablet的当前状态的所有SSTable中读取数据。如果这些SSTable不在内存中，我们就不得不需要很多磁盘访问。我们通过下面的方式来减少磁盘访问，即允许客户端来确定，为某个特定locality
+group中的SSTable创建Bloom filter。一个Bloom
+filter允许我们询问，一个SSTabble是否包含属于指定的“行-列队”的特定的数据。对于某个特定的应用，一个用来存储Bloom
+filter的很少量的tablet服务器内存空间，都可以极大减少读操作的磁盘访问次数。我们使用Bloom
+filter也意味着，许多针对目前不存在的行或列的查询，根本就不需要访问磁盘。</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Google PageRank]]></title>
     <link href="http://billowkiller.github.io/blog/2013/05/14/google-pagerank/"/>
     <updated>2013-05-14T01:09:00-04:00</updated>
     <id>http://billowkiller.github.io/blog/2013/05/14/google-pagerank</id>
-    <content type="html"><![CDATA[<p><strong>edited</strong>from<strong><em>How Google Finds Your Needle in the Web&rsquo;s Haystack</em></strong></p>
+    <content type="html"><![CDATA[<p><strong>edited</strong> from <strong><em><a href="http://www.ams.org/samplings/feature-column/fcarc-pagerank">How Google Finds Your Needle in the Web&rsquo;s Haystack</a></em></strong></p>
 
 <hr />
 
-<p> Google搜索的核心算法当然不止是PageRank，但PageRank确实是其中的核心部分。Google就曾经说过：“the
+<p> Google搜索的核心算法当然不止是PageRank，但PageRank确实是其中的核心部分。Google就曾经说过：“the
 heart of our software is PageRank”.</p>
 
 <p>Google的PageRank算法声称他们比较了一个月来网页的受欢迎程度从而确定哪个网页显得比较重要。根据Sergey
@@ -927,50 +1267,36 @@ B_i \\ 0 &amp; \hbox{otherwise} \end{array}\right. \]
 I = {\bf H}I \]
 " /></p>
 
-<p>这个表达式其实也就是向量 <em>I </em>为矩阵特征值为1的特征向量，也称呼它为H的固定向量。</p>
+<p>这个表达式其实也就是向量 <em>I </em>为矩阵特征值为1的特征向量，也称呼它为H的固定向量。</p>
 
 <p>下边是一个例子：</p>
 
 <p><img src="http://www.ams.org/featurecolumn/images/december2006/goodnet.jpg" alt="" /></p>
 
-<p><img src="http://www.ams.org/featurecolumn/images/december2006/matrix.0.gif" alt="" /> 
-     
-  <img src="http://www.ams.org/featurecolumn/images/december2006/eigenvector.0.gif" alt="" /></p>
+<p><img src="http://www.ams.org/featurecolumn/images/december2006/matrix.0.gif" alt="" /></p>
+
+<p>  <img src="http://www.ams.org/featurecolumn/images/december2006/eigenvector.0.gif" alt="" /></p>
 
 <p>这样看来，问题貌似得到了解决，我们获得了这8个网页的PageRank值。但是在现实中，这个矩阵的n为250亿，其中的大部分值为0，实际上，研究表明每个网页链接的平均数量是10，这表明每一列只有10个数值不为0。下面我们用一个叫<em>power
 method</em>的方法来寻找矩阵的固定向量。</p>
 
-<p> <img src="http://www.ams.org/featurecolumn/images/december2006/index_6.gif" alt="\[ I^{k+1}={\bf H}I^k \]
+<p> <img src="http://www.ams.org/featurecolumn/images/december2006/index_6.gif" alt="\[ I^{k+1}={\bf H}I^k \]
 " /></p>
 
-<p><em><strong>General principle:</strong> The sequence </em>I ^k^<em> will converge to the
-stationary vector </em>I<em>.</em></p>
+<p><strong>General principle:</strong> The sequence <em>I ^k^</em> will converge to the
+stationary vector <em>I</em>.*</p>
 
 <p>通过这个方法解释上面的例子</p>
 
-<hr />
-
-<p>  <em>I ^0^</em>   <em>I ^1^</em>   <em>I ^2^</em>   <em>I ^3^</em>   <em>I ^4^</em>   &hellip;   <em>I ^60^</em>   <em>I ^61^</em>
-  1         0         0         0         0.0278    &hellip;   0.06       0.06
-  0         0.5       0.25      0.1667    0.0833    &hellip;   0.0675     0.0675
-  0         0.5       0         0         0         &hellip;   0.03       0.03
-  0         0         0.5       0.25      0.1667    &hellip;   0.0675     0.0675
-  0         0         0.25      0.1667    0.1111    &hellip;   0.0975     0.0975
-  0         0         0         0.25      0.1806    &hellip;   0.2025     0.2025
-  0         0         0         0.0833    0.0972    &hellip;   0.18       0.18
-  0         0         0         0.0833    0.3333    &hellip;   0.295      0.295</p>
-
-<hr />
+<p>   <p>                                                  <center>                           <table cellpadding=5 border=1>   <tr>   <td bgcolor=#ffffcc> <em>I <sup>0</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>1</sup></em> </td>    <td bgcolor=#ffffcc> <em>I <sup>2</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>3</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>4</sup></em> </td>   <td bgcolor=#ffffcc> &hellip; </td>    <td bgcolor=#ffffcc> <em>I <sup>60</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>61</sup></em> </td>   </tr>   <tr>   <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0.0278</td> <td> &hellip;</td>    <td>0.06</td>    <td>0.06</td>    </tr>   <tr>   <td>0</td> <td>0.5</td> <td>0.25</td> <td>0.1667</td> <td>0.0833</td> <td> &hellip;</td>    <td>0.0675</td>    <td>0.0675</td>    </tr>   <tr>   <td>0</td> <td>0.5</td> <td>0</td> <td>0</td> <td>0</td> <td> &hellip;</td>    <td>0.03</td>    <td>0.03</td>    </tr>   <tr>   <td>0</td> <td>0</td> <td>0.5</td> <td>0.25</td> <td>0.1667</td> <td> &hellip;</td>    <td>0.0675</td>    <td>0.0675</td>    </tr>   <tr>   <td>0</td> <td>0</td> <td>0.25</td> <td>0.1667</td> <td>0.1111</td> <td> &hellip;</td>    <td>0.0975</td>    <td>0.0975</td>    </tr>   <tr>   <td>0</td> <td>0</td> <td>0</td> <td>0.25</td> <td>0.1806</td> <td> &hellip;</td>    <td>0.2025</td>    <td>0.2025</td>    </tr>   <tr>   <td>0</td> <td>0</td> <td>0</td> <td>0.0833</td> <td>0.0972</td> <td> &hellip;</td>    <td>0.18</td>    <td>0.18</td>    </tr>   <tr>   <td>0</td> <td>0</td> <td>0</td> <td>0.0833</td> <td>0.3333</td> <td> &hellip;</td>    <td>0.295</td>    <td>0.295</td>    </tr>   </table>                           </center>                         <p></p>
 
 <p>得到的结果只是网页重要程度的相对比值，如果要的到最终的PageRank数值，还需要对它进行线性增加，使得它们的总和为1。</p>
-
-<p> </p>
 
 <p>有三个问题自然地就提出来了：</p>
 
 <ul>
-<li> <em>I^ k^</em>是否会汇聚到1</li>
-<li>向量是否与<em>I<sup>0</sup>^</em>的取值无关</li>
+<li> <em>I<sup>k</sup></em>是否会汇聚到1</li>
+<li>向量是否与<em>I<sup>0</sup></em>的取值无关</li>
 <li>是否包含了我们想要的信息，也就是达到充分统计</li>
 </ul>
 
@@ -985,13 +1311,7 @@ stationary vector </em>I<em>.</em></p>
 
 <p>结果如下：</p>
 
-<hr />
-
-<p>  <em>I ^0^</em>   <em>I ^1^</em>   <em>I ^2^</em>   <em>I ^3^=</em>I**
-  1         0         0         0
-  0         1         0         0</p>
-
-<hr />
+<p> <p>                                                 <center>   <table cellpadding=5 border=1>   <tr>   <td bgcolor=#ffffcc><em>I <sup>0</sup></em></td>   <td bgcolor=#ffffcc><em>I <sup>1</sup></em></td>    <td bgcolor=#ffffcc><em>I <sup>2</sup></em></td>   <td bgcolor=#ffffcc><em>I <sup>3</sup>=<em>I</em></em></td>   </tr>   <tr>   <td>1</td>   <td>0</td>   <td>0</td>   <td align=center>0</td>   </tr>   <tr>   <td>0</td>   <td>1</td>   <td>0</td>   <td align=center>0</td>   </tr>   </table>                           </center>                         <p></p>
 
 <p>上面例子的问题是P2并没有链接，它在每次迭代中获取了P1的一些权重，但是却不传给其他网页。像这样没有链接的节点我们称它为悬挂节点，显然，真实环境中这样的网页还很多。要解决这个问题，我们可以转换一种思维方式来思考PageRank，或者说用另外一种视角。</p>
 
@@ -1037,32 +1357,32 @@ method</em>是用来寻找矩阵特征向量对应的最大特征值的。在我
 \\ \end{eqnarray*}
 " /></p>
 
-<p>Since the eigenvalues <img src="http://www.ams.org/featurecolumn/images/december2006/index_19.gif" alt="\$ \lambda_j \$
-" /> with <img src="http://www.ams.org/featurecolumn/images/december2006/index_20.gif" alt="\$
+<p>Since the eigenvalues <img src="http://www.ams.org/featurecolumn/images/december2006/index_19.gif" alt="\$ \lambda_j \$
+" /> with <img src="http://www.ams.org/featurecolumn/images/december2006/index_20.gif" alt="\$
 j\geq2 \$
-" /> have
-magnitude smaller than one, it follows that <img src="http://www.ams.org/featurecolumn/images/december2006/index_21.gif" alt="\$ \lambda_j^k\to0 \$
-" /> if <img src="http://www.ams.org/featurecolumn/images/december2006/index_22.gif" alt="\$
+" /> have
+magnitude smaller than one, it follows that <img src="http://www.ams.org/featurecolumn/images/december2006/index_21.gif" alt="\$ \lambda_j^k\to0 \$
+" /> if <img src="http://www.ams.org/featurecolumn/images/december2006/index_22.gif" alt="\$
 j\geq2 \$
 " />and
-therefore <img src="http://www.ams.org/featurecolumn/images/december2006/index_23.gif" alt="\$ I^k\to I=c_1v_1 \$
-" /> ,
+therefore <img src="http://www.ams.org/featurecolumn/images/december2006/index_23.gif" alt="\$ I^k\to I=c_1v_1 \$
+" /> ,
 an eigenvector corresponding to the eigenvalue 1.</p>
 
-<p>It is important to note here that the rate at which <img src="http://www.ams.org/featurecolumn/images/december2006/index_24.gif" alt="\$ I^k\to I \$
-" /> is
-determined by <img src="http://www.ams.org/featurecolumn/images/december2006/index_25.gif" alt="\$ |\lambda_2| \$
-" /> .
-When <img src="http://www.ams.org/featurecolumn/images/december2006/index_26.gif" alt="\$ |\lambda_2| \$
-" /> is
-relatively close to 0, then <img src="http://www.ams.org/featurecolumn/images/december2006/index_27.gif" alt="\$ \lambda_2^k\to0 \$
-" /> relatively
+<p>It is important to note here that the rate at which <img src="http://www.ams.org/featurecolumn/images/december2006/index_24.gif" alt="\$ I^k\to I \$
+" /> is
+determined by <img src="http://www.ams.org/featurecolumn/images/december2006/index_25.gif" alt="\$ |\lambda_2| \$
+" /> .
+When <img src="http://www.ams.org/featurecolumn/images/december2006/index_26.gif" alt="\$ |\lambda_2| \$
+" /> is
+relatively close to 0, then <img src="http://www.ams.org/featurecolumn/images/december2006/index_27.gif" alt="\$ \lambda_2^k\to0 \$
+" /> relatively
 quickly.</p>
 
-<p>以上的讨论中，我们假设矩阵S的 <img src="http://www.ams.org/featurecolumn/images/december2006/index_34.gif" alt="\$ \lambda_1=1 \$
-" /> 并且<img src="http://www.ams.org/featurecolumn/images/december2006/index_35.gif" alt="\$
+<p>以上的讨论中，我们假设矩阵S的 <img src="http://www.ams.org/featurecolumn/images/december2006/index_34.gif" alt="\$ \lambda_1=1 \$
+" /> 并且<img src="http://www.ams.org/featurecolumn/images/december2006/index_35.gif" alt="\$
 |\lambda_2|&lt;1 \$
-" /> ，但实际上不常是这样的。</p>
+" /> ，但实际上不常是这样的。</p>
 
 <p>下面的例子:</p>
 
@@ -1070,29 +1390,16 @@ quickly.</p>
 
 <p>那么有</p>
 
-<p> </p>
+<p> <p>                                                 <center>   <table border=1 cellpadding=5>   <tr>   <td bgcolor=#ffffcc> <em>I <sup>0</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>1</sup></em> </td>    <td bgcolor=#ffffcc> <em>I <sup>2</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>3</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>4</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>5</sup></em> </td>   </tr>   <tr>   <td> 1 </td>   <td> 0 </td>   <td> 0 </td>   <td> 0 </td>   <td> 0 </td>    <td> 1 </td>   </tr>   <tr>   <td> 0 </td>   <td> 1 </td>   <td> 0 </td>   <td> 0 </td>    <td> 0 </td>   <td> 0 </td>   </tr>   <tr>   <td> 0 </td>   <td> 0 </td>   <td> 1 </td>    <td> 0 </td>   <td> 0 </td>   <td> 0 </td>   </tr>   <tr>   <td> 0 </td>   <td> 0 </td>    <td> 0 </td>   <td> 1 </td>   <td> 0 </td>   <td> 0 </td>   </tr>   <tr>   <td> 0 </td>    <td> 0 </td>   <td> 0 </td>   <td> 0 </td>   <td> 1 </td>   <td> 0 </td>   </tr>   </table>                         </center>                        </p></p>
 
-<p> </p>
-
-<hr />
-
-<p>  <em>I ^0^</em>   <em>I ^1^</em>   <em>I ^2^</em>   <em>I ^3^</em>   <em>I ^4^</em>   <em>I ^5^</em>
-  1         0         0         0         0         1
-  0         1         0         0         0         0
-  0         0         1         0         0         0
-  0         0         0         1         0         0
-  0         0         0         0         1         0</p>
-
-<hr />
-
-<p>the sequence of vectors <em>I <sup>k</sup>^</em> fails to converge。这是因为<img src="http://www.ams.org/featurecolumn/images/december2006/index_36.gif" alt="\$
+<p>the sequence of vectors <em>I <sup>k</sup></em> fails to converge。这是因为<img src="http://www.ams.org/featurecolumn/images/december2006/index_36.gif" alt="\$
 |\lambda_2|=1 \$
 " />，所以power
 method就失效了。</p>
 
 <p>为了保证<img src="http://www.ams.org/featurecolumn/images/december2006/index_37.gif" alt="\$ |\lambda_2|&lt;1 \$
-" /> ,
-矩阵<strong>S</strong> 必须 <em>primitive。</em>这意味着对于某个自然数<strong>m*, </strong>S<em><em>^</em>m</em>^<em>中的数值全为正。也就是说，对于两个页面，最多经过m个链接，可以从第一个页面跳转到第二个页面。显然，上个例子并不满足。</em>\
+" /> ,
+矩阵<strong>S</strong> 必须 <em>primitive。</em>这意味着对于某个自然数<em>m</em>, <em>S <sup>m</sup></em>中的数值全为正。也就是说，对于两个页面，最多经过m个链接，可以从第一个页面跳转到第二个页面。显然，上个例子并不满足。
 *</p>
 
 <p>下面是另外一个例子：</p>
@@ -1133,18 +1440,12 @@ Brin和Larry Page选择了0.85。</p>
 
 <p>使用<em>power method</em>则公式为：</p>
 
-<p> </p>
-
 <p><img src="http://www.ams.org/featurecolumn/images/december2006/index_52.gif" alt="\[ {\bf S}={\bf H} + {\bf A} \]
 " /></p>
-
-<p> </p>
 
 <p><img src="http://www.ams.org/featurecolumn/images/december2006/index_53.gif" alt="\[ {\bf G}=\alpha{\bf H} + \alpha{\bf A} +
 \frac{1-\alpha}{n}{\bf 1} \]
 " /></p>
-
-<p> </p>
 
 <p><img src="http://www.ams.org/featurecolumn/images/december2006/index_54.gif" alt="\[ {\bf G}I^k=\alpha{\bf H}I^k + \alpha{\bf A}I^k +
 \frac{1-\alpha}{n}{\bf 1}I^k \]

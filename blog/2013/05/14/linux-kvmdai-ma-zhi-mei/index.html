@@ -7,7 +7,7 @@
 	<meta name="author" content="Wutao">
 
 	
-	<meta name="description" content=" edited as an essey for 程序语言设计原理   在程序的编写上，我认为编程的难度，也就是可写性是一个次要的角色，而代码的可读性，可维护性一直软件生命周期中的主要部分，尤其是对于大型项目而言，软件的维护绝对是项目管理人员首先要考虑的问题，成本的控制，人月量的降低。 &hellip;">
+	<meta name="description" content="edited as an essey for 程序语言设计原理 在程序的编写上，我认为编程的难度，也就是可写性是一个次要的角色，而代码的可读性，可维护性一直软件生命周期中的主要部分，尤其是对于大型项目而言，软件的维护绝对是项目管理人员首先要考虑的问题，成本的控制，人月量的降低。 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -25,7 +25,8 @@
 <nav id="main-nav"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -34,7 +35,8 @@
 		<div class="container"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -79,17 +81,13 @@
 	
 	<div id="content" class="inner"><article class="post">
 	<h2 class="title">Linux KVM代码之美</h2>
-	<div class="entry-content"><p> <strong>edited as an essey for <em>程序语言设计原理</em></strong></p>
+	<div class="entry-content"><p> <strong>edited as an essey for <em>程序语言设计原理</em> </strong></p>
 
 <hr />
-
-<p><em> </em></p>
 
 <p>在程序的编写上，我认为编程的难度，也就是可写性是一个次要的角色，而代码的可读性，可维护性一直软件生命周期中的主要部分，尤其是对于大型项目而言，软件的维护绝对是项目管理人员首先要考虑的问题，成本的控制，人月量的降低。在这一点上更为突出表现的我想应该是对于开源项目来说，人员的流动性大，项目时间的不确定性，还有对开发人员的吸引力。开源项目应该关注的不止是软件功能性的强大，思维理念的超前，更应该是代码的可读性，可维护性。毕竟没有人愿意在垃圾场上重新盖一栋漂亮的大楼。所以开源项目应该从一开始就在可读性，可维护性上下工夫，并且需要有一些自己的理念，开发标准在里面，这样可以引导后来的开发人员遵循这些原则，保证代码的可读性，可维护性，避免出现破窗效应。</p>
 
 <p>那么如此看来，代码之美又应该包括哪些方面呢，我想应该需要有程序的可读性，可维护性，另外还需要有一些设计准则。这里就以Linux内核中的KVM代码部分为例，谈谈这些原则。</p>
-
-<p> </p>
 
 <h2>一、可读性、可维护性</h2>
 
@@ -104,37 +102,25 @@
 
 <p>包括8个字符缩进，把长的行和字符串打散，大括号和空格的放置，命名规范等。在Linux内核中Documentation/CodingStyle文件中有句话表明这些规范的用处“代码风格的意义就在于使用平常使用的工具来维持代码的可读性和可维护性”，无需特别的编辑器，只需要一个普通的文本编辑器就可以了。这些规范十分有利于读者理解和修改代码，例如不超过80列的代码长度使得函数体中的形式参数不会显得拥挤不堪，分不清个数。如图1中这样的例子在这4000行代码中俯拾皆是，极大的提高了可读性。</p>
 
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/1.png" title="图1" alt="" /></p>
-
-<p>图1</p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/1.png" alt="图1"/></p>
 
 <p>可能是得益于C语言设计的简单性和正交性，我在Linux代码中很少看到有3层以上的嵌套，代码的逻辑大多数可以在最多2层的嵌套中完成。并且程序的控制语句可以将代码的逻辑部分清晰的展现出来，无需过多的升入理解。另外，程序中的注释部分所占的比例也不会很大，不会出现注释数量比代码数量还要多的情况，并且注释部分十分的简短精细。这表明对程序片段的理解无需额外的添加注释，只是凭借代码的逻辑结构和命名就可以很好的理解代码，而且注释的语言不会显得赘述，只是简单扼要的解释片段功能或逻辑。例如图2中的情形，复杂的位操作尽管提高了效率，可是难以理解，这时就需要注释来帮助解释。</p>
 
-<p> <img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/2.png" title="图2" alt="" /></p>
-
-<p>图 2</p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/2.png" alt="图2"/></p>
 
 <p>可读性在很多的时候是与可维护性相关联的，程序写出来很大一部分原因就是为了维护，而强可读性对于程序的理解至关重要，特别是人员流动性强的时候，而语言的特性和优秀的代码规范是可读性的保证，Linux内核代码在这两方面都做得非常好，拥有Documentation/CodingStyle这样的编程规范，还有C语言这样的高级程序设计语言。从另一方面来说，可读性强也同时意味着可写性强，因为在编写程序的过程中，编程人员需要不断地阅读已经编写的程序部分。</p>
 
-<p> </p>
-
 <h2>二、设计准则</h2>
 
-<p> </p>
-
-<h3>1. 频度准则</h3>
+<h3>1. 频度准则</h3>
 
 <p>越常用越简单，包括命名，和函数体。例如在模拟器的缓存表写入时有两个函数体，一个reg_write，另外一个为writeback_registers。表示的意思一个为写入，另外一个是回写，这个是对应于Cache的不同存取机制的，显然第一个较为常用，所以在命名上面会比第二个简略一些。</p>
 
 <p>而对于更为常用的函数来说，例如一些简单的位运算，kvm将这些函数当做预编译的部分，放在函数开头。如下图3，就表示一个栈的指令移动，在代码中频繁的出现则用预编译函数来表示。并且有一些函数使用了内联的方法来提高性能，这些函数往往是另外一个复杂或者多次使用的函数的一部分，所以内联的函数函数体都比较简单，拥有一个描述性的名字，并且作用通常是作为辅助函数。</p>
 
-<p> <img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/3.png" title="图3" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/3.png" alt="图3"/></p>
 
-<p>图 3</p>
-
-<p> </p>
-
-<h3>2. 结构一致</h3>
+<h3>2. 结构一致</h3>
 
 <p>结构一致表示的是程序结构和计算的逻辑结构一致。Kvm代码可以体现出自顶向下、逐步求精的思想，复杂问题，往往有一个总体的引导性函数，然后会由一些子函数，辅助函数来作为过渡，逐步细化地解决问题。上文提到的一些预编译函数，内联函数就是起到这样的作用的。</p>
 
@@ -142,31 +128,23 @@
 
 <p>例如图4中，代码清晰的表示了获取操作数后处理器将要做得事情，程序的结构和计算逻辑是一致的，并不存在什么晦涩难懂的部分。</p>
 
-<p> <img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/4.png" title="图4" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/4.png" alt="图4"/></p>
 
-<p>图 4</p>
-
-<h3>3. 局部性</h3>
+<h3>3. 局部性</h3>
 
 <p>C语言是不鼓励使用全局变量的。在emulator.c的代码中我也并未有发现全局变量的使用。代码规范里头对全局变量的描述是“只有当你真正需要它们的时候再用它”。并且对于局部变量的使用它是有标准的：“函数的另外一个衡量标准是本地变量的数量。此数量不应超过5－10个，否则你的函数就有问题了”。</p>
 
 <p>kvm代码中函数的局部变量都很少，并且命名十分的简洁，一般为2-3个字母，是放在一块儿申明的。声明完后空一行，开始函数的逻辑部分。</p>
 
-<h3>4. 词法内聚</h3>
+<h3>4. 词法内聚</h3>
 
 <p>词法内聚是变量在使用处就近声明。这一点要看使用处的定义，因为kvm中变量的声明是放在一块的，对于函数来说，是在使用处定义。但如果把使用处定义为使用变量的具体位置，表达式或判断赋值语句，那么kvm代码中的变量声明就不是词法内聚了。</p>
 
 <h2>三、总结</h2>
 
-<p>总的来说Linux内核代码所带来的标准已经影响了很多从业人员，并且正在成为C语言代码的标准规范。这个规范是从Brian Kernighan和Dennis Ritchie开始的，也就是著名的经典C，并且经历了C90、C99标准，根据不同的需求在变化着，修改着。我所看到的这个CodingStyle是在两天前 Joe Perches提交的，添加了网络块的评论规范。</p>
+<p>总的来说Linux内核代码所带来的标准已经影响了很多从业人员，并且正在成为C语言代码的标准规范。这个规范是从Brian Kernighan和Dennis Ritchie开始的，也就是著名的经典C，并且经历了C90、C99标准，根据不同的需求在变化着，修改着。我所看到的这个CodingStyle是在两天前 Joe Perches提交的，添加了网络块的评论规范。</p>
 
 <p>但是这些修改变化，有一个共同的目标就是使linux内核代码能够看起来更加的舒适，理解起来更容易，并最终做到可写性和维护性。</p>
-
-<p> </p>
-
-<p> </p>
-
-<p> </p>
 </div>
 
 
@@ -184,13 +162,24 @@
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/kvm/'>kvm</a>, <a class='category' href='/blog/categories/linux/'>linux</a>
+	<a class='category' href='/blog/categories/rework/'>rework</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/kvm/'>kvm</a>, <a class='tag' href='/blog/tags/linux/'>linux</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/linux-kvmdai-ma-zhi-mei/#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -207,11 +196,18 @@
 </div>
 
 
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2013
 
     Wutao
 
+- Powered by Octopress, Pandoc and Slash
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>
@@ -221,6 +217,22 @@
 })(jQuery);
 </script> <!-- Delete or comment this line to disable Fancybox -->
 
+
+<script type="text/javascript">
+      var disqus_shortname = 'jonesdavid';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/05/14/linux-kvmdai-ma-zhi-mei/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/05/14/linux-kvmdai-ma-zhi-mei/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
 
 
 

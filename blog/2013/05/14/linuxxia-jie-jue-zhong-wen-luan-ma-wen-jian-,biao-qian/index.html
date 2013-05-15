@@ -26,7 +26,8 @@
 <nav id="main-nav"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -35,7 +36,8 @@
 		<div class="container"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -92,11 +94,15 @@
 
 <p>convmv -f 源编码 -t 新编码 [选项] 文件名</p>
 
-<p>常用参数：\
--r 递归处理子文件夹\
-–notest 真正进行操作，默认情况下是不对文件进行真实操作\
-–list 显示所有支持的编码\
-–unescap 可以做一下转义，比如把%20变成空格</p>
+<p>常用参数：</p>
+
+<ul>
+<li>-r 递归处理子文件夹</li>
+<li>–notest 真正进行操作，默认情况下是不对文件进行真实操作</li>
+<li>–list 显示所有支持的编码</li>
+<li>–unescap 可以做一下转义，比如把%20变成空格</li>
+</ul>
+
 
 <p>举例：</p>
 
@@ -119,10 +125,8 @@
 
 <pre><code>mid3iconv -e gbk *.mp3 //当前目录下的mp3文件
 
-find . -iname “*.mp3” -execdir mid3iconv -e GBK {} \; //所有文件包括子文件夹
+find . -iname “*.mp3” -execdir mid3iconv -e GBK {}; //所有文件包括子文件夹
 </code></pre>
-
-<p> </p>
 </div>
 
 
@@ -140,13 +144,24 @@ find . -iname “*.mp3” -execdir mid3iconv -e GBK {} \; //所有文件包括�
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/linux/'>linux</a>, <a class='category' href='/blog/categories/luan-ma/'>乱码</a>
+	<a class='category' href='/blog/categories/linux/'>linux</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/linux/'>linux</a>, <a class='tag' href='/blog/tags/luan-ma/'>乱码</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-%2Cbiao-qian/#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -163,11 +178,18 @@ find . -iname “*.mp3” -execdir mid3iconv -e GBK {} \; //所有文件包括�
 </div>
 
 
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2013
 
     Wutao
 
+- Powered by Octopress, Pandoc and Slash
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>
@@ -177,6 +199,22 @@ find . -iname “*.mp3” -execdir mid3iconv -e GBK {} \; //所有文件包括�
 })(jQuery);
 </script> <!-- Delete or comment this line to disable Fancybox -->
 
+
+<script type="text/javascript">
+      var disqus_shortname = 'jonesdavid';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-%2Cbiao-qian/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-%2Cbiao-qian/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
 
 
 

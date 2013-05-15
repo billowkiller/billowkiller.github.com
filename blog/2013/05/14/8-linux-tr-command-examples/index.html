@@ -8,8 +8,8 @@
 
 	
 	<meta name="description" content="from
-TheGeekStuff   tr is an UNIX utility for translating, or deleting, or squeezing
-repeated characters. It will read from STDIN and write to STDOUT &hellip;">
+TheGeekStuff tr is an UNIX utility for translating, or deleting, or squeezing
+repeated characters. It will read from STDIN and write to STDOUT. &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -27,7 +27,8 @@ repeated characters. It will read from STDIN and write to STDOUT &hellip;">
 <nav id="main-nav"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -36,7 +37,8 @@ repeated characters. It will read from STDIN and write to STDOUT &hellip;">
 		<div class="container"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -86,8 +88,6 @@ repeated characters. It will read from STDIN and write to STDOUT &hellip;">
 
 <hr />
 
-<p> </p>
-
 <p>tr is an UNIX utility for translating, or deleting, or squeezing
 repeated characters. It will read from STDIN and write to STDOUT.</p>
 
@@ -97,8 +97,10 @@ repeated characters. It will read from STDIN and write to STDOUT.</p>
 
 <p>The syntax of tr command is:</p>
 
-<pre><code>$ tr [OPTION] SET1 [SET2]
-</code></pre>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>    <span class="nv">$ </span>tr <span class="o">[</span>OPTION<span class="o">]</span> SET1 <span class="o">[</span>SET2<span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
 
 <h3>Translation</h3>
 
@@ -113,33 +115,47 @@ each character in same position in SET2.</p>
 
 <p>The following tr command is used to convert the lower case to upper case</p>
 
-<pre><code>$ tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ
- thegeekstuff
- THEGEEKSTUFF
-</code></pre>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>    <span class="nv">$ </span>tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ
+</span><span class='line'>     thegeekstuff
+</span><span class='line'>     THEGEEKSTUFF
+</span></code></pre></td></tr></table></div></figure>
+
 
 <p>The following command will also convert lower case to upper case</p>
 
-<pre><code>$ tr [:lower:] [:upper:]
- thegeekstuff
- THEGEEKSTUFF
-</code></pre>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>    <span class="nv">$ </span>tr <span class="o">[</span>:lower:<span class="o">]</span> <span class="o">[</span>:upper:<span class="o">]</span>
+</span><span class='line'>     thegeekstuff
+</span><span class='line'>     THEGEEKSTUFF
+</span></code></pre></td></tr></table></div></figure>
+
 
 <p>You can also use ranges in tr. The following command uses ranges to
 convert lower to upper case.</p>
 
-<pre><code>$ tr a-z A-Z
- thegeekstuff
- THEGEEKSTUFF
-</code></pre>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>    <span class="nv">$ </span>tr a-z A-Z
+</span><span class='line'>     thegeekstuff
+</span><span class='line'>     THEGEEKSTUFF
+</span></code></pre></td></tr></table></div></figure>
+
 
 <h3>2. Translate braces into parenthesis</h3>
 
 <p>You can also translate from and to a file. In this example we will
 translate braces in a file with parenthesis.</p>
 
-<pre><code>$ tr '{}' '()' &lt; inputfile &gt; outputfile
-</code></pre>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>    <span class="nv">$ </span>tr <span class="s1">&#39;{}&#39;</span> <span class="s1">&#39;()&#39;</span> &lt; inputfile &gt; outputfile
+</span></code></pre></td></tr></table></div></figure>
+
 
 <p>The above command will read each character from “inputfile”, translate
 if it is a brace, and write the output in “outputfile”.</p>
@@ -148,9 +164,12 @@ if it is a brace, and write the output in “outputfile”.</p>
 
 <p>The following command will translate all the white-space to tabs</p>
 
-<pre><code>$ echo "This is for testing" | tr [:space:] '\t'
- This   is  for testing
-</code></pre>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>    <span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;This is for testing&quot;</span> | tr <span class="o">[</span>:space:<span class="o">]</span> <span class="s1">&#39;\t&#39;</span>
+</span><span class='line'>     This   is  <span class="k">for </span>testing
+</span></code></pre></td></tr></table></div></figure>
+
 
 <h3>4. Squeeze repetition of characters using -s</h3>
 
@@ -158,37 +177,52 @@ if it is a brace, and write the output in “outputfile”.</p>
 two are more spaces present continuously, then the previous command will
 translate each spaces to a tab as follows.</p>
 
-<pre><code>$ echo "This is for testing" | tr [:space:] '\t'
- This    is  for    testing
-</code></pre>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>    <span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;This is for testing&quot;</span> | tr <span class="o">[</span>:space:<span class="o">]</span> <span class="s1">&#39;\t&#39;</span>
+</span><span class='line'>     This    is  <span class="k">for    </span>testing
+</span></code></pre></td></tr></table></div></figure>
+
 
 <p>We can use -s option to squeeze the repetition of characters.</p>
 
-<pre><code>$ echo "This is for testing" | tr -s [:space:] '\t'
- This   is  for testing
-</code></pre>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>    <span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;This is for testing&quot;</span> | tr -s <span class="o">[</span>:space:<span class="o">]</span> <span class="s1">&#39;\t&#39;</span>
+</span><span class='line'>     This   is  <span class="k">for </span>testing
+</span></code></pre></td></tr></table></div></figure>
+
 
 <p>Similarly you can convert multiple continuous spaces with a single space</p>
 
-<pre><code>$ echo "This is for testing" | tr -s [:space:] ' '
- This is for testing
-</code></pre>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>    <span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;This is for testing&quot;</span> | tr -s <span class="o">[</span>:space:<span class="o">]</span> <span class="s1">&#39; &#39;</span>
+</span><span class='line'>     This is <span class="k">for </span>testing
+</span></code></pre></td></tr></table></div></figure>
+
 
 <h3>5. Delete specified characters using -d option</h3>
 
 <p>tr can also be used to remove particular characters using -d option.</p>
 
-<pre><code>$ echo "the geek stuff" | tr -d 't'
- he geek suff
-</code></pre>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>    <span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;the geek stuff&quot;</span> | tr -d <span class="s1">&#39;t&#39;</span>
+</span><span class='line'>     he geek suff
+</span></code></pre></td></tr></table></div></figure>
+
 
 <p>To remove all the digits from the string, use</p>
 
-<pre><code>$ echo "my username is 432234" | tr -d [:digit:]
- my username is
-</code></pre>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>    <span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;my username is 432234&quot;</span> | tr -d <span class="o">[</span>:digit:<span class="o">]</span>
+</span><span class='line'>     my username is
+</span></code></pre></td></tr></table></div></figure>
 
-<p>Also, if you like to delete lines from file, you can use <a href="http://www.thegeekstuff.com/2009/09/unix-sed-tutorial-delete-file-lines-using-address-and-patterns/">sed d
+
+<p>Also, if you like to delete lines from file, you can use <a href="http://www.thegeekstuff.com/2009/09/unix-sed-tutorial-delete-file-lines-using-address-and-patterns/">sed d
 command</a>.</p>
 
 <h3>6. Complement the sets using -c option</h3>
@@ -196,29 +230,34 @@ command</a>.</p>
 <p>You can complement the SET1 using -c option. For example, to remove all
 characters except digits, you can use the following.</p>
 
-<pre><code>$ echo "my username is 432234" | tr -cd [:digit:]
- 432234
-</code></pre>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>    <span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;my username is 432234&quot;</span> | tr -cd <span class="o">[</span>:digit:<span class="o">]</span>
+</span><span class='line'>     432234
+</span></code></pre></td></tr></table></div></figure>
+
 
 <h3>7. Remove all non-printable character from a file</h3>
 
 <p>The following command can be used to remove all non-printable characters
 from a file.</p>
 
-<pre><code>$ tr -cd [:print:] &lt; file.txt
-</code></pre>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>    <span class="nv">$ </span>tr -cd <span class="o">[</span>:print:<span class="o">]</span> &lt; file.txt
+</span></code></pre></td></tr></table></div></figure>
+
 
 <h3>8. Join all the lines in a file into a single line</h3>
 
 <p>The below command will translate all newlines into spaces and make the
 result as a single line.</p>
 
-<pre><code>$ tr -s '\n' ' ' &lt; file.txt
-</code></pre>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>    <span class="nv">$ </span>tr -s <span class="s1">&#39;\n&#39;</span> <span class="s1">&#39; &#39;</span> &lt; file.txt
+</span></code></pre></td></tr></table></div></figure>
 
-<hr />
 
-<p> </p>
+
 </div>
 
 
@@ -236,13 +275,24 @@ result as a single line.</p>
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/command/'>command</a>, <a class='category' href='/blog/categories/linux/'>linux</a>, <a class='category' href='/blog/categories/tr/'>tr</a>
+	<a class='category' href='/blog/categories/linux/'>linux</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/command/'>command</a>, <a class='tag' href='/blog/tags/linux/'>linux</a>, <a class='tag' href='/blog/tags/tr/'>tr</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/8-linux-tr-command-examples/#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -259,11 +309,18 @@ result as a single line.</p>
 </div>
 
 
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2013
 
     Wutao
 
+- Powered by Octopress, Pandoc and Slash
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>
@@ -273,6 +330,22 @@ result as a single line.</p>
 })(jQuery);
 </script> <!-- Delete or comment this line to disable Fancybox -->
 
+
+<script type="text/javascript">
+      var disqus_shortname = 'jonesdavid';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/05/14/8-linux-tr-command-examples/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/05/14/8-linux-tr-command-examples/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
 
 
 

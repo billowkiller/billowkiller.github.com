@@ -7,7 +7,7 @@
 	<meta name="author" content="Wutao">
 
 	
-	<meta name="description" content="editedfromHow Google Finds Your Needle in the Web&rsquo;s Haystack  Google搜索的核心算法当然不止是PageRank，但PageRank确实是其中的核心部分。Google就曾经说过：“the
+	<meta name="description" content="edited from How Google Finds Your Needle in the Web&rsquo;s Haystack Google搜索的核心算法当然不止是PageRank，但PageRank确实是其中的核心部分。Google就曾经说过：“the
 heart of our &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -26,7 +26,8 @@ heart of our &hellip;">
 <nav id="main-nav"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -35,7 +36,8 @@ heart of our &hellip;">
 		<div class="container"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -80,11 +82,11 @@ heart of our &hellip;">
 	
 	<div id="content" class="inner"><article class="post">
 	<h2 class="title">Google PageRank</h2>
-	<div class="entry-content"><p><strong>edited</strong>from<strong><em>How Google Finds Your Needle in the Web&rsquo;s Haystack</em></strong></p>
+	<div class="entry-content"><p><strong>edited</strong> from <strong><em><a href="http://www.ams.org/samplings/feature-column/fcarc-pagerank">How Google Finds Your Needle in the Web&rsquo;s Haystack</a></em></strong></p>
 
 <hr />
 
-<p> Google搜索的核心算法当然不止是PageRank，但PageRank确实是其中的核心部分。Google就曾经说过：“the
+<p> Google搜索的核心算法当然不止是PageRank，但PageRank确实是其中的核心部分。Google就曾经说过：“the
 heart of our software is PageRank”.</p>
 
 <p>Google的PageRank算法声称他们比较了一个月来网页的受欢迎程度从而确定哪个网页显得比较重要。根据Sergey
@@ -115,50 +117,36 @@ B_i \\ 0 &amp; \hbox{otherwise} \end{array}\right. \]
 I = {\bf H}I \]
 " /></p>
 
-<p>这个表达式其实也就是向量 <em>I </em>为矩阵特征值为1的特征向量，也称呼它为H的固定向量。</p>
+<p>这个表达式其实也就是向量 <em>I </em>为矩阵特征值为1的特征向量，也称呼它为H的固定向量。</p>
 
 <p>下边是一个例子：</p>
 
 <p><img src="http://www.ams.org/featurecolumn/images/december2006/goodnet.jpg" alt="" /></p>
 
-<p><img src="http://www.ams.org/featurecolumn/images/december2006/matrix.0.gif" alt="" /> 
-     
-  <img src="http://www.ams.org/featurecolumn/images/december2006/eigenvector.0.gif" alt="" /></p>
+<p><img src="http://www.ams.org/featurecolumn/images/december2006/matrix.0.gif" alt="" /></p>
+
+<p>  <img src="http://www.ams.org/featurecolumn/images/december2006/eigenvector.0.gif" alt="" /></p>
 
 <p>这样看来，问题貌似得到了解决，我们获得了这8个网页的PageRank值。但是在现实中，这个矩阵的n为250亿，其中的大部分值为0，实际上，研究表明每个网页链接的平均数量是10，这表明每一列只有10个数值不为0。下面我们用一个叫<em>power
 method</em>的方法来寻找矩阵的固定向量。</p>
 
-<p> <img src="http://www.ams.org/featurecolumn/images/december2006/index_6.gif" alt="\[ I^{k+1}={\bf H}I^k \]
+<p> <img src="http://www.ams.org/featurecolumn/images/december2006/index_6.gif" alt="\[ I^{k+1}={\bf H}I^k \]
 " /></p>
 
-<p><em><strong>General principle:</strong> The sequence </em>I ^k^<em> will converge to the
-stationary vector </em>I<em>.</em></p>
+<p><strong>General principle:</strong> The sequence <em>I ^k^</em> will converge to the
+stationary vector <em>I</em>.*</p>
 
 <p>通过这个方法解释上面的例子</p>
 
-<hr />
-
-<p>  <em>I ^0^</em>   <em>I ^1^</em>   <em>I ^2^</em>   <em>I ^3^</em>   <em>I ^4^</em>   &hellip;   <em>I ^60^</em>   <em>I ^61^</em>
-  1         0         0         0         0.0278    &hellip;   0.06       0.06
-  0         0.5       0.25      0.1667    0.0833    &hellip;   0.0675     0.0675
-  0         0.5       0         0         0         &hellip;   0.03       0.03
-  0         0         0.5       0.25      0.1667    &hellip;   0.0675     0.0675
-  0         0         0.25      0.1667    0.1111    &hellip;   0.0975     0.0975
-  0         0         0         0.25      0.1806    &hellip;   0.2025     0.2025
-  0         0         0         0.0833    0.0972    &hellip;   0.18       0.18
-  0         0         0         0.0833    0.3333    &hellip;   0.295      0.295</p>
-
-<hr />
+<p>   <p>                                                  <center>                           <table cellpadding=5 border=1>   <tr>   <td bgcolor=#ffffcc> <em>I <sup>0</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>1</sup></em> </td>    <td bgcolor=#ffffcc> <em>I <sup>2</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>3</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>4</sup></em> </td>   <td bgcolor=#ffffcc> &hellip; </td>    <td bgcolor=#ffffcc> <em>I <sup>60</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>61</sup></em> </td>   </tr>   <tr>   <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0.0278</td> <td> &hellip;</td>    <td>0.06</td>    <td>0.06</td>    </tr>   <tr>   <td>0</td> <td>0.5</td> <td>0.25</td> <td>0.1667</td> <td>0.0833</td> <td> &hellip;</td>    <td>0.0675</td>    <td>0.0675</td>    </tr>   <tr>   <td>0</td> <td>0.5</td> <td>0</td> <td>0</td> <td>0</td> <td> &hellip;</td>    <td>0.03</td>    <td>0.03</td>    </tr>   <tr>   <td>0</td> <td>0</td> <td>0.5</td> <td>0.25</td> <td>0.1667</td> <td> &hellip;</td>    <td>0.0675</td>    <td>0.0675</td>    </tr>   <tr>   <td>0</td> <td>0</td> <td>0.25</td> <td>0.1667</td> <td>0.1111</td> <td> &hellip;</td>    <td>0.0975</td>    <td>0.0975</td>    </tr>   <tr>   <td>0</td> <td>0</td> <td>0</td> <td>0.25</td> <td>0.1806</td> <td> &hellip;</td>    <td>0.2025</td>    <td>0.2025</td>    </tr>   <tr>   <td>0</td> <td>0</td> <td>0</td> <td>0.0833</td> <td>0.0972</td> <td> &hellip;</td>    <td>0.18</td>    <td>0.18</td>    </tr>   <tr>   <td>0</td> <td>0</td> <td>0</td> <td>0.0833</td> <td>0.3333</td> <td> &hellip;</td>    <td>0.295</td>    <td>0.295</td>    </tr>   </table>                           </center>                         <p></p>
 
 <p>得到的结果只是网页重要程度的相对比值，如果要的到最终的PageRank数值，还需要对它进行线性增加，使得它们的总和为1。</p>
-
-<p> </p>
 
 <p>有三个问题自然地就提出来了：</p>
 
 <ul>
-<li> <em>I^ k^</em>是否会汇聚到1</li>
-<li>向量是否与<em>I<sup>0</sup>^</em>的取值无关</li>
+<li> <em>I<sup>k</sup></em>是否会汇聚到1</li>
+<li>向量是否与<em>I<sup>0</sup></em>的取值无关</li>
 <li>是否包含了我们想要的信息，也就是达到充分统计</li>
 </ul>
 
@@ -173,13 +161,7 @@ stationary vector </em>I<em>.</em></p>
 
 <p>结果如下：</p>
 
-<hr />
-
-<p>  <em>I ^0^</em>   <em>I ^1^</em>   <em>I ^2^</em>   <em>I ^3^=</em>I**
-  1         0         0         0
-  0         1         0         0</p>
-
-<hr />
+<p> <p>                                                 <center>   <table cellpadding=5 border=1>   <tr>   <td bgcolor=#ffffcc><em>I <sup>0</sup></em></td>   <td bgcolor=#ffffcc><em>I <sup>1</sup></em></td>    <td bgcolor=#ffffcc><em>I <sup>2</sup></em></td>   <td bgcolor=#ffffcc><em>I <sup>3</sup>=<em>I</em></em></td>   </tr>   <tr>   <td>1</td>   <td>0</td>   <td>0</td>   <td align=center>0</td>   </tr>   <tr>   <td>0</td>   <td>1</td>   <td>0</td>   <td align=center>0</td>   </tr>   </table>                           </center>                         <p></p>
 
 <p>上面例子的问题是P2并没有链接，它在每次迭代中获取了P1的一些权重，但是却不传给其他网页。像这样没有链接的节点我们称它为悬挂节点，显然，真实环境中这样的网页还很多。要解决这个问题，我们可以转换一种思维方式来思考PageRank，或者说用另外一种视角。</p>
 
@@ -225,32 +207,32 @@ method</em>是用来寻找矩阵特征向量对应的最大特征值的。在我
 \\ \end{eqnarray*}
 " /></p>
 
-<p>Since the eigenvalues <img src="http://www.ams.org/featurecolumn/images/december2006/index_19.gif" alt="\$ \lambda_j \$
-" /> with <img src="http://www.ams.org/featurecolumn/images/december2006/index_20.gif" alt="\$
+<p>Since the eigenvalues <img src="http://www.ams.org/featurecolumn/images/december2006/index_19.gif" alt="\$ \lambda_j \$
+" /> with <img src="http://www.ams.org/featurecolumn/images/december2006/index_20.gif" alt="\$
 j\geq2 \$
-" /> have
-magnitude smaller than one, it follows that <img src="http://www.ams.org/featurecolumn/images/december2006/index_21.gif" alt="\$ \lambda_j^k\to0 \$
-" /> if <img src="http://www.ams.org/featurecolumn/images/december2006/index_22.gif" alt="\$
+" /> have
+magnitude smaller than one, it follows that <img src="http://www.ams.org/featurecolumn/images/december2006/index_21.gif" alt="\$ \lambda_j^k\to0 \$
+" /> if <img src="http://www.ams.org/featurecolumn/images/december2006/index_22.gif" alt="\$
 j\geq2 \$
 " />and
-therefore <img src="http://www.ams.org/featurecolumn/images/december2006/index_23.gif" alt="\$ I^k\to I=c_1v_1 \$
-" /> ,
+therefore <img src="http://www.ams.org/featurecolumn/images/december2006/index_23.gif" alt="\$ I^k\to I=c_1v_1 \$
+" /> ,
 an eigenvector corresponding to the eigenvalue 1.</p>
 
-<p>It is important to note here that the rate at which <img src="http://www.ams.org/featurecolumn/images/december2006/index_24.gif" alt="\$ I^k\to I \$
-" /> is
-determined by <img src="http://www.ams.org/featurecolumn/images/december2006/index_25.gif" alt="\$ |\lambda_2| \$
-" /> .
-When <img src="http://www.ams.org/featurecolumn/images/december2006/index_26.gif" alt="\$ |\lambda_2| \$
-" /> is
-relatively close to 0, then <img src="http://www.ams.org/featurecolumn/images/december2006/index_27.gif" alt="\$ \lambda_2^k\to0 \$
-" /> relatively
+<p>It is important to note here that the rate at which <img src="http://www.ams.org/featurecolumn/images/december2006/index_24.gif" alt="\$ I^k\to I \$
+" /> is
+determined by <img src="http://www.ams.org/featurecolumn/images/december2006/index_25.gif" alt="\$ |\lambda_2| \$
+" /> .
+When <img src="http://www.ams.org/featurecolumn/images/december2006/index_26.gif" alt="\$ |\lambda_2| \$
+" /> is
+relatively close to 0, then <img src="http://www.ams.org/featurecolumn/images/december2006/index_27.gif" alt="\$ \lambda_2^k\to0 \$
+" /> relatively
 quickly.</p>
 
-<p>以上的讨论中，我们假设矩阵S的 <img src="http://www.ams.org/featurecolumn/images/december2006/index_34.gif" alt="\$ \lambda_1=1 \$
-" /> 并且<img src="http://www.ams.org/featurecolumn/images/december2006/index_35.gif" alt="\$
+<p>以上的讨论中，我们假设矩阵S的 <img src="http://www.ams.org/featurecolumn/images/december2006/index_34.gif" alt="\$ \lambda_1=1 \$
+" /> 并且<img src="http://www.ams.org/featurecolumn/images/december2006/index_35.gif" alt="\$
 |\lambda_2|&lt;1 \$
-" /> ，但实际上不常是这样的。</p>
+" /> ，但实际上不常是这样的。</p>
 
 <p>下面的例子:</p>
 
@@ -258,29 +240,16 @@ quickly.</p>
 
 <p>那么有</p>
 
-<p> </p>
+<p> <p>                                                 <center>   <table border=1 cellpadding=5>   <tr>   <td bgcolor=#ffffcc> <em>I <sup>0</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>1</sup></em> </td>    <td bgcolor=#ffffcc> <em>I <sup>2</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>3</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>4</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>5</sup></em> </td>   </tr>   <tr>   <td> 1 </td>   <td> 0 </td>   <td> 0 </td>   <td> 0 </td>   <td> 0 </td>    <td> 1 </td>   </tr>   <tr>   <td> 0 </td>   <td> 1 </td>   <td> 0 </td>   <td> 0 </td>    <td> 0 </td>   <td> 0 </td>   </tr>   <tr>   <td> 0 </td>   <td> 0 </td>   <td> 1 </td>    <td> 0 </td>   <td> 0 </td>   <td> 0 </td>   </tr>   <tr>   <td> 0 </td>   <td> 0 </td>    <td> 0 </td>   <td> 1 </td>   <td> 0 </td>   <td> 0 </td>   </tr>   <tr>   <td> 0 </td>    <td> 0 </td>   <td> 0 </td>   <td> 0 </td>   <td> 1 </td>   <td> 0 </td>   </tr>   </table>                         </center>                        </p></p>
 
-<p> </p>
-
-<hr />
-
-<p>  <em>I ^0^</em>   <em>I ^1^</em>   <em>I ^2^</em>   <em>I ^3^</em>   <em>I ^4^</em>   <em>I ^5^</em>
-  1         0         0         0         0         1
-  0         1         0         0         0         0
-  0         0         1         0         0         0
-  0         0         0         1         0         0
-  0         0         0         0         1         0</p>
-
-<hr />
-
-<p>the sequence of vectors <em>I <sup>k</sup>^</em> fails to converge。这是因为<img src="http://www.ams.org/featurecolumn/images/december2006/index_36.gif" alt="\$
+<p>the sequence of vectors <em>I <sup>k</sup></em> fails to converge。这是因为<img src="http://www.ams.org/featurecolumn/images/december2006/index_36.gif" alt="\$
 |\lambda_2|=1 \$
 " />，所以power
 method就失效了。</p>
 
 <p>为了保证<img src="http://www.ams.org/featurecolumn/images/december2006/index_37.gif" alt="\$ |\lambda_2|&lt;1 \$
-" /> ,
-矩阵<strong>S</strong> 必须 <em>primitive。</em>这意味着对于某个自然数<strong>m*, </strong>S<em><em>^</em>m</em>^<em>中的数值全为正。也就是说，对于两个页面，最多经过m个链接，可以从第一个页面跳转到第二个页面。显然，上个例子并不满足。</em>\
+" /> ,
+矩阵<strong>S</strong> 必须 <em>primitive。</em>这意味着对于某个自然数<em>m</em>, <em>S <sup>m</sup></em>中的数值全为正。也就是说，对于两个页面，最多经过m个链接，可以从第一个页面跳转到第二个页面。显然，上个例子并不满足。
 *</p>
 
 <p>下面是另外一个例子：</p>
@@ -321,18 +290,12 @@ Brin和Larry Page选择了0.85。</p>
 
 <p>使用<em>power method</em>则公式为：</p>
 
-<p> </p>
-
 <p><img src="http://www.ams.org/featurecolumn/images/december2006/index_52.gif" alt="\[ {\bf S}={\bf H} + {\bf A} \]
 " /></p>
-
-<p> </p>
 
 <p><img src="http://www.ams.org/featurecolumn/images/december2006/index_53.gif" alt="\[ {\bf G}=\alpha{\bf H} + \alpha{\bf A} +
 \frac{1-\alpha}{n}{\bf 1} \]
 " /></p>
-
-<p> </p>
 
 <p><img src="http://www.ams.org/featurecolumn/images/december2006/index_54.gif" alt="\[ {\bf G}I^k=\alpha{\bf H}I^k + \alpha{\bf A}I^k +
 \frac{1-\alpha}{n}{\bf 1}I^k \]
@@ -354,13 +317,24 @@ Brin和Larry Page选择了0.85。</p>
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/algorithm/'>algorithm</a>, <a class='category' href='/blog/categories/google/'>google</a>, <a class='category' href='/blog/categories/page-rank/'>page rank</a>
+	<a class='category' href='/blog/categories/google/'>google</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/algorithm/'>algorithm</a>, <a class='tag' href='/blog/tags/google/'>google</a>, <a class='tag' href='/blog/tags/page-rank/'>page rank</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/google-pagerank/#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -377,11 +351,18 @@ Brin和Larry Page选择了0.85。</p>
 </div>
 
 
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2013
 
     Wutao
 
+- Powered by Octopress, Pandoc and Slash
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>
@@ -391,6 +372,22 @@ Brin和Larry Page选择了0.85。</p>
 })(jQuery);
 </script> <!-- Delete or comment this line to disable Fancybox -->
 
+
+<script type="text/javascript">
+      var disqus_shortname = 'jonesdavid';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/05/14/google-pagerank/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/05/14/google-pagerank/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
 
 
 

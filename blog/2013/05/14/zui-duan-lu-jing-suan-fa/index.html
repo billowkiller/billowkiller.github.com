@@ -7,7 +7,7 @@
 	<meta name="author" content="Wutao">
 
 	
-	<meta name="description" content="单源最短路径 ​1. Dijkstra  Dijkstra算法解决有向图上带权的单源最短路径问题，要求所有边的权值非负。 用到了顶点的最小优先队列，排序关键字为顶点的d值。即开始出了根为0，其他 顶点为正无穷，后来d值根据松弛算法变化。 总计运行时间为O((V+E)lgV)，如果所有顶点都可达的话 &hellip;">
+	<meta name="description" content="单源最短路径 ​1. Dijkstra Dijkstra算法解决有向图上带权的单源最短路径问题，要求所有边的权值非负。 用到了顶点的最小优先队列，排序关键字为顶点的d值。即开始出了根为0，其他 顶点为正无穷，后来d值根据松弛算法变化。 总计运行时间为O((V+E)lgV)，如果所有顶点都可达的话， &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -25,7 +25,8 @@
 <nav id="main-nav"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -34,7 +35,8 @@
 		<div class="container"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -83,15 +85,13 @@
 
 <p>​1. Dijkstra</p>
 
-<p> Dijkstra算法解决有向图上带权的单源最短路径问题，要求所有边的权值非负。</p>
+<p> Dijkstra算法解决有向图上带权的单源最短路径问题，要求所有边的权值非负。</p>
 
 <p>用到了顶点的最小优先队列，排序关键字为顶点的d值。即开始出了根为0，其他</p>
 
 <p>顶点为正无穷，后来d值根据松弛算法变化。</p>
 
 <p>总计运行时间为O((V+E)lgV)，如果所有顶点都可达的话，则为O(ElgV)。</p>
-
-<p> </p>
 
 <p>​2. Bellman-ford</p>
 
@@ -101,13 +101,11 @@
 
 <p>算法的运行时间为O(VE)。</p>
 
-<p> <!--more--></p>
+<p> <!--more--></p>
 
 <p>在Dijkstra算法以及关于有向无回路图的最短路径算法中，对每条边执行一次松弛操作。</p>
 
 <p>在Bellman-Ford算法中，对每条边要执行多次松弛操作。</p>
-
-<p> </p>
 
 <p><strong>每对顶点间的最短路径</strong></p>
 
@@ -119,21 +117,20 @@
 
 <p>利用的递归式为</p>
 
-<p><em>D~i,j,k~ = min(D~i,k,k −\ 1~ + D~k,j,k −\ 1~,D~i,j,k −\ 1~)　　K >=
-1</em></p>
+<p><span style="font-family: 'comic sans ms', sans-serif;"><em>D<sub>i,j,k</sub>&nbsp;= min(D<sub>i,k,k&nbsp;&minus; 1</sub>&nbsp;+&nbsp;D<sub>k,j,k&nbsp;&minus; 1</sub>,D<sub>i,j,k&nbsp;&minus; 1</sub>)　　K &gt;= 1</em></span></p>
 
-<p><em>　　　= W~i,j~                                 　　　　  K = 0</em></p>
 
-<p><em>\
-</em>算法运行时间为Φ(n<sup>3</sup>^)。</p>
+<p><span style="font-family: 'comic sans ms', sans-serif;"><em>　　　= W<sub>i,j</sub>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;　　　　 &nbsp;K = 0</em></span></p>
+
+
+<p><span style="font-family: 'comic sans ms', sans-serif;"><em><br /></em>算法运行时间为&Phi;(n<sup>3</sup>)。</span></p>
+
 
 <p>利用Floyd算法可以计算出有向图的传递闭包，即确定对所有顶点对，图中是否都存在一条</p>
 
 <p>从 i 到 j 的路径。</p>
 
 <p>用相应的逻辑运算或和并来替换 min 和 + 用以增加运算速度。</p>
-
-<p> </p>
 
 <p>​2. 稀疏图上的Johnson算法</p>
 
@@ -145,7 +142,7 @@
 
 <p>若采用斐波那契堆来实现Dijkstra算法的最小优先队列则运算时间是</p>
 
-<p>O(V<sup>2</sup><sup>lgV</sup> + VE)。更简单的二叉堆实现，则可以得到O(VElgV)的运行时间。</p>
+<p><span>O(V<sup>2</sup>lgV + VE</span>)。更简单的二叉堆实现，则可以得到O(VElgV)的运行时间。</p>
 </div>
 
 
@@ -163,13 +160,24 @@
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/algorithm/'>algorithm</a>, <a class='category' href='/blog/categories/shortest-path/'>shortest path</a>
+	<a class='category' href='/blog/categories/algorithm/'>algorithm</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/algorithm/'>algorithm</a>, <a class='tag' href='/blog/tags/shortest-path/'>shortest path</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/zui-duan-lu-jing-suan-fa/#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -186,11 +194,18 @@
 </div>
 
 
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2013
 
     Wutao
 
+- Powered by Octopress, Pandoc and Slash
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>
@@ -200,6 +215,22 @@
 })(jQuery);
 </script> <!-- Delete or comment this line to disable Fancybox -->
 
+
+<script type="text/javascript">
+      var disqus_shortname = 'jonesdavid';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/05/14/zui-duan-lu-jing-suan-fa/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/05/14/zui-duan-lu-jing-suan-fa/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
 
 
 

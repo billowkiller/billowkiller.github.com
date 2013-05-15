@@ -7,7 +7,7 @@
 	<meta name="author" content="Wutao">
 
 	
-	<meta name="description" content="Head First Design Patterns   ​1. Identify the aspects of your application that vary and separate them
+	<meta name="description" content="Head First Design Patterns ​1. Identify the aspects of your application that vary and separate them
 from what stays the same. 　　Take the parts that &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -26,7 +26,8 @@ from what stays the same. 　　Take the parts that &hellip;">
 <nav id="main-nav"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -35,7 +36,8 @@ from what stays the same. 　　Take the parts that &hellip;">
 		<div class="container"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -84,15 +86,11 @@ from what stays the same. 　　Take the parts that &hellip;">
 
 <hr />
 
-<p> </p>
-
 <p>​1. Identify the aspects of your application that vary and separate them
 from what stays the same.</p>
 
 <p>　　Take the parts that vary and encapsulate them, so that later you can
 alter or extend the parts that vary without affecting those that don&rsquo;t.</p>
-
-<p> </p>
 
 <p>​2. Program to an interface, not an implementation.</p>
 
@@ -105,21 +103,19 @@ out the behavior other than writing more code.</p>
 an interface, so that the actual implementation of the behavior won&rsquo;t be
 locked.</p>
 
-<p>　　ps: <em>program to an interface </em>really means <em>program to a
-supertype. </em>In JAVA, it means interface or abstract class.</p>
+<p>　　ps: <em>program to an interface </em>really means <em>program to a
+supertype. </em>In JAVA, it means interface or abstract class.</p>
 
 <p>　　　　Even better, you can assign the concrete implementation object
 at runtime.</p>
 
-<p> <!--more--></p>
+<p> <!--more--></p>
 
 <p>​3. Favor composition over inheritance.</p>
 
 <p>　　Creating systems using composition gives you a lot more flexibility.
 Not only does it let you encapsulate a family of algorithms into their
 own set of classes, but it also lets you change behaviror at runtime.</p>
-
-<p> </p>
 
 <p>​4. Strive for loosely coupled designs between objects that interact.</p>
 
@@ -129,12 +125,6 @@ very little knowledge of each other.</p>
 <p>　　Loosely coupled designs allow us to build flexible OO systems that
 can handle change because they minimize the interdependency between
 objects.</p>
-
-<p> </p>
-
-<p> </p>
-
-<p> </p>
 </div>
 
 
@@ -152,13 +142,24 @@ objects.</p>
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/design-patterns/'>Design Patterns</a>, <a class='category' href='/blog/categories/book/'>book</a>, <a class='category' href='/blog/categories/programming/'>programming</a>
+	<a class='category' href='/blog/categories/book/'>book</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/design-patterns/'>Design Patterns</a>, <a class='tag' href='/blog/tags/book/'>book</a>, <a class='tag' href='/blog/tags/programming/'>programming</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/design-pattern-principle/#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -175,11 +176,18 @@ objects.</p>
 </div>
 
 
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2013
 
     Wutao
 
+- Powered by Octopress, Pandoc and Slash
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>
@@ -189,6 +197,22 @@ objects.</p>
 })(jQuery);
 </script> <!-- Delete or comment this line to disable Fancybox -->
 
+
+<script type="text/javascript">
+      var disqus_shortname = 'jonesdavid';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/05/14/design-pattern-principle/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/05/14/design-pattern-principle/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
 
 
 

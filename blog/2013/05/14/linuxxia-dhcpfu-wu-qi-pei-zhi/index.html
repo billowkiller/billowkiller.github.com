@@ -7,7 +7,7 @@
 	<meta name="author" content="Wutao">
 
 	
-	<meta name="description" content="环境为Ubuntu 12.10，机器为3网卡，需要再eth2上配置一个dhcp服务。 因为eth2后接一个交换机，交换机上的机器需要自动分配网址，并且对于某一台或多台机器需要固定网址，例如打印机。  1.   安装DHCP服务 sudo apt-get install dhcp3-server &hellip;">
+	<meta name="description" content="环境为Ubuntu 12.10，机器为3网卡，需要再eth2上配置一个dhcp服务。 因为eth2后接一个交换机，交换机上的机器需要自动分配网址，并且对于某一台或多台机器需要固定网址，例如打印机。 1. 安装DHCP服务 sudo apt-get install dhcp3-server &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -25,7 +25,8 @@
 <nav id="main-nav"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -34,7 +35,8 @@
 		<div class="container"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -83,7 +85,7 @@
 
 <p>因为eth2后接一个交换机，交换机上的机器需要自动分配网址，并且对于某一台或多台机器需要固定网址，例如打印机。</p>
 
-<h3> 1.   安装DHCP服务</h3>
+<h3>1.   安装DHCP服务</h3>
 
 <pre><code>sudo apt-get install dhcp3-server
 </code></pre>
@@ -111,7 +113,7 @@ isp-dhcp-server。可能是ubuntu进行的版本替换。但是不影响后面�
 <!--more-->
 
 
-<h3>2.  配置DHCP服务</h3>
+<h3>2.  配置DHCP服务</h3>
 
 <p>修改在上一步查到的dhcpd文件</p>
 
@@ -154,8 +156,6 @@ isp-dhcp-server。可能是ubuntu进行的版本替换。但是不影响后面�
 
 <pre><code>tail -n 15 /var/lib/dhcp3/dhclient.*.leases
 </code></pre>
-
-<p> </p>
 </div>
 
 
@@ -173,13 +173,24 @@ isp-dhcp-server。可能是ubuntu进行的版本替换。但是不影响后面�
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/dhcp/'>dhcp</a>, <a class='category' href='/blog/categories/linux/'>linux</a>
+	<a class='category' href='/blog/categories/tools/'>tools</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/dhcp/'>dhcp</a>, <a class='tag' href='/blog/tags/linux/'>linux</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/linuxxia-dhcpfu-wu-qi-pei-zhi/#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -196,11 +207,18 @@ isp-dhcp-server。可能是ubuntu进行的版本替换。但是不影响后面�
 </div>
 
 
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2013
 
     Wutao
 
+- Powered by Octopress, Pandoc and Slash
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>
@@ -210,6 +228,22 @@ isp-dhcp-server。可能是ubuntu进行的版本替换。但是不影响后面�
 })(jQuery);
 </script> <!-- Delete or comment this line to disable Fancybox -->
 
+
+<script type="text/javascript">
+      var disqus_shortname = 'jonesdavid';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/05/14/linuxxia-dhcpfu-wu-qi-pei-zhi/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/05/14/linuxxia-dhcpfu-wu-qi-pei-zhi/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
 
 
 

@@ -28,7 +28,8 @@ pair的数据集合； &hellip;">
 <nav id="main-nav"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -37,7 +38,8 @@ pair的数据集合； &hellip;">
 		<div class="container"><ul class="main">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
-	<li><a href="/blog/categories">Categories</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="/blog/me">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -97,10 +99,10 @@ pair的数据集合；然后再创建一个Reduce函数用来合并所有的具�
 
 <p>使用这个抽象模型，我们只要表述我们想要执行的简单运算即可，而不必关心并行计算、容错、数据分布、负载均衡等复杂的细节，这些问题都被封装在了一个库里面。设计这个抽象模型的灵感来自Lisp和许多其他函数式语言的Map和Reduce的原语。</p>
 
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr2_zps9c617225.png" alt="big picture of MapReduce"/></p>
+
 <!--more-->
 
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr2_zps9c617225.png" alt="" /></p>
 
 <h3>1.2 概述</h3>
 
@@ -167,7 +169,7 @@ pair的数据集合；然后再创建一个Reduce函数用来合并所有的具�
 
 <h3>2.1 流程</h3>
 
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr1_zps85dad9ca.png" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr1_zps85dad9ca.png" alt="Execution Overview" height="500px"></p>
 
 <p>上图展示了我们的MapReduce实现中操作的全部流程。</p>
 
@@ -223,12 +225,12 @@ worker程序将这个key值和它相关的中间value值的集合传递给用户
 </ul>
 
 
-<p> <img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr3_zps5ead0c7b.png" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr3_zps5ead0c7b.png" alt="map和Reduce的同步" height="300px"></p>
 
 <h3>2.3 本地聚合</h3>
 
 <ul>
-<li><p>Ideal scaling characteristics:</p>
+<li><p>Ideal scaling characteristics:</p>
 
 <ul>
 <li>Twice the data, twice the running time</li>
@@ -254,7 +256,7 @@ worker程序将这个key值和它相关的中间value值的集合传递给用户
 
 <h3>2.4 Shuffle and Sort</h3>
 
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr4_zps7ee59e35.png" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr4_zps7ee59e35.png" alt="Shuffle and Sort" height="400px"/></p>
 
 <h3>2.5 Master</h3>
 
@@ -354,61 +356,167 @@ completely rerun</li>
 
 <p><strong>术语对照</strong></p>
 
-<p> </p>
+<p> <table border="1" cellspacing="0" cellpadding="0">
+<tbody>
+<tr>
+<td width="109"></p>
 
-<p><strong>翻译</strong></p>
+<p class="TableContents" align="center"><span style="font-size: 14px;"><strong>翻译</strong></span></p>
 
-<p><strong>Hadoop</strong><strong>术语</strong></p>
 
-<p><strong>Google</strong><strong>术语</strong></p>
+<p></td>
+<td width="136"></p>
 
-<p><strong>相关解释</strong></p>
+<p class="TableContents" align="center"><span style="font-size: 14px;"><strong>Hadoop</strong><strong>术语</strong></span></p>
 
-<p>作业</p>
 
-<p>Job</p>
+<p></td>
+<td width="142"></p>
 
-<p>Job</p>
+<p class="TableContents" align="center"><span style="font-size: 14px;"><strong>Google</strong><strong>术语</strong></span></p>
 
-<p>用户的每一个计算请求，就称为一个作业。</p>
 
-<p>作业服务器</p>
+<p></td>
+<td width="277"></p>
 
-<p>JobTracker</p>
+<p class="TableContents" align="center"><span style="font-size: 14px;"><strong>相关解释</strong></span></p>
 
-<p>Master</p>
 
-<p>用户提交作业的服务器，同时，它还负责各个作业任务的分配，管理所有的任务服务器。</p>
+<p></td>
+</tr>
+<tr>
+<td width="109"></p>
 
-<p>任务服务器</p>
+<p class="TableContents" align="center"><span style="font-size: 14px;">作业</span></p>
 
-<p>TaskTracker</p>
 
-<p>Worker</p>
+<p></td>
+<td width="136"></p>
 
-<p>任劳任怨的工蜂，负责执行具体的任务。</p>
+<p class="TableContents" align="center"><span style="font-size: 14px;">Job</span></p>
 
-<p>任务</p>
 
-<p>Task</p>
+<p></td>
+<td width="142"></p>
 
-<p>Task</p>
+<p class="TableContents" align="center"><span style="font-size: 14px;">Job</span></p>
 
-<p>每一个作业，都需要拆分开了，交由多个服务器来完成，拆分出来的执行单位，就称为任务。</p>
 
-<p>备份任务</p>
+<p></td>
+<td width="277"></p>
 
-<p>Speculative Task</p>
+<p class="TableContents"><span style="font-size: 14px;">用户的每一个计算请求，就称为一个作业。</span></p>
 
-<p>Buckup Task</p>
 
-<p>每一个任务，都有可能执行失败或者缓慢，为了降低为此付出的代价，系统会未雨绸缪的实现在另外的任务服务器上执行同样一个任务，这就是备份任务。</p>
+<p></td>
+</tr>
+<tr>
+<td width="109"></p>
 
-<p>具体可以看博文<a href="http://www.cnblogs.com/duguguiyu/archive/2009/02/28/1400278.html">http://www.cnblogs.com/duguguiyu/archive/2009/02/28/1400278.html</a></p>
+<p class="TableContents" align="center"><span style="font-size: 14px;">作业服务器</span></p>
 
-<p> </p>
 
-<p> </p>
+<p></td>
+<td width="136"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">JobTracker</span></p>
+
+
+<p></td>
+<td width="142"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">Master</span></p>
+
+
+<p></td>
+<td width="277"></p>
+
+<p class="TableContents"><span style="font-size: 14px;">用户提交作业的服务器，同时，它还负责各个作业任务的分配，管理所有的任务服务器。</span></p>
+
+
+<p></td>
+</tr>
+<tr>
+<td width="109"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">任务服务器</span></p>
+
+
+<p></td>
+<td width="136"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">TaskTracker</span></p>
+
+
+<p></td>
+<td width="142"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">Worker</span></p>
+
+
+<p></td>
+<td width="277"></p>
+
+<p class="TableContents"><span style="font-size: 14px;">任劳任怨的工蜂，负责执行具体的任务。</span></p>
+
+
+<p></td>
+</tr>
+<tr>
+<td width="109"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">任务</span></p>
+
+
+<p></td>
+<td width="136"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">Task</span></p>
+
+
+<p></td>
+<td width="142"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">Task</span></p>
+
+
+<p></td>
+<td width="277"></p>
+
+<p class="TableContents"><span style="font-size: 14px;">每一个作业，都需要拆分开了，交由多个服务器来完成，拆分出来的执行单位，就称为任务。</span></p>
+
+
+<p></td>
+</tr>
+<tr>
+<td width="109"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">备份任务</span></p>
+
+
+<p></td>
+<td width="136"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">Speculative Task</span></p>
+
+
+<p></td>
+<td width="142"></p>
+
+<p class="TableContents" align="center"><span style="font-size: 14px;">Buckup Task</span></p>
+
+
+<p></td>
+<td width="277"></p>
+
+<p class="TableContents"><span style="font-size: 14px;">每一个任务，都有可能执行失败或者缓慢，为了降低为此付出的代价，系统会未雨绸缪的实现在另外的任务服务器上执行同样一个任务，这就是备份任务。</span></p>
+
+
+<p></td>
+</tr>
+</tbody>
+</table>
+具体可以看博文<a href="http://www.cnblogs.com/duguguiyu/archive/2009/02/28/1400278.html">http://www.cnblogs.com/duguguiyu/archive/2009/02/28/1400278.html</a></p>
 </div>
 
 
@@ -426,13 +534,24 @@ completely rerun</li>
 
 
 <time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div class="tags">
+	<div>
 
 
-	<a class='category' href='/blog/categories/google/'>google</a>, <a class='category' href='/blog/categories/mapreduce/'>mapreduce</a>, <a class='category' href='/blog/categories/paper/'>paper</a>
+	<a class='category' href='/blog/categories/google/'>google</a>
 
 
 </div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/google/'>google</a>, <a class='tag' href='/blog/tags/mapreduce/'>mapreduce</a>, <a class='tag' href='/blog/tags/paper/'>paper</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/googlelun-wen-%3Amapreduce/#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -449,11 +568,18 @@ completely rerun</li>
 </div>
 
 
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2013
 
     Wutao
 
+- Powered by Octopress, Pandoc and Slash
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>
@@ -463,6 +589,22 @@ completely rerun</li>
 })(jQuery);
 </script> <!-- Delete or comment this line to disable Fancybox -->
 
+
+<script type="text/javascript">
+      var disqus_shortname = 'jonesdavid';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-%3Amapreduce/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-%3Amapreduce/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
 
 
 
