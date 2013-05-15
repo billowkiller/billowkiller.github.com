@@ -16,7 +16,7 @@ tags: [zip,乱码]
 
 通过unzip行命令解压，指定字符集
 
-unzip -O CP936 xxx.zip (用GBK, GB18030也可以)
+    unzip -O CP936 xxx.zip (用GBK, GB18030也可以)
 
 有趣的是unzip的manual中并无这个选项的说明, unzip
 --help对这个参数有一行简单的说明。
@@ -29,7 +29,7 @@ unzip -O CP936 xxx.zip (用GBK, GB18030也可以)
 
 引用
 
-    [sourcecode language="bash"]vi /etc/environment[/sourcecode]
+    vi /etc/environment
 
 再最后加入后面的代码即可
 

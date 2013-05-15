@@ -11,20 +11,18 @@ tags: [linux,kernel,compile]
 
 下载需要的包
 
-{% codeblock lang:bash %}
+	apt-get install kernel-package libncurses5-dev fakeroot wget bzip2
+	cp linux-3.x.x /usr/src
+	cd /usr/src/linux-3.x.x
+	make menuconfig
+	make modules
+	make modules\_install
+	make
+	make install
+	sudo mkinitramfs -o /boot/initrd.img-3.x.x
+	sudo update-initramfs -c -k 3.x.x
+	sudo update-grub2
 
-apt-get install kernel-package libncurses5-dev fakeroot wget bzip2
-cp linux-3.x.x /usr/src
-cd /usr/src/linux-3.x.x
-make menuconfig
-make modules
-make modules\_install
-make
-make install
-sudo mkinitramfs -o /boot/initrd.img-3.x.x
-sudo update-initramfs -c -k 3.x.x
-sudo update-grub2
-{% endcodeblock %}
 
 * * * * *
 

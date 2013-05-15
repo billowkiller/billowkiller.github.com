@@ -30,7 +30,8 @@ tags: [grep,linux,command]
 基本的用法
 ----------
 
-在某个文件里搜索error字符串\
+在某个文件里搜索error字符串
+
 `$ grep "error" log.txt`
 <!--more-->
 忽略大小写搜索(-i)

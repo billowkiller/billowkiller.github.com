@@ -4,6 +4,7 @@ title: "ubuntu亮度调节"
 date: 2013-05-14 01:09
 comments: true
 categories: [linux]
+tags: [ubuntu, 亮度]
 ---
 
 1.
@@ -17,10 +18,10 @@ VendorName "NVIDIA Corporation" EndSection <br/>
 
 改成
 
-Section "Device"<br/> 　　　　
-Identifier "Device0"<br/>　　　
+Section "Device"<br/>
+Identifier "Device0"<br/>
 Driver "nvidia"<br/>
-VendorName "NVIDIA Corporation" 　<br/>　　　
+VendorName "NVIDIA Corporation" 　<br/>
 Option "RegistryDwords" "<br/> EnableBrightnessControl=1"<br/>
 EndSection
 

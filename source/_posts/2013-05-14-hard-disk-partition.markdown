@@ -6,13 +6,12 @@ comments: true
 categories: linux
 tags: [disk partition, linux]
 ---
-
-***edited
-from *[vbird](http://vbird.dic.ksu.edu.tw/linux_basic/0130designlinux.php#partition_name) 
-                                                                 *All
-picture
-© [vbird](http://vbird.dic.ksu.edu.tw/linux_basic/0130designlinux.php#partition_name)***
-
+<em>
+edited
+from [vbird](http://vbird.dic.ksu.edu.tw/linux_basic/0130designlinux.php#partition_name) 
+	All picture
+© [vbird](http://vbird.dic.ksu.edu.tw/linux_basic/0130designlinux.php#partition_name)
+</em>
 * * * * *
 
 在windows中我们可以很容易的发现磁盘盘符C，D，E等，这些盘符到底是什么呢，从磁盘管理器中又可以知道有主分区，逻辑分区，扩展分区等分区，这些东东也就是Partition了，那么他们又是一些什么东西呢，记得以前装windows用时，发现给C盘分配的盘符太小了，想要扩大一些C盘，试了好长时间，才发现要从临近的盘符，也就是D盘划分一部分给C盘，其他盘符都不行，而D盘就是所谓的逻辑分区，这个逻辑分区要先变成扩展分区，然后再又扩展分区转化为主分区，接下来这两个主分区也就是C盘和分割下来的一部分空间也就可以合并了。那么又是为什么这么麻烦呢？这就是接下来要说的了。

@@ -19,9 +19,7 @@ tags: [linux, command]
 
 ***pgrep***遍历目前正在运行的进程然后列出符合查找规则的进程ID（PID）。
 
-{% codeblock lang:bash %}
-pgrep ssh
-{% endcodeblock %}
+<pre><code>pgrep ssh</code></pre>
 
 这条命令会列出所有与ssh有关的进程。
 
@@ -29,9 +27,7 @@ pgrep ssh
 
 这个标题有些绕口，但是它是名副其实的。
 
-{% codeblock lang:bash %}
-!!
-{% endcodeblock %}
+<pre><code>!!</code></pre>
 <!--more-->
 这会执行你上一次在命令行中执行过的命令。
 
@@ -39,9 +35,7 @@ pgrep ssh
 
 如果你想要从命令行历史中执行一个s开头的命令时，你可以使用如下命令：
 
-{% codeblock lang:bash %}
-!s
-{% endcodeblock %}
+<pre><code>!s</code></pre>
 
 它会执行最近一次在命令行中执行且以字母s开头的命令。
 
@@ -49,9 +43,7 @@ pgrep ssh
 
 ***watch***会反复运行一个命令，并在屏幕上打印输出。它可以让你实时的观察程序的输出变化。默认情况下，程序每2秒运行一次。***watch***命令与***tail***命令很相似。
 
-{% codeblock lang:bash %}
-watch -d ls -l
-{% endcodeblock %}
+<pre><code>watch -d ls -l</code></pre>
 
 这条命令会监视当前目录的所有文件，并且高亮文件所发生的改变。
 
@@ -65,9 +57,7 @@ watch -d ls -l
 
 你可以使用如下命令返回你上一次所在的目录：
 
-{% codeblock lang:bash %}
-cd -
-{% endcodeblock %}
+<pre><code>cd -</code></pre>
 
 **8.聪明地创建父目录**
 
@@ -75,26 +65,20 @@ cd -
 make ; cd make ; mkdir all ; cd all ; mkdir of ; cd of
 …*** 你说到点子上了，使用***mkdir -p***！
 
-{% codeblock lang:bash %}
-mkdir -p /home/adam/make/all/of/these/directories/
-{% endcodeblock %}
+<pre><code>mkdir -p /home/adam/make/all/of/these/directories/</code></pre>
 
 **9.删除一整行**
 
 如果你已经输入一长串的命令，但是你又不在需要他们了，那么你可以使用如下命令直接删除一整行：
 
-{% codeblock lang:bash %}
-CTRL+U
-{% endcodeblock %}
+<pre><code>CTRL+U</code></pre>
 
 **10.设置文件的时间戳**
 
 下面这条命令会把文件的时间戳设置成2008-01-01
 8:00。日期格式是(YYMMDDhhmm)
 
-{% codeblock lang:bash %}
-touch -c -t 0801010800 filename.c
-{% endcodeblock %}
+<pre><code>touch -c -t 0801010800 filename.c</code></pre>
 
 你还能想到哪些为大多数人所指的Linux命令？
 
@@ -104,16 +88,10 @@ touch -c -t 0801010800 filename.c
 assignment.htm /home/phill/reports/2008/
 然后你可以冲 **\_\$** 访问刚才那条命令最后一个参数"*/home/phill/reports/2008/*"，例如：
 
-{% codeblock lang:bash %}
-cd $_
-{% endcodeblock %}
+<pre><code>cd $_</code></pre>
 
 **清除光标右边的内容** 上文有一个小错误，***【Ctrl +
 U】***并不是删除一整行，而是删除光标左边的内容，如果光标停留在行首，那么***【Ctrl
 + U】***将无任何作用，这个时候，需要删除光标右边内容：
 
-{% codeblock lang:bash %}
-ctrl-k
-{% endcodeblock %}
-
-` `
+<pre><code>ctrl-k</code></pre>
