@@ -7,20 +7,11 @@
 	<meta name="author" content="Wutao">
 
 	
-	<meta name="description" content="编译安装： 下载需要的包 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-apt-get install kernel-package libncurses5-dev fakeroot wget bzip2
+	<meta name="description" content="编译安装： 下载需要的包 apt-get install kernel-package libncurses5-dev fakeroot wget bzip2
 cp linux-3.x.x /usr/src
-cd /usr/src/linux-3.x &hellip;">
+cd /usr/src/linux-3.x.x
+make menuconfig
+make &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -39,7 +30,7 @@ cd /usr/src/linux-3.x &hellip;">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
 	<li><a href="/blog/tags">Tags</a></li>
-	<li><a href="/blog/me">Me</a></li>
+	<li><a href="http://about.me/wu_tao/">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -49,7 +40,7 @@ cd /usr/src/linux-3.x &hellip;">
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
 	<li><a href="/blog/tags">Tags</a></li>
-	<li><a href="/blog/me">Me</a></li>
+	<li><a href="http://about.me/wu_tao/">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -98,30 +89,18 @@ cd /usr/src/linux-3.x &hellip;">
 
 <p>下载需要的包</p>
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>apt-get install kernel-package libncurses5-dev fakeroot wget bzip2
-</span><span class='line'>cp linux-3.x.x /usr/src
-</span><span class='line'><span class="nb">cd</span> /usr/src/linux-3.x.x
-</span><span class='line'>make menuconfig
-</span><span class='line'>make modules
-</span><span class='line'>make modules<span class="se">\_</span>install
-</span><span class='line'>make
-</span><span class='line'>make install
-</span><span class='line'>sudo mkinitramfs -o /boot/initrd.img-3.x.x
-</span><span class='line'>sudo update-initramfs -c -k 3.x.x
-</span><span class='line'>sudo update-grub2
-</span></code></pre></td></tr></table></div></figure>
-
+<pre><code>apt-get install kernel-package libncurses5-dev fakeroot wget bzip2
+cp linux-3.x.x /usr/src
+cd /usr/src/linux-3.x.x
+make menuconfig
+make modules
+make modules\_install
+make
+make install
+sudo mkinitramfs -o /boot/initrd.img-3.x.x
+sudo update-initramfs -c -k 3.x.x
+sudo update-grub2
+</code></pre>
 
 <hr />
 
@@ -203,7 +182,7 @@ to point to correct kernel version.</li>
 
     Wutao
 
-- Powered by Octopress, Pandoc and Slash
+- Powered by Octopress, Pandoc and <a href="http://zespia.tw/Octopress-Theme-Slash/">Slash</a>
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>

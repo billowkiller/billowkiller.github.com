@@ -26,7 +26,7 @@
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
 	<li><a href="/blog/tags">Tags</a></li>
-	<li><a href="/blog/me">Me</a></li>
+	<li><a href="http://about.me/wu_tao/">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -36,7 +36,7 @@
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
 	<li><a href="/blog/tags">Tags</a></li>
-	<li><a href="/blog/me">Me</a></li>
+	<li><a href="http://about.me/wu_tao/">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -92,20 +92,16 @@
 	<div class="entry-content">
 		<h3>项目说明</h3>
 
-<pre><code>来源为高等计算机网络的大作业设计。我们组选择的是p2p的流媒体视频点播系统。核心内容的是chord算法。
-</code></pre>
+<p>来源为高等计算机网络的大作业设计。我们组选择的是p2p的流媒体视频点播系统。核心内容的是chord算法。</p>
 
 <h3>系统分析</h3>
 
-<pre><code>局域网内的任何结点既可以发送媒体压缩信息给其他结点，也可以从其他结点接收视频信息。此外流媒体信息是在网内从多源结点获取，而非单源模式。改变传统的需要中央服务器的查询支持，虽然本系统也需要一个中央服务器进行存储数据源以及节点加入的初始化，但是一旦节点加入了p2p网络，那么中央服务器的功能便会弱化很多，客户端peer可以利用其他peer节点已有的信息进行资源查询，而不用经过中央服务器。
-</code></pre>
-
-<p>在理论上，chord是一个纯p2p算法，但是在试验中我们发现，在广域网中实现一个完全对等的p2p网络是不大现实的一件事情，因为根据chord算法，节点的加入需要知道一个已知的节点信息，而这个节点信息无法像在局域网中可以通过广播的方式进行查询，也就是说这个已知的节点就是存在的中央服务器，所有的节点加入都需要知道中央服务器在网络中的位置，通过中央服务器加入到chord网络中。而在局域网中，必存在一个初始信息源，对于一个如上所描述的系统来说，这个初始信息源可以当成一个中央服务器，当然这个中央服务器的功能也被弱化很多。</p>
+<p>局域网内的任何结点既可以发送媒体压缩信息给其他结点，也可以从其他结点接收视频信息。此外流媒体信息是在网内从多源结点获取，而非单源模式。改变传统的需要中央服务器的查询支持，虽然本系统也需要一个中央服务器进行存储数据源以及节点加入的初始化，但是一旦节点加入了p2p网络，那么中央服务器的功能便会弱化很多，客户端peer可以利用其他peer节点已有的信息进行资源查询，而不用经过中央服务器。
+在理论上，chord是一个纯p2p算法，但是在试验中我们发现，在广域网中实现一个完全对等的p2p网络是不大现实的一件事情，因为根据chord算法，节点的加入需要知道一个已知的节点信息，而这个节点信息无法像在局域网中可以通过广播的方式进行查询，也就是说这个已知的节点就是存在的中央服务器，所有的节点加入都需要知道中央服务器在网络中的位置，通过中央服务器加入到chord网络中。而在局域网中，必存在一个初始信息源，对于一个如上所描述的系统来说，这个初始信息源可以当成一个中央服务器，当然这个中央服务器的功能也被弱化很多。</p>
 
 <h4>项目设计与管理</h4>
 
-<pre><code>采用JAVA语言作为实现工具，并利用其UDT传输包实现数据传输、JMF视频播放工具包和openchord开源工具包，在局域网内实现基于P2P的流媒体视频点播系统。系统设计主要涉及的工作量包括：服务器端资源管理、P2P资源查询传输机制、客户端缓冲区管理和视频播放软件。预计的工作时间为1个月，总工作量为4人月。开发采用敏捷开发模型，进行迭代式开发，开发讨论为3天一次的站立会议，有效保障小组成员的信息一致性。会议中根据迭代需求列出一周或者近期的任务，小组成员互相监督管理，提高效率。能够有效的保障在规定的时间内完成项目。
-</code></pre>
+<p>采用JAVA语言作为实现工具，并利用其UDT传输包实现数据传输、JMF视频播放工具包和openchord开源工具包，在局域网内实现基于P2P的流媒体视频点播系统。系统设计主要涉及的工作量包括：服务器端资源管理、P2P资源查询传输机制、客户端缓冲区管理和视频播放软件。预计的工作时间为1个月，总工作量为4人月。开发采用敏捷开发模型，进行迭代式开发，开发讨论为3天一次的站立会议，有效保障小组成员的信息一致性。会议中根据迭代需求列出一周或者近期的任务，小组成员互相监督管理，提高效率。能够有效的保障在规定的时间内完成项目。</p>
 
 
 		
@@ -242,7 +238,7 @@
     <article class="post">
 	<h2 class="title">
 		
-		<a href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-%2Cbiao-qian/">
+		<a href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/">
 		
 			Linux下解决中文乱码——文件，标签</a>
 	</h2>
@@ -288,7 +284,7 @@
 
 <p>举例：
 		
-		<a href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-%2Cbiao-qian/" class="more-link">Read on &rarr;</a>
+		<a href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/" class="more-link">Read on &rarr;</a>
 	</div>
 
 
@@ -323,7 +319,7 @@
 
 </div>
 	
-		<div class="comments"><a href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-%2Cbiao-qian//blog/page/2/index.html#disqus_thread">Comments</a></div>
+		<div class="comments"><a href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian//blog/page/2/index.html#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -437,19 +433,19 @@ the</p>
 
 <p>以向中文版维护者求助。如果本翻译更新不及时或者翻译存在问题，请联系中文版维护者。</p>
 
-<p>中文版维护者： 张乐 Zhang Le <a href="&#x6d;&#x61;&#105;&#x6c;&#116;&#111;&#58;&#x72;&#48;&#x62;&#x65;&#114;&#x74;&#122;&#64;&#103;&#x65;&#110;&#116;&#x6f;&#x6f;&#x2e;&#111;&#x72;&#x67;">&#114;&#x30;&#x62;&#101;&#x72;&#x74;&#x7a;&#64;&#103;&#x65;&#110;&#116;&#x6f;&#111;&#46;&#x6f;&#x72;&#103;</a></p>
+<p>中文版维护者： 张乐 Zhang Le <a href="&#109;&#x61;&#105;&#108;&#x74;&#x6f;&#58;&#x72;&#48;&#98;&#x65;&#114;&#116;&#x7a;&#x40;&#103;&#x65;&#x6e;&#116;&#x6f;&#111;&#46;&#111;&#114;&#103;">&#114;&#x30;&#98;&#101;&#x72;&#116;&#122;&#64;&#103;&#101;&#110;&#116;&#111;&#x6f;&#46;&#111;&#114;&#x67;</a></p>
 
-<p>中文版翻译者： 张乐 Zhang Le <a href="&#109;&#x61;&#105;&#108;&#x74;&#x6f;&#x3a;&#114;&#48;&#98;&#x65;&#x72;&#x74;&#x7a;&#64;&#103;&#101;&#110;&#116;&#x6f;&#111;&#46;&#111;&#x72;&#103;">&#114;&#x30;&#x62;&#x65;&#114;&#x74;&#x7a;&#64;&#103;&#101;&#x6e;&#x74;&#x6f;&#x6f;&#x2e;&#x6f;&#114;&#103;</a></p>
+<p>中文版翻译者： 张乐 Zhang Le <a href="&#x6d;&#97;&#105;&#x6c;&#x74;&#x6f;&#x3a;&#114;&#48;&#98;&#x65;&#114;&#116;&#x7a;&#x40;&#103;&#x65;&#110;&#116;&#x6f;&#111;&#x2e;&#x6f;&#114;&#x67;">&#x72;&#x30;&#x62;&#101;&#114;&#116;&#x7a;&#64;&#103;&#101;&#x6e;&#116;&#111;&#111;&#46;&#111;&#x72;&#103;</a></p>
 
-<p>中文版校译者： 王聪 Wang Cong <a href="&#x6d;&#97;&#x69;&#x6c;&#116;&#x6f;&#x3a;&#x78;&#x69;&#x79;&#111;&#117;&#46;&#119;&#x61;&#x6e;&#x67;&#99;&#111;&#110;&#103;&#64;&#103;&#x6d;&#x61;&#x69;&#108;&#46;&#x63;&#x6f;&#x6d;">&#120;&#x69;&#121;&#x6f;&#x75;&#x2e;&#x77;&#97;&#110;&#103;&#99;&#x6f;&#110;&#103;&#64;&#x67;&#x6d;&#97;&#105;&#108;&#46;&#99;&#111;&#x6d;</a></p>
+<p>中文版校译者： 王聪 Wang Cong <a href="&#109;&#97;&#x69;&#108;&#116;&#x6f;&#x3a;&#x78;&#x69;&#121;&#x6f;&#117;&#x2e;&#119;&#x61;&#110;&#103;&#x63;&#x6f;&#x6e;&#x67;&#x40;&#103;&#x6d;&#x61;&#105;&#x6c;&#x2e;&#99;&#111;&#x6d;">&#120;&#105;&#121;&#111;&#117;&#x2e;&#x77;&#97;&#x6e;&#x67;&#x63;&#x6f;&#110;&#x67;&#64;&#x67;&#109;&#97;&#105;&#x6c;&#x2e;&#x63;&#x6f;&#109;</a></p>
 
-<pre><code>           wheelz &lt;kernel.zeng@gmail.com&gt;
+<pre><code>        wheelz &lt;kernel.zeng@gmail.com&gt;
 
-           管旭东 Xudong Guan &lt;xudong.guan@gmail.com&gt;
+        管旭东 Xudong Guan &lt;xudong.guan@gmail.com&gt;
 
-           Li Zefan &lt;lizf@cn.fujitsu.com&gt;
+        Li Zefan &lt;lizf@cn.fujitsu.com&gt;
 
-           Wang Chen &lt;wangchen@cn.fujitsu.com&gt;
+        Wang Chen &lt;wangchen@cn.fujitsu.com&gt;
 </code></pre>
 
 <p>以下为正文</p>
@@ -520,30 +516,18 @@ the</p>
 
 <p>下载需要的包</p>
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>apt-get install kernel-package libncurses5-dev fakeroot wget bzip2
-</span><span class='line'>cp linux-3.x.x /usr/src
-</span><span class='line'><span class="nb">cd</span> /usr/src/linux-3.x.x
-</span><span class='line'>make menuconfig
-</span><span class='line'>make modules
-</span><span class='line'>make modules<span class="se">\_</span>install
-</span><span class='line'>make
-</span><span class='line'>make install
-</span><span class='line'>sudo mkinitramfs -o /boot/initrd.img-3.x.x
-</span><span class='line'>sudo update-initramfs -c -k 3.x.x
-</span><span class='line'>sudo update-grub2
-</span></code></pre></td></tr></table></div></figure>
-
+<pre><code>apt-get install kernel-package libncurses5-dev fakeroot wget bzip2
+cp linux-3.x.x /usr/src
+cd /usr/src/linux-3.x.x
+make menuconfig
+make modules
+make modules\_install
+make
+make install
+sudo mkinitramfs -o /boot/initrd.img-3.x.x
+sudo update-initramfs -c -k 3.x.x
+sudo update-grub2
+</code></pre>
 
 <hr />
 
@@ -665,20 +649,23 @@ the</p>
 	<div class="entry-content">
 		<p>转换文件到pdf</p>
 
-<p>unoconv -f pdf mydocument.odt</p>
+<pre><code>unoconv -f pdf mydocument.odt
+</code></pre>
 
 <p>zip乱码解压</p>
 
-<p>unzip -O CP936 xx.zip</p>
+<pre><code>unzip -O CP936 xx.zip
+</code></pre>
 
 <p>mp3 乱码</p>
 
-<p>mid3iconv -e gbk *.mp3 //当前目录下的mp3文件</p>
+<pre><code>mid3iconv -e gbk \*.mp3 //当前目录下的mp3文件
+</code></pre>
 
 <p>视频转码</p>
 
-<p>mencoder *.rmvb -o output.avi -oac mp3lame -lameopts cbr:br=32
--ovc x264 -x264encopts bitrate=440 -vf scale=320:-3</p>
+<pre><code>mencoder \*.rmvb -o output.avi -oac mp3lame -lameopts cbr:br=32 -ovc x264 -x264encopts bitrate=440 -vf scale=320:-3
+</code></pre>
 
 <p>linux 声音调节  alsamixer</p>
 
@@ -687,7 +674,10 @@ the</p>
 <pre><code>gsettings set org.gnome.gedit.preferences.encodings auto-detected "['UTF-8','CURRENT','GB18030','ISO-8859-15','UTF-16']"
 </code></pre>
 
-<p>SSH 远程登录：   ssh -l root 192.168.0.150</p>
+<p>SSH 远程登录：</p>
+
+<pre><code>ssh -l root 192.168.0.150
+</code></pre>
 
 <p>vim 中文乱码：</p>
 
@@ -865,7 +855,7 @@ set fileencodings=utf-8,gbk</p>
 
     Wutao
 
-- Powered by Octopress, Pandoc and Slash
+- Powered by Octopress, Pandoc and <a href="http://zespia.tw/Octopress-Theme-Slash/">Slash</a>
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>

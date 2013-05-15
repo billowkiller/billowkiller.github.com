@@ -3,12 +3,11 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>linux下解决中文乱码——文件，标签 - Billowkiller's Blog</title>
+	<title>tags: ubuntu - Billowkiller's Blog</title>
 	<meta name="author" content="Wutao">
 
 	
-	<meta name="description" content="文件是在WIndows 下创建的,Windows
-的文件名中文编码默认为GBK,而Linux中默认文件名编码为UTF8,由于编码不一致所以导致了文件名乱码的问题，解决这个问题需要对文件名进行转码。 文件与文件夹乱码，使用convmv来解决 convmv 使用方法： convmv -f 源编码 -t &hellip;">
+	<meta name="description" content="Tag: ubuntu">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -27,7 +26,7 @@
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
 	<li><a href="/blog/tags">Tags</a></li>
-	<li><a href="/blog/me">Me</a></li>
+	<li><a href="http://about.me/wu_tao/">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -37,7 +36,7 @@
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
 	<li><a href="/blog/tags">Tags</a></li>
-	<li><a href="/blog/me">Me</a></li>
+	<li><a href="http://about.me/wu_tao/">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -80,116 +79,45 @@
 	
 		
 	
-	<div id="content" class="inner"><article class="post">
-	<h2 class="title">Linux下解决中文乱码——文件，标签</h2>
-	<div class="entry-content"><p>文件是在WIndows 下创建的,Windows
-的文件名中文编码默认为GBK,而Linux中默认文件名编码为UTF8,由于编码不一致所以导致了文件名乱码的问题，解决这个问题需要对文件名进行转码。</p>
-
-<ul>
-<li><strong>文件与文件夹乱码，使用convmv来解决</strong></li>
-</ul>
+	<div id="content" class="inner">
+    
 
 
-<p>convmv 使用方法：</p>
+	
+	
+	<section class="archives"><h1 class="year">Categories</h1><ul class="category_list"><li><a href='/blog/categories/algorithm'>algorithm (2)</a></li><li><a href='/blog/categories/book'>book (4)</a></li><li><a href='/blog/categories/film'>film (3)</a></li><li><a href='/blog/categories/google'>google (4)</a></li><li><a href='/blog/categories/linux'>linux (10)</a></li><li><a href='/blog/categories/other'>other (1)</a></li><li><a href='/blog/categories/python'>python (2)</a></li><li><a href='/blog/categories/rework'>rework (4)</a></li><li><a href='/blog/categories/tools'>tools (4)</a></li></ul>
 
-<p>convmv -f 源编码 -t 新编码 [选项] 文件名</p>
-
-<p>常用参数：</p>
-
-<ul>
-<li>-r 递归处理子文件夹</li>
-<li>–notest 真正进行操作，默认情况下是不对文件进行真实操作</li>
-<li>–list 显示所有支持的编码</li>
-<li>–unescap 可以做一下转义，比如把%20变成空格</li>
-</ul>
-
-
-<p>举例：</p>
-
-<p>在当前目录下</p>
-
-<pre><code>convmv -f GBK -t UTF-8 --notest * //所有文件转gbk为utf8
-</code></pre>
-
-<ul>
-<li><strong>转换 mp3 标签编码，使用mutagen</strong></li>
-</ul>
-
-
-<p>安装：</p>
-
-<pre><code>sudo apt-get install python-mutagen
-</code></pre>
-
-<p>举例：<!--more--></p>
-
-<pre><code>mid3iconv -e gbk *.mp3 //当前目录下的mp3文件
-
-find . -iname “*.mp3” -execdir mid3iconv -e GBK {}; //所有文件包括子文件夹
-</code></pre>
-</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
-	<div>
+<article>
+	<h2 class="title"><a href="/blog/2013/05/14/ubuntuliang-du-diao-jie/">ubuntu亮度调节</a></h2>
+	<div class="meta">
+		<span class="date">May 14</span>
+		<span>
 
 
 	<a class='category' href='/blog/categories/linux/'>linux</a>
 
 
-</div>
-	<div class="tags">
+</span>
+		<span class="tags">
 
 <span>
   
-    <a class='tag' href='/blog/tags/linux/'>linux</a>, <a class='tag' href='/blog/tags/luan-ma/'>乱码</a>
+    <a class='tag' href='/blog/tags/ubuntu/'>ubuntu</a>, <a class='tag' href='/blog/tags/liang-du/'>亮度</a>
   
 </span>
 
-</div>
-	
-		<div class="comments"><a href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-%2Cbiao-qian/#disqus_thread">Comments</a></div>
-	
-</div></article>
-
-	<div class="share">
-	<div class="addthis_toolbox addthis_default_style ">
-	
-	
-	<a class="addthis_button_tweet"></a>
-	
-	
-	<a class="addthis_counter addthis_pill_style"></a>
+</span>
+	    
+	    <span class="comments"><a href="/blog/2013/05/14/ubuntuliang-du-diao-jie/#disqus_thread">Comments</a></span>
+	    
 	</div>
-  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
-</div>
-
-
-
-<section id="comment">
-    <h2 class="title">Comments</h2>
-    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-</div>
-</section>
+</article>
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2013
 
     Wutao
 
-- Powered by Octopress, Pandoc and Slash
+- Powered by Octopress, Pandoc and <a href="http://zespia.tw/Octopress-Theme-Slash/">Slash</a>
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>
@@ -204,10 +132,7 @@ find . -iname “*.mp3” -execdir mid3iconv -e GBK {}; //所有文件包括子�
       var disqus_shortname = 'jonesdavid';
       
         
-        // var disqus_developer = 1;
-        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-%2Cbiao-qian/';
-        var disqus_url = 'http://billowkiller.github.io/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-%2Cbiao-qian/';
-        var disqus_script = 'embed.js';
+        var disqus_script = 'count.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

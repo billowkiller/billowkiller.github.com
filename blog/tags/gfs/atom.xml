@@ -4,7 +4,7 @@
   <title><![CDATA[tags: gfs | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/gfs/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2013-05-15T02:06:31-04:00</updated>
+  <updated>2013-05-15T09:18:01-04:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[Wutao]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[google论文：GFS]]></title>
-    <link href="http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-%3Agfs/"/>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-gfs/"/>
     <updated>2013-05-14T01:09:00-04:00</updated>
-    <id>http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-:gfs</id>
+    <id>http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-gfs</id>
     <content type="html"><![CDATA[<p>论文：<a href="http://www.cs.rochester.edu/meetings/sosp2003/papers/p125-ghemawat.pdf">英文版</a>，<a href="http://blademaster.ixiezi.com/2010/03/27/the-google-file-system%E4%B8%AD%E6%96%87%E7%89%88/">中文版</a></p>
 
 <hr />

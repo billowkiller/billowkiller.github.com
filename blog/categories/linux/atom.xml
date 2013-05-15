@@ -4,7 +4,7 @@
   <title><![CDATA[Category: linux | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/linux/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2013-05-15T02:06:31-04:00</updated>
+  <updated>2013-05-15T09:18:01-04:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[Wutao]]></name>
@@ -27,7 +27,8 @@
 
 <p>通过unzip行命令解压，指定字符集</p>
 
-<p>unzip -O CP936 xxx.zip (用GBK, GB18030也可以)</p>
+<pre><code>unzip -O CP936 xxx.zip (用GBK, GB18030也可以)
+</code></pre>
 
 <p>有趣的是unzip的manual中并无这个选项的说明, unzip
 &mdash;help对这个参数有一行简单的说明。</p>
@@ -40,7 +41,7 @@
 
 <p>引用</p>
 
-<pre><code>[sourcecode language="bash"]vi /etc/environment[/sourcecode]
+<pre><code>vi /etc/environment
 </code></pre>
 
 <p>再最后加入后面的代码即可</p>
@@ -71,10 +72,10 @@ VendorName &ldquo;NVIDIA Corporation&rdquo; EndSection <br/></p>
 
 <p>改成</p>
 
-<p>Section &ldquo;Device&rdquo;<br/> 　　　　
-Identifier &ldquo;Device0&rdquo;<br/>　　　
+<p>Section &ldquo;Device&rdquo;<br/>
+Identifier &ldquo;Device0&rdquo;<br/>
 Driver &ldquo;nvidia&rdquo;<br/>
-VendorName &ldquo;NVIDIA Corporation&rdquo; 　<br/>　　　
+VendorName &ldquo;NVIDIA Corporation&rdquo; 　<br/>
 Option &ldquo;RegistryDwords&rdquo; &ldquo;<br/> EnableBrightnessControl=1&rdquo;<br/>
 EndSection</p>
 
@@ -153,9 +154,8 @@ Audio Controller (rev 02)</p>
 
 <p><strong><em>pgrep</em></strong>遍历目前正在运行的进程然后列出符合查找规则的进程ID（PID）。</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pgrep ssh
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>pgrep ssh</code></pre>
+
 
 <p>这条命令会列出所有与ssh有关的进程。</p>
 
@@ -163,9 +163,8 @@ Audio Controller (rev 02)</p>
 
 <p>这个标题有些绕口，但是它是名副其实的。</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>!!
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>!!</code></pre>
+
 
 <!--more-->
 
@@ -176,9 +175,8 @@ Audio Controller (rev 02)</p>
 
 <p>如果你想要从命令行历史中执行一个s开头的命令时，你可以使用如下命令：</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>!s
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>!s</code></pre>
+
 
 <p>它会执行最近一次在命令行中执行且以字母s开头的命令。</p>
 
@@ -186,9 +184,8 @@ Audio Controller (rev 02)</p>
 
 <p><strong><em>watch</em></strong>会反复运行一个命令，并在屏幕上打印输出。它可以让你实时的观察程序的输出变化。默认情况下，程序每2秒运行一次。<strong><em>watch</em></strong>命令与<strong><em>tail</em></strong>命令很相似。</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>watch -d ls -l
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>watch -d ls -l</code></pre>
+
 
 <p>这条命令会监视当前目录的所有文件，并且高亮文件所发生的改变。</p>
 
@@ -202,9 +199,8 @@ Audio Controller (rev 02)</p>
 
 <p>你可以使用如下命令返回你上一次所在的目录：</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">cd</span> &amp;ndash;
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>cd -</code></pre>
+
 
 <p><strong>8.聪明地创建父目录</strong></p>
 
@@ -212,26 +208,23 @@ Audio Controller (rev 02)</p>
 make ; cd make ; mkdir all ; cd all ; mkdir of ; cd of
 …</em></strong> 你说到点子上了，使用<strong><em>mkdir -p</em></strong>！</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>mkdir -p /home/adam/make/all/of/these/directories/
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>mkdir -p /home/adam/make/all/of/these/directories/</code></pre>
+
 
 <p><strong>9.删除一整行</strong></p>
 
 <p>如果你已经输入一长串的命令，但是你又不在需要他们了，那么你可以使用如下命令直接删除一整行：</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>CTRL+U
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>CTRL+U</code></pre>
+
 
 <p><strong>10.设置文件的时间戳</strong></p>
 
 <p>下面这条命令会把文件的时间戳设置成2008-01-01
 8:00。日期格式是(YYMMDDhhmm)</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>touch -c -t 0801010800 filename.c
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>touch -c -t 0801010800 filename.c</code></pre>
+
 
 <p>你还能想到哪些为大多数人所指的Linux命令？</p>
 
@@ -241,27 +234,23 @@ make ; cd make ; mkdir all ; cd all ; mkdir of ; cd of
 assignment.htm /home/phill/reports/2008/
 然后你可以冲 <strong>_\$</strong> 访问刚才那条命令最后一个参数"<em>/home/phill/reports/2008/</em>&ldquo;，例如：</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">cd</span> <span class="nv">$_</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>cd $_</code></pre>
+
 
 <p><strong>清除光标右边的内容</strong> 上文有一个小错误，<strong><em>【Ctrl +
 U】</em></strong>并不是删除一整行，而是删除光标左边的内容，如果光标停留在行首，那么<strong><em>【Ctrl
 + U】</em></strong>将无任何作用，这个时候，需要删除光标右边内容：</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>ctrl-k
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>ctrl-k</code></pre>
 
-<p><code></code></p>
 ]]></content>
   </entry>
   
   <entry>
     <title type="html"><![CDATA[linux下解决中文乱码——文件，标签]]></title>
-    <link href="http://billowkiller.github.io/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-%2Cbiao-qian/"/>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/"/>
     <updated>2013-05-14T01:09:00-04:00</updated>
-    <id>http://billowkiller.github.io/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-,biao-qian</id>
+    <id>http://billowkiller.github.io/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian</id>
     <content type="html"><![CDATA[<p>文件是在WIndows 下创建的,Windows
 的文件名中文编码默认为GBK,而Linux中默认文件名编码为UTF8,由于编码不一致所以导致了文件名乱码的问题，解决这个问题需要对文件名进行转码。</p>
 
@@ -337,19 +326,19 @@ the</p>
 
 <p>以向中文版维护者求助。如果本翻译更新不及时或者翻译存在问题，请联系中文版维护者。</p>
 
-<p>中文版维护者： 张乐 Zhang Le <a href="&#109;&#97;&#x69;&#108;&#116;&#111;&#x3a;&#x72;&#x30;&#98;&#101;&#x72;&#x74;&#122;&#x40;&#x67;&#x65;&#x6e;&#x74;&#x6f;&#111;&#46;&#x6f;&#114;&#x67;">&#114;&#48;&#x62;&#x65;&#x72;&#116;&#x7a;&#x40;&#x67;&#101;&#110;&#x74;&#x6f;&#x6f;&#46;&#111;&#x72;&#x67;</a></p>
+<p>中文版维护者： 张乐 Zhang Le <a href="&#109;&#x61;&#x69;&#108;&#116;&#111;&#x3a;&#114;&#x30;&#98;&#x65;&#x72;&#116;&#122;&#64;&#x67;&#101;&#110;&#x74;&#111;&#111;&#x2e;&#111;&#114;&#x67;">&#x72;&#x30;&#x62;&#x65;&#x72;&#116;&#x7a;&#64;&#x67;&#x65;&#110;&#x74;&#x6f;&#111;&#46;&#x6f;&#x72;&#x67;</a></p>
 
-<p>中文版翻译者： 张乐 Zhang Le <a href="&#x6d;&#97;&#x69;&#x6c;&#x74;&#111;&#58;&#114;&#48;&#98;&#x65;&#114;&#116;&#x7a;&#x40;&#x67;&#x65;&#110;&#116;&#111;&#x6f;&#x2e;&#111;&#x72;&#x67;">&#114;&#48;&#x62;&#101;&#114;&#x74;&#x7a;&#64;&#103;&#101;&#x6e;&#116;&#111;&#x6f;&#46;&#x6f;&#x72;&#103;</a></p>
+<p>中文版翻译者： 张乐 Zhang Le <a href="&#x6d;&#97;&#x69;&#108;&#116;&#x6f;&#58;&#x72;&#x30;&#x62;&#x65;&#x72;&#x74;&#122;&#64;&#103;&#x65;&#x6e;&#116;&#x6f;&#x6f;&#x2e;&#111;&#x72;&#x67;">&#x72;&#x30;&#x62;&#x65;&#x72;&#x74;&#122;&#x40;&#103;&#x65;&#x6e;&#116;&#x6f;&#111;&#x2e;&#111;&#x72;&#x67;</a></p>
 
-<p>中文版校译者： 王聪 Wang Cong <a href="&#x6d;&#97;&#x69;&#108;&#x74;&#x6f;&#58;&#120;&#x69;&#121;&#111;&#117;&#x2e;&#119;&#x61;&#110;&#103;&#x63;&#x6f;&#110;&#x67;&#x40;&#103;&#109;&#x61;&#x69;&#x6c;&#x2e;&#99;&#111;&#109;">&#x78;&#x69;&#x79;&#x6f;&#117;&#x2e;&#119;&#97;&#110;&#103;&#x63;&#111;&#x6e;&#x67;&#x40;&#x67;&#109;&#97;&#x69;&#108;&#x2e;&#99;&#111;&#x6d;</a></p>
+<p>中文版校译者： 王聪 Wang Cong <a href="&#x6d;&#97;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#120;&#105;&#x79;&#x6f;&#117;&#46;&#119;&#x61;&#x6e;&#x67;&#99;&#111;&#110;&#x67;&#x40;&#x67;&#x6d;&#x61;&#105;&#x6c;&#46;&#99;&#x6f;&#x6d;">&#120;&#x69;&#x79;&#x6f;&#117;&#46;&#x77;&#x61;&#110;&#103;&#99;&#111;&#110;&#103;&#64;&#x67;&#109;&#97;&#105;&#108;&#46;&#x63;&#x6f;&#x6d;</a></p>
 
-<pre><code>           wheelz &lt;kernel.zeng@gmail.com&gt;
+<pre><code>        wheelz &lt;kernel.zeng@gmail.com&gt;
 
-           管旭东 Xudong Guan &lt;xudong.guan@gmail.com&gt;
+        管旭东 Xudong Guan &lt;xudong.guan@gmail.com&gt;
 
-           Li Zefan &lt;lizf@cn.fujitsu.com&gt;
+        Li Zefan &lt;lizf@cn.fujitsu.com&gt;
 
-           Wang Chen &lt;wangchen@cn.fujitsu.com&gt;
+        Wang Chen &lt;wangchen@cn.fujitsu.com&gt;
 </code></pre>
 
 <p>以下为正文</p>
@@ -397,9 +386,8 @@ the</p>
 
 <p>在switch语句中消除多级缩进的首选的方式是让“switch”和从属于它的“case”标签对齐于同</p>
 
-<p>一列，而不要“两次缩进”“case”标签。比如：</p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<p>一列，而不要“两次缩进”“case”标签。比如：
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -431,11 +419,8 @@ the</p>
 </span><span class='line'> <span class="nl">default:</span>
 </span><span class='line'><span class="k">break</span><span class="p">;</span>
 </span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>不要把多个语句放在一行里，除非你有什么东西要隐藏：</p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>不要把多个语句放在一行里，除非你有什么东西要隐藏：
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -447,9 +432,8 @@ the</p>
 </span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
 </span><span class='line'>
 </span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p> 也不要在一行里放多个赋值语句。内核代码风格超级简单。就是避免可能导致别人误读的表</p>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+也不要在一行里放多个赋值语句。内核代码风格超级简单。就是避免可能导致别人误读的表</p>
 
 <p>达式。</p>
 
@@ -842,25 +826,19 @@ the</p>
 <p> (a)
 完全不透明的对象（这种情况下要主动使用typedef来隐藏这个对象实际上是什么）。</p>
 
-<pre><code> 例如：“pte\_t”等不透明对象，你只能用合适的访问函数来访问它们。
-</code></pre>
+<p>例如：“pte_t”等不透明对象，你只能用合适的访问函数来访问它们。</p>
 
 <p> 注意！不透明性和“访问函数”本身是不好的。我们使用pte_t等类型的原因在于真的是</p>
 
-<pre><code> 完全没有任何共用的可访问信息。
-</code></pre>
+<p>完全没有任何共用的可访问信息。</p>
 
 <p> (b)
 清楚的整数类型，如此，这层抽象就可以帮助消除到底是“int”还是“long”的混淆。</p>
 
-<pre><code> u8/u16/u32是完全没有问题的typedef，不过它们更符合类别(d)而不是这里。
+<p>u8/u16/u32是完全没有问题的typedef，不过它们更符合类别(d)而不是这里。</p>
 
-
-
- 再次注意！要这样做，必须事出有因。如果某个变量是“unsigned
-</code></pre>
-
-<p>long“，那么没有必要</p>
+<p>再次注意！要这样做，必须事出有因。如果某个变量是“unsigned
+long“，那么没有必要</p>
 
 <p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -887,13 +865,11 @@ int”而在</p>
 
 <p> 虽然让眼睛和脑筋来适应新的标准类型比如“uint32_t”不需要花很多时间，可是有些</p>
 
-<pre><code> 人仍然拒绝使用它们。
-</code></pre>
+<p>人仍然拒绝使用它们。</p>
 
 <p> 因此，Linux特有的等同于标准类型的“u8/u16/u32/u64”类型和它们的有符号类型是被</p>
 
-<pre><code> 允许的——尽管在你自己的新代码中，它们不是强制要求要使用的。
-</code></pre>
+<p>允许的——尽管在你自己的新代码中，它们不是强制要求要使用的。</p>
 
 <p> 当编辑已经使用了某个类型集的已有代码时，你应该遵循那些代码中已经做出的选择。</p>
 
@@ -1248,7 +1224,7 @@ mm_struct”：mm_users和mm_count）</p>
 
 <p>用于定义常量的宏的名字及枚举里的标签需要大写。</p>
 
-<pre><code>1 #define CONSTANT 0x12345
+<pre><code>#define CONSTANT 0x12345
 </code></pre>
 
 <p>在定义几个相关的常量时，最好用枚举。</p>

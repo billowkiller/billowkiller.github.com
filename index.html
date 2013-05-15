@@ -26,7 +26,7 @@
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
 	<li><a href="/blog/tags">Tags</a></li>
-	<li><a href="/blog/me">Me</a></li>
+	<li><a href="http://about.me/wu_tao/">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -36,7 +36,7 @@
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
 	<li><a href="/blog/tags">Tags</a></li>
-	<li><a href="/blog/me">Me</a></li>
+	<li><a href="http://about.me/wu_tao/">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -234,7 +234,8 @@
 
 <p>通过unzip行命令解压，指定字符集</p>
 
-<p>unzip -O CP936 xxx.zip (用GBK, GB18030也可以)</p>
+<pre><code>unzip -O CP936 xxx.zip (用GBK, GB18030也可以)
+</code></pre>
 
 <p>有趣的是unzip的manual中并无这个选项的说明, unzip
 &mdash;help对这个参数有一行简单的说明。</p>
@@ -247,7 +248,7 @@
 
 <p>引用</p>
 
-<pre><code>[sourcecode language="bash"]vi /etc/environment[/sourcecode]
+<pre><code>vi /etc/environment
 </code></pre>
 
 <p>再最后加入后面的代码即可</p>
@@ -401,10 +402,10 @@ VendorName &ldquo;NVIDIA Corporation&rdquo; EndSection <br/></p>
 
 <p>改成</p>
 
-<p>Section &ldquo;Device&rdquo;<br/> 　　　　
-Identifier &ldquo;Device0&rdquo;<br/>　　　
+<p>Section &ldquo;Device&rdquo;<br/>
+Identifier &ldquo;Device0&rdquo;<br/>
 Driver &ldquo;nvidia&rdquo;<br/>
-VendorName &ldquo;NVIDIA Corporation&rdquo; 　<br/>　　　
+VendorName &ldquo;NVIDIA Corporation&rdquo; 　<br/>
 Option &ldquo;RegistryDwords&rdquo; &ldquo;<br/> EnableBrightnessControl=1&rdquo;<br/>
 EndSection</p>
 
@@ -447,6 +448,12 @@ Linux下调节笔记本屏幕亮度的方法，有的调的是亮度但不是背
 </div>
 	<div class="tags">
 
+<span>
+  
+    <a class='tag' href='/blog/tags/ubuntu/'>ubuntu</a>, <a class='tag' href='/blog/tags/liang-du/'>亮度</a>
+  
+</span>
+
 </div>
 	
 		<div class="comments"><a href="/blog/2013/05/14/ubuntuliang-du-diao-jie//index.html#disqus_thread">Comments</a></div>
@@ -465,7 +472,7 @@ Linux下调节笔记本屏幕亮度的方法，有的调的是亮度但不是背
 		<p>看了电影《Mona Lisa
 Smile》，这是一部小成本电影。整部影片从头到尾没有任何异样的高潮，没有扣人心弦的打斗或者其他对抗场面，同样也没有任何妙手回春的拍摄手法，但是这部两个小时的电影却牢牢牵住了我的心，时光在刹那间浓缩了电影中的那一年。</p>
 
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/5485107143.jpg" alt="The Mona Lisa Smail" height="500"></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/5485107143.jpg" alt="The Mona Lisa Smail" height="450px"></p>
 
 
 		
@@ -496,6 +503,12 @@ Smile》，这是一部小成本电影。整部影片从头到尾没有任何异
 </div>
 	<div class="tags">
 
+<span>
+  
+    <a class='tag' href='/blog/tags/film/'>film</a>, <a class='tag' href='/blog/tags/mona-lisa-smile/'>mona lisa smile</a>
+  
+</span>
+
 </div>
 	
 		<div class="comments"><a href="/blog/2013/05/14/the-film-mona-lisa-smile//index.html#disqus_thread">Comments</a></div>
@@ -521,9 +534,7 @@ Smile》，这是一部小成本电影。整部影片从头到尾没有任何异
 
 <p><strong><em>pgrep</em></strong>遍历目前正在运行的进程然后列出符合查找规则的进程ID（PID）。</p>
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pgrep ssh
-</span></code></pre></td></tr></table></div></figure>
+<pre><code>pgrep ssh</code></pre>
 
 
 <p>这条命令会列出所有与ssh有关的进程。</p>
@@ -532,11 +543,7 @@ Smile》，这是一部小成本电影。整部影片从头到尾没有任何异
 
 <p>这个标题有些绕口，但是它是名副其实的。</p>
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>!!
-</span></code></pre></td></tr></table></div></figure>
-
-
+<pre><code>!!</code></pre>
 
 
 
@@ -653,7 +660,7 @@ Smile》，这是一部小成本电影。整部影片从头到尾没有任何异
     <article class="post">
 	<h2 class="title">
 		
-		<a href="/blog/2013/05/14/pythonte-shu-yu-fa-%3Afilter%2C-map%2C-reduce%2C-lambda-zhuan/">
+		<a href="/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan/">
 		
 			Python特殊语法：filter、map、reduce、lambda [转]</a>
 	</h2>
@@ -704,7 +711,7 @@ sequence)</strong> ：对sequence中的item依次执行function(item)，见执�
 
 
 		
-		<a href="/blog/2013/05/14/pythonte-shu-yu-fa-%3Afilter%2C-map%2C-reduce%2C-lambda-zhuan/" class="more-link">Read on &rarr;</a>
+		<a href="/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan/" class="more-link">Read on &rarr;</a>
 	</div>
 
 
@@ -739,7 +746,7 @@ sequence)</strong> ：对sequence中的item依次执行function(item)，见执�
 
 </div>
 	
-		<div class="comments"><a href="/blog/2013/05/14/pythonte-shu-yu-fa-%3Afilter%2C-map%2C-reduce%2C-lambda-zhuan//index.html#disqus_thread">Comments</a></div>
+		<div class="comments"><a href="/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan//index.html#disqus_thread">Comments</a></div>
 	
 </div></article>
 
@@ -832,7 +839,7 @@ name of the output file:</p>
 
     Wutao
 
-- Powered by Octopress, Pandoc and Slash
+- Powered by Octopress, Pandoc and <a href="http://zespia.tw/Octopress-Theme-Slash/">Slash</a>
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>

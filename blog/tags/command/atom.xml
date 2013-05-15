@@ -4,7 +4,7 @@
   <title><![CDATA[tags: command | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/command/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2013-05-15T02:06:31-04:00</updated>
+  <updated>2013-05-15T09:18:01-04:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[Wutao]]></name>
@@ -28,9 +28,8 @@
 
 <p><strong><em>pgrep</em></strong>遍历目前正在运行的进程然后列出符合查找规则的进程ID（PID）。</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pgrep ssh
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>pgrep ssh</code></pre>
+
 
 <p>这条命令会列出所有与ssh有关的进程。</p>
 
@@ -38,9 +37,8 @@
 
 <p>这个标题有些绕口，但是它是名副其实的。</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>!!
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>!!</code></pre>
+
 
 <!--more-->
 
@@ -51,9 +49,8 @@
 
 <p>如果你想要从命令行历史中执行一个s开头的命令时，你可以使用如下命令：</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>!s
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>!s</code></pre>
+
 
 <p>它会执行最近一次在命令行中执行且以字母s开头的命令。</p>
 
@@ -61,9 +58,8 @@
 
 <p><strong><em>watch</em></strong>会反复运行一个命令，并在屏幕上打印输出。它可以让你实时的观察程序的输出变化。默认情况下，程序每2秒运行一次。<strong><em>watch</em></strong>命令与<strong><em>tail</em></strong>命令很相似。</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>watch -d ls -l
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>watch -d ls -l</code></pre>
+
 
 <p>这条命令会监视当前目录的所有文件，并且高亮文件所发生的改变。</p>
 
@@ -77,9 +73,8 @@
 
 <p>你可以使用如下命令返回你上一次所在的目录：</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">cd</span> &amp;ndash;
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>cd -</code></pre>
+
 
 <p><strong>8.聪明地创建父目录</strong></p>
 
@@ -87,26 +82,23 @@
 make ; cd make ; mkdir all ; cd all ; mkdir of ; cd of
 …</em></strong> 你说到点子上了，使用<strong><em>mkdir -p</em></strong>！</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>mkdir -p /home/adam/make/all/of/these/directories/
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>mkdir -p /home/adam/make/all/of/these/directories/</code></pre>
+
 
 <p><strong>9.删除一整行</strong></p>
 
 <p>如果你已经输入一长串的命令，但是你又不在需要他们了，那么你可以使用如下命令直接删除一整行：</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>CTRL+U
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>CTRL+U</code></pre>
+
 
 <p><strong>10.设置文件的时间戳</strong></p>
 
 <p>下面这条命令会把文件的时间戳设置成2008-01-01
 8:00。日期格式是(YYMMDDhhmm)</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>touch -c -t 0801010800 filename.c
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>touch -c -t 0801010800 filename.c</code></pre>
+
 
 <p>你还能想到哪些为大多数人所指的Linux命令？</p>
 
@@ -116,19 +108,15 @@ make ; cd make ; mkdir all ; cd all ; mkdir of ; cd of
 assignment.htm /home/phill/reports/2008/
 然后你可以冲 <strong>_\$</strong> 访问刚才那条命令最后一个参数"<em>/home/phill/reports/2008/</em>&ldquo;，例如：</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">cd</span> <span class="nv">$_</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>cd $_</code></pre>
+
 
 <p><strong>清除光标右边的内容</strong> 上文有一个小错误，<strong><em>【Ctrl +
 U】</em></strong>并不是删除一整行，而是删除光标左边的内容，如果光标停留在行首，那么<strong><em>【Ctrl
 + U】</em></strong>将无任何作用，这个时候，需要删除光标右边内容：</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>ctrl-k
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>ctrl-k</code></pre>
 
-<p><code></code></p>
 ]]></content>
   </entry>
   
@@ -326,20 +314,23 @@ pandoc -s -S --biblio biblio.bib --csl ieee.csl CITATIONS -t man -o example24c.1
     <id>http://billowkiller.github.io/blog/2013/05/14/ji-ge-linuxming-ling</id>
     <content type="html"><![CDATA[<p>转换文件到pdf</p>
 
-<p>unoconv -f pdf mydocument.odt</p>
+<pre><code>unoconv -f pdf mydocument.odt
+</code></pre>
 
 <p>zip乱码解压</p>
 
-<p>unzip -O CP936 xx.zip</p>
+<pre><code>unzip -O CP936 xx.zip
+</code></pre>
 
 <p>mp3 乱码</p>
 
-<p>mid3iconv -e gbk *.mp3 //当前目录下的mp3文件</p>
+<pre><code>mid3iconv -e gbk \*.mp3 //当前目录下的mp3文件
+</code></pre>
 
 <p>视频转码</p>
 
-<p>mencoder *.rmvb -o output.avi -oac mp3lame -lameopts cbr:br=32
--ovc x264 -x264encopts bitrate=440 -vf scale=320:-3</p>
+<pre><code>mencoder \*.rmvb -o output.avi -oac mp3lame -lameopts cbr:br=32 -ovc x264 -x264encopts bitrate=440 -vf scale=320:-3
+</code></pre>
 
 <p>linux 声音调节  alsamixer</p>
 
@@ -348,7 +339,10 @@ pandoc -s -S --biblio biblio.bib --csl ieee.csl CITATIONS -t man -o example24c.1
 <pre><code>gsettings set org.gnome.gedit.preferences.encodings auto-detected "['UTF-8','CURRENT','GB18030','ISO-8859-15','UTF-16']"
 </code></pre>
 
-<p>SSH 远程登录：   ssh -l root 192.168.0.150</p>
+<p>SSH 远程登录：</p>
+
+<pre><code>ssh -l root 192.168.0.150
+</code></pre>
 
 <p>vim 中文乱码：</p>
 
@@ -380,8 +374,9 @@ set fileencodings=utf-8,gbk</p>
 
 <h2>基本的用法</h2>
 
-<p>在某个文件里搜索error字符串\
-<code>$ grep "error" log.txt</code></p>
+<p>在某个文件里搜索error字符串</p>
+
+<p><code>$ grep "error" log.txt</code></p>
 
 <!--more-->
 

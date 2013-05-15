@@ -4,7 +4,7 @@
   <title><![CDATA[Category: python | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/python/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2013-05-15T02:06:31-04:00</updated>
+  <updated>2013-05-15T09:18:01-04:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[Wutao]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Python特殊语法：filter、map、reduce、lambda [转]]]></title>
-    <link href="http://billowkiller.github.io/blog/2013/05/14/pythonte-shu-yu-fa-%3Afilter%2C-map%2C-reduce%2C-lambda-zhuan/"/>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan/"/>
     <updated>2013-05-14T01:09:00-04:00</updated>
-    <id>http://billowkiller.github.io/blog/2013/05/14/pythonte-shu-yu-fa-:filter,-map,-reduce,-lambda-zhuan</id>
+    <id>http://billowkiller.github.io/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan</id>
     <content type="html"><![CDATA[<p><i><strong>from</strong> <a href="http://www.cnblogs.com/longdouhzt/archive/2012/05/19/2508844.html">http://www.cnblogs.com/longdouhzt/archive/2012/05/19/2508844.html</a></i></p>
 
 <hr />
@@ -95,13 +95,9 @@ starting_value)</strong>：对sequence中的item顺序迭代调用function，如
 
 <p>例如</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="n">kmpathes</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">kmpath</span><span class="p">:</span> <span class="n">kmpath</span><span class="p">,</span>                <span class="o">&lt;</span><span class="n">br</span><span class="o">/&gt;</span>
-</span><span class='line'><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">kmpath</span><span class="p">:</span> <span class="n">string</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">kmpath</span><span class="p">),</span>
-</span><span class='line'><span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;:</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;)))</span> <span class="o">&lt;</span><span class="n">br</span><span class="o">/&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>kmpathes = filter(lambda kmpath: kmpath,                <br/>
+map(lambda kmpath: string.strip(kmpath),
+string.split(l, &lsquo;:&rsquo;)))</p>
 
 <p>看起来麻烦，其实就像用语言来描述问题一样，非常优雅。
 对 l
@@ -115,33 +111,24 @@ starting_value)</strong>：对sequence中的item顺序迭代调用function，如
 
 <p>例子：</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="n">func</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">:</span><span class="n">x</span><span class="o">+</span><span class="n">y</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>func = lambda x,y:x+y
+</code></pre>
+
 
 <p>func相当于下面这个函数</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">return</span> <span class="n">x</span><span class="o">+</span><span class="n">y</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>def func(x,y):
+    return x+y
+</code></pre>
+
 
 <p>注意def是语句而lambda是表达式</p>
 
 <p>下面这种情况下就只能用lambda而不能用def</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="p">[(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">11</span><span class="p">)]</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>[(lambda x:x*x)(x) for x in range(1,11)]
+</code></pre>
+
 
 <p>map，reduce，filter中的function都可以用lambda表达式来生成！</p>
 
@@ -156,9 +143,9 @@ map(function,sequence1,sequence2)。</p>
 
 <p>求1<em>1,2</em>2,3<em>3,4</em>4</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>map(lambda x:x*x,range(1,5))
+</code></pre>
+
 
 <p>返回值是[1,4,9,16]</p>
 
@@ -174,9 +161,9 @@ map(function,sequence1,sequence2)。</p>
 
 <p>求1到10的累加</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="nb">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">:</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">11</span><span class="p">))</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>reduce(lambda x,y:x+y,range(1,11))
+</code></pre>
+
 
 <p>返回值是55。</p>
 
@@ -190,9 +177,9 @@ map(function,sequence1,sequence2)。</p>
 
 <p>找出1到10之间的奇数</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="o">%</span><span class="mi">2</span><span class="o">!=</span><span class="mi">0</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">11</span><span class="p">))</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>filter(lambda x:x%2!=0,range(1,11))
+</code></pre>
+
 
 <p>返回值</p>
 
@@ -200,15 +187,15 @@ map(function,sequence1,sequence2)。</p>
 
 <p>如果sequence是一个string</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">!=</span><span class="mi">0</span><span class="p">,</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">hello</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>filter(lambda x:len(x)!=0,'hello')
+</code></pre>
+
 
 <p>返回'hello'</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">,</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">hello</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>filter(lambda x:len(x)==0,'hello')
+</code></pre>
+
 
 <p>返回''</p>
 

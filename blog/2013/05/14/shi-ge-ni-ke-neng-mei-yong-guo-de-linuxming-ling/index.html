@@ -26,7 +26,7 @@
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
 	<li><a href="/blog/tags">Tags</a></li>
-	<li><a href="/blog/me">Me</a></li>
+	<li><a href="http://about.me/wu_tao/">Me</a></li>
 </ul>
 </nav>
 <nav id="mobile-nav">
@@ -36,7 +36,7 @@
 	<li><a href="/">Blog</a></li>
 	<li><a href="/blog/archives">Archives</a></li>
 	<li><a href="/blog/tags">Tags</a></li>
-	<li><a href="/blog/me">Me</a></li>
+	<li><a href="http://about.me/wu_tao/">Me</a></li>
 </ul>
 </div>
 	</div>
@@ -91,9 +91,7 @@
 
 <p><strong><em>pgrep</em></strong>遍历目前正在运行的进程然后列出符合查找规则的进程ID（PID）。</p>
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pgrep ssh
-</span></code></pre></td></tr></table></div></figure>
+<pre><code>pgrep ssh</code></pre>
 
 
 <p>这条命令会列出所有与ssh有关的进程。</p>
@@ -102,11 +100,7 @@
 
 <p>这个标题有些绕口，但是它是名副其实的。</p>
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>!!
-</span></code></pre></td></tr></table></div></figure>
-
-
+<pre><code>!!</code></pre>
 
 
 <!--more-->
@@ -118,9 +112,7 @@
 
 <p>如果你想要从命令行历史中执行一个s开头的命令时，你可以使用如下命令：</p>
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>!s
-</span></code></pre></td></tr></table></div></figure>
+<pre><code>!s</code></pre>
 
 
 <p>它会执行最近一次在命令行中执行且以字母s开头的命令。</p>
@@ -129,9 +121,7 @@
 
 <p><strong><em>watch</em></strong>会反复运行一个命令，并在屏幕上打印输出。它可以让你实时的观察程序的输出变化。默认情况下，程序每2秒运行一次。<strong><em>watch</em></strong>命令与<strong><em>tail</em></strong>命令很相似。</p>
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>watch -d ls -l
-</span></code></pre></td></tr></table></div></figure>
+<pre><code>watch -d ls -l</code></pre>
 
 
 <p>这条命令会监视当前目录的所有文件，并且高亮文件所发生的改变。</p>
@@ -146,9 +136,7 @@
 
 <p>你可以使用如下命令返回你上一次所在的目录：</p>
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">cd</span> -
-</span></code></pre></td></tr></table></div></figure>
+<pre><code>cd -</code></pre>
 
 
 <p><strong>8.聪明地创建父目录</strong></p>
@@ -157,18 +145,14 @@
 make ; cd make ; mkdir all ; cd all ; mkdir of ; cd of
 …</em></strong> 你说到点子上了，使用<strong><em>mkdir -p</em></strong>！</p>
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>mkdir -p /home/adam/make/all/of/these/directories/
-</span></code></pre></td></tr></table></div></figure>
+<pre><code>mkdir -p /home/adam/make/all/of/these/directories/</code></pre>
 
 
 <p><strong>9.删除一整行</strong></p>
 
 <p>如果你已经输入一长串的命令，但是你又不在需要他们了，那么你可以使用如下命令直接删除一整行：</p>
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>CTRL+U
-</span></code></pre></td></tr></table></div></figure>
+<pre><code>CTRL+U</code></pre>
 
 
 <p><strong>10.设置文件的时间戳</strong></p>
@@ -176,9 +160,7 @@ make ; cd make ; mkdir all ; cd all ; mkdir of ; cd of
 <p>下面这条命令会把文件的时间戳设置成2008-01-01
 8:00。日期格式是(YYMMDDhhmm)</p>
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>touch -c -t 0801010800 filename.c
-</span></code></pre></td></tr></table></div></figure>
+<pre><code>touch -c -t 0801010800 filename.c</code></pre>
 
 
 <p>你还能想到哪些为大多数人所指的Linux命令？</p>
@@ -189,21 +171,15 @@ make ; cd make ; mkdir all ; cd all ; mkdir of ; cd of
 assignment.htm /home/phill/reports/2008/
 然后你可以冲 <strong>_\$</strong> 访问刚才那条命令最后一个参数&#8221;<em>/home/phill/reports/2008/</em>&ldquo;，例如：</p>
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">cd</span> <span class="nv">$_</span>
-</span></code></pre></td></tr></table></div></figure>
+<pre><code>cd $_</code></pre>
 
 
 <p><strong>清除光标右边的内容</strong> 上文有一个小错误，<strong><em>【Ctrl +
 U】</em></strong>并不是删除一整行，而是删除光标左边的内容，如果光标停留在行首，那么<strong><em>【Ctrl
 + U】</em></strong>将无任何作用，这个时候，需要删除光标右边内容：</p>
 
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>ctrl-k
-</span></code></pre></td></tr></table></div></figure>
+<pre><code>ctrl-k</code></pre>
 
-
-<p><code></code></p>
 </div>
 
 
@@ -266,7 +242,7 @@ U】</em></strong>并不是删除一整行，而是删除光标左边的内容�
 
     Wutao
 
-- Powered by Octopress, Pandoc and Slash
+- Powered by Octopress, Pandoc and <a href="http://zespia.tw/Octopress-Theme-Slash/">Slash</a>
 </footer>
 	<script src="/javascripts/slash.js"></script>
 <script src="/javascripts/jquery.fancybox.pack.js"></script>

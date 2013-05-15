@@ -4,7 +4,7 @@
   <title><![CDATA[tags: compile | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/compile/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2013-05-15T02:06:31-04:00</updated>
+  <updated>2013-05-15T09:18:01-04:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[Wutao]]></name>
@@ -22,33 +22,18 @@
 
 <p>下载需要的包</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;apt-get install kernel-package libncurses5-dev fakeroot wget bzip2
-</span><span class='line'>cp linux-3.x.x /usr/src
-</span><span class='line'><span class="nb">cd</span> /usr/src/linux-3.x.x
-</span><span class='line'>make menuconfig
-</span><span class='line'>make modules
-</span><span class='line'>make modules_install
-</span><span class='line'>make
-</span><span class='line'>make install
-</span><span class='line'>sudo mkinitramfs -o /boot/initrd.img-3.x.x
-</span><span class='line'>sudo update-initramfs -c -k 3.x.x
-</span><span class='line'>sudo update-grub2
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>apt-get install kernel-package libncurses5-dev fakeroot wget bzip2
+cp linux-3.x.x /usr/src
+cd /usr/src/linux-3.x.x
+make menuconfig
+make modules
+make modules\_install
+make
+make install
+sudo mkinitramfs -o /boot/initrd.img-3.x.x
+sudo update-initramfs -c -k 3.x.x
+sudo update-grub2
+</code></pre>
 
 <hr />
 
