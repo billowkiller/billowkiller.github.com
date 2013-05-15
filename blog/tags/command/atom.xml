@@ -4,7 +4,7 @@
   <title><![CDATA[tags: command | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/command/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2013-05-15T09:18:01-04:00</updated>
+  <updated>2013-05-15T10:22:12-04:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[Wutao]]></name>
@@ -454,19 +454,8 @@ repeated characters. It will read from STDIN and write to STDOUT.</p>
 
 <p>The syntax of tr command is:</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;<span class="nv">$ </span>tr <span class="o">[</span>OPTION<span class="o">]</span> SET1 <span class="o">[</span>SET2<span class="o">]</span>
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>$ tr [OPTION] SET1 [SET2]
+</code></pre>
 
 <h3>Translation</h3>
 
@@ -481,83 +470,33 @@ each character in same position in SET2.</p>
 
 <p>The following tr command is used to convert the lower case to upper case</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;<span class="nv">$ </span>tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ
-</span><span class='line'> thegeekstuff
-</span><span class='line'> THEGEEKSTUFF
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>$ tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ
+ thegeekstuff
+ THEGEEKSTUFF
+</code></pre>
 
 <p>The following command will also convert lower case to upper case</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;<span class="nv">$ </span>tr <span class="o">[</span>:lower:<span class="o">]</span> <span class="o">[</span>:upper:<span class="o">]</span>
-</span><span class='line'> thegeekstuff
-</span><span class='line'> THEGEEKSTUFF
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>$ tr [:lower:] [:upper:]
+ thegeekstuff
+ THEGEEKSTUFF
+</code></pre>
 
 <p>You can also use ranges in tr. The following command uses ranges to
 convert lower to upper case.</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;<span class="nv">$ </span>tr a-z A-Z
-</span><span class='line'> thegeekstuff
-</span><span class='line'> THEGEEKSTUFF
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>$ tr a-z A-Z
+ thegeekstuff
+ THEGEEKSTUFF
+</code></pre>
 
 <h3>2. Translate braces into parenthesis</h3>
 
 <p>You can also translate from and to a file. In this example we will
 translate braces in a file with parenthesis.</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;<span class="nv">$ </span>tr <span class="s1">&#39;{}&#39;</span> <span class="s1">&#39;()&#39;</span> &amp;lt; inputfile &amp;gt; outputfile
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>$ tr '{}' '()' &lt; inputfile &gt; outputfile
+</code></pre>
 
 <p>The above command will read each character from “inputfile”, translate
 if it is a brace, and write the output in “outputfile”.</p>
@@ -566,21 +505,9 @@ if it is a brace, and write the output in “outputfile”.</p>
 
 <p>The following command will translate all the white-space to tabs</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;<span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;This is for testing&quot;</span> | tr <span class="o">[</span>:space:<span class="o">]</span> <span class="s1">&#39;\t&#39;</span>
-</span><span class='line'> This   is  <span class="k">for </span>testing
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>$ echo "This is for testing" | tr [:space:] '\t'
+ This   is  for testing
+</code></pre>
 
 <h3>4. Squeeze repetition of characters using -s</h3>
 
@@ -588,95 +515,35 @@ if it is a brace, and write the output in “outputfile”.</p>
 two are more spaces present continuously, then the previous command will
 translate each spaces to a tab as follows.</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;<span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;This is for testing&quot;</span> | tr <span class="o">[</span>:space:<span class="o">]</span> <span class="s1">&#39;\t&#39;</span>
-</span><span class='line'> This    is  <span class="k">for    </span>testing
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>$ echo "This is for testing" | tr [:space:] '\t'
+ This    is  for    testing
+</code></pre>
 
 <p>We can use -s option to squeeze the repetition of characters.</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;<span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;This is for testing&quot;</span> | tr -s <span class="o">[</span>:space:<span class="o">]</span> <span class="s1">&#39;\t&#39;</span>
-</span><span class='line'> This   is  <span class="k">for </span>testing
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>$ echo "This is for testing" | tr -s [:space:] '\t'
+ This   is  for testing
+</code></pre>
 
 <p>Similarly you can convert multiple continuous spaces with a single space</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;<span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;This is for testing&quot;</span> | tr -s <span class="o">[</span>:space:<span class="o">]</span> <span class="s1">&#39; &#39;</span>
-</span><span class='line'> This is <span class="k">for </span>testing
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>$ echo "This is for testing" | tr -s [:space:] ' '
+ This is for testing
+</code></pre>
 
 <h3>5. Delete specified characters using -d option</h3>
 
 <p>tr can also be used to remove particular characters using -d option.</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;<span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;the geek stuff&quot;</span> | tr -d <span class="s1">&#39;t&#39;</span>
-</span><span class='line'> he geek suff
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>$ echo "the geek stuff" | tr -d 't'
+ he geek suff
+</code></pre>
 
 <p>To remove all the digits from the string, use</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;<span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;my username is 432234&quot;</span> | tr -d <span class="o">[</span>:digit:<span class="o">]</span>
-</span><span class='line'> my username is
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>$ echo "my username is 432234" | tr -d [:digit:]
+ my username is
+</code></pre>
 
 <p>Also, if you like to delete lines from file, you can use <a href="http://www.thegeekstuff.com/2009/09/unix-sed-tutorial-delete-file-lines-using-address-and-patterns/">sed d
 command</a>.</p>
@@ -686,59 +553,25 @@ command</a>.</p>
 <p>You can complement the SET1 using -c option. For example, to remove all
 characters except digits, you can use the following.</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;<span class="nv">$ </span><span class="nb">echo</span> <span class="s2">&quot;my username is 432234&quot;</span> | tr -cd <span class="o">[</span>:digit:<span class="o">]</span>
-</span><span class='line'> 432234
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>$ echo "my username is 432234" | tr -cd [:digit:]
+ 432234
+</code></pre>
 
 <h3>7. Remove all non-printable character from a file</h3>
 
 <p>The following command can be used to remove all non-printable characters
 from a file.</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;<span class="nv">$ </span>tr -cd <span class="o">[</span>:print:<span class="o">]</span> &amp;lt; file.txt
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>$ tr -cd [:print:] &lt; file.txt
+</code></pre>
 
 <h3>8. Join all the lines in a file into a single line</h3>
 
 <p>The below command will translate all newlines into spaces and make the
 result as a single line.</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;<span class="nv">$ </span>tr -s <span class="s1">&#39;\n&#39;</span> <span class="s1">&#39; &#39;</span> &amp;lt; file.txt
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>$ tr -s '\n' ' ' &lt; file.txt
+</code></pre>
 ]]></content>
   </entry>
   
