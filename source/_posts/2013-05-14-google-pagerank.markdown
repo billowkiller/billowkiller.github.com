@@ -3,14 +3,15 @@ layout: post
 title: "Google PageRank"
 date: 2013-05-14 01:09
 comments: true
-categories: [google, page rank, algorithm]
+categories: google
+tags: [google, page rank, algorithm]
 ---
 
-**edited**from***How Google Finds Your Needle in the Web's Haystack***
+**edited** from ***[How Google Finds Your Needle in the Web's Haystack](http://www.ams.org/samplings/feature-column/fcarc-pagerank)***
 
 * * * * *
 
- Google搜索的核心算法当然不止是PageRank，但PageRank确实是其中的核心部分。Google就曾经说过：“the
+ Google搜索的核心算法当然不止是PageRank，但PageRank确实是其中的核心部分。Google就曾经说过：“the
 heart of our software is PageRank”.
 
 Google的PageRank算法声称他们比较了一个月来网页的受欢迎程度从而确定哪个网页显得比较重要。根据Sergey
@@ -38,47 +39,37 @@ B\_i \\\\ 0 & \\hbox{otherwise} \\end{array}\\right. \\]
 I = {\\bf H}I \\]
 ](http://www.ams.org/featurecolumn/images/december2006/index_5.gif)
 
-这个表达式其实也就是向量 *I *为矩阵特征值为1的特征向量，也称呼它为H的固定向量。
+这个表达式其实也就是向量 *I *为矩阵特征值为1的特征向量，也称呼它为H的固定向量。
 
 下边是一个例子：
 
 ![](http://www.ams.org/featurecolumn/images/december2006/goodnet.jpg)
 
-![](http://www.ams.org/featurecolumn/images/december2006/matrix.0.gif) 
-     
-  ![](http://www.ams.org/featurecolumn/images/december2006/eigenvector.0.gif)
+![](http://www.ams.org/featurecolumn/images/december2006/matrix.0.gif) 
+     
+  ![](http://www.ams.org/featurecolumn/images/december2006/eigenvector.0.gif)
 
 这样看来，问题貌似得到了解决，我们获得了这8个网页的PageRank值。但是在现实中，这个矩阵的n为250亿，其中的大部分值为0，实际上，研究表明每个网页链接的平均数量是10，这表明每一列只有10个数值不为0。下面我们用一个叫*power
 method*的方法来寻找矩阵的固定向量。
 
- ![\\[ I\^{k+1}={\\bf H}I\^k \\]
+ ![\\[ I\^{k+1}={\\bf H}I\^k \\]
 ](http://www.ams.org/featurecolumn/images/december2006/index_6.gif)
 
-***General principle:** The sequence *I ^k^* will converge to the
+**General principle:** The sequence *I ^k^* will converge to the
 stationary vector *I*.*
 
 通过这个方法解释上面的例子
 
-  --------- --------- --------- --------- --------- ----- ---------- ----------
-  *I ^0^*   *I ^1^*   *I ^2^*   *I ^3^*   *I ^4^*   ...   *I ^60^*   *I ^61^*
-  1         0         0         0         0.0278    ...   0.06       0.06
-  0         0.5       0.25      0.1667    0.0833    ...   0.0675     0.0675
-  0         0.5       0         0         0         ...   0.03       0.03
-  0         0         0.5       0.25      0.1667    ...   0.0675     0.0675
-  0         0         0.25      0.1667    0.1111    ...   0.0975     0.0975
-  0         0         0         0.25      0.1806    ...   0.2025     0.2025
-  0         0         0         0.0833    0.0972    ...   0.18       0.18
-  0         0         0         0.0833    0.3333    ...   0.295      0.295
-  --------- --------- --------- --------- --------- ----- ---------- ----------
+   <p>                                                  <center>                           <table cellpadding=5 border=1>   <tr>   <td bgcolor=#ffffcc> <em>I <sup>0</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>1</sup></em> </td>    <td bgcolor=#ffffcc> <em>I <sup>2</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>3</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>4</sup></em> </td>   <td bgcolor=#ffffcc> ... </td>    <td bgcolor=#ffffcc> <em>I <sup>60</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>61</sup></em> </td>   </tr>   <tr>   <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0.0278</td> <td> ...</td>    <td>0.06</td>    <td>0.06</td>    </tr>   <tr>   <td>0</td> <td>0.5</td> <td>0.25</td> <td>0.1667</td> <td>0.0833</td> <td> ...</td>    <td>0.0675</td>    <td>0.0675</td>    </tr>   <tr>   <td>0</td> <td>0.5</td> <td>0</td> <td>0</td> <td>0</td> <td> ...</td>    <td>0.03</td>    <td>0.03</td>    </tr>   <tr>   <td>0</td> <td>0</td> <td>0.5</td> <td>0.25</td> <td>0.1667</td> <td> ...</td>    <td>0.0675</td>    <td>0.0675</td>    </tr>   <tr>   <td>0</td> <td>0</td> <td>0.25</td> <td>0.1667</td> <td>0.1111</td> <td> ...</td>    <td>0.0975</td>    <td>0.0975</td>    </tr>   <tr>   <td>0</td> <td>0</td> <td>0</td> <td>0.25</td> <td>0.1806</td> <td> ...</td>    <td>0.2025</td>    <td>0.2025</td>    </tr>   <tr>   <td>0</td> <td>0</td> <td>0</td> <td>0.0833</td> <td>0.0972</td> <td> ...</td>    <td>0.18</td>    <td>0.18</td>    </tr>   <tr>   <td>0</td> <td>0</td> <td>0</td> <td>0.0833</td> <td>0.3333</td> <td> ...</td>    <td>0.295</td>    <td>0.295</td>    </tr>   </table>                           </center>                         <p>
 
 得到的结果只是网页重要程度的相对比值，如果要的到最终的PageRank数值，还需要对它进行线性增加，使得它们的总和为1。
 
- 
+ 
 
 有三个问题自然地就提出来了：
 
--    *I^ k^*是否会汇聚到1
--   向量是否与*I^0^*的取值无关
+-    <em>I<sup>k</sup></em>是否会汇聚到1
+-   向量是否与<em>I<sup>0</sup></em>的取值无关
 -   是否包含了我们想要的信息，也就是达到充分统计
 
 现在我们对这三个问题还只能说No，但接下来我们将会修改我们的方法使得对这三个问题的回答得到肯定。
@@ -91,11 +82,7 @@ with matrix
 
 结果如下：
 
-  --------- --------- --------- -------------
-  *I ^0^*   *I ^1^*   *I ^2^*   *I ^3^=*I**
-  1         0         0         0
-  0         1         0         0
-  --------- --------- --------- -------------
+ <p>                                                 <center>   <table cellpadding=5 border=1>   <tr>   <td bgcolor=#ffffcc><em>I <sup>0</sup></em></td>   <td bgcolor=#ffffcc><em>I <sup>1</sup></em></td>    <td bgcolor=#ffffcc><em>I <sup>2</sup></em></td>   <td bgcolor=#ffffcc><em>I <sup>3</sup>=<em>I</em></em></td>   </tr>   <tr>   <td>1</td>   <td>0</td>   <td>0</td>   <td align=center>0</td>   </tr>   <tr>   <td>0</td>   <td>1</td>   <td>0</td>   <td align=center>0</td>   </tr>   </table>                           </center>                         <p>
 
 上面例子的问题是P2并没有链接，它在每次迭代中获取了P1的一些权重，但是却不传给其他网页。像这样没有链接的节点我们称它为悬挂节点，显然，真实环境中这样的网页还很多。要解决这个问题，我们可以转换一种思维方式来思考PageRank，或者说用另外一种视角。
 
@@ -141,32 +128,32 @@ method*是用来寻找矩阵特征向量对应的最大特征值的。在我们�
 \\\\ \\end{eqnarray\*}
 ](http://www.ams.org/featurecolumn/images/december2006/index_18.gif)
 
-Since the eigenvalues ![\$ \\lambda\_j \$
-](http://www.ams.org/featurecolumn/images/december2006/index_19.gif) with ![\$
+Since the eigenvalues ![\$ \\lambda\_j \$
+](http://www.ams.org/featurecolumn/images/december2006/index_19.gif) with ![\$
 j\\geq2 \$
-](http://www.ams.org/featurecolumn/images/december2006/index_20.gif) have
-magnitude smaller than one, it follows that ![\$ \\lambda\_j\^k\\to0 \$
-](http://www.ams.org/featurecolumn/images/december2006/index_21.gif) if ![\$
+](http://www.ams.org/featurecolumn/images/december2006/index_20.gif) have
+magnitude smaller than one, it follows that ![\$ \\lambda\_j\^k\\to0 \$
+](http://www.ams.org/featurecolumn/images/december2006/index_21.gif) if ![\$
 j\\geq2 \$
 ](http://www.ams.org/featurecolumn/images/december2006/index_22.gif)and
-therefore ![\$ I\^k\\to I=c\_1v\_1 \$
-](http://www.ams.org/featurecolumn/images/december2006/index_23.gif) ,
+therefore ![\$ I\^k\\to I=c\_1v\_1 \$
+](http://www.ams.org/featurecolumn/images/december2006/index_23.gif) ,
 an eigenvector corresponding to the eigenvalue 1.
 
-It is important to note here that the rate at which ![\$ I\^k\\to I \$
-](http://www.ams.org/featurecolumn/images/december2006/index_24.gif) is
-determined by ![\$ |\\lambda\_2| \$
-](http://www.ams.org/featurecolumn/images/december2006/index_25.gif) .
-When ![\$ |\\lambda\_2| \$
-](http://www.ams.org/featurecolumn/images/december2006/index_26.gif) is
-relatively close to 0, then ![\$ \\lambda\_2\^k\\to0 \$
-](http://www.ams.org/featurecolumn/images/december2006/index_27.gif) relatively
+It is important to note here that the rate at which ![\$ I\^k\\to I \$
+](http://www.ams.org/featurecolumn/images/december2006/index_24.gif) is
+determined by ![\$ |\\lambda\_2| \$
+](http://www.ams.org/featurecolumn/images/december2006/index_25.gif) .
+When ![\$ |\\lambda\_2| \$
+](http://www.ams.org/featurecolumn/images/december2006/index_26.gif) is
+relatively close to 0, then ![\$ \\lambda\_2\^k\\to0 \$
+](http://www.ams.org/featurecolumn/images/december2006/index_27.gif) relatively
 quickly.
 
-以上的讨论中，我们假设矩阵S的 ![\$ \\lambda\_1=1 \$
-](http://www.ams.org/featurecolumn/images/december2006/index_34.gif) 并且![\$
+以上的讨论中，我们假设矩阵S的 ![\$ \\lambda\_1=1 \$
+](http://www.ams.org/featurecolumn/images/december2006/index_34.gif) 并且![\$
 |\\lambda\_2|\<1 \$
-](http://www.ams.org/featurecolumn/images/december2006/index_35.gif) ，但实际上不常是这样的。
+](http://www.ams.org/featurecolumn/images/december2006/index_35.gif) ，但实际上不常是这样的。
 
 下面的例子:
 
@@ -174,27 +161,17 @@ quickly.
 
 那么有
 
- 
+ 
+ <p>                                                 <center>   <table border=1 cellpadding=5>   <tr>   <td bgcolor=#ffffcc> <em>I <sup>0</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>1</sup></em> </td>    <td bgcolor=#ffffcc> <em>I <sup>2</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>3</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>4</sup></em> </td>   <td bgcolor=#ffffcc> <em>I <sup>5</sup></em> </td>   </tr>   <tr>   <td> 1 </td>   <td> 0 </td>   <td> 0 </td>   <td> 0 </td>   <td> 0 </td>    <td> 1 </td>   </tr>   <tr>   <td> 0 </td>   <td> 1 </td>   <td> 0 </td>   <td> 0 </td>    <td> 0 </td>   <td> 0 </td>   </tr>   <tr>   <td> 0 </td>   <td> 0 </td>   <td> 1 </td>    <td> 0 </td>   <td> 0 </td>   <td> 0 </td>   </tr>   <tr>   <td> 0 </td>   <td> 0 </td>    <td> 0 </td>   <td> 1 </td>   <td> 0 </td>   <td> 0 </td>   </tr>   <tr>   <td> 0 </td>    <td> 0 </td>   <td> 0 </td>   <td> 0 </td>   <td> 1 </td>   <td> 0 </td>   </tr>   </table>                         </center>                        </p>
 
- 
-
-  --------- --------- --------- --------- --------- ---------
-  *I ^0^*   *I ^1^*   *I ^2^*   *I ^3^*   *I ^4^*   *I ^5^*
-  1         0         0         0         0         1
-  0         1         0         0         0         0
-  0         0         1         0         0         0
-  0         0         0         1         0         0
-  0         0         0         0         1         0
-  --------- --------- --------- --------- --------- ---------
-
-the sequence of vectors *I ^k^* fails to converge。这是因为![\$
+the sequence of vectors <em>I <sup>k</sup></em> fails to converge。这是因为![\$
 |\\lambda\_2|=1 \$
 ](http://www.ams.org/featurecolumn/images/december2006/index_36.gif)，所以power
 method就失效了。
 
 为了保证![\$ |\\lambda\_2|\<1 \$
-](http://www.ams.org/featurecolumn/images/december2006/index_37.gif) ,
-矩阵**S** 必须 *primitive。*这意味着对于某个自然数**m*, **S**^*m*^*中的数值全为正。也就是说，对于两个页面，最多经过m个链接，可以从第一个页面跳转到第二个页面。显然，上个例子并不满足。*\
+](http://www.ams.org/featurecolumn/images/december2006/index_37.gif) ,
+矩阵**S** 必须 *primitive。*这意味着对于某个自然数*m*, <em>S <sup>m</sup></em>中的数值全为正。也就是说，对于两个页面，最多经过m个链接，可以从第一个页面跳转到第二个页面。显然，上个例子并不满足。
 *
 
 下面是另外一个例子：
@@ -235,18 +212,18 @@ Brin和Larry Page选择了0.85。
 
 使用*power method*则公式为：
 
- 
+ 
 
 ![\\[ {\\bf S}={\\bf H} + {\\bf A} \\]
 ](http://www.ams.org/featurecolumn/images/december2006/index_52.gif)
 
- 
+ 
 
 ![\\[ {\\bf G}=\\alpha{\\bf H} + \\alpha{\\bf A} +
 \\frac{1-\\alpha}{n}{\\bf 1} \\]
 ](http://www.ams.org/featurecolumn/images/december2006/index_53.gif)
 
- 
+ 
 
 ![\\[ {\\bf G}I\^k=\\alpha{\\bf H}I\^k + \\alpha{\\bf A}I\^k +
 \\frac{1-\\alpha}{n}{\\bf 1}I\^k \\]

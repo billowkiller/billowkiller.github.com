@@ -5,14 +5,13 @@
 	{% unless forloop.first %}
 		</section>
 	{% endunless %}
-	<section class="archives"><h1 class="year">Categories</h1><ul class="category_list">{% category_list counter:true %}</ul>
+	<section class="archives"><h1 class="year">{{ date | date: "%Y" }}</h1>
 {% endunless %}
 <article>
 	<h2 class="title"><a href="{{ root_url }}{{ post.url }}">{{post.title}}</a></h2>
 	<div class="meta">
 		<div class="date">{{ date | date: "%b %e" }}</div>
-		<div>{% include post/categories.html %}</div>
-		<div class="tags">{% include post/tags.html %}</div>
+		<div class="tags">{% include post/categories.html %}</div>
 	    {% if site.disqus_short_name and post.comments == true and site.disqus_show_comment_count == true %}
 	    <div class="comments"><a href="{{ root_url }}{{ post.url }}#disqus_thread">Comments</a></div>
 	    {% endif %}

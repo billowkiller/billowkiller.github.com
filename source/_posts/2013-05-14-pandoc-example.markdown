@@ -3,14 +3,15 @@ layout: post
 title: "pandoc example"
 date: 2013-05-14 01:09
 comments: true
-categories: [pandoc, command]
+categories: tools
+tags: [pandoc, command]
 ---
 
-from [pondoc ](http://johnmacfarlane.net/pandoc/demos.html)
+from [pondoc ](http://johnmacfarlane.net/pandoc/demos.html)
 
 * * * * *
 
- 
+ 
 
 To see the output created by each of the commands below, click on the
 name of the output file:
@@ -52,7 +53,7 @@ name of the output file:
         pandoc -s -S -w docbook README -o example9.db
 
     Chunked XHTML via DocBook
-    and [xmlto](http://cyberelk.net/tim/xmlto/):
+    and [xmlto](http://cyberelk.net/tim/xmlto/):
 
         xmlto xhtml -m config.xsl example9.db -o example9/
 
@@ -64,7 +65,7 @@ name of the output file:
 
         pandoc -s -w context README -o example11.tex
 
-    PDF via pandoc and ConTeXt’s `texexec`:
+    PDF via pandoc and ConTeXt’s `texexec`:
 
         texexec --pdf example11.tex # produces example11.pdf
 
@@ -80,8 +81,8 @@ name of the output file:
 
         pandoc -N --template=mytemplate.tex --variable mainfont=Georgia --variable sansfont=Arial --variable monofont="Bitstream Vera Sans Mono" --variable fontsize=12pt --variable version=1.9 README --latex-engine=xelatex --toc -o example14.pdf
 
-15. A wiki program using [Happstack](http://happstack.com/) and
-    pandoc: [gitit](http://gitit.net/)
+15. A wiki program using [Happstack](http://happstack.com/) and
+    pandoc: [gitit](http://gitit.net/)
 
 16. HTML slide shows:
 

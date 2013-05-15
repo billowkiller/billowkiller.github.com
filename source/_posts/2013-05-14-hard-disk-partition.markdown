@@ -3,14 +3,15 @@ layout: post
 title: "Hard Disk Partition"
 date: 2013-05-14 01:09
 comments: true
-categories: [disk partition, linux]
+categories: linux
+tags: [disk partition, linux]
 ---
 
 ***edited
-from *[vbird](http://vbird.dic.ksu.edu.tw/linux_basic/0130designlinux.php#partition_name) 
-                                                                 *All
+from *[vbird](http://vbird.dic.ksu.edu.tw/linux_basic/0130designlinux.php#partition_name) 
+                                                                 *All
 picture
-© [vbird](http://vbird.dic.ksu.edu.tw/linux_basic/0130designlinux.php#partition_name)***
+© [vbird](http://vbird.dic.ksu.edu.tw/linux_basic/0130designlinux.php#partition_name)***
 
 * * * * *
 
@@ -21,7 +22,7 @@ Record)，这是可以安装启动管理程序的地方，有446 bytes；还有�
 table)：记录整颗硬盘分割的状态，有64
 bytes。MBR是系统在启动的时候会主动去读取的内容，多系统就是靠这块来选择的；分割表就是系统用来确定分区的，也就是分区地址的索引，它将硬盘进行逻辑上的切割，然后用分割表来记录所包含的逻辑地址。
 
-![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/partition-1.png "分区")
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/partition-1.png" alt="磁盘分区"/>
 
 假设上面的硬盘装置档名为/dev/hda时，那么这四个分割槽在Linux系统中的装置档名如下所示:
 
@@ -41,7 +42,7 @@ Partition中，那么为什么要进行分割呢？我想是有以下两点好�
 既然第一个磁区所在的分割表只能记录四笔数据，
 那就利用额外的磁区来记录更多的分割。具体的做法如下：
 
-![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/partition-2.png "更多分区")
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/partition-2.png" alt="更多分区"/>
 
 在上图当中，我们知道硬盘的四个分割记录区仅使用到两个，P1为主要分割，而P2则为扩展分配。请注意，
 扩展分配的目的是使用额外的磁区来记录分割，扩展分配本身并不能被拿来格式化。
@@ -86,7 +87,7 @@ loader的主要任务有底下这些项目：
 你要如何在启动的时候选择用Windows还是Linux启动呢？假设MBR内安装的是可同时认识Windows/Linux操作系统的启动管理程序，
 那么整个流程可以图示如下：
 
-![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/loader.gif "双系统启动")
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/loader.gif" alt="系统启动"/>
 
 **但是如果要安装多重启动， 最好先安装Windows再安装Linux。**
 

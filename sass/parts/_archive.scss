@@ -28,6 +28,27 @@
 			width: 100%;
 		}
 	}
+	.category_list{
+		line-height: 35px;
+		width: 200px;
+    	height: 51px;
+    	padding-top: 55px;
+    	padding-left: 20px;
+		position: absolute;
+		top: 0;
+		border-top: 1px solid #fff;
+		&:before{
+			content: "";
+			position: absolute;
+			top: -2px;
+			width: 100%;
+			border-top: 1px solid $color-gray04;
+		}
+		@media screen and (max-width: 600px){
+			position: relative;
+			width: 100%;
+		}
+	}
 	article{
 		margin-left: 200px;
 		padding: 15px 0;
@@ -65,7 +86,23 @@
 					color: $color-gray01;
 				}
 			}
+			.date, .tags, .category, .comments{
+				padding-left: 30px;
+				position: relative;
+				&:before{
+					color: $color-gray03;
+					font: 1.3em $font-icon;
+					line-height: 1.6em;
+					position: absolute;
+					left: 0;
+				}
+				@media screen and (max-width: 800px){
+					@include inline-block;
+					margin-right: 30px;
+				}
+			}
 			.date:before{content: "\f073";}
+			.category:before{content: "\f02d";}
 			.tags:before{content: "\f02c";}
 			.comments:before{content: "\f075";}
 		}

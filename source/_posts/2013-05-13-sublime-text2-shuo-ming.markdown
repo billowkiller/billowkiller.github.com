@@ -3,7 +3,8 @@ layout: post
 title: "sublime text2 说明"
 date: 2013-05-13 03:05
 comments: true
-categories: [sublime, sublime text, shortcut, pulgin]
+categories: tools
+tags: [sublime, sublime text, shortcut, pulgin]
 ---
 
 ***Infomation Included：***
@@ -13,13 +14,13 @@ categories: [sublime, sublime text, shortcut, pulgin]
 
 * * * * *
 
-###  
+###  
 
 ### 快捷键
 
 **Ctrl+L**
 
-**选择整行****(****按住****-****继续选择下行****)**
+选择整行(按住, 继续选择下行)
 
 **Ctrl+KK**
 
@@ -151,4 +152,4 @@ categories: [sublime, sublime text, shortcut, pulgin]
 
 行排序(按a-z)
 
- 
+ 

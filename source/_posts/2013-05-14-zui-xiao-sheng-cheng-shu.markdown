@@ -3,14 +3,16 @@ layout: post
 title: "最小生成树"
 date: 2013-05-14 01:09
 comments: true
-categories: [algothrim, spanning tree]
+categories: algorithm
+tags: [algorithm, spanning tree]
 ---
 
 算法使用的是二叉堆，时间为O(ElgV)。如果V小于E的话，使用Prim更好。
 
 Kruskal算法：
 
-O(ElgE): E\<V^2 ^,所以有 lgE=O(lgV)
+<p>O(ElgE): E&lt;V<sup>2&nbsp;</sup>,所以有 lgE=O(lgV)</p>
+
 
 集合A是一个森林，加入集合A中的安全边总是图中连接两个不同连通分支的最小权边。
 
@@ -20,7 +22,7 @@ O(ElgE): E\<V^2 ^,所以有 lgE=O(lgV)
 
 若不在则可以对集合进行合并。
 
- 
+ 
 <!--more-->
 Prim算法：
 

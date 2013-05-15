@@ -39,11 +39,11 @@ $header-height: 30px;
 			display: none;
 		}
 		>li{
-			margin-left: 50px;
+			margin-left: 40px;
 			@include inline-block;
 			@media screen and (max-width: 1040px){
 				margin-left: 0;
-				margin-right: 50px;
+				margin-right: 40px;
 				&:last-of-type{
 					margin-right: 0;
 				}

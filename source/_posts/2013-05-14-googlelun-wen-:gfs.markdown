@@ -3,7 +3,8 @@ layout: post
 title: "google论文：GFS"
 date: 2013-05-14 01:09
 comments: true
-categories: [google,paper,gfs]
+categories: google
+tags: [google,paper,gfs]
 ---
 
 论文：[英文版](http://www.cs.rochester.edu/meetings/sosp2003/papers/p125-ghemawat.pdf)，[中文版](http://blademaster.ixiezi.com/2010/03/27/the-google-file-system%E4%B8%AD%E6%96%87%E7%89%88/)
@@ -13,13 +14,9 @@ categories: [google,paper,gfs]
 1. 导论
 -------
 
- 先给个定义：GFS是一个可扩展的分布式文件系统，用于大型的、分布式的、对大量数据进行访问的应用。它运行于廉价的普通硬件上，但可以提供容错功能。它可以给大量的用户提供总体性能较高的服务。
+ 先给个定义：GFS是一个可扩展的分布式文件系统，用于大型的、分布式的、对大量数据进行访问的应用。它运行于廉价的普通硬件上，但可以提供容错功能。它可以给大量的用户提供总体性能较高的服务。
 
-![](http://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/GoogleFileSystemGFS.svg/500px-GoogleFileSystemGFS.svg.png)
-
-*Google File System. Designed for system-to-system interaction, and not
-for user-to-system interaction. The chunk servers replicate the data
-automatically.*
+<img src="http://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/GoogleFileSystemGFS.svg/500px-GoogleFileSystemGFS.svg.png" alt="Google File System. Designed for system-to-system interaction, and not for user-to-system interaction. The chunk servers replicate the data automatically"/>
 
 **Assumptions in Google File System (GFS)**
 
@@ -47,7 +44,7 @@ automatically.*
 2.  以通常的标准衡量，我们的文件非常巨大。
 3.  绝大部分文件的修改是采用在文件尾部追加数据，而不是覆盖原有数据的方式。
 4.  应用程序和文件系统API的协同设计提高了整个系统的灵活性。e.g.
-    -    放松了在GFS一致性模型的要求
+    -    放松了在GFS一致性模型的要求
     -   引入了原子性的记录追加操作
     -   三个冗余的数据可以不是位一致，但是要求校验和验证
 
@@ -70,7 +67,7 @@ automatically.*
 **2. 架构**
 -----------
 
-![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/ache_zps14a9a2bc.png)
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/ache_zps14a9a2bc.png" alt="GFS Achitecture" height="300px">
 
 -   Files are divided into chunks
 -   Fixed-size chunks (64MB)
@@ -181,7 +178,7 @@ Master服务器并不保存持久化保存哪个Chunk服务器存有指定Chunk�
 
 -   **Benefits**：Avoid bottle necks and minimize latency
 
-![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/c_zps5923b611.png)
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/c_zps5923b611.png" alt="Write control and Data Flow">
 
 1.  客户机向Master节点询问哪一个Chunk服务器持有当前的租约，以及其它副本的位置。如果没有一个Chunk持有租约，Master节点就选择其中一个副本建立一个租约。
 2.  Master节点将主Chunk的标识符以及其它副本（又称为secondary副本、二级副本）的位置返回给客户机。客户机缓存这些数据以便后续的操作。只有在主Chunk不可用，或者主Chunk回复信息表明它已不再持有租约的时候，客户机才需要重新跟Master节点联系。

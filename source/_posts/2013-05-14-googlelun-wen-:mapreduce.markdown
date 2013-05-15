@@ -3,7 +3,8 @@ layout: post
 title: "google论文：MapReduce"
 date: 2013-05-14 01:09
 comments: true
-categories: [google, paper, mapreduce]
+categories: google
+tags: [google, paper, mapreduce]
 ---
 
 论文：[英文版](http://static.googleusercontent.com/external_content/untrusted_dlcp/research.google.com/en//archive/mapreduce-osdi04.pdf)，[中文版](http://blademaster.ixiezi.com/2010/03/27/google-mapreduce%E4%B8%AD%E6%96%87%E7%89%88/)
@@ -21,9 +22,10 @@ pair的数据集合，输出中间的基于key/value
 pair的数据集合；然后再创建一个Reduce函数用来合并所有的具有相同中间key值的中间value值。
 
 使用这个抽象模型，我们只要表述我们想要执行的简单运算即可，而不必关心并行计算、容错、数据分布、负载均衡等复杂的细节，这些问题都被封装在了一个库里面。设计这个抽象模型的灵感来自Lisp和许多其他函数式语言的Map和Reduce的原语。
-<!--more-->
-![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr2_zps9c617225.png)
 
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr2_zps9c617225.png" alt="big picture of MapReduce"/>
+
+<!--more-->
 ### 1.2 概述
 
 -   Programmers must specify:
@@ -60,7 +62,7 @@ pair的数据集合；然后再创建一个Reduce函数用来合并所有的具�
 
 ### 2.1 流程
 
-![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr1_zps85dad9ca.png)
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr1_zps85dad9ca.png" alt="Execution Overview" height="500px">
 
 上图展示了我们的MapReduce实现中操作的全部流程。
 
@@ -97,11 +99,11 @@ pair的数据集合；然后再创建一个Reduce函数用来合并所有的具�
 -   Preserving state in mappers and reducers
     -   Capture dependencies across multiple keys and values
 
- ![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr3_zps5ead0c7b.png)
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr3_zps5ead0c7b.png" alt="map和Reduce的同步" height="300px">
 
 ### 2.3 本地聚合
 
--   Ideal scaling characteristics:
+-   Ideal scaling characteristics:
     -   Twice the data, twice the running time
     -   Twice the resources, half the running time
 
@@ -115,7 +117,7 @@ pair的数据集合；然后再创建一个Reduce函数用来合并所有的具�
 
 ### 2.4 Shuffle and Sort
 
-![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr4_zps7ee59e35.png)
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr4_zps7ee59e35.png" alt="Shuffle and Sort" height="400px"/>
 
 ### 2.5 Master
 
@@ -195,58 +197,96 @@ pair数据的处理顺序是按照key值增量顺序处理的。
 
 **术语对照**
 
- 
-
-**翻译**
-
-**Hadoop****术语**
-
-**Google****术语**
-
-**相关解释**
-
-作业
-
-Job
-
-Job
-
-用户的每一个计算请求，就称为一个作业。
-
-作业服务器
-
-JobTracker
-
-Master
-
-用户提交作业的服务器，同时，它还负责各个作业任务的分配，管理所有的任务服务器。
-
-任务服务器
-
-TaskTracker
-
-Worker
-
-任劳任怨的工蜂，负责执行具体的任务。
-
-任务
-
-Task
-
-Task
-
-每一个作业，都需要拆分开了，交由多个服务器来完成，拆分出来的执行单位，就称为任务。
-
-备份任务
-
-Speculative Task
-
-Buckup Task
-
-每一个任务，都有可能执行失败或者缓慢，为了降低为此付出的代价，系统会未雨绸缪的实现在另外的任务服务器上执行同样一个任务，这就是备份任务。
-
+ <table border="1" cellspacing="0" cellpadding="0">
+<tbody>
+<tr>
+<td width="109">
+<p class="TableContents" align="center"><span style="font-size: 14px;"><strong>翻译</strong></span></p>
+</td>
+<td width="136">
+<p class="TableContents" align="center"><span style="font-size: 14px;"><strong>Hadoop</strong><strong>术语</strong></span></p>
+</td>
+<td width="142">
+<p class="TableContents" align="center"><span style="font-size: 14px;"><strong>Google</strong><strong>术语</strong></span></p>
+</td>
+<td width="277">
+<p class="TableContents" align="center"><span style="font-size: 14px;"><strong>相关解释</strong></span></p>
+</td>
+</tr>
+<tr>
+<td width="109">
+<p class="TableContents" align="center"><span style="font-size: 14px;">作业</span></p>
+</td>
+<td width="136">
+<p class="TableContents" align="center"><span style="font-size: 14px;">Job</span></p>
+</td>
+<td width="142">
+<p class="TableContents" align="center"><span style="font-size: 14px;">Job</span></p>
+</td>
+<td width="277">
+<p class="TableContents"><span style="font-size: 14px;">用户的每一个计算请求，就称为一个作业。</span></p>
+</td>
+</tr>
+<tr>
+<td width="109">
+<p class="TableContents" align="center"><span style="font-size: 14px;">作业服务器</span></p>
+</td>
+<td width="136">
+<p class="TableContents" align="center"><span style="font-size: 14px;">JobTracker</span></p>
+</td>
+<td width="142">
+<p class="TableContents" align="center"><span style="font-size: 14px;">Master</span></p>
+</td>
+<td width="277">
+<p class="TableContents"><span style="font-size: 14px;">用户提交作业的服务器，同时，它还负责各个作业任务的分配，管理所有的任务服务器。</span></p>
+</td>
+</tr>
+<tr>
+<td width="109">
+<p class="TableContents" align="center"><span style="font-size: 14px;">任务服务器</span></p>
+</td>
+<td width="136">
+<p class="TableContents" align="center"><span style="font-size: 14px;">TaskTracker</span></p>
+</td>
+<td width="142">
+<p class="TableContents" align="center"><span style="font-size: 14px;">Worker</span></p>
+</td>
+<td width="277">
+<p class="TableContents"><span style="font-size: 14px;">任劳任怨的工蜂，负责执行具体的任务。</span></p>
+</td>
+</tr>
+<tr>
+<td width="109">
+<p class="TableContents" align="center"><span style="font-size: 14px;">任务</span></p>
+</td>
+<td width="136">
+<p class="TableContents" align="center"><span style="font-size: 14px;">Task</span></p>
+</td>
+<td width="142">
+<p class="TableContents" align="center"><span style="font-size: 14px;">Task</span></p>
+</td>
+<td width="277">
+<p class="TableContents"><span style="font-size: 14px;">每一个作业，都需要拆分开了，交由多个服务器来完成，拆分出来的执行单位，就称为任务。</span></p>
+</td>
+</tr>
+<tr>
+<td width="109">
+<p class="TableContents" align="center"><span style="font-size: 14px;">备份任务</span></p>
+</td>
+<td width="136">
+<p class="TableContents" align="center"><span style="font-size: 14px;">Speculative Task</span></p>
+</td>
+<td width="142">
+<p class="TableContents" align="center"><span style="font-size: 14px;">Buckup Task</span></p>
+</td>
+<td width="277">
+<p class="TableContents"><span style="font-size: 14px;">每一个任务，都有可能执行失败或者缓慢，为了降低为此付出的代价，系统会未雨绸缪的实现在另外的任务服务器上执行同样一个任务，这就是备份任务。</span></p>
+</td>
+</tr>
+</tbody>
+</table>
 具体可以看博文[http://www.cnblogs.com/duguguiyu/archive/2009/02/28/1400278.html](http://www.cnblogs.com/duguguiyu/archive/2009/02/28/1400278.html)
 
- 
+ 
 
- 
+ 

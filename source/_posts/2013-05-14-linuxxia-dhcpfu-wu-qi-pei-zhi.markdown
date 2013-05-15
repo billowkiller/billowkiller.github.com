@@ -3,14 +3,15 @@ layout: post
 title: "Linux下DHCP服务器配置"
 date: 2013-05-14 01:09
 comments: true
-categories: [linux,dhcp]
+categories: tools
+tags: [linux,dhcp]
 ---
 
 环境为Ubuntu 12.10，机器为3网卡，需要再eth2上配置一个dhcp服务。
 
 因为eth2后接一个交换机，交换机上的机器需要自动分配网址，并且对于某一台或多台机器需要固定网址，例如打印机。
 
-###  1.   安装DHCP服务
+###  1.   安装DHCP服务
 
     sudo apt-get install dhcp3-server
 
@@ -31,7 +32,7 @@ isp-dhcp-server。可能是ubuntu进行的版本替换。但是不影响后面�
 
     INTERFACES=“eth2”
 <!--more-->
-### 2.  配置DHCP服务
+### 2.  配置DHCP服务
 
 修改在上一步查到的dhcpd文件
 
@@ -70,4 +71,4 @@ isp-dhcp-server。可能是ubuntu进行的版本替换。但是不影响后面�
 
     tail -n 15 /var/lib/dhcp3/dhclient.*.leases
 
- 
+ 

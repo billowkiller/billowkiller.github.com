@@ -3,14 +3,15 @@ layout: post
 title: "最短路径算法"
 date: 2013-05-14 01:09
 comments: true
-categories: [algorithm, shortest path]
+categories: algorithm
+tags: [algorithm, shortest path]
 ---
 
 **单源最短路径**
 
 ​1. Dijkstra
 
- Dijkstra算法解决有向图上带权的单源最短路径问题，要求所有边的权值非负。
+ Dijkstra算法解决有向图上带权的单源最短路径问题，要求所有边的权值非负。
 
 用到了顶点的最小优先队列，排序关键字为顶点的d值。即开始出了根为0，其他
 
@@ -18,7 +19,7 @@ categories: [algorithm, shortest path]
 
 总计运行时间为O((V+E)lgV)，如果所有顶点都可达的话，则为O(ElgV)。
 
- 
+ 
 
 ​2. Bellman-ford
 
@@ -28,13 +29,13 @@ categories: [algorithm, shortest path]
 
 算法的运行时间为O(VE)。
 
- <!--more-->
+ <!--more-->
 
 在Dijkstra算法以及关于有向无回路图的最短路径算法中，对每条边执行一次松弛操作。
 
 在Bellman-Ford算法中，对每条边要执行多次松弛操作。
 
- 
+ 
 
 **每对顶点间的最短路径**
 
@@ -46,13 +47,10 @@ categories: [algorithm, shortest path]
 
 利用的递归式为
 
-*D~i,j,k~ = min(D~i,k,k −\\ 1~ + D~k,j,k −\\ 1~,D~i,j,k −\\ 1~)　　K \>=
-1*
+<p><span style="font-family: 'comic sans ms', sans-serif;"><em>D<sub>i,j,k</sub>&nbsp;= min(D<sub>i,k,k&nbsp;&minus; 1</sub>&nbsp;+&nbsp;D<sub>k,j,k&nbsp;&minus; 1</sub>,D<sub>i,j,k&nbsp;&minus; 1</sub>)　　K &gt;= 1</em></span></p>
+<p><span style="font-family: 'comic sans ms', sans-serif;"><em>　　　= W<sub>i,j</sub>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;　　　　 &nbsp;K = 0</em></span></p>
+<p><span style="font-family: 'comic sans ms', sans-serif;"><em><br /></em>算法运行时间为&Phi;(n<sup>3</sup>)。</span></p>
 
-*　　　= W~i,j~                                 　　　　  K = 0*
-
-*\
-*算法运行时间为Φ(n^3^)。
 
 利用Floyd算法可以计算出有向图的传递闭包，即确定对所有顶点对，图中是否都存在一条
 
@@ -60,7 +58,7 @@ categories: [algorithm, shortest path]
 
 用相应的逻辑运算或和并来替换 min 和 + 用以增加运算速度。
 
- 
+ 
 
 ​2. 稀疏图上的Johnson算法
 
@@ -72,4 +70,4 @@ Johnson算法吧Dijkstra算法和Bellman-Ford算法作为其的子程序。
 
 若采用斐波那契堆来实现Dijkstra算法的最小优先队列则运算时间是
 
-O(V^2^lgV + VE)。更简单的二叉堆实现，则可以得到O(VElgV)的运行时间。
+<span>O(V<sup>2</sup>lgV + VE</span>)。更简单的二叉堆实现，则可以得到O(VElgV)的运行时间。

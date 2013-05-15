@@ -3,77 +3,129 @@ layout: post
 title: "程序员的时间换算表"
 date: 2013-05-14 01:09
 comments: true
-categories: [time,manage,programmer] 
+categories: other
+tags: [time,manage,programmer] 
 --- 
 
- 摘自[图灵社区](http://www.ituring.com.cn/)
-
-* * * * *
-
- 
-
-估算时间
-
-程序员所想象的
-
-程序员所忘记的
-
-实际时间
-
-30秒
-
-只需要做一个很小的代码改动。我准确地知道怎么改，在哪里改。花费30秒敲键盘即可。
-
-启动计算机，开发环境和获取正确源码的时间。用于构件，测试，检查和文档修复的时间。
-
-1小时
-
-5分钟
-<!--more-->
-小事一桩，我只要上谷歌查一下语法就可以修复它了。
-
-很少有一次就能找到完全正确的信息。即使找到，在它能工作前，也需要做一些调整。外加构件，测试等等时间。
-
-2小时
-
-1 小时
-
-我知道怎么做，但是写这些代码需要花费一些时间。
-
-面对未来可能发生的问题，1小时稍纵即逝。有些东西总是会出错。
-
-2小时
-
-4小时
-
-需要写一些代码，但是我粗略地知道步骤。我知道标准框架中的Wizzabanga模块可以做到，不过我得查看文档，了解它的准确地调用方式。
-
-这个大概是唯一现实的估算。它为意外的错误留下了足够大的余地，而这个任务也小到足以把握。
-
-4小时
-
-8 小时
-
-我先要把Balunga类重构成2个，然后为Wizzabanga模块加一个调用，最后为GUI加一些字段。
-
-总会有许多系统的不同部分依赖着Balunga类。大概有40个不同的文件需要修改。为GUI新加的字段，同样也需要加到数据库中。8小时太长，无法完全把握。总会有比程序员估算时更多的步骤出现。
-
-12-16小时
-
-2 天
-
-真的有一大堆代码要写。我需要往数据库里加一些新table，显示table的GUI，还有读写table的代码逻辑。
-
-对于大多数开发者来说，两天的工作量已经大到难以估算了。肯定会有什么东西被遗漏掉。不仅仅是一些小事情，而是整个一大块主要功能会被遗忘在估算中。
-
-5 天
-
-1 周
-
-哎哟，这真是一项艰巨的任务。虽然我还没有思路，但我不能说我不知道。一周应该够了，我希望，我真心希望，但是我不能要求更多了，否则他们会认为我不够称职。
-
-这个任务已经大到超过大多数程序员的理解了。它应该被发回给架构师，帮忙将它划分成更小的部分，然后提供一些解决问题的方向。架构师可能会发现一种更简单的方法来完成它，或者发现其实有更多超乎想象的工作。。。
-
-2-20 天
-
- 
+<div class="Section0">
+<p class="p0">&nbsp;<i>摘自<a href="http://www.ituring.com.cn/">图灵社区</a></i></p>
+<hr />
+<p class="p0" style="text-align: center;">&nbsp;</p>
+<table>
+<tbody>
+<tr style="background-color: #d6e5fe;">
+<td valign="center" width="85">
+<p class="p17">估算时间</p>
+</td>
+<td valign="center" width="209">
+<p class="p17">程序员所想象的</p>
+</td>
+<td valign="center" width="269">
+<p class="p17">程序员所忘记的</p>
+</td>
+<td valign="center" width="100">
+<p class="p17">实际时间</p>
+</td>
+</tr>
+<tr>
+<td valign="center" width="85">
+<p class="p16">30<span style="font-family: 'WenQuanYi Zen Hei';">秒</span></p>
+</td>
+<td valign="center" width="209">
+<p class="p16">只需要做一个很小的代码改动。我准确地知道怎么改，在哪里改。花费<span style="font-family: 'Liberation Serif';">30</span><span style="font-family: 'WenQuanYi Zen Hei';">秒敲键盘即可。</span></p>
+</td>
+<td valign="center" width="269">
+<p class="p16">启动计算机，开发环境和获取正确源码的时间。用于构件，测试，检查和文档修复的时间。</p>
+</td>
+<td valign="center" width="100">
+<p class="p16">1<span style="font-family: 'WenQuanYi Zen Hei';">小时</span></p>
+</td>
+</tr>
+<tr>
+<td valign="center" width="85">
+<p class="p16">5<span style="font-family: 'WenQuanYi Zen Hei';">分钟</span></p>
+</td>
+<td valign="center" width="209">
+<p class="p16">小事一桩，我只要上谷歌查一下语法就可以修复它了。</p>
+</td>
+<td valign="center" width="269">
+<p class="p16">很少有一次就能找到完全正确的信息。即使找到，在它能工作前，也需要做一些调整。外加构件，测试等等时间。</p>
+</td>
+<td valign="center" width="100">
+<p class="p16">2<span style="font-family: 'WenQuanYi Zen Hei';">小时</span></p>
+</td>
+</tr>
+<tr>
+<td valign="center" width="85">
+<p class="p16">1&nbsp;<span style="font-family: 'WenQuanYi Zen Hei';">小时</span></p>
+</td>
+<td valign="center" width="209">
+<p class="p16">我知道怎么做，但是写这些代码需要花费一些时间。</p>
+</td>
+<td valign="center" width="269">
+<p class="p16">面对未来可能发生的问题，<span style="font-family: 'Liberation Serif';">1</span><span style="font-family: 'WenQuanYi Zen Hei';">小时稍纵即逝。有些东西总是会出错。</span></p>
+</td>
+<td valign="center" width="100">
+<p class="p16">2<span style="font-family: 'WenQuanYi Zen Hei';">小时</span></p>
+</td>
+</tr>
+<tr>
+<td valign="center" width="85">
+<p class="p16">4<span style="font-family: 'WenQuanYi Zen Hei';">小时</span></p>
+</td>
+<td valign="center" width="209">
+<p class="p16">需要写一些代码，但是我粗略地知道步骤。我知道标准框架中的<span style="font-family: 'Liberation Serif';">Wizzabanga</span><span style="font-family: 'WenQuanYi Zen Hei';">模块可以做到，不过我得查看文档，了解它的准确地调用方式。</span></p>
+</td>
+<td valign="center" width="269">
+<p class="p16">这个大概是唯一现实的估算。它为意外的错误留下了足够大的余地，而这个任务也小到足以把握。</p>
+</td>
+<td valign="center" width="100">
+<p class="p16">4<span style="font-family: 'WenQuanYi Zen Hei';">小时</span></p>
+</td>
+</tr>
+<tr>
+<td valign="center" width="85">
+<p class="p16">8&nbsp;<span style="font-family: 'WenQuanYi Zen Hei';">小时</span></p>
+</td>
+<td valign="center" width="209">
+<p class="p16">我先要把<span style="font-family: 'Liberation Serif';">Balunga</span><span style="font-family: 'WenQuanYi Zen Hei';">类重构成</span><span style="font-family: 'Liberation Serif';">2</span><span style="font-family: 'WenQuanYi Zen Hei';">个，然后为</span><span style="font-family: 'Liberation Serif';">Wizzabanga</span><span style="font-family: 'WenQuanYi Zen Hei';">模块加一个调用，最后为</span><span style="font-family: 'Liberation Serif';">GUI</span><span style="font-family: 'WenQuanYi Zen Hei';">加一些字段。</span></p>
+</td>
+<td valign="center" width="269">
+<p class="p16">总会有许多系统的不同部分依赖着<span style="font-family: 'Liberation Serif';">Balunga</span><span style="font-family: 'WenQuanYi Zen Hei';">类。大概有</span><span style="font-family: 'Liberation Serif';">40</span><span style="font-family: 'WenQuanYi Zen Hei';">个不同的文件需要修改。为</span><span style="font-family: 'Liberation Serif';">GUI</span><span style="font-family: 'WenQuanYi Zen Hei';">新加的字段，同样也需要加到数据库中。</span><span style="font-family: 'Liberation Serif';">8</span><span style="font-family: 'WenQuanYi Zen Hei';">小时太长，无法完全把握。总会有比程序员估算时更多的步骤出现。</span></p>
+</td>
+<td valign="center" width="100">
+<p class="p16">12-16<span style="font-family: 'WenQuanYi Zen Hei';">小时</span></p>
+</td>
+</tr>
+<tr>
+<td valign="center" width="85">
+<p class="p16">2&nbsp;<span style="font-family: 'WenQuanYi Zen Hei';">天</span></p>
+</td>
+<td valign="center" width="209">
+<p class="p16">真的有一大堆代码要写。我需要往数据库里加一些新<span style="font-family: 'Liberation Serif';">table</span><span style="font-family: 'WenQuanYi Zen Hei';">，显示</span><span style="font-family: 'Liberation Serif';">table</span><span style="font-family: 'WenQuanYi Zen Hei';">的</span><span style="font-family: 'Liberation Serif';">GUI</span><span style="font-family: 'WenQuanYi Zen Hei';">，还有读写</span><span style="font-family: 'Liberation Serif';">table</span><span style="font-family: 'WenQuanYi Zen Hei';">的代码逻辑。</span></p>
+</td>
+<td valign="center" width="269">
+<p class="p16">对于大多数开发者来说，两天的工作量已经大到难以估算了。肯定会有什么东西被遗漏掉。不仅仅是一些小事情，而是整个一大块主要功能会被遗忘在估算中。</p>
+</td>
+<td valign="center" width="100">
+<p class="p16">5&nbsp;<span style="font-family: 'WenQuanYi Zen Hei';">天</span></p>
+</td>
+</tr>
+<tr>
+<td valign="center" width="85">
+<p class="p16">1&nbsp;<span style="font-family: 'WenQuanYi Zen Hei';">周</span></p>
+</td>
+<td valign="center" width="209">
+<p class="p16">哎哟，这真是一项艰巨的任务。虽然我还没有思路，但我不能说我不知道。一周应该够了，我希望，我真心希望，但是我不能要求更多了，否则他们会认为我不够称职。</p>
+</td>
+<td valign="center" width="269">
+<p class="p16">这个任务已经大到超过大多数程序员的理解了。它应该被发回给架构师，帮忙将它划分成更小的部分，然后提供一些解决问题的方向。架构师可能会发现一种更简单的方法来完成它，或者发现其实有更多超乎想象的工作。。。</p>
+</td>
+<td valign="center" width="100">
+<p class="p16">2-20&nbsp;<span style="font-family: 'WenQuanYi Zen Hei';">天</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="p15">&nbsp;</p>
+</div>

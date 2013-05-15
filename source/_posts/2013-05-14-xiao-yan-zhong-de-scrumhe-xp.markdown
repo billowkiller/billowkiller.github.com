@@ -3,10 +3,11 @@ layout: post
 title: "硝烟中的Scrum和XP"
 date: 2013-05-14 01:09
 comments: true
-categories: [scrum,xp,software engineering]
+categories: rework
+tags: [scrum,xp,software engineering]
 ---
 
-**refine from* 硝烟中的Scrum和XP--我们如何实施Scrum***
+**refine from** *硝烟中的Scrum和XP--我们如何实施Scrum*
 
 * * * * *
 
@@ -54,4 +55,4 @@ sprint计划会议产生的成果：
 -   持续集成：Maven，QuickBuild
 -   代码标准
 
- 
+ 
