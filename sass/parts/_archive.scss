@@ -86,7 +86,7 @@
 					color: $color-gray01;
 				}
 			}
-			.date, .tags, .category, .comments{
+			.date, .tags, .categories, .comments{
 				padding-left: 30px;
 				position: relative;
 				&:before{
@@ -102,7 +102,7 @@
 				}
 			}
 			.date:before{content: "\f073";}
-			.category:before{content: "\f02d";}
+			.categories:before{content: "\f02d";}
 			.tags:before{content: "\f02c";}
 			.comments:before{content: "\f075";}
 		}
