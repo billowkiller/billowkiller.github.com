@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: reduce | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/reduce/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2013-05-17T01:17:40-04:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[Wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Python特殊语法：filter、map、reduce、lambda [转]]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan/"/>
+    <updated>2013-05-14T01:09:00-04:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan</id>
+    <content type="html"><![CDATA[<p><i><strong>from</strong> <a href="http://www.cnblogs.com/longdouhzt/archive/2012/05/19/2508844.html">http://www.cnblogs.com/longdouhzt/archive/2012/05/19/2508844.html</a></i></p>
+
+<hr />
+
+<p>Python内置了一些非常有趣但非常有用的函数，充分体现了Python的语言魅力！</p>
+
+<p><strong>filter(function,
+sequence)</strong>：对sequence中的item依次执行function(item)，将执行结果为True的item组成一个List/String/Tuple（取决于sequence的类型）返回：</p>
+
+<p>>>> def f(x): return x % 2 != 0 and x % 3 != 0</p>
+
+<p>>>> filter(f, range(2, 25))
+[5, 7, 11, 13, 17, 19, 23]</p>
+
+<p>>>> def f(x): return x != &lsquo;a&rsquo;</p>
+
+<p>>>> filter(f, &ldquo;abcdef&rdquo;)</p>
+
+<p>&lsquo;bcdef&rsquo;</p>
+
+<p><strong>map(function,
+sequence)</strong> ：对sequence中的item依次执行function(item)，见执行结果组成一个List返回：</p>
+
+<p>>>> def cube(x): return x<em>x</em>x</p>
+
+<p>>>> map(cube, range(1, 11))</p>
+
+<p>[1, 8, 27, 64, 125, 216, 343, 512, 729, 1000]</p>
+
+<p>>>> def cube(x) : return x + x</p>
+
+<p>&hellip;</p>
+
+<p>>>> map(cube , &ldquo;abcde&rdquo;)</p>
+
+<p>[&lsquo;aa&rsquo;, &lsquo;bb&rsquo;, &lsquo;cc&rsquo;, &lsquo;dd&rsquo;, &lsquo;ee&rsquo;]</p>
+
+<p>另外map也支持多个sequence，这就要求function也支持相应数量的参数输入：
+>>> def add(x, y): return x+y</p>
+
+<p>>>> map(add, range(8), range(8))</p>
+
+<p>[0, 2, 4, 6, 8, 10, 12, 14]</p>
+
+<!--more-->
+
+
+<p><strong>reduce(function, sequence,
+starting_value)</strong>：对sequence中的item顺序迭代调用function，如果有starting_value，还可以作为初始值调用，例如可以用来对List求和：</p>
+
+<p>>>> def add(x,y): return x + y</p>
+
+<p>>>> reduce(add, range(1, 11))</p>
+
+<p>55 （注：1+2+3+4+5+6+7+8+9+10）</p>
+
+<p>>>> reduce(add, range(1, 11), 20)</p>
+
+<p>75 （注：1+2+3+4+5+6+7+8+9+10+20）</p>
+
+<p><strong>lambda</strong>：这是Python支持一种有趣的语法，它允许你快速定义单行的最小函数，类似与C语言中的宏，这些叫做lambda的函数，是从LISP借用来的，可以用在任何需要函数的地方：</p>
+
+<p>>>> g = lambda x: x * 2</p>
+
+<p>>>> g(3)</p>
+
+<p>6</p>
+
+<p>>>> (lambda x: x * 2)(3)</p>
+
+<p>6</p>
+
+<p>我们也可以<strong>把filter map reduce
+和lambda结合起来</strong>用，函数就可以简单的写成一行。</p>
+
+<p>例如</p>
+
+<p>kmpathes = filter(lambda kmpath: kmpath,                <br/>
+map(lambda kmpath: string.strip(kmpath),
+string.split(l, &lsquo;:&rsquo;)))</p>
+
+<p>看起来麻烦，其实就像用语言来描述问题一样，非常优雅。
+对 l
+中的所有元素以':&lsquo;做分割，得出一个列表。对这个列表的每一个元素做字符串strip，形成一个列表。对这个列表的每一个元素做直接返回操作(这个地方可以加上过滤条件限制)，最终获得一个字符串被&rsquo;:&lsquo;分割的列表，列表中的每一个字符串都做了strip，并可以对特殊字符串过滤。</p>
+
+<p>[转] <a href="http://hi.baidu.com/black/item/307001d18715fc322a35c747">http://hi.baidu.com/black/item/307001d18715fc322a35c747</a></p>
+
+<hr />
+
+<p><strong>lambda表达式</strong>返回一个函数对象</p>
+
+<p>例子：</p>
+
+<pre><code>func = lambda x,y:x+y
+</code></pre>
+
+
+<p>func相当于下面这个函数</p>
+
+<pre><code>def func(x,y):
+    return x+y
+</code></pre>
+
+
+<p>注意def是语句而lambda是表达式</p>
+
+<p>下面这种情况下就只能用lambda而不能用def</p>
+
+<pre><code>[(lambda x:x*x)(x) for x in range(1,11)]
+</code></pre>
+
+
+<p>map，reduce，filter中的function都可以用lambda表达式来生成！</p>
+
+<p><strong>map(function,sequence)</strong></p>
+
+<p>把sequence中的值当参数逐个传给function，返回一个包含函数执行结果的list。</p>
+
+<p>如果function有两个参数，即
+map(function,sequence1,sequence2)。</p>
+
+<p>例子：</p>
+
+<p>求1<em>1,2</em>2,3<em>3,4</em>4</p>
+
+<pre><code>map(lambda x:x*x,range(1,5))
+</code></pre>
+
+
+<p>返回值是[1,4,9,16]</p>
+
+<p><strong>reduce(function,sequence)</strong></p>
+
+<p>function接收的参数个数只能为2</p>
+
+<p>先把sequence中第一个值和第二个值当参数传给function，再把function的返回值和第三个值当参数传给</p>
+
+<p>function，然后只返回一个结果。</p>
+
+<p>例子：</p>
+
+<p>求1到10的累加</p>
+
+<pre><code>reduce(lambda x,y:x+y,range(1,11))
+</code></pre>
+
+
+<p>返回值是55。</p>
+
+<p><strong>filter(function,sequence)</strong></p>
+
+<p>function的返回值只能是True或False</p>
+
+<p>把sequence中的值逐个当参数传给function，如果function(x)的返回值是True，就把x加到filter的返回值里面。一般来说filter的返回值是list，特殊情况如sequence是string或tuple，则返回值按照sequence的类型。</p>
+
+<p>例子：</p>
+
+<p>找出1到10之间的奇数</p>
+
+<pre><code>filter(lambda x:x%2!=0,range(1,11))
+</code></pre>
+
+
+<p>返回值</p>
+
+<p>[1,3,5,7,9]</p>
+
+<p>如果sequence是一个string</p>
+
+<pre><code>filter(lambda x:len(x)!=0,'hello')
+</code></pre>
+
+
+<p>返回'hello'</p>
+
+<pre><code>filter(lambda x:len(x)==0,'hello')
+</code></pre>
+
+
+<p>返回''</p>
+
+<p>[转] <a href="http://blog.csdn.net/myzhan/article/details/7269471">http://blog.csdn.net/myzhan/article/details/7269471</a></p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,241 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>硝烟中的Scrum和XP - Billowkiller's Blog</title>
+	<meta name="author" content="Wutao">
+
+	
+	<meta name="description" content="refine from 硝烟中的Scrum和XP&mdash;我们如何实施Scrum 产品的backlog时Scrum的核心，也是一切的起源，从根本上说，它就是一个需求或故事特性等组成的列表，按照重要性的级别进行排序。它里面包含的是客户想要的东西，并用客户的术语加一描述。 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">Billowkiller's Blog</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="http://about.me/wu_tao/">Me</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/blog/tags">Tags</a></li>
+	<li><a href="http://about.me/wu_tao/">Me</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:billowkiller.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		
+		<a class="github" href="https://github.com/billowkiller" title="GitHub">GitHub</a>
+		
+    
+		
+		
+		
+		
+		<a class="delicious" href="http://delicious.com/billowkiller" title="Delicious">Delicious</a>
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:billowkiller.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">硝烟中的Scrum和XP</h2>
+	<div class="entry-content"><p><strong>refine from</strong> <em>硝烟中的Scrum和XP&mdash;我们如何实施Scrum</em></p>
+
+<hr />
+
+<p>产品的backlog时Scrum的核心，也是一切的起源，从根本上说，它就是一个需求或故事特性等组成的列表，按照重要性的级别进行排序。它里面包含的是客户想要的东西，并用客户的术语加一描述。</p>
+
+<p>backlog的另外一个名称是故事。包括以下字段：</p>
+
+<ul>
+<li>ID</li>
+<li>Name：一个简短的描述</li>
+<li>Importance：100以内打分，分数越高越重要</li>
+<li>Initial estimate：最小单位为stroy
+point，即为人天。估值无需准确，但是要保证相对的正确性。</li>
+<li>How to demo：简短的测试规范，先做啥，然后做啥，最后做啥，得到什么结果。</li>
+<li>Notes：相关信息，解释说明，对其他资料的引用等等，简短。</li>
+</ul>
+
+
+<p>额外的字段，根据需要：</p>
+
+<ul>
+<li>Track：当前故事的大致分类（后台系统，优化&hellip;）</li>
+<li>Components：再多个Scrum团队协作的时候很有用，包括数据库，服务器，客户端等组件</li>
+<li>Requestor：哪个客户活相关人员最先提出的需求，再后续的开发过程中向他反馈</li>
+<li>Bug tracking ID</li>
+</ul>
+
+
+<p>产品的backlog应该停留再业务层次上，例如给Events表添加索引，潜在的目标是“提高再后台系统中搜索事件表单的相应速度”，这时需要改写，原先的目标作为一个注释存在。</p>
+
+<!--more-->
+
+
+<p>产品负责人维护backlog，理解每个故事的含义，不需要知道故事的具体实现，但是要知道为什么这个故事会在这里。其他人向负责人申请故事，负责人对它们划分先后次序。</p>
+
+<p>sprint计划会议产生的成果：</p>
+
+<ul>
+<li>sprint目标</li>
+<li>团队成员名单（以及他们的投入程度）</li>
+<li>sprint backlog</li>
+<li>确定好sprint演示日期</li>
+<li>确定每日Scrum会议的时间和地点</li>
+</ul>
+
+
+<p>过程中实践TDD（测试驱动开发），包括开发和提问需求方式&hellip;</p>
+
+<p>故事可以分成更小的故事，而小故事又可以分成任务。</p>
+
+<p>一些重要的开发概念：</p>
+
+<ul>
+<li>结对编程</li>
+<li>测试驱动开发：Juit/httpnit/JWebUnit，HSQLDB，Jetty，Cobertura，mock</li>
+<li>增量设计</li>
+<li>代码集体所有权</li>
+<li>持续集成：Maven，QuickBuild</li>
+<li>代码标准</li>
+</ul>
+
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-14T01:09:00-04:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time></div>
+	<div class="categories">
+
+
+	<a class='category' href='/blog/categories/rework/'>rework</a>
+
+
+</div>
+	<div class="tags">
+
+<span>
+  
+    <a class='tag' href='/blog/tags/scrum/'>scrum</a>, <a class='tag' href='/blog/tags/software-engineering/'>software engineering</a>, <a class='tag' href='/blog/tags/xp/'>xp</a>
+  
+</span>
+
+</div>
+	
+		<div class="comments"><a href="/blog/2013/05/14/xiao-yan-zhong-de-scrumhe-xp/#disqus_thread">Comments</a></div>
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2013
+
+    Wutao
+
+- Powered by Octopress, Pandoc and <a href="http://zespia.tw/Octopress-Theme-Slash/">Slash</a>
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/05/14/xiao-yan-zhong-de-scrumhe-xp/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/05/14/xiao-yan-zhong-de-scrumhe-xp/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+<center>
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.</center>
+</body>
+</html>
