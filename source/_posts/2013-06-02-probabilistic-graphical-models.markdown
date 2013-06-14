@@ -131,7 +131,7 @@ $$
 
   具体的一个例子为phone HMM，这是一个语音识别的例子，根据单词的发言可以建立HMM，识别出得到的声音模型为观察值evidents，从start到end计算得到概率最大的HMM最终状态即为识别到的单词。
   
-  <img src="" width="400px" alt="一个典型的HMM，y为观察值，x为状态值，t为时刻"/>
+  <img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/hmm_zpsf0b66b9e.png" width="400px" alt="一个典型的HMM，y为观察值，x为状态值，t为时刻"/>
   
   * 贝叶斯网络(Beyesian Network)
   
