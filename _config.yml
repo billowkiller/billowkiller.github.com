@@ -5,7 +5,7 @@
 url: http://billowkiller.github.io
 title: Billowkiller's Blog
 subtitle: A blogging framework for hackers.
-author: Wutao
+author: wutao
 simple_search: http://google.com/search
 description:
 
@@ -34,7 +34,7 @@ plugins: plugins
 code_dir: downloads/code
 category_dir: blog/categories
 tag_dir: blog/tags
-markdown: rdiscount
+markdown: kramdown #rdiscount
 rdiscount:
   extensions:
     - autolink
