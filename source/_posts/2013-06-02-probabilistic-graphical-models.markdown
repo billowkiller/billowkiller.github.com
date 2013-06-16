@@ -1,4 +1,4 @@
----
+----
 layout: post
 title: "Probabilistic Graphical Models"
 date: 2013-06-02 13:49
@@ -90,28 +90,28 @@ $$
 
 #### 2.3 生成模型和判别模型对比
 
-*	统计建模方式不同。生成模型构建联合分布$p(X,Y)$；判别模型构建条件概率分布$p(X\|Y)$。
-*	训练时，二者优化准则不同。生成模型优化训练数据的联合分布概率；判别模型优化训练数据的条件分布概率，判别模型与序列标记问题有较好的对应性。
-*	训练复杂度不同。判别模型训练复杂度较高。
-*	对于观察序列的处理不同。生成模型中，观察序列作为模型的一部分；判别模型中，观察序列只作为条件，因此可以针对观察序列设计灵活的特征。
-*	是否支持无监督训练。生成模型支持无监督训练。
-*	应用角度不同。生成模型一般主要是对后验概率建模，从统计的角度表示数据的分布情况，能够反映同类数据本身的相似度；判别模型主要特点是寻找不同类别之间的最优分类面，反映的是异类数据之间的差异。
+*  统计建模方式不同。生成模型构建联合分布$p(X,Y)$；判别模型构建条件概率分布$p(X\|Y)$。
+*   训练时，二者优化准则不同。生成模型优化训练数据的联合分布概率；判别模型优化训练数据的条件分布概率，判别模型与序列标记问题有较好的对应性。
+* 训练复杂度不同。判别模型训练复杂度较高。
+* 对于观察序列的处理不同。生成模型中，观察序列作为模型的一部分；判别模型中，观察序列只作为条件，因此可以针对观察序列设计灵活的特征。
+* 是否支持无监督训练。生成模型支持无监督训练。
+* 应用角度不同。生成模型一般主要是对后验概率建模，从统计的角度表示数据的分布情况，能够反映同类数据本身的相似度；判别模型主要特点是寻找不同类别之间的最优分类面，反映的是异类数据之间的差异。
 
 #### 2.4 举例
 
 常见的Generative Model主要有：
 
-*	Gaussians, Naive Bayes, Mixtures of multinomials
-*	Mixtures of Gaussians, Mixtures of experts, HMMs
-*	Sigmoidal belief networks, Bayesian networks
-*	Markov random fields
+* Gaussians, Naive Bayes, Mixtures of multinomials
+* Mixtures of Gaussians, Mixtures of experts, HMMs
+* Sigmoidal belief networks, Bayesian networks
+* Markov random fields
 
 常见的Discriminative Model主要有：
 
-*	logistic regression
-*	SVMs
-*	traditional neural networks
-*	Nearest neighbor
+* logistic regression
+* SVMs
+* traditional neural networks
+* Nearest neighbor
 
 ### 3. 表示理论
 
@@ -125,23 +125,83 @@ $$
 
   看这个名称就知道，隐马尔可夫模型是马尔可夫模型的扩展，它是在马尔可夫链的基础上发展起来的。马尔可夫链是马尔可夫随机过程的特殊情况，即马尔可夫链的状态和时间参数都是离散的马尔可夫过程。它的$m+1$时刻的状态只是和$m$时刻的状态有关，而与之前的状态无关。实际中，马尔可夫链的每一状态可以对应于一个可观测到的物理事件。比如天气预测中的雨晴雪等，根据这个模型可以算出各种天气在某一时刻出现的概率。
   
+  <img src="http://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Hmm_temporal_bayesian_net.svg/500px-Hmm_temporal_bayesian_net.svg.png" width="400px" alt="一个典型的HMM，y为观察值，x为状态值，t为时刻"/>
+  
   由于实际问题比马尔可夫链模型所描述的更为复杂，观察到的事件并不是与状态一一对应的，而是通过一组概率分布相联系，这个就是HMM。HMM是一个双重的随机过程，其中之一是马尔可夫链，描述状态转移。另外一个随机过程描述状态和观察值，它并不是与状态一一对应的，需要通过一个随机过程去感知状态的存在及特性。这个就是Hidden的由来。
 
-  <img src="http://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Hmm_temporal_bayesian_net.svg/500px-Hmm_temporal_bayesian_net.svg.png" width="400px" alt="一个典型的HMM，y为观察值，x为状态值，t为时刻"/>
-
-  具体的一个例子为phone HMM，这是一个语音识别的例子，根据单词的发言可以建立HMM，识别出得到的声音模型为观察值evidents，从start到end计算得到概率最大的HMM最终状态即为识别到的单词。
+  具体的一个例子为phone HMM，这是一个语音识别的例子，根据单词的发言可以建立HMM，一个随机的有限自动机，每个状态都产生一个evident或observation。识别出得到的声音特征为观察值evidents，从start到end计算得到概率最大的HMM最终状态即为识别到的单词。
   
-  <img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/hmm_zpsf0b66b9e.png" width="400px" alt="一个典型的HMM，y为观察值，x为状态值，t为时刻"/>
+  <img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/hmm_zpsf0b66b9e.png" width="600px" alt="一个典型的HMM，y为观察值，x为状态值，t为时刻"/>
   
-  * 贝叶斯网络(Beyesian Network)
+* 贝叶斯网络(Beyesian Network, BN)
   
   一般是指带有概率信息的有向无环图(directed acyclic graph, DAG)。由两部分组成：
   
   * 图中的节点表示的是随机变量，结点间的连接表示了可能的因果关系。
   * 每一个结点都附有与该变量相联系的条件概率分布函数(Conditional Probability Distribution, CPD)，如果变量是离散的，则表现为条件概率表(Conditional Probability Table, CPT)。
   
+  <img src="http://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/SimpleBayesNet.svg/400px-SimpleBayesNet.svg.png" width="400px" alt="一个简单的贝叶斯网络"/>
+  
   贝叶斯网络表现的是一个联合概率分布，可以通过Chain Rule来计算$p(X\_1,X\_2,...,X\_n)=\prod{p(X\_i\|Par_G(X\_i))}$。
+  
+  贝叶斯网络一个很有用的用途是作为分类器，即通过某对象的先验概率，利用贝叶斯公式计算出其后验概率，即该对象属于某一类的概率，选择具有最大后验概率的类作为该对象所属的类。所谓的先验概率是指在没有观测值的情况下的概率，后验概率是指在加入观测值后的概率。用的比较多的贝叶斯网络分类器有四种: 分别是朴素贝叶斯网络(Naive Bayesian Networks, NBN); 通用贝叶斯网络(General Bayesian Networks, GBN); 增强型朴素贝叶斯网络(Tree-Augmented Naive Bayes, TAN); 马尔可夫毯贝叶斯网络(Markov Blanket Bayesian Networks, MBBN)。
+  
+* 动态贝叶斯网络(Dynamic Bayesian Networks, DBNs)
+
+  贝叶斯网络只能反映事物的静态特征，也就是在某一个时刻事物不同特征的依赖关系，但在现实生活中，存在着很多的动态随机过程，DBN就是用来对这些过程建模的方法之一。但是动态表示的是一个动态的系统，而系统的结构并不随着时间变化。DBN服从马尔科夫特征：*t*时刻系统的所有变量的概率分布只与*t-1*时刻的状态变量概率分布相关。HMM可以当做DBN的一种特殊情况。
+  
+  <img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/DBN_zpse19ad96b.gif" width="400px" alt="车辆位置的DBN"/>
   
 #### 3.2 无向图模型
 
-无向图概率模型用来建立随机变量间的空间相互关系或只是相互依赖性。典型的代表是马尔科夫随机场和条件随机场。
+无向图概率模型用来建立随机变量间的空间相互关系或只是相互依赖性。典型的代表是马尔科夫随机场和条件随机场。无向连接通常捕捉一对结点之间的互相依赖关系。
+
+* 马尔科夫随机场(Markov Random Fields, MRFs)
+
+  MRF也叫马尔科夫网(Markov Network, MN)，MRF是关于一组有马尔科夫性质随机变量*X*的全联合概率分布模型。一方面MRF可以表示BN无法表示的依赖关系，如循环关系；另外一方面，它不能表示BN所能够表示的推导关系。
+  
+  当概率分布为正的时候，被称为Gibbs随机场，因为根据Hammersley–Clifford理论（MN与Gibbs分布的等价性）和局部马尔科夫性质，无向图的概率分布可以被定义为下面的Gibbs公式，即
+
+$$
+\begin{align}
+P(x) = \frac{1}{Z}\prod_C\phi_C(X_C)
+\end{align}
+$$
+
+其中，$\phi\_C(X\_C)$是一个关于$X\_C$的非负实数函数，表示的是无向图中团的势函数(potential function)。Z是一个归一化常数(Partition Function)，其取值为$\sum\_X\phi\_C(X\_C)$。
+
+MRF可以用来分析物理现象的空间关系或者非因果上下文关系。在图像处理领域，它能够很好地描述相邻的图像像素或者相关特征间的相互依赖关系。
+
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/Isingmodel_zpsbd31e4ba.png" alt="MN的原型，Ising model" width="400px"/>
+
+  * Pairwise MRF
+  
+  Pairwise MRF模型是广泛使用的一种MRF模型，其结构形式简单和计算量低。
+  其联合概率分布可以写成如下形式：
+  
+$$
+\begin{align}
+P(x) = \frac{1}{Z}\prod_{i,j}\Psi(x_i,y_j)\prod_i\phi(x_i,y_j)
+\end{align}
+$$
+式中，$x$为标注类，$y$为观测值。
+
+<img src="http://www.hindawi.com/journals/mpe/2012/814356.fig.004.jpg" alt="Pairwise MRF模型" width="300px"/>
+
+* 条件随机场(Conditional Random Fields, CRF)
+
+给定输出标识序列X和观察序列Y，CRF通过定义条件概率$p(X\|Y)$，而不是联合概率$p(X,Y)$来描述模型。CRF是一个判别模型，在图像分割、形状分析和图像标注等方面优于生成模型MRF。CRF是一种无向图模型，当给定观测值(y)，且能够直接表达类条件概率分布(类变量x)，即
+
+$$
+\begin{align}
+P(x|y) = \frac{1}{Z(y)}\prod_C\phi_C(X_C,y)
+\end{align}
+$$
+
+其中，$\phi\_C(X\_C,y)$不仅依赖于集合x，同时也依赖于整个观测值y。
+
+CRF同MRF相比，最主要的优点有：CRF关注于最终的预测问题，避免不必要的观察密度计算；CRF不要求像生成模型中对于观察变量之间条件独立关系的假设。
+
+CRF可以被称为Task-Specify Prediction，因为，不像MN，它的判别对象是确定的。例如，对于图像分割来说，它的$X$为输入端，可以是像素值和要处理的特征，targe value为$Y$，也就是每个像素的类别，例如草地，天空等。又如对于文本处理来说，输入端可以为句子中的词，目标则是这些词的标注，例如人名，地名等。
+
+这种情况适用于correlated featureas, 也就是特征之间存在依赖关系；这种情况对于其他模型并不适用，例如从Naive Beysian的模型可以看出，它的特征之间是相互独立的。
