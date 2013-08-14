@@ -1,4 +1,0 @@
-User-agent: *
-Disallow: 
-
-Sitemap: http://billowkiller.github.io/sitemap.xml 
