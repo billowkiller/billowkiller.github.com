@@ -16,7 +16,7 @@ Python内置了一些非常有趣但非常有用的函数，充分体现了Pytho
 
 
 **filter(function,
-sequence)**：对sequence中的item依次执行function(item)，将执行结果为True的item组成一个List/String/Tuple（取决于sequence的类型）返回：
+sequence)** ：对sequence中的item依次执行function(item)，将执行结果为True的item组成一个List/String/Tuple（取决于sequence的类型）返回：
 
 \>>> def f(x): return x % 2 != 0 and x % 3 != 0 
 

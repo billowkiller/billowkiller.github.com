@@ -1,10 +1,10 @@
-----
+---
 layout: post
 title: "Probabilistic Graphical Models"
 date: 2013-06-02 13:49
 comments: true
-categories: 
-tags: 
+categories: [rework]
+tags: [PGM,Machine Learning]
 ---
 
 ### 1. PGM介绍
@@ -19,7 +19,7 @@ GM(graphical model)，图模型首先它是一个概率模型，用的是图的�
 
 使用现实中得到的知识数据来表述图模型，作为declarative representation，它与我们所要使用的算法是
 松耦合的，可以将不同的算法应用到图模型上，在图模型中可以加入专家知识，和从其他数据中学习到的知识。
-
+<!--more-->
 **什么时候需要用到PGM？**
 
 *   拥有噪音数据或者不确定性比较大的时候
@@ -58,9 +58,9 @@ X^* = arg max_{X_1,X_2,...,X_n}p(X_1,X_2,...,X_n|Y_1,Y_2,...,Y_n)
 \end{align}
 $$
 
-#### 2.1 生成模型
+#### 2.1 生成模型(Generative Models)
 
-生成模型\(Generative Models\)不直接对$p(X\_1,X\_2,...,X\_n\|Y\_1,Y\_2,...,Y\_n)$进行建模，而是先对其进行变换，构建联合概率$p(生成模型和判别模型。X\_1,X\_2,...,X\_n\,Y\_1,Y\_2,...,Y\_n)$，即
+生成模型不直接对$p(X\_1,X\_2,...,X\_n\|Y\_1,Y\_2,...,Y\_n)$进行建模，而是先对其进行变换，构建联合概率$p(X\_1,X\_2,...,X\_n\,Y\_1,Y\_2,...,Y\_n)$，即
 
 $$
 \begin{equation}
@@ -84,9 +84,9 @@ $$
 
 生成模型认为观测值是由状态生成的。
 
-#### 2.2 判别模型
+#### 2.2 判别模型(Discriminative Models)
 
-判别模型\(Discriminative Models\)克服了生成模型的独立性假设，其直接对条件概率$p(X\_1,X\_2,...,X\_n\|Y\_1,Y\_2,...,Y\_n)$进行建模，也就是说，在给定观察序列的条件下，寻找最可能的状态序列的时候，条件分布可以直接使用。
+判别模型克服了生成模型的独立性假设，其直接对条件概率$p(X\_1,X\_2,...,X\_n\|Y\_1,Y\_2,...,Y\_n)$进行建模，也就是说，在给定观察序列的条件下，寻找最可能的状态序列的时候，条件分布可以直接使用。
 
 #### 2.3 生成模型和判别模型对比
 
@@ -121,10 +121,10 @@ $$
 
 有向图概率模型使用有向边连接不同的结点，这些有向边通常表示了结点间的因果关系。典型的代表是隐马尔可夫模型，贝叶斯网络和的动态贝叶斯网络。
 
-* HMM(Hidden Markov Model)
+* **HMM(Hidden Markov Model)**
 
   看这个名称就知道，隐马尔可夫模型是马尔可夫模型的扩展，它是在马尔可夫链的基础上发展起来的。马尔可夫链是马尔可夫随机过程的特殊情况，即马尔可夫链的状态和时间参数都是离散的马尔可夫过程。它的$m+1$时刻的状态只是和$m$时刻的状态有关，而与之前的状态无关。实际中，马尔可夫链的每一状态可以对应于一个可观测到的物理事件。比如天气预测中的雨晴雪等，根据这个模型可以算出各种天气在某一时刻出现的概率。
-  
+
   <img src="http://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Hmm_temporal_bayesian_net.svg/500px-Hmm_temporal_bayesian_net.svg.png" width="400px" alt="一个典型的HMM，y为观察值，x为状态值，t为时刻"/>
   
   由于实际问题比马尔可夫链模型所描述的更为复杂，观察到的事件并不是与状态一一对应的，而是通过一组概率分布相联系，这个就是HMM。HMM是一个双重的随机过程，其中之一是马尔可夫链，描述状态转移。另外一个随机过程描述状态和观察值，它并不是与状态一一对应的，需要通过一个随机过程去感知状态的存在及特性。这个就是Hidden的由来。
@@ -133,7 +133,7 @@ $$
   
   <img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/hmm_zpsf0b66b9e.png" width="600px" alt="一个典型的HMM，y为观察值，x为状态值，t为时刻"/>
   
-* 贝叶斯网络(Beyesian Network, BN)
+* **贝叶斯网络(Beyesian Network, BN)**
   
   一般是指带有概率信息的有向无环图(directed acyclic graph, DAG)。由两部分组成：
   
@@ -144,9 +144,14 @@ $$
   
   贝叶斯网络表现的是一个联合概率分布，可以通过Chain Rule来计算$p(X\_1,X\_2,...,X\_n)=\prod{p(X\_i\|Par_G(X\_i))}$。
   
-  贝叶斯网络一个很有用的用途是作为分类器，即通过某对象的先验概率，利用贝叶斯公式计算出其后验概率，即该对象属于某一类的概率，选择具有最大后验概率的类作为该对象所属的类。所谓的先验概率是指在没有观测值的情况下的概率，后验概率是指在加入观测值后的概率。用的比较多的贝叶斯网络分类器有四种: 分别是朴素贝叶斯网络(Naive Bayesian Networks, NBN); 通用贝叶斯网络(General Bayesian Networks, GBN); 增强型朴素贝叶斯网络(Tree-Augmented Naive Bayes, TAN); 马尔可夫毯贝叶斯网络(Markov Blanket Bayesian Networks, MBBN)。
+  贝叶斯网络一个很有用的用途是作为分类器，即通过某对象的先验概率，利用贝叶斯公式计算出其后验概率，即该对象属于某一类的概率，选择具有最大后验概率的类作为该对象所属的类。所谓的先验概率是指在没有观测值的情况下的概率，后验概率是指在加入观测值后的概率。用的比较多的贝叶斯网络分类器有四种: 
+
+*	朴素贝叶斯网络(Naive Bayesian Networks, NBN);
+*	通用贝叶斯网络(General Bayesian Networks, GBN);
+*	增强型朴素贝叶斯网络(Tree-Augmented Naive Bayes, TAN);
+*	马尔可夫毯贝叶斯网络(Markov Blanket Bayesian Networks, MBBN)。
   
-* 动态贝叶斯网络(Dynamic Bayesian Networks, DBNs)
+* **动态贝叶斯网络(Dynamic Bayesian Networks, DBNs)**
 
   贝叶斯网络只能反映事物的静态特征，也就是在某一个时刻事物不同特征的依赖关系，但在现实生活中，存在着很多的动态随机过程，DBN就是用来对这些过程建模的方法之一。但是动态表示的是一个动态的系统，而系统的结构并不随着时间变化。DBN服从马尔科夫特征：*t*时刻系统的所有变量的概率分布只与*t-1*时刻的状态变量概率分布相关。HMM可以当做DBN的一种特殊情况。
   
@@ -156,7 +161,7 @@ $$
 
 无向图概率模型用来建立随机变量间的空间相互关系或只是相互依赖性。典型的代表是马尔科夫随机场和条件随机场。无向连接通常捕捉一对结点之间的互相依赖关系。
 
-* 马尔科夫随机场(Markov Random Fields, MRFs)
+* **马尔科夫随机场(Markov Random Fields, MRFs)**
 
   MRF也叫马尔科夫网(Markov Network, MN)，MRF是关于一组有马尔科夫性质随机变量*X*的全联合概率分布模型。一方面MRF可以表示BN无法表示的依赖关系，如循环关系；另外一方面，它不能表示BN所能够表示的推导关系。
   
@@ -188,7 +193,7 @@ $$
 
 <img src="http://www.hindawi.com/journals/mpe/2012/814356.fig.004.jpg" alt="Pairwise MRF模型" width="300px"/>
 
-* 条件随机场(Conditional Random Fields, CRF)
+* **条件随机场(Conditional Random Fields, CRF)**
 
 给定输出标识序列X和观察序列Y，CRF通过定义条件概率$p(X\|Y)$，而不是联合概率$p(X,Y)$来描述模型。CRF是一个判别模型，在图像分割、形状分析和图像标注等方面优于生成模型MRF。CRF是一种无向图模型，当给定观测值(y)，且能够直接表达类条件概率分布(类变量x)，即
 
@@ -202,6 +207,10 @@ $$
 
 CRF同MRF相比，最主要的优点有：CRF关注于最终的预测问题，避免不必要的观察密度计算；CRF不要求像生成模型中对于观察变量之间条件独立关系的假设。
 
-CRF可以被称为Task-Specify Prediction，因为，不像MN，它的判别对象是确定的。例如，对于图像分割来说，它的$X$为输入端，可以是像素值和要处理的特征，targe value为$Y$，也就是每个像素的类别，例如草地，天空等。又如对于文本处理来说，输入端可以为句子中的词，目标则是这些词的标注，例如人名，地名等。
+CRF可以被称为Task-Specify Prediction。因为不像MN，它的判别对象是确定的。例如，对于图像分割来说，它的$X$为输入端，可以是像素值和要处理的特征，targe value为$Y$，也就是每个像素的类别，例如草地，天空等。又如对于文本处理来说，输入端可以为句子中的词，目标则是这些词的标注，例如人名，地名等。
 
 这种情况适用于correlated featureas, 也就是特征之间存在依赖关系；这种情况对于其他模型并不适用，例如从Naive Beysian的模型可以看出，它的特征之间是相互独立的。
+
+### 4. Inference && Learning
+
+Inference和Learning我学习的也是一知半解的，很多东西都是知其然不知其所以然，就不误人子弟了，具体的可以参考[pluskid](http://freemind.pluskid.org/machine-learning/probabilistic-graphical-model/)的博文，讲的非常的详细。
