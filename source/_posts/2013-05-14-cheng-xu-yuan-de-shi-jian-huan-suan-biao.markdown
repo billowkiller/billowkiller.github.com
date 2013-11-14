@@ -3,7 +3,7 @@ layout: post
 title: "程序员的时间换算表"
 date: 2013-05-14 01:09
 comments: true
-categories: other
+categories: tools
 tags: [time,manage,programmer] 
 --- 
 

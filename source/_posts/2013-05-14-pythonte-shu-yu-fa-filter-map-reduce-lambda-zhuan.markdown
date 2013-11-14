@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Python特殊语法：filter、map、reduce、lambda [转]"
+title: "python特殊语法：filter、map、reduce、lambda [转]"
 date: 2013-05-14 01:09
 comments: true
-categories: python
+categories: language
 tags: [python,filter,map,reduce,lambda]
 ---
 <i>**from** [http://www.cnblogs.com/longdouhzt/archive/2012/05/19/2508844.html](http://www.cnblogs.com/longdouhzt/archive/2012/05/19/2508844.html)</i>

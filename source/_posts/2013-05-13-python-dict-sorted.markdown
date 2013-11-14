@@ -3,7 +3,7 @@ layout: post
 title: "python dict sorted"
 date: 2013-05-13 02:18
 comments: true
-categories: python
+categories: language
 tags: [python, dict, 排序, sort]
 ---
 
