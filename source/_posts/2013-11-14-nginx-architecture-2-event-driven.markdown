@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "nginx-architecture-2-event-driven"
+title: "Nginx architecture(2)--Event Driven"
 date: 2013-11-14 00:16
 comments: true
 categories: rework
@@ -10,6 +10,8 @@ tags: Nginx architecture
 Nginx是一个事件驱动架构的Web服务器。在Linux中，`epoll`是目前最强大的事件管理机制(I/O多路复用)，定时器事件也是由`epoll`等事件模块触发的，它是由红黑树实现的。并且Nginx很好的解决多个`worker`子进程监听同一个端口引起的惊群问题，以及对`worker`进行负载平衡。最后会讨论下linux内核中的文件异步I/O。
 
 <img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx-logo_zpsabde8e46.png"/>
+
+<!--more-->
 
 ## 1. 框架概述
 
