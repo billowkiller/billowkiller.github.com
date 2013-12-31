@@ -3,7 +3,7 @@ layout: post
 title: "硝烟中的Scrum和XP"
 date: 2013-05-14 01:09
 comments: true
-categories: rework
+categories: book
 tags: [scrum,xp, software engineering]
 ---
 

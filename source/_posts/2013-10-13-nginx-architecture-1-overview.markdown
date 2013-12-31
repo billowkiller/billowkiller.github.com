@@ -98,7 +98,7 @@ Nginx的模块化架构最基本的数据结构为`ngx_module_t`。整个数据�
 3. 模块的命令集，指向一个`ngx_command_t`结构数组
 4. 模块的类型，运行定义模块类型这个概念，允许专注于不同领域的模块按照类型来区别。
 
-具体的模块解释可以参考![http://www.linuxidc.com/Linux/2011-08/40949.htm]http://www.linuxidc.com/Linux/2011-08/40949.htm
+具体的模块解释可以参考[http://www.linuxidc.com/Linux/2011-08/40949.htm]http://www.linuxidc.com/Linux/2011-08/40949.htm
 
 <img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx_zps3788eefc.jpg" alt="Nginx模块设计" width="650px">
 

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "deep C and C++"
-date: 2013-11-14 16:12
+date: 2013-10-12 16:12
 comments: true
 categories: language
 tags: c c++ interview
