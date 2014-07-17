@@ -1,0 +1,987 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: rework | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/categories/rework/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2014-07-17T22:06:20+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Nginx architecture(4)--Modularity]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/11/26/nginx-architecture-4-modularity/"/>
+    <updated>2013-11-26T16:52:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/11/26/nginx-architecture-4-modularity</id>
+    <content type="html"><![CDATA[<h2 id="section">1. 概述</h2>
+
+<p>这章的题目说的有些不对，nginx的模块化只是模块化编程的一个案例，我用它来分析所谓的模块化编程，接下来在其他的例子中也有体现模块化，但是为了形成nginx架构这一系列文章，我还是把它命名为nginx架构——模块化。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx-logo_zpsabde8e46.png" /></p>
+
+<!--more-->
+
+<p>好了，言归正传。现代编程的一大特点是：模块化编程，具体来说就是好几个人来完成一个大的的功能：这一个大的功能又拆分为好几个子功能，每一个人做一块子功能，然后导出子功能的API,而大功能的运行实际上就变成子功能导出的API的相互调用。</p>
+
+<p>换言之，模块化编程并不像我们以前开发的强耦合系统，从头到尾一步步或结构化或对象化的把系统功能添加到代码中，各个子功能之间协商好直接通信的接口——可以互相调用的API，子功能和子功能集成后，调试，运行成功就成了完整的系统。这样的系统可以做到软件代码紧凑，开发效率高，如果是互相熟悉，经验丰富实力强的开发团队，可以达到理想的开发速度，和代码质量。</p>
+
+<p>但如果开发人员数量庞大且良莠不齐，那么核心开发者无法兼顾每个子系统的代码质量，一个子系统的失败也许会导致整个项目的失败，这种损失是无法估量的；如果需要开发的子系统纷杂繁多，这样的设计也无法满足日益增多的个性化子功能。</p>
+
+<p>在这样的背景下，模块化编程是十分必要的。优秀的系统，生命周期长的系统，有革命意义的系统，如Linux、eclipse、NetBeans、nginx，它们所利用的都是模块化设计带来的红利，因为模块化系统有一下几个特点：</p>
+
+<ol>
+  <li>而模块化应用由小块的、分散的代码块组成，每一块都是独立的。于是，这些代码块可以由不同的团队进行开发，而他们都有各自的生命周期和时间表。最终的成果则可以由另一个独立的个体，即发行者，进行集成。</li>
+  <li>应用程序（或操作系统）的源代码不再处于某一个开发者完全的掌控之中。源代码被散布至世界各地。毫无疑问，构建这样的软件与传统那种源代码完全在代码库的应用构建是完全不同的。</li>
+  <li>管理者无需对整个项目的时间表有完全的掌控。不单单是源代码，开发者们也遍布世界各地，并以他们自己的时间表工作。每个人都有这样一个权利：使用一个新版本或旧版本类库的自由。</li>
+  <li>使用外部库并使用它们组建应用程序，这意味着人们能够花费更少的时间和精力创造更复杂的软件。比如说，一个模块系统中的组件加入一个XML解析器，或者加入某种数据库驱动。</li>
+</ol>
+
+<p>ok，有了这样统一的一个认识后，再来具体谈谈什么是模块化编程。</p>
+
+<h2 id="section-1">2.模块化编程</h2>
+
+<p>百度百科对模块化设计有这样的定义
+&gt; 模块化设计是指在对一定范围内的不同功能或相同功能不同性能、不同规格的产品进行功能分析的基础上，划分并设计出一系列功能模块，通过模块的选择和组合可以构成不同的产品，以满足市场的不同需求的设计方法。</p>
+
+<p>它的概念是
+&gt; 首先用主程序、子程序、子过程等框架把软件的主要结构和流程描述出来，并定义和调试好各个框架之间的输入、输出链接关系。逐步求精的结果是得到一系列以功能块为单位的算法描述。以功能块为单位进行程序设计，实现其求解算法的方法称为模块化。模块化的目的是为了降低程序复杂度，使程序设计、调试和维护等操作简单化。</p>
+
+<p>这些说法似乎都不够接地气，但它们又能够很好的表现出模块化的特点：总体框架的制定，分功能块的设计减少耦合性，降低代码逻辑复杂性。在我看来，实现一个具有明显物理结构的软件是模块化的，例如带可扩展<code>插件</code>的<code>eclipse</code>；具有明显分层结构的软件是模块化的，例如<code>android</code>手机操作系统；具有明显封装性的软件是模块化的，例如图形引擎<code>OGRE</code>。</p>
+
+<p><img src="https://community.freescale.com/servlet/JiveServlet/showImage/38-1135-1687/android_fig1.png" alt="android architecture" /></p>
+
+<p>可以看出，这些软件都有一个特点：<strong>高对比度</strong>，不会和其他软件代码交杂混合，这可以带来很多显而易见的好处。在开发期，一个模块化的设计有利于程序员实现， 使其在实现过程中一直保持清晰的思路，减少潜伏的BUG；而在维护期，则有利于其他程序 员的理解。</p>
+
+<p>从上面的几个例子中也可以看出，良好模块设计的代码，至少分为两种形式：纵向的模块化和横向的模块化。</p>
+
+<p>横向：整个代码架构是由一个核心和若干外围的模块化代码构成。其中核心构成了软件的业务逻辑，子模块负责子功能的实现。核心和子模块之间有直接的接口，子模块间不需要或很少有交互需求。这样在功能的扩展上具有明显的优势，但对逻辑层的设计带来了更高的要求。</p>
+
+<p>纵向：整个库/软件拥有明显的层次之分，从最底层，与应用业务毫无相关的一层，到最顶层，完全对应用进行直接实现的那一层，每一个相对高层的软件层依赖于更底层的软件层，逐层构建。同一层之中也有独立的子模块，子模块彼此之间耦合甚少，这些子模块构成了一个软件层，共同为上层应用提供服务。</p>
+
+<p>下面就来举两个具体的例子。</p>
+
+<h2 id="nginx">3.nginx的模块化</h2>
+
+<p>网上看到的有关C语言模块化程序设计的一些概念，摘抄一下：</p>
+
+<blockquote>
+  <ol>
+    <li>模块即是一个.c 文件和一个.h 文件的结合，头文件中是对于该模块接口的声明；</li>
+    <li>某模块提供给其它模块调用的外部函数及数据需在.h 中文件中冠以<code>extern</code>关键字声明；</li>
+    <li>模块内的函数和全局变量需在.c 文件开头冠以<code>static</code>关键字声明；</li>
+    <li>永远不要在.h 文件中定义变量！定义变量和声明变量的区别在于定义会产生内存分配的操作，是汇编阶段的概念；而声明则只是告诉包含该声明的模块在连接阶段从其它模块寻找外部函数和变量。</li>
+  </ol>
+</blockquote>
+
+<p>意思是暴露在头文件中的信息，则可能被当作该头文件所描述模块的接口描述。所以， 在C语言中任何置于头文件中的信息都需要慎重考虑。</p>
+
+<p>C中默认的作用域是全局的，<code>static</code>用于限定其修饰对象的作用域，用它去修饰某个函数或变量，旨在告诉：这个函数或变量仅被当前文件（模块）使用，它仅用于本模块实现所依赖，它不是提供给模块外的接口！ <strong>封装内部实现 ，暴露够用的接口，也是保持模块清晰的方式之一。</strong></p>
+
+<p>C语言较缺乏模块设计的语言机制——良好的接口封装。所以，在C语言中，良好的设计更依赖于程序员自己的功底。</p>
+
+<p>nginx就是一个十分优秀的模块化编程的C语言实现，在nginx中，除了少量的核心代码，其他一切皆为模块。并且模块对使用用户只是暴露了很少的接口或者说指令更合适。nginx的每个模块都可以实现一些自定义的指令，这些指令写在配置文件的适当配置项中，每一个指令在源码中对应着一个 <code>ngx_command_t</code>结构的变量，nginx会从配置文件中把模块的指令读取出来放到模块的commands指令数组中，这些指令一般是把配置项的参数值赋给一些程序中的变量或者是在不同的变量之间合并或转换数据。</p>
+
+<p>并且nginx的模块与模块间基本上没有任何的通信措施，拿最常用的http模块来说（这里的http模块是一个泛类，nginx中将模块分为core、event、http和mail四类，用宏定义标识四个分类）。根据使用的情况不同，http模块可以分为处理模块和过滤模块，处理模块用于处理请求并输出内容，过滤模块用于过滤处理模块的输出内容。处理模块在一个请求中只能使用1种，而过滤模块可以使用多个。那么这里要考虑的是，处理模块和核心代码，过滤模块和核心代码，处理模块和过滤模块，过滤模块和过滤模块之间的交互。实际上，过滤模块是用链表串联起来的，而处理模块与过滤模块在不同的阶段处理数据内容，所以现在只需要考虑前两者的交互手段。</p>
+
+<p>以上的特点和需求都可以在nginx的模块化架构最基本的数据结构为<code>ngx_module_t</code>中得到体现。这个数据结构是所有模块的共同基础，类似于Java中的接口。</p>
+
+<p>先来看看nginx的模块化架构最基本的数据结构为<code>ngx_module_t</code>，在系列文章1中有简略的介绍，现在看看具体的代码。</p>
+
+<pre><code>struct ngx_module_s{
+   ngx_uint_t    ctx_index;  //分类模块计数器
+   ngx_uint_t    index;      //模块计数器
+
+   ngx_uint_t    spare0;
+   ngx_uint_t    spare1;
+   ngx_uint_t    spare2;
+   ngx_uint_t    spare3;
+
+   ngx_uint_t    version;    //版本
+
+   void          *ctx;       //该模块的上下文，每个种类的模块有不同的上下文
+   ngx_command_t *commands;  //该模块的命令集，指向一个ngx_command_t结构数组
+   ngx_uint_t    type;       //该模块的种类，为core/event/http/mail中的一种
+   //以下是一些callback函数
+   ngx_uint_t    (*init_master)(ngx_log_t *log);      //初始化master
+
+   ngx_uint_t    (*init_module)(ngx_cycle_t *cycle);  //初始化模块
+
+   ngx_uint_t    (*init_process)(ngx_cycle_t *cycle); //初始化工作进程
+   ngx_uint_t    (*init_thread)(ngx_cycle_t *cycle);  //初始化线程
+   void          (*exit_thread)(ngx_cycle_t *cycle);  //退出线程
+   void          (*exit_process)(ngx_cycle_t *cycle); //退出工作进程
+
+   void          (*exit_master)(ngx_cycle_t *cycle);  //退出master
+
+   uintptr_t     spare_hook0;  //这些字段貌似没用过
+   uintptr_t     spare_hook1;
+   uintptr_t     spare_hook2;
+   uintptr_t     spare_hook3;
+   uintptr_t     spare_hook4;
+   uintptr_t     spare_hook5;
+   uintptr_t     spare_hook6;
+   uintptr_t     spare_hook7;
+};
+</code></pre>
+
+<p>在这些回调函数中有初始化模块的回调函数，在这个回调函数中可以注册模块自身实现的其他函数。在核心代码中，http框架将http的处理阶段分为多个，每个阶段都有phase_handler成员，可以通过初始化时赋值给这个成员来达到注册的效果。这样在处理这个阶段内容的时候，自然就会调用模块实现的方法。</p>
+
+<p>对于过滤模块来说实现机制却又有些不同，前面提到过滤模块是用链表串联起来的，核心代码在遍历过滤链表的时候触发回调函数。每个过滤模块需要实现两个回调函数，类似于：</p>
+
+<pre><code>ngx_int_t
+ngx_http_send_header(ngx_http_request_t *r)
+{
+    ...
+	return ngx_http_top_header_filter(r);
+}
+
+static int
+ngx_http_example_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
+{
+    ...
+    return ngx_http_next_body_filter(r, in);
+}
+</code></pre>
+
+<p>分别用来过滤响应头和内容。注意这里面的<code>ngx_http_top_header_filter</code>和<code>ngx_http_next_body_filter</code>，这里可以看出来，各个模块是由它们是由链表串联起来的，那么是怎么实现这个过程的呢，也就是如何注册过滤模块到核心代码中的链表的。</p>
+
+<p>编译后可以找到<code>ngx_modules.c</code>文件，里面规定了一个数组</p>
+
+<pre><code>ngx_module_t *ngx_modules[] = {
+        ...
+        &amp;ngx_http_write_filter_module,
+        &amp;ngx_http_header_filter_module,
+        &amp;ngx_http_chunked_filter_module,
+        &amp;ngx_http_range_header_filter_module,
+        &amp;ngx_http_gzip_filter_module,
+        &amp;ngx_http_postpone_filter_module,
+        &amp;ngx_http_ssi_filter_module,
+        &amp;ngx_http_charset_filter_module,
+        &amp;ngx_http_userid_filter_module,
+        &amp;ngx_http_headers_filter_module,
+        &amp;ngx_http_copy_filter_module,
+        &amp;ngx_http_range_body_filter_module,
+        &amp;ngx_http_not_modified_filter_module,
+        NULL
+};
+</code></pre>
+
+<p>模块的执行顺序是反向的。也就是说最早执行的是<code>not_modified_filter</code>，然后各个模块依次执行。所有第三方的模块只能加入到<code>copy_filter</code>和<code>headers_filter</code>模块之间。</p>
+
+<p>Nginx执行的时候是怎么安照次序依次来执行各个模块呢？它采用了一种很隐晦的方法，通过局部的全局变量。比如，在每个filter模块，很可能看到如下代码：</p>
+
+<pre><code>static ngx_http_output_header_filter_pt  ngx_http_next_header_filter;
+static ngx_http_output_body_filter_pt    ngx_http_next_body_filter;
+...
+ngx_http_next_header_filter = ngx_http_top_header_filter;
+ngx_http_top_header_filter = ngx_http_example_header_filter;
+
+ngx_http_next_body_filter = ngx_http_top_body_filter;
+ngx_http_top_body_filter = ngx_http_example_body_filter;
+</code></pre>
+
+<p><code>ngx_http_top_header_filter</code>是一个全局变量。当编译进一个filter模块的时候，就被赋值为当前filter模块的处理函数。而<code>ngx_http_next_header_filter</code>是一个局部全局变量，它保存了编译前上一个filter模块的处理函数。所以整体看来，就像用全局变量组成的一条单向链表。</p>
+
+<p>每个模块想执行下一个过滤函数，只要调用一下<code>ngx_http_next_header_filter()</code>这个局部变量。而整个过滤模块链的入口，只要调用<code>ngx_http_top_header_filter</code>这个全局变量就可以了。<code>ngx_http_top_body_filter</code>的行为与header fitler类似。</p>
+
+<p>所以nginx的模块化可以概括为</p>
+
+<ol>
+  <li>核心代码+模块，核心代码负责处理流程的业务逻辑，模块代码负责实现功能。</li>
+  <li>核心代码在处理业务逻辑时候用全局字段保留信息，用统一的结构体传递信息，用相同的名称调用回调函数。</li>
+  <li>模块代码采用统一的数据结构，结构中包括统一变量和回调函数，以及与模块上下文相关的保留字段。</li>
+</ol>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Nginx architecture(3)--memory pool]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-3-memory-pool/"/>
+    <updated>2013-11-14T15:12:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-3-memory-pool</id>
+    <content type="html"><![CDATA[<h2 id="section">1. 概述</h2>
+
+<p>Nginx里内存的使用大都十分有特色：申请了永久保存，抑或伴随着请求的结束而全部释放，还有写满了缓冲再从头接着写。这么做的原因也主要取决于Web Server的特殊的场景，内存的分配和请求相关，一条请求处理完毕，即可释放其相关的内存池，降低了开发中对内存资源管理的复杂度，也减少了内存碎片的存在。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx_zps7d735b88.jpg" alt="Nginx logo" /></p>
+
+<!--more-->
+
+<p>所以在Nginx使用内存池时总是只申请，不释放，使用完毕后直接destroy整个内存池。</p>
+
+<p>Nginx的内存模型实现得很精巧，代码也很简洁。总体来说，所有的内存池遵守一个宗旨：申请大块内存，避免“细水长流”。主要实现代码在<code>ngx_palloc.h</code>和<code>ngx_palloc.c</code>文件中。使用内存池的好处是：</p>
+
+<ol>
+  <li>在大量的小块内存的申请和释放的时候，能更快地进行内存分配；</li>
+  <li>减少内存碎片，防止内存泄露；</li>
+</ol>
+
+<p>这种方式处理起来缺点也是显而易见的，即申请一块大的内存比如会导致内存空间的浪费，但是比起频繁地<code>malloc</code>和<code>free</code>，这样做的代价是非常小的，典型的以空间换时间的做法。</p>
+
+<h2 id="section-1">2. 内存分配</h2>
+
+<p>nginx内存分配将内存需求分成了两种：a) 大块内存, b) 小内存。内存大小的判定依据是申请的内存是否比同页大小与pool的size两者都小。</p>
+
+<p>对于大块内存，单独利用malloc来申请，并且使用单向链表管理起来；</p>
+
+<p>对于小块内存，则从已有的pool数据区中划分出一部分出来，这里的内存划分出去后没有特殊的结构来保存，而是等到申请对象生命周期结束后一起释放。小块内存的存储方式非常类似于sk_buffer，通过tail，end指针来表示多少内存已经被分配出去。</p>
+
+<p>下图是linux kernel中数据结构sk_buff的使用示意图。具体可见<a href="http://linux.chinaunix.net/techdoc/system/2008/08/04/1023273.shtml">http://linux.chinaunix.net/techdoc/system/2008/08/04/1023273.shtml</a>
+<img src="http://blogimg.chinaunix.net/blog/upfile/070330110745.jpg" alt="linux kernel struct sk_buff" /></p>
+
+<p>nginx中分配内存时总是先判断申请内存是否属于大块内存，如果是则调用<code>ngx_palloc_large</code>申请大内存；如果是小内存则在已经存在的内存池中分配。</p>
+
+<p>内存池的作用在于解决小块内存池频繁申请问题，对于大块内存是可以忍受直接申请的，这块内存会直接挂在内存池头部的large字段下。nginx中每块大内存都对应有一个头部结构，这个头部结构式用来将所有大内存串成一个链表用的。这个头部结构不是直接向操作系统申请的，而是单做小块内存直接在内存池中申请的。这样的大块内存在使用完后，可能需要第一时间释放，节省内存空间。</p>
+
+<p>nginx专门提供了接口函数用来释放内存池中的某个大块内存，但它只会释放大内存，不会释放其对应的头部结构，毕竟头部结构式当做小内存在内存池中申请的；遗留下来的头部结构会作为下次申请大内存之用。</p>
+
+<p><img src="http://blog.chinaunix.net/attachment/201306/16/24830931_1371367358NKxn.jpg" alt="nginx内存分配流程" /></p>
+
+<h2 id="section-2">3. 深入内存池</h2>
+
+<p>先来看看内存池中的数据结构以及之间关系的示意图。</p>
+
+<p><img src="http://images.cnblogs.com/cnblogs_com/xiekeli/201210/201210171140226537.png" alt="" /></p>
+
+<p>从这张图中可以看到<code>ngx_pool_data_t</code>和<code>ngx_pool_s</code>的结构。可以看出，nginx的内存池实际是一个由<code>ngx_pool_data_t</code>和<code>ngx_pool_s</code>构成的链表。</p>
+
+<p>主要的数据结构为：</p>
+
+<pre><code>`ngx_pool_data_t`中：
+
+last：是一个unsigned char 类型的指针，保存的是当前内存池分配到末位地址，即下一次分配从此处开始。
+
+end：内存池结束位置；
+
+next：内存池里面有很多块内存，这些内存块就是通过该指针连成链表的，next指向下一块内存。
+
+failed：内存池分配失败次数。
+</code></pre>
+
+<hr />
+
+<pre><code>`ngx_pool_s`
+
+d：内存池的数据块；
+
+max：内存池数据块的最大值；
+
+current：指向当前内存池；
+
+chain：该指针挂接一个ngx_chain_t结构；
+
+large：大块内存链表，即分配空间超过max的情况使用；
+
+cleanup：释放内存池的callback
+
+log：日志信息
+</code></pre>
+
+<p>以上是内存池涉及的主要数据结构，内存池对外的主要方法有：</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td> </td>
+      <td><strong>创建内存池</strong></td>
+      <td> </td>
+      <td>ngx_pool_t *  ngx_create_pool(size_t size, ngx_log_t *log);</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>销毁内存池</strong></td>
+      <td> </td>
+      <td>void ngx_destroy_pool(ngx_pool_t *pool);</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>重置内存池</strong></td>
+      <td> </td>
+      <td>void ngx_reset_pool(ngx_pool_t *pool);</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>内存申请（对齐）</strong></td>
+      <td> </td>
+      <td>void *  ngx_palloc(ngx_pool_t *pool,  size_t size);</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>内存申请（不对齐）</strong></td>
+      <td> </td>
+      <td>void *  ngx_pnalloc(ngx_pool_t *pool, size_t size);</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>内存清除</strong></td>
+      <td> </td>
+      <td>ngx_int_t  ngx_pfree(ngx_pool_t *pool, void *p);</td>
+      <td> </td>
+    </tr>
+  </tbody>
+</table>
+
+<p>需要说明的是，内存池中并没有真正意义调用malloc等函数申请内存，而是移动指针标记而已，所以<code>内存对齐</code>的活，C编译器帮不了你了，得自己动手。并且不同的操作系统对齐方式不同。</p>
+
+<p>这几个函数具体的功能可以见<a href="http://www.cnblogs.com/xiekeli/archive/2012/10/17/2727432.html">http://www.cnblogs.com/xiekeli/archive/2012/10/17/2727432.html</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Nginx architecture(2)--Event Driven]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-2-event-driven/"/>
+    <updated>2013-11-14T00:16:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-2-event-driven</id>
+    <content type="html"><![CDATA[<p>Nginx是一个事件驱动架构的Web服务器。在Linux中，<code>epoll</code>是目前最强大的事件管理机制(I/O多路复用)，定时器事件也是由<code>epoll</code>等事件模块触发的，它是由红黑树实现的。并且Nginx很好的解决多个<code>worker</code>子进程监听同一个端口引起的惊群问题，以及对<code>worker</code>进行负载平衡。最后会讨论下linux内核中的文件异步I/O。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx-logo_zpsabde8e46.png" /></p>
+
+<!--more-->
+
+<h2 id="section">1. 框架概述</h2>
+
+<p>关于事件驱动模型的介绍已经在上篇介绍过了，这里再做一些补充说明。</p>
+
+<p>事件处理框架所要解决的问题是如何收集、管理、分发事件。对于一个基本的web服务器来说，事件通常有三种类型，<strong>网络事件</strong>、<strong>信号</strong>、<strong>定时器</strong>。这里的事件主要是指<code>网络事件</code>（TCP事件）和<code>定时器事件</code>。</p>
+
+<p>网络事件与网卡中断处理程序、内核提供的系统调用密切相关，所以网络事件的驱动受制于不用的操作系统平台，在同一个操作系统中也受制于不同的操作系统内核版本。例如在<code>kernel2.6</code>之前的版本或者大部分类UNIX系统都可以使用<code>poll</code>或<code>select</code>，而2.6后使用<code>epoll</code>。</p>
+
+<p>对比与传统的过程驱动方法(Process-driven method)来说，事件驱动模型可以用更少的线程处理更多的客户请求。</p>
+
+<h3 id="section-1">1.1 事件定义与事件模块</h3>
+
+<p>事件代表过去发生的事件，事件既是技术架构概念，也是业务概念。以事件为驱动的编程模型称为事件驱动架构EDA。</p>
+
+<p>一个事件代表某个发生的事情，在计算机系统中，事件是由一个对象表达，其包含有关事件的数据，比如发生的时间，地点等等。这个事件对象可以存在在一个消息或数据库记录或其他组件的形式中，这样一个对象称为”一个事件”，事件这个概念有两个含义，既代表已经发生的某个事情，也可以表达一个正在发生的对象。至于事件到底是这两个含义中哪一个，取决于事件发生的场景(上下文)。</p>
+
+<p>事件在技术架构上应用能提供无堵塞的高并发性能，如Nginx和<code>Node.js</code>。</p>
+
+<p>所谓事件驱动，简单地说就是你点什么按钮（即产生什么事件），电脑执行什么操作（即调用什么函数）.当然事件不仅限于用户的操作. 事件驱动的核心自然是事件。从事件角度说，事件驱动程序的基本结构是由一个事件收集器、一个事件发送器和一个事件处理器组成。事件收集器专门负责收集所有事件，包括来自用户的（如鼠标、键盘事件等）、来自硬件的（如时钟事件等）和来自软件的（如操作系统、应用程序本身等）。事件发送器负责将收集器收集到的事件分发到目标对象中。事件处理器做具体的事件响应工作，它往往要到实现阶段才完全确定，因而需要运用虚函数机制（函数名往往取为类似于HandleMsg的一个名字）。对于框架的使用者来说，他们唯一能够看到的是事件处理器。这也是他们所关心的内容。</p>
+
+<p>视图（即我们通常所说的“窗口”）是“事件驱动”应用程序的另一个要元。它是我们所说的事件发送器的目标对象。视图接受事件并能够对其进行处理。当我们将事件发送到具体的视图时，实际上我们完成了一个根本性的变化：从传统的流线型程序结构到事件触发方式的转变。这样应用程序具备相当的柔性，可以应付种种离散的、随机的事件。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/ev-server_zps36dcc97a.png" /></p>
+
+<p>在Nginx中，事件都是由<code>ngx_event_t</code>结构体来表示，这个结构体包含了事件的几个要素，方法、状态、参数以及前后事件的链表。</p>
+
+<p>事件模块是一种新的模块类型，<code>ngx_module_t</code>表示Nginx模块的基本接口，而针对每一种不同类型的模块，都有一个结构体来描述这一类模块的通用接口，这个接口保存在<code>ngx_module_t</code>结构体中的<code>ctx</code>成员中。也就是说，不同模块类型的区别就是<code>ctx</code>成员保存内容的区别，而模块还是在一个统一的结构体中表示。事件模块的通用接口则<code>ngx_event_module_t</code>结构体，它里面定义了模块名称、配置项参数的回调函数以及每个事件模块需要实现的10个抽象方法，如初始化添加删除事件等。</p>
+
+<h3 id="nginx">1.2 Nginx事件驱动机制</h3>
+
+<p>在上一篇中提到，Nginx将HTTP请求分为多个阶段进行处理</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td> </td>
+      <td><strong>阶段意义</strong></td>
+      <td> </td>
+      <td><strong>触发条件</strong></td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>建立TCP连接</td>
+      <td> </td>
+      <td>接收到TCP中的SYN包</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>开始接受用户请求</td>
+      <td> </td>
+      <td>接收到TCP中的ACK表示连接建立成功</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>接收到用户请求并分析已接收的请求是否完整</td>
+      <td> </td>
+      <td>接收到用户的数据包</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>接收到完整的用户请求后开始处理用户请求</td>
+      <td> </td>
+      <td>接收到用户的数据包</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>…</td>
+      <td> </td>
+      <td>…</td>
+      <td> </td>
+    </tr>
+  </tbody>
+</table>
+
+<p>而异步处理是与多阶段相辅相成的，当事件发生时，由<code>epoll</code>等事件分发器收到通知，调用事件消费者处理请求，在每个阶段中，事件消费者都不清楚本次完整的操作纠结什么时候会完成，只能异步被动地等待下一次时间的通知。</p>
+
+<p>这种设计配合事件驱动架构，将会极大地提高网络性能，同时使得进程不会或很少出现休眠现象。因为一旦出现进程休眠，必然减少并发处理事件的数目，一定会降低网络性能，同时会增加请求处理时间的平均时延！这时，如果网络新能无法满足业务需求将智能增加进程数目，进程数目过多就会增加操作系统内核的额外操作：进程间切换，频繁地进行进程切换仍会消耗CPU等资源，从而减低网络性能。同时，休眠的进程会使进程占用的内存得不到有效是否，这最终比如会导致系统可用内存的下降，从而影响系统能够处理的最大并发连接数。</p>
+
+<p>另外，异步非阻塞的事件处理机制与多线程相比，是有很大的优势的，不需要创建线程，每个请求占用的内存也很少，没有上下文切换，事件处理非常的轻量级。并发数再多也不会导致无谓的资源浪费（上下文切换）。更多的并发数，只是会占用更多的内存而已。 我之前有对连接数进行过测试，在24G内存的机器上，处理的并发请求数达到过200万。现在的网络服务器基本都采用这种方式，这也是Nginx性能高效的主要原因。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mighttpd_e02gif_zpse3ff26a7.gif" /></p>
+
+<h2 id="linuxepoll">2. Linux事件驱动机制——<code>epoll</code></h2>
+
+<p>事件驱动机制也被称为I/O多路复用，其实也就是非阻塞的I/O。<code>poll</code>、<code>select</code>和<code>epoll</code>的功能在本质上是一样的：都允许进程决定是否可以对一个和多个打开文件做非阻塞操作的读取和写入。这些调用也会阻塞进程，直到给定的文件描述符集合中的任何一个可读取或写入。因此，它们常常用于那些要使用多个输入和输出流而又不会阻塞阻于其中任何一个流的应用程序程序中。同一功能之所以要多个独立函数提供，是因为其中两个几乎是同时由两个不同的unix团体分别实现的：<code>select</code>在<code>BSD unix</code>中引入，而<code>poll</code>由<code>System V</code>引入。<code>epoll</code>系统调用，它用于将poll函数的扩展到能个处理数千个文件描述符。对上述系统调用的支持需要来自设备的驱动程序的相应支持。所有三个系统均通过驱动程序的<code>poll</code>方法提供。</p>
+
+<p><code>select</code>和<code>poll</code>在处理事件的时候会造成用户态到内核态内存的大量复制，这是极大的资源浪费。实际上，它会将所有连接的套接字传给操作系统，如果有100万个连接，在某一个时刻，进程收集事件连接的时候，虽然这100万连接中大部分是没有发生的，但<code>select</code>和<code>poll</code>还是会将这100万连接的套接字传给操作系统，而由操作系统内核寻找这些连接上有没有未处理的时间，这是极大的资源浪费，所以它们最多只能处理几千个并发连接。</p>
+
+<p>而<code>epoll</code>不这么做，它在内核中申请了一个简易的文件系统，把原先的一个select或poll调用分成了3个部分：调用<code>epoll_create</code>,建立1个<code>epoll</code>对象（在<code>epoll</code>文件系统中给这个句柄分配资源）、调用<code>epoll_ctl</code>向<code>epoll</code>对象中添加这100万个连接的套接字、调用<code>epoll_wait</code>收集发生事件的连接。这样，只需要在进程启动时建立1个<code>epoll</code>对象，并在需要的时候向它添加或删除连接就可以了。那么再来看看<code>epoll</code>是如何高效的处理事件的。</p>
+
+<p>当某一个进程调用<code>epoll_create</code>方法时，Linux内核会创建一个<code>eventpoll</code>结构体，这个结构体有一棵红黑树（存储所有添加到<code>epoll</code>中过的事件），还有一个双向链表（保持将要通过<code>epoll_wait</code>返回给用户的、满足条件的事件）。所有添加到<code>epoll</code>中的事件都会与设备驱动程序建立回调关系，这个回调方法会把这样的事件放到上面的双向链表中。当调用<code>epoll_wait</code>检测是否有发生事件的连接时，只是检查<code>eventpoll</code>对象中的双向链表是否有元素而已，如果不为空，则把这里的事件复制到用户内存中，同时将时间数量返回给用户。</p>
+
+<p>所以在<code>epoll</code>中，<code>epoll_ctl</code>向<code>epoll</code>对象中添加、修改、删除事件时，从红黑树中查找事件非常快，同时<code>epoll_wait</code>检查事件的效率也是非常的高。可以处理百万级别的并发事件。</p>
+
+<h2 id="section-2">3. 定时器事件</h2>
+
+<p>要弄清Nginx的定时器事件处理，那么需要搞清楚几个问题：</p>
+
+<ol>
+  <li>定时器事件是如何组织起来的</li>
+  <li>事件超时后又是如何触发的</li>
+  <li>时间又是如何更新的</li>
+</ol>
+
+<p>出于性能原因，Nginx的时间是缓存在内存中，不是每次都通过<code>gettimeofday</code>这个系统函数来实现。在Nginx中，只有在初始化和更新这个缓存时间的时候才会调用<code>gettimeofday</code>。在内存中可以通过各种已经定制好的格式化方法格式化需要转换的时间。</p>
+
+<p>所有的定时器事件是通过红黑树组织起来的。红黑树用事件的超时时间作为关键字，并且以这个关键字组成二叉排序树。这样需要找出最有可能的超时事件，那么只要将最左边的节点取出来即可，可以判断这个时间是否超时或者还需要多久才会超时。红黑树定时器处理添加删除外，还提供了一些方法可以遍历所有的事件，触发事件的<code>handler</code>回调方法。那么何时调用这些方法呢？</p>
+
+<p>首先在程序开始的时候会检测配置选项中是否有<code>timer_resolution</code>这一项内容即用户希望服务器时间精确度是多少毫秒，如果有则采用这个设置项作为阈值时间<code>timer</code>；如果没有设置这一选项，则在红黑树中寻找最近可能发生事件的时间差，以这个时间作为<code>timer</code>。<code>timer</code>也就是用来收集<code>epoll</code>监控事件是否发生的阈值时间，即如果<code>epoll</code>中没有任何一个事件发生，则最多等待<code>timer</code>毫秒后返回。也就是说如果是通过红黑树中找到的<code>timer</code>则肯定会有事件发生，如果是通过<code>timer_resolution</code>赋值的则不一定。</p>
+
+<p>收集来的事件放在队列中按<code>FIFO</code>顺序处理。而如果收集事件消耗的时间大于0，也就是有等待事件发生，那么这时有可能有新的定时器事件被触发，也就需要遍历所有的时间，触发事件的<code>handler</code>回调方法。</p>
+
+<h2 id="section-3">4. 惊群问题</h2>
+
+<p>惊群问题（Thundering Herd）是指多个进程监听同一个事件，操作系统无法判断由谁来负责这个事件，就会索性唤醒所有进程，但最终只有一个进程成功执行，其他进程失败，造成严重的资源浪费。</p>
+
+<p>Nginx的解决思路：<strong>避免惊群</strong>。具体措施有使用全局互斥锁，每个子进程在<code>epoll_wait()</code>之前先去申请锁，申请到则继续处理，获取不到则等待，并设置了一个负载均衡的算法（当某一个子进程的任务量达到总设置量的7/8时，则不会再尝试去申请锁）来均衡各个进程的任务量。</p>
+
+<p>原因和解决方法对比参见<a href="http://blog.163.com/pandalove@126/blog/static/9800324520122633515612/">这篇博客</a>。</p>
+
+<p><a href="http://blog.csdn.net/randyleonard/article/details/9058567">这篇也很精彩</a>。</p>
+
+<h2 id="io">5. 文件异步I/O</h2>
+
+<p>要使用文件异步I/O，则Linux内核必须要支持。这里的异步I/O不同于<code>glibc</code>提供的文件异步I/O库，它是基于多线程实现的，并不是真正意义上的异步I/O。把读取文件的操作异步地提交给内核后，内核会通知I/O设备独立地执行操作，这样，CPU可以得到充分的利用。而且，当大量读事件发生时候，将会发挥出内核读硬盘中“电梯算法”的优势，从而降低随机读取硬盘扇区的成本。</p>
+
+<p>需要注意的是Linux内核级别的文件异步I/O是不支持缓存操作的，所以说文件异步I/O的使用要看场景，并不是所有情况都可以使用，如果用户请求对文件的操作大部分都会落到文件缓存上，那么就不要使用异步I/O，反之则可以试着使用文件异步I/O，看一下是否会为服务器带来并发能力上的提升。</p>
+
+<p>这个文件异步I/O在linux中的称呼是<code>sendfile</code>，那么<code>sendfile</code>的原理是什么呢？</p>
+
+<p>在传统的文件传输里面（read/write方式），在实现上其实是比较复杂的，需要经过多次上下文的切换，我们看一下如下两行代码：</p>
+
+<p>read(file, tmp_buf, len);     <br />
+write(socket, tmp_buf, len);  </p>
+
+<p>以上两行代码是传统的read/write方式进行文件到socket的传输。</p>
+
+<p>当需要对一个文件进行传输的时候，其具体流程细节如下：</p>
+
+<p>1、调用read函数，文件数据被copy到内核缓冲区</p>
+
+<p>2、read函数返回，文件数据从内核缓冲区copy到用户缓冲区</p>
+
+<p>3、write函数调用，将文件数据从用户缓冲区copy到内核与socket相关的缓冲区。</p>
+
+<p>4、数据从socket缓冲区copy到相关协议引擎。</p>
+
+<p>以上细节是传统read/write方式进行网络文件传输的方式，我们可以看到，在这个过程当中，文件数据实际上是经过了四次copy操作：</p>
+
+<p>硬盘—&gt;内核buf—&gt;用户buf—&gt;socket相关缓冲区—&gt;协议引擎</p>
+
+<p>而sendfile系统调用则提供了一种减少以上多次copy，提升文件传输性能的方法。Sendfile系统调用是在2.1版本内核时引进的：</p>
+
+<p>sendfile(socket, file, len);   </p>
+
+<p>运行流程如下：</p>
+
+<p>1、<code>sendfile</code>系统调用，文件数据被copy至内核缓冲区</p>
+
+<p>2、再从内核缓冲区copy至内核中socket相关的缓冲区</p>
+
+<p>3、最后再socket相关的缓冲区copy到协议引擎</p>
+
+<p>相较传统read/write方式，2.1版本内核引进的<code>sendfile</code>已经减少了内核缓冲区到user缓冲区，再由user缓冲区到socket相关缓冲区的文件copy，而在内核版本2.4之后，文件描述符结果被改变，<code>sendfile</code>实现了更简单的方式，系统调用方式仍然一样，细节与2.1版本的 不同之处在于，当文件数据被复制到内核缓冲区时，不再将所有数据copy到socket相关的缓冲区，而是仅仅将记录数据位置和长度相关的数据保存到 socket相关的缓存，而实际数据将由DMA模块直接发送到协议引擎，再次减少了一次copy操作。</p>
+
+<p>目前，Nginx仅支持在读取文件时使用异步I/O，因为正常写入文件时往往是写入内存中就立即返回，效率很高，而使用异步I/O写入时速度会明显的下降。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Nginx architecture(1)--Overview]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/10/13/nginx-architecture-1-overview/"/>
+    <updated>2013-10-13T00:28:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/10/13/nginx-architecture-1-overview</id>
+    <content type="html"><![CDATA[<p>从04年发布以来，Nginx已经成为多个国内外互联网具体首选的高性能Web服务器。其特点是占有内存少，并发能力强，并且由于Nginx使用基于事件驱动的架构能够最有效的利用多核CPU的处理能力，进程可以无阻塞的运行。</p>
+
+<p>特别是Nginx可以利用当前操作系统特有的一些高校API来提高自己的性能，例如Linux上的<code>epoll</code>、Solaris上的event ports和Free BSD上的kqueue。又如对于Linux，Nginx支持其独有的sendfile系统调用，可以高效的讲硬盘中的数据发送到网络上（无需将硬盘数据先复制到用户态内存中）。</p>
+
+<p>所以通过分析Nginx的架构设计，可以怎样充分利用服务器上的硬件资源，以及学习到更为先进的理念。下面就来分析和学习Nginx的架构设计。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx_zps7d735b88.jpg" alt="Nginx logo" /></p>
+
+<!--more-->
+
+<h2 id="section">1. 基础架构</h2>
+
+<p>Nginx是模块化的，事件驱动，异步，单线程的，非无阻塞架构的。</p>
+
+<p><img src="http://www.aosabook.org/images/nginx/architecture.png" width="650px" alt="Diagram of Nginx's architecture" /></p>
+
+<h3 id="nginx">1.1 Nginx配置</h3>
+
+<p><strong>内核参数优化</strong></p>
+
+<p>Nginx需要可以对linux内核参数进行修改，来实现对内核参数的优化，以达到硬件资源的最大化利用。</p>
+
+<p>默认的linux内核参数考虑的是最通用的场景，而高并发访问的Web服务器需要根据具体的业务特点来调整内核参数。Nginx作为静态Web内容服务器、反向代理服务器或是提供内容压缩功能的服务器时，内核参数的调整都是不同的。</p>
+
+<p>具体的文件修改是在<code>/etc/sysctl.conf</code>下。举例来说，滑动窗口的大小与套接字缓存区会在一定程度上影响并发连接的数目。每个TCP连接都会为维护TCP滑动窗口而消耗额昵称，这个窗口会更具服务器的处理速度收缩或扩张。</p>
+
+<p><strong>Nginx配置文件</strong></p>
+
+<p>而Nginx的配置文件则规定了程序运行时几个核心模块的基本配置。具体分为4类：</p>
+
+<ul>
+  <li>用于调试、定位问题的配置项</li>
+  <li>正常运行的必备配置项</li>
+  <li>优化性能的配置项</li>
+  <li>事件类配置项</li>
+</ul>
+
+<p>其他配置项是针对具体模块的，例如对于一个为完整的静态Web服务器提供了8类配置信息（功能）：</p>
+
+<ul>
+  <li>虚拟主机与请求的分发
+    <ul>
+      <li>对特定的Host域名的请求提供不同的服务，以此实现虚拟主机功能</li>
+    </ul>
+  </li>
+  <li>文件路径的定义</li>
+  <li>内存及磁盘资源的分配</li>
+  <li>网络连接的设置</li>
+  <li>MIME类型的设置</li>
+  <li>对客户端请求的限制</li>
+  <li>文件操作的优化
+    <ul>
+      <li>sendfile系统条用</li>
+      <li>aio系统调用</li>
+    </ul>
+  </li>
+  <li>对客户端请求的特殊处理
+    <ul>
+      <li>DNS</li>
+      <li>忽略不合法HTTP头部</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>配置文件读取</strong></p>
+
+<p>Nginx启动的时候读取配置文件过程：</p>
+
+<ol>
+  <li>更具命令行得到配置文件路径</li>
+  <li>调用所有核心模块的<code>create_conf</code>方法生成存放配置项的结构体</li>
+  <li>针对所有核心模块解析<code>Nginx.conf</code>配置文件</li>
+  <li>调用所有核心模块的<code>init_conf</code>方法</li>
+</ol>
+
+<h3 id="section-1">1.2. 事件驱动架构</h3>
+
+<p>事件驱动模型就是事件发生源来产生事件，由一个或者多个事件收集器来收集、分发事件，然后许多事件处理器会注册自己感兴趣的事件，同时会消费这些事件。</p>
+
+<p>对于Nginx来说，事件模块将负责事件的收集、分发操作，而所有的模块都可能是事件消费者，首先需要向事件模块注册感兴趣的事件类型，当有事件产生时，事件模块会把事件分发到相应的模块中进行处理。</p>
+
+<p>Nginx完全采用事件驱动架构处理事务，与其他Web服务器不同。传统的Web服务器采用的事件驱动往往局限在TCP连接建立、关闭事件上，连接建立后将这个会话加入队列排队让事件消费者进行消费。在连接建立与关闭之间会退化为按序执行的批处理模式，通常采用线程或进程执行的处理方式。这样的处理会在连接建立后始终占据系统资源，因为这段时间从1毫秒到1分钟都有可能，并且进程线程之间的切换也会有性能损失，这样影响了系统可以处理的并发连接数。</p>
+
+<p>Nginx中只有事件模块才有资格占用进程资源，它们在分发某个事件时调用事件消费模块使用当前占用的进程资源。这种设计使得网络性能、用户感知的请求时延都得到提升，整个服务器的网络吞吐量都会由于事件的及时响应而增加。但是，每个事件消费者都不能有阻塞行为，否则会长时间占用事件分发进程而导致其他事件得不到及时响应。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/_zpscc820489.jpg" width="600px" alt="Nginx事件驱动" /></p>
+
+<h3 id="section-2">1.3 多模块设计</h3>
+
+<p><strong>Nginx的模块</strong></p>
+
+<p>要知道Nginx有哪些模块，一个快速的方法就是编译Nginx。编译之后，会在源代码根目录下生成objs目录，该目录中包含有ngx_auto_config.h和ngx_auto_headers.h，以及ngx_modules.c文件，当然，还有Makefile文件等。</p>
+
+<p>其中，生成的<code>ngx_modules.c</code>文件中，重新集中申明(使用extern关键字)了Nginx配置的所有模块，这些模块可通过编译前的configure命令进行配置，即设置哪些模块需要编译，哪些不被编译。</p>
+
+<p>Nginx的模块化架构最基本的数据结构为<code>ngx_module_t</code>。整个数据结构规定了：</p>
+
+<ol>
+  <li>该模块的上下文，每个种类的模块有不同的上下文，用void *ctx表示。</li>
+  <li>一些callback函数
+    <ul>
+      <li><code>master</code>初始化和退出</li>
+      <li>模块初始化</li>
+      <li>工作进程初始化和退出</li>
+      <li>线程初始化和退出</li>
+    </ul>
+  </li>
+  <li>模块的命令集，指向一个<code>ngx_command_t</code>结构数组</li>
+  <li>模块的类型，运行定义模块类型这个概念，允许专注于不同领域的模块按照类型来区别。</li>
+</ol>
+
+<p>具体的模块解释可以参考[http://www.linuxidc.com/Linux/2011-08/40949.htm]http://www.linuxidc.com/Linux/2011-08/40949.htm</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx_zps3788eefc.jpg" alt="Nginx模块设计" width="650px" /></p>
+
+<p><strong>模块化设计的优点</strong></p>
+
+<p>高度模块化的设计是Nginx的架构基础。在Nginx中，除了少量的核心代码，其他一切皆为模块。这种模块化设计同时具有以下几个特点：</p>
+
+<ol>
+  <li>
+    <p>高度抽象的模块接口</p>
+
+    <p>所有的模块都遵循同样的<code>ngx_module_t</code>(后面有说明)接口设计规范，这减少整个系统中的变数，这种方式带来良好的简单性、静态可扩展性、可重用性。</p>
+  </li>
+  <li>
+    <p>模块接口非常简单，具有很高的灵活性</p>
+
+    <p>模块的基本接口<code>ngx_module_t</code>足够坚定，只涉及模块的初始化、退出以及对配置项的处理，这同时也带来了足够的灵活性，是的Nginx比较简单地实现了动态可修改性(通过HUP信号在服务正常运行时使用新的配置文件生效，以及通过USR2信号实现平滑升级)。</p>
+  </li>
+  <li>
+    <p>定义基础类型的模块：核心模块。</p>
+
+    <p>这样可以简化Nginx的设计，使得非模块化框架代码只关注于如何调用核心模块(6个)。
+核心模块将ctx上下文进一步实例化为<code>ngx_core_module_t</code>结构体，它是以配置项的解析作为基础的，提供了create_conf回调方法来创建存储配置项的数据结构，在读取Nginx.conf文件时，会更具模块中的ngx_command_t解析出的配置项存放在这个数据结构中；还提供init_conf回调方法，用于在解析配置文件后，使用解析出的配置项初始化核心模块功能。</p>
+  </li>
+  <li>
+    <p>多层次、多类别的模块设计</p>
+
+    <p>所有的模块间是分层次和类别的，官方Nginx共有五大类型的模块：核心模块、配置模块、事件模块、HTTP模块、mail模块。核心模块和配置模块是由Nginx的框架代码所定义的。其他三种模块都不会与框架产生直接关系，实际上核心模块各有这三种模块的一个agent，并在同类模块中有一个作为和核心业务与管理功能的模块。</p>
+  </li>
+</ol>
+
+<h2 id="section-3">2. 请求的多阶段异步处理</h2>
+
+<p>请求的多阶段异步处理是把一个请求的处理过程按照事件的触发方式划分为多个阶段，每个阶段都可以有事件收集、分发来触发。也就是说请求的多阶段异步处理只能基于事件驱动架构实现。</p>
+
+<p>异步处理和多阶段是相辅相成的。只有多阶段了才能进行异步处理，异步处理使得阶段的划分才有意义。那么是什么原则来划分请求阶段呢？一般是找到请求处理流程中的阻塞方法（或造成阻塞的代码段）在阻塞代码段上按照下面4中方式来划分阶段：</p>
+
+<ol>
+  <li>将阻塞进程的方法按照相关的触发事件分解为两个阶段
+    <ul>
+      <li>阻塞方法改为非阻塞，调用这个方法</li>
+      <li>处理非阻塞方法结果返回事件</li>
+    </ul>
+  </li>
+  <li>将阻塞方法调用按照事件分解为多个阶段的方法调用
+    <ul>
+      <li>例如将读取10MB文件(非异步)，这些文件在磁盘中的块未必是联系的，即10MB文件内容不再操作系统的缓存中，可能需要多次驱动硬盘寻址，导致进程休眠或等待。这样可以把文件分为1000份，每份10KB，这样读取的时间就是可控的，系统可以及时地处理其他请求。</li>
+    </ul>
+  </li>
+  <li>等待系统的响应从而导致进程空转时，使用定时器划分阶段</li>
+  <li>如果阻塞方法完全无法继续划分，则必须使用独立的进程执行这个阻塞方法</li>
+</ol>
+
+<h2 id="section-4">3. 进程管理</h2>
+
+<p>Nginx采用一个<code>master</code>管理进程，多个<code>worker</code>工作进程的设计方式，还包括一个可选的<code>cache manager</code>进程以及<code>cache loader</code>进程。</p>
+
+<p>Nginx的<code>worker</code>代码包括核心和功能模块，Nginx的核心是负责维持一个紧凑的运行循环(tight run-loop)，并执行相应的部分模块的代码、每个请求处理阶段。模块包括Nginx在表现层和业务层的功能。模块读取和写入到网络和硬盘，修改内容，出站(outbound)过滤，应用服务器(apply server-side)包括动作，传递请求给上游代理服务器。</p>
+
+<p>Nginx并没有为每个<code>worker</code>分配连接，这个工作是由操作系统内核做的。启动后，<code>worker</code>创建一组初始的监听套接字 ，然后不断接受，读取和写入到sockets，同时处理HTTP请求和响应。</p>
+
+<p>由于Nginx会产生多个<code>worker</code>，所以它在多核的架构中扩展的很好。每个核一个<code>worker</code>可以充分地利用多核的优势，防止颠簸和锁，并且在单线程的的<code>worker</code>进程中没有资源匮乏和资源控制机制。该模型还允许扩展更多的跨物理存储设备，有利于更大的磁盘利用率，避免磁盘I/O阻塞。</p>
+
+<p>根据磁盘的利用和CPU的负载类型，Nginx的<code>worker</code>数量可以调整。一般来说，如果负载模式是CPU密集型处理，例如，TCP/IP的很多，做的SSL或压缩时，<code>worker</code>的数量应该和核的数目相同；如果负载大多数是在磁盘上，如在磁盘上做不同的内容服务或代理，那么<code>worker</code>的数量应该是核的1.5到2倍。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/3_zpsbb4840cf.png" alt="1 process per core" /></p>
+
+<p>Nginx所有的进程使用的是内存共享的通信机制。<code>master</code>运行作为root用户，<code>cache manager</code>，<code>cache loader</code>和<code>worker</code>作为非特权用户运行。<code>master</code>的功能如下：</p>
+
+<ul>
+  <li>读取和验证配置</li>
+  <li>创建，绑定和关闭socket</li>
+  <li>启动，终止和维护配置数量的<code>worker</code>进程</li>
+  <li>在不中断服务的情况下重新配置</li>
+  <li>无需停止的系统升级 (启动新的进程，如果有必要则回滚)</li>
+  <li>编译嵌入式Perl脚本</li>
+  <li>日志文件</li>
+</ul>
+
+<p><code>cache loader</code>是负责检查磁盘上的缓存项和填充缓存元数据到Nginx的in-memory数据库。 从本质上讲，<code>cache loader</code>准备Nginx的实例用来在工作在一个专门分配的目录结构存储的磁盘文件上。它遍历目录，检查缓存内容元数据、更新共享内存中的相关条目，然后退出时准备给下次使用。</p>
+
+<p>缓存管理器主要是负责缓存过期和失效。 在Nginx的正常运行时，它驻留在内存中；在失败的情况下，它由主进程重新启动。</p>
+
+<h2 id="section-5">4. 跨平台实现</h2>
+
+<p>Nginx有两个特点：跨平台、使用C语言实现。这两个特点导致Nginx不宜使用一些第三方中间件提供的容器和算法，并且C语言与每一个操作系统都是强相关的，且C库对操作系统的某些系统调用封装的方法并不是跨平台的。</p>
+
+<p>对于这种情况，Nginx的解决方法很简单，在这些必须特殊化处理的地方，对每个操作系统都给一份特意化的实现。而对于基础的数据结构和算法，Nginx则完全从头实现了一遍，如动态数组、链表、二叉排序树、散列表等等。</p>
+
+<p>要学习这些数据结构和算法的实现时可以看看Nginx源码，有些设计思路还是非常值得借鉴的，例如双向链表并不存储元素，只是存储指针，而且提供了简单的插入排序法。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Probabilistic Graphical Models]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/06/02/probabilistic-graphical-models/"/>
+    <updated>2013-06-02T13:49:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/06/02/probabilistic-graphical-models</id>
+    <content type="html"><![CDATA[<h3 id="pgm">1. PGM介绍</h3>
+
+<p>GM(graphical model)，图模型首先它是一个概率模型，用的是图的数据结构，用来表示随机变量之间的以来关系。
+因为是涉及到变量之间的关系，于是在概率理论特别是统计部分得到很长远的应用，另外还包括机器学习。</p>
+
+<p><img src="http://www.stanford.edu/~montanar/TEACHING/Stat375/graph.jpg" width="400px" /></p>
+
+<p>可以看的出来，概率图模型是综合了统计和计算机技术：</p>
+
+<ul>
+  <li>统计方面提供了概率基础，包括概率分布的分析，不确定性的处理，决策判定等等。</li>
+  <li>计算机方面可以将概率中的条件概率置于高维空间中，用图来表示它们的数据结构，并使用高效的算法计算。</li>
+</ul>
+
+<p>使用现实中得到的知识数据来表述图模型，作为declarative representation，它与我们所要使用的算法是
+松耦合的，可以将不同的算法应用到图模型上，在图模型中可以加入专家知识，和从其他数据中学习到的知识。
+<!--more--></p>
+
+<p><strong>什么时候需要用到PGM？</strong></p>
+
+<ul>
+  <li>拥有噪音数据或者不确定性比较大的时候</li>
+  <li>拥有很多先验知识的时候, 要比普通的机器学习来的有效</li>
+  <li>多个变量的推理(reason)，特别是多个变量之间存在内在联系</li>
+  <li>从较小的模块化的模型中建立复杂的模型，疾病诊断或错误诊断</li>
+</ul>
+
+<p><strong>应用</strong></p>
+
+<p>概率图模型能够发现和分析复杂分布的结构，提取出原本非结构化的数据，使得这些分布能够被有效的重构和利用。
+主要在图像和视频智能信息处理领域已有应用。具体的应该用包括：</p>
+
+<ul>
+  <li>Medical diagnosis</li>
+  <li>Fault diagnosis</li>
+  <li>Natural language processing</li>
+  <li>speech recognition</li>
+  <li>Social network models</li>
+  <li>computer vision
+    <ul>
+      <li>Image segmentation</li>
+      <li>3D reconstruction </li>
+      <li>Holistic scene analysis</li>
+    </ul>
+  </li>
+  <li>decoding of low-density parity-check codes</li>
+  <li>Robot localization &amp; mapping</li>
+</ul>
+
+<p>概率图理论共分为三个部分，分别为<strong>表示理论，推理理论和学习理论</strong>。</p>
+
+<h3 id="section">2. 两种模型</h3>
+
+<p>先说说<strong>生成模型和判别模型</strong>。</p>
+
+<p>假设有观察值序列$Y=(Y_1,Y_2,…,Y_n)$，求其对应的状态序列$X=(X_1,X_2,…,X_n)$，则实际上即使求出状态序列$X^*$，使得条件概率$p(X_1,X_2,…,X_n|Y_1,Y_2,…,Y_n)$最大化，即:</p>
+
+<script type="math/tex; mode=display">
+\begin{align}
+X^* = arg max_{X_1,X_2,...,X_n}p(X_1,X_2,...,X_n|Y_1,Y_2,...,Y_n)
+\end{align}
+</script>
+
+<h4 id="generative-models">2.1 生成模型(Generative Models)</h4>
+
+<p>生成模型不直接对$p(X_1,X_2,…,X_n|Y_1,Y_2,…,Y_n)$进行建模，而是先对其进行变换，构建联合概率$p(X_1,X_2,…,X_n\,Y_1,Y_2,…,Y_n)$，即</p>
+
+<script type="math/tex; mode=display">% &lt;![CDATA[
+
+\begin{equation}
+\begin{split}
+p(X_1,X_2,...,X_n|Y_1,Y_2,...,Y_n) &= \frac{p(X_1,X_2,...,X_n,Y_1,Y_2,...,Y_n)}{p(Y_1,Y_2,...,Y_n)} \\
+&= \frac{p(Y_1,Y_2,...,Y_n|X_1,X_2,...,X_n) × p(X_1,X_2,...,X_n)}{p(Y_1,Y_2,...,Y_n)}
+\end{split}
+\end{equation}
+ %]]&gt;</script>
+
+<p>在给定观察值序列的前提下，其出现的概率是一定的，所以得到</p>
+
+<script type="math/tex; mode=display">% &lt;![CDATA[
+
+\begin{equation}
+\begin{split}
+X^* &= arg max_{X_1,X_2,...,X_n}p(X_1,X_2,...,X_n|Y_1,Y_2,...,Y_n) \\
+&= arg max_{X_1,X_2,...,X_n}p(Y_1,Y_2,...,Y_n|X_1,X_2,...,X_n) × p(X_1,X_2,...,X_n)
+\end{split}
+\end{equation}
+ %]]&gt;</script>
+
+<p>生成模型认为观测值是由状态生成的。</p>
+
+<h4 id="discriminative-models">2.2 判别模型(Discriminative Models)</h4>
+
+<p>判别模型克服了生成模型的独立性假设，其直接对条件概率$p(X_1,X_2,…,X_n|Y_1,Y_2,…,Y_n)$进行建模，也就是说，在给定观察序列的条件下，寻找最可能的状态序列的时候，条件分布可以直接使用。</p>
+
+<h4 id="section-1">2.3 生成模型和判别模型对比</h4>
+
+<ul>
+  <li>统计建模方式不同。生成模型构建联合分布$p(X,Y)$；判别模型构建条件概率分布$p(X|Y)$。</li>
+  <li>训练时，二者优化准则不同。生成模型优化训练数据的联合分布概率；判别模型优化训练数据的条件分布概率，判别模型与序列标记问题有较好的对应性。</li>
+  <li>训练复杂度不同。判别模型训练复杂度较高。</li>
+  <li>对于观察序列的处理不同。生成模型中，观察序列作为模型的一部分；判别模型中，观察序列只作为条件，因此可以针对观察序列设计灵活的特征。</li>
+  <li>是否支持无监督训练。生成模型支持无监督训练。</li>
+  <li>应用角度不同。生成模型一般主要是对后验概率建模，从统计的角度表示数据的分布情况，能够反映同类数据本身的相似度；判别模型主要特点是寻找不同类别之间的最优分类面，反映的是异类数据之间的差异。</li>
+</ul>
+
+<h4 id="section-2">2.4 举例</h4>
+
+<p>常见的Generative Model主要有：</p>
+
+<ul>
+  <li>Gaussians, Naive Bayes, Mixtures of multinomials</li>
+  <li>Mixtures of Gaussians, Mixtures of experts, HMMs</li>
+  <li>Sigmoidal belief networks, Bayesian networks</li>
+  <li>Markov random fields</li>
+</ul>
+
+<p>常见的Discriminative Model主要有：</p>
+
+<ul>
+  <li>logistic regression</li>
+  <li>SVMs</li>
+  <li>traditional neural networks</li>
+  <li>Nearest neighbor</li>
+</ul>
+
+<h3 id="section-3">3. 表示理论</h3>
+
+<p>不同的概率图的模型可以分成3类：有向图模型，无向图模型和混合概率图模型。</p>
+
+<h4 id="section-4">3.1 有向图模型</h4>
+
+<p>有向图概率模型使用有向边连接不同的结点，这些有向边通常表示了结点间的因果关系。典型的代表是隐马尔可夫模型，贝叶斯网络和的动态贝叶斯网络。</p>
+
+<ul>
+  <li>
+    <p><strong>HMM(Hidden Markov Model)</strong></p>
+
+    <p>看这个名称就知道，隐马尔可夫模型是马尔可夫模型的扩展，它是在马尔可夫链的基础上发展起来的。马尔可夫链是马尔可夫随机过程的特殊情况，即马尔可夫链的状态和时间参数都是离散的马尔可夫过程。它的$m+1$时刻的状态只是和$m$时刻的状态有关，而与之前的状态无关。实际中，马尔可夫链的每一状态可以对应于一个可观测到的物理事件。比如天气预测中的雨晴雪等，根据这个模型可以算出各种天气在某一时刻出现的概率。</p>
+
+    <p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Hmm_temporal_bayesian_net.svg/500px-Hmm_temporal_bayesian_net.svg.png" width="400px" alt="一个典型的HMM，y为观察值，x为状态值，t为时刻" /></p>
+
+    <p>由于实际问题比马尔可夫链模型所描述的更为复杂，观察到的事件并不是与状态一一对应的，而是通过一组概率分布相联系，这个就是HMM。HMM是一个双重的随机过程，其中之一是马尔可夫链，描述状态转移。另外一个随机过程描述状态和观察值，它并不是与状态一一对应的，需要通过一个随机过程去感知状态的存在及特性。这个就是Hidden的由来。</p>
+
+    <p>具体的一个例子为phone HMM，这是一个语音识别的例子，根据单词的发言可以建立HMM，一个随机的有限自动机，每个状态都产生一个evident或observation。识别出得到的声音特征为观察值evidents，从start到end计算得到概率最大的HMM最终状态即为识别到的单词。</p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/hmm_zpsf0b66b9e.png" width="600px" alt="一个典型的HMM，y为观察值，x为状态值，t为时刻" /></p>
+  </li>
+  <li>
+    <p><strong>贝叶斯网络(Beyesian Network, BN)</strong></p>
+
+    <p>一般是指带有概率信息的有向无环图(directed acyclic graph, DAG)。由两部分组成：</p>
+
+    <ul>
+      <li>图中的节点表示的是随机变量，结点间的连接表示了可能的因果关系。</li>
+      <li>每一个结点都附有与该变量相联系的条件概率分布函数(Conditional Probability Distribution, CPD)，如果变量是离散的，则表现为条件概率表(Conditional Probability Table, CPT)。</li>
+    </ul>
+
+    <p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/SimpleBayesNet.svg/400px-SimpleBayesNet.svg.png" width="400px" alt="一个简单的贝叶斯网络" /></p>
+
+    <p>贝叶斯网络表现的是一个联合概率分布，可以通过Chain Rule来计算$p(X_1,X_2,…,X_n)=\prod{p(X_i|Par_G(X_i))}$。</p>
+
+    <p>贝叶斯网络一个很有用的用途是作为分类器，即通过某对象的先验概率，利用贝叶斯公式计算出其后验概率，即该对象属于某一类的概率，选择具有最大后验概率的类作为该对象所属的类。所谓的先验概率是指在没有观测值的情况下的概率，后验概率是指在加入观测值后的概率。用的比较多的贝叶斯网络分类器有四种: </p>
+  </li>
+  <li>朴素贝叶斯网络(Naive Bayesian Networks, NBN);</li>
+  <li>通用贝叶斯网络(General Bayesian Networks, GBN);</li>
+  <li>增强型朴素贝叶斯网络(Tree-Augmented Naive Bayes, TAN);</li>
+  <li>
+    <p>马尔可夫毯贝叶斯网络(Markov Blanket Bayesian Networks, MBBN)。</p>
+  </li>
+  <li>
+    <p><strong>动态贝叶斯网络(Dynamic Bayesian Networks, DBNs)</strong></p>
+
+    <p>贝叶斯网络只能反映事物的静态特征，也就是在某一个时刻事物不同特征的依赖关系，但在现实生活中，存在着很多的动态随机过程，DBN就是用来对这些过程建模的方法之一。但是动态表示的是一个动态的系统，而系统的结构并不随着时间变化。DBN服从马尔科夫特征：<em>t</em>时刻系统的所有变量的概率分布只与<em>t-1</em>时刻的状态变量概率分布相关。HMM可以当做DBN的一种特殊情况。</p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/DBN_zpse19ad96b.gif" width="400px" alt="车辆位置的DBN" /></p>
+  </li>
+</ul>
+
+<h4 id="section-5">3.2 无向图模型</h4>
+
+<p>无向图概率模型用来建立随机变量间的空间相互关系或只是相互依赖性。典型的代表是马尔科夫随机场和条件随机场。无向连接通常捕捉一对结点之间的互相依赖关系。</p>
+
+<ul>
+  <li>
+    <p><strong>马尔科夫随机场(Markov Random Fields, MRFs)</strong></p>
+
+    <p>MRF也叫马尔科夫网(Markov Network, MN)，MRF是关于一组有马尔科夫性质随机变量<em>X</em>的全联合概率分布模型。一方面MRF可以表示BN无法表示的依赖关系，如循环关系；另外一方面，它不能表示BN所能够表示的推导关系。</p>
+
+    <p>当概率分布为正的时候，被称为Gibbs随机场，因为根据Hammersley–Clifford理论（MN与Gibbs分布的等价性）和局部马尔科夫性质，无向图的概率分布可以被定义为下面的Gibbs公式，即</p>
+  </li>
+</ul>
+
+<script type="math/tex; mode=display">
+\begin{align}
+P(x) = \frac{1}{Z}\prod_C\phi_C(X_C)
+\end{align}
+</script>
+
+<p>其中，$\phi_C(X_C)$是一个关于$X_C$的非负实数函数，表示的是无向图中团的势函数(potential function)。Z是一个归一化常数(Partition Function)，其取值为$\sum_X\phi_C(X_C)$。</p>
+
+<p>MRF可以用来分析物理现象的空间关系或者非因果上下文关系。在图像处理领域，它能够很好地描述相邻的图像像素或者相关特征间的相互依赖关系。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/Isingmodel_zpsbd31e4ba.png" alt="MN的原型，Ising model" width="400px" /></p>
+
+<ul>
+  <li>Pairwise MRF</li>
+</ul>
+
+<p>Pairwise MRF模型是广泛使用的一种MRF模型，其结构形式简单和计算量低。
+  其联合概率分布可以写成如下形式：</p>
+
+<p>$$
+\begin{align}
+P(x) = \frac{1}{Z}\prod_{i,j}\Psi(x_i,y_j)\prod_i\phi(x_i,y_j)
+\end{align}
+$$
+式中，$x$为标注类，$y$为观测值。</p>
+
+<p><img src="http://www.hindawi.com/journals/mpe/2012/814356.fig.004.jpg" alt="Pairwise MRF模型" width="300px" /></p>
+
+<ul>
+  <li><strong>条件随机场(Conditional Random Fields, CRF)</strong></li>
+</ul>
+
+<p>给定输出标识序列X和观察序列Y，CRF通过定义条件概率$p(X|Y)$，而不是联合概率$p(X,Y)$来描述模型。CRF是一个判别模型，在图像分割、形状分析和图像标注等方面优于生成模型MRF。CRF是一种无向图模型，当给定观测值(y)，且能够直接表达类条件概率分布(类变量x)，即</p>
+
+<script type="math/tex; mode=display">
+\begin{align}
+P(x|y) = \frac{1}{Z(y)}\prod_C\phi_C(X_C,y)
+\end{align}
+</script>
+
+<p>其中，$\phi_C(X_C,y)$不仅依赖于集合x，同时也依赖于整个观测值y。</p>
+
+<p>CRF同MRF相比，最主要的优点有：CRF关注于最终的预测问题，避免不必要的观察密度计算；CRF不要求像生成模型中对于观察变量之间条件独立关系的假设。</p>
+
+<p>CRF可以被称为Task-Specify Prediction。因为不像MN，它的判别对象是确定的。例如，对于图像分割来说，它的$X$为输入端，可以是像素值和要处理的特征，targe value为$Y$，也就是每个像素的类别，例如草地，天空等。又如对于文本处理来说，输入端可以为句子中的词，目标则是这些词的标注，例如人名，地名等。</p>
+
+<p>这种情况适用于correlated featureas, 也就是特征之间存在依赖关系；这种情况对于其他模型并不适用，例如从Naive Beysian的模型可以看出，它的特征之间是相互独立的。</p>
+
+<h3 id="inference--learning">4. Inference &amp;&amp; Learning</h3>
+
+<p>Inference和Learning我学习的也是一知半解的，很多东西都是知其然不知其所以然，就不误人子弟了，具体的可以参考<a href="http://freemind.pluskid.org/machine-learning/probabilistic-graphical-model/">pluskid</a>的博文，讲的非常的详细。</p>
+]]></content>
+  </entry>
+  
+</feed>

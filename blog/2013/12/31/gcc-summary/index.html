@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>gcc summary - Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2013/12/31/gcc-summary">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-12-31T18:07:00+08:00" pubdate data-updated="true">Dec 31<span>st</span>, 2013</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        Gcc Summary
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><p>本文介绍在Linux平台下应用程序的编译过程，以及编译程序<a href="http://gcc.gnu.org/">GCC</a>在编译应用程序的过程的具体用法，同时详细说明了GCC的常用选项、模式和警告选项。</p>
+
+<center>![gcc](http://gcc.gnu.org/img/gccegg-65.png)</center>
+
+<!--more-->
+
+<h3 id="compile-process">Compile Process</h3>
+
+<h4 id="four-steps">Four Steps</h4>
+
+<p>对于GUN编译器来说，程序的编译要经历预处理、编译、汇编、连接四个阶段.</p>
+
+<center>![四个阶段](http://new.51cto.com/files/uploadimg/20060926/1714230.jpg)</center>
+
+<p>从功能上分，预处理、编译、汇编是三个不同的阶段，但<code>gcc</code>的实际操作上，它可以把这三个步骤合并为一个步骤来执行。下面我们以C语言为例来谈一下不同阶段的输入和输出情况。</p>
+
+<p>在预处理阶段，输入的是C语言的源文件，通常为<code>*.c</code>。它们通常带有<code>.h</code>之类头文件的包含文件。这个阶段主要处理源文件中的<code>#ifdef</code>、 <code>#include</code>和<code>#define</code>命令。该阶段会生成一个中间文件<code>*.i</code>，但实际工作中通常不用专门生成这种文件，因为基本上用不到；若非要生成这种文件不可，可以利用下面的示例命令：</p>
+
+<pre><code>gcc -E  test.c -o test.i
+</code></pre>
+
+<p>在编译阶段，输入的是中间文件<code>*.i</code>，编译后生成汇编语言文件<code>*.s</code> 。这个阶段对应的<code>gcc</code>命令如下所示：</p>
+
+<pre><code>gcc -S test.i -o test.s 
+</code></pre>
+
+<p>在汇编阶段，将输入的汇编文件<code>*.s</code>转换成机器语言<code>*.o</code>。这个阶段对应的<code>gcc</code>命令如下所示：</p>
+
+<pre><code>gcc -c test.s -o test.o 
+</code></pre>
+
+<p>最后，在连接阶段将输入的机器代码文件<code>*.s</code>（与其它的机器代码文件和库文件）汇集成一个可执行的二进制代码文件。这一步骤，可以利用下面的示例命令完成：</p>
+
+<pre><code>gcc test.o -o test 
+</code></pre>
+
+<h4 id="two-modes">Two Modes</h4>
+
+<p>gcc常用的两种模式：编译模式和编译连接模式。下面以一个例子来说明各种模式的使用方法。为简单起见，假设我们全部的源代码都在一个文件<code>test.c</code>中，要想把这个源文件直接编译成可执行程序，可以使用以下命令：</p>
+
+<pre><code>gcc test.c -o test
+</code></pre>
+
+<p>这里<code>test.c</code>是源文件，生成的可执行代码存放在一个名为<code>test</code>的文件中（该文件是机器代码并且可执行）。<code>-o</code>是生成可执行文件的输出选项。如果我们只想让源文件生成目标文件（给文件虽然也是机器代码但不可执行），可以使用标记<code>-c</code>，详细命令如下所示：</p>
+
+<pre><code>gcc -c test.c
+</code></pre>
+
+<p>默认情况下，生成的目标文件被命名为<code>test.o</code>，但我们也可以为输出文件指定名称，如下所示：</p>
+
+<pre><code>gcc -c test.c -o mytest.o
+</code></pre>
+
+<p>上面这条命令将编译后的目标文件命名为<code>mytest.o</code>，而不是默认的<code>test.o</code>。</p>
+
+<p>迄今为止，我们谈论的程序仅涉及到一个源文件；现实中，一个程序的源代码通常包含在多个源文件之中，这该怎么办？没关系，即使这样，用gcc处理起来也并不复杂，见下例：</p>
+
+<pre><code>gcc -o test  first.c second.c third.c
+</code></pre>
+
+<p>该命令将同时编译三个源文件，即<code>first.c</code>、<code>second.c</code>和 <code>third.c</code>，然后将它们连接成一个可执行程序，名为<code>test</code>。</p>
+
+<h3 id="compile-option">Compile Option</h3>
+
+<h4 id="debug">Debug</h4>
+<p>在<code>gcc</code>编译源代码时指定<code>-g</code>选项可以产生带有调试信息的目标代码,<code>gcc</code>可以为多个不同平台上帝不同调试器提供调试信息,默认<code>gcc</code>产生的调试信息是为<code>gdb</code>使用的,可以使用<code>-gformat</code>指定要生成的调试信息的格式以提供给其他平台的其他调试器使用.</p>
+
+<p>常用的格式有 </p>
+
+<ul>
+  <li>-ggdb:生成gdb专 用的调试信息,使用最适合的格式(DWARF 2,stabs等)会有一些gdb专用的扩展,可能造成其他调试器无法运行. </li>
+  <li>-gstabs:使用 stabs格式,不包含gdb扩展,stabs常用于BSD系统的DBX调试器. </li>
+  <li>-gcoff:产生COFF格式的调试信息,常用于System V下的SDB调试器; </li>
+  <li>-gxcoff:产生XCOFF格式的调试信息,用于IBM的RS/6000下的DBX调试器; </li>
+  <li>-gdwarf-2:产生DWARF version2 的格式的调试信息,常用于IRIXX6上的DBX调试器.<code>gcc</code>会使用DWARF version3的一些特性. </li>
+</ul>
+
+<h4 id="common-option">Common Option</h4>
+
+<p>–help&lt;/br&gt;
+–target-help &lt;/br&gt;
+显示 <code>gcc</code> 帮助说明。‘target-help’是显示目标机器特定的命令行选项。</p>
+
+<p>–version &lt;/br&gt;
+显示 <code>gcc</code> 版本号和版权信息 。</p>
+
+<p>-o outfile &lt;/br&gt;
+输出到指定的文件。</p>
+
+<p>-x language &lt;/br&gt;
+指明使用的编程语言。允许的语言包括：c c++ assembler none 。 ‘none’意味着恢复默认行为，即根据文件的扩展名猜测源文件的语言。</p>
+
+<p>-v &lt;/br&gt;
+打印较多信息，显示编译器调用的程序。</p>
+
+<p>-### &lt;/br&gt;
+与 -v 类似，但选项被引号括住，并且不执行命令。</p>
+
+<p><strong>-E</strong>&lt;/br&gt;
+仅作预处理，不进行编译、汇编和链接。如上图所示。</p>
+
+<p>-S &lt;/br&gt;
+仅编译到汇编语言，不进行汇编和链接。如上图所示。</p>
+
+<p><strong>-c</strong> &lt;/br&gt;
+编译、汇编到目标代码，不进行链接。如上图所示。</p>
+
+<p>-pipe &lt;/br&gt;
+使用管道代替临时文件。</p>
+
+<p>-combine &lt;/br&gt;
+将多个源文件一次性传递给汇编器。</p>
+
+<h4 id="other-option">Other Option</h4>
+
+<p>更多有用的<code>gcc</code>选项：</p>
+
+<p>-l library&lt;/br&gt;
+-llibrary &lt;/br&gt;
+进行链接时搜索名为library的库。 &lt;/br&gt;
+例子： $ <code>gcc</code> test.c -lm -o test</p>
+
+<p>-Idir &lt;/br&gt;
+把dir 加入到搜索头文件的路径列表中。 &lt;/br&gt;
+例子： $ <code>gcc</code> test.c -I../inc -o test</p>
+
+<p>-Ldir &lt;/br&gt;
+把dir 加入到搜索库文件的路径列表中。 &lt;/br&gt;
+例子： $ <code>gcc</code> -I/home/foo -L/home/foo -ltest test.c -o test</p>
+
+<p>-Dname &lt;/br&gt;
+预定义一个名为name 的宏，值为1。 &lt;/br&gt;
+例子： $ <code>gcc</code> -DTEST_CONFIG test.c -o test</p>
+
+<p>-Dname =definition &lt;/br&gt;
+预定义名为name ，值为definition 的宏。</p>
+
+<p>-ggdb &lt;/br&gt;
+-ggdblevel &lt;/br&gt;
+为调试器 gdb 生成调试信息。level 可以为1，2，3，默认值为2。</p>
+
+<p>-g &lt;/br&gt;
+-glevel &lt;/br&gt;
+生成操作系统本地格式的调试信息。-g 和 -ggdb 并不太相同， -g 会生成 gdb 之外的信息。level 取值同上。</p>
+
+<p>-s &lt;/br&gt;
+去除可执行文件中的符号表和重定位信息。用于减小可执行文件的大小。</p>
+
+<p>-M &lt;/br&gt;
+告诉预处理器输出一个适合make的规则，用于描述各目标文件的依赖关系。对于每个 源文件，预处理器输出 一个make规则，该规则的目标项(target)是源文件对应的目标文件名，依赖项(dependency)是源文件中<code>#include</code>引用的所有文件。生成的规则可以是单行，但如果太长，就用<code>\</code>-换行符续成多行。规则 显示在标准输出，不产生预处理过的C程序。</p>
+
+<p>-C &lt;/br&gt;
+告诉预处理器不要丢弃注释。配合`-E’选项使用。</p>
+
+<p>-P &lt;/br&gt;
+告诉预处理器不要产生<code>#line</code>命令。配合<code>-E</code>选项使用。</p>
+
+<p>-static &lt;/br&gt;
+在支持动态链接的系统上，阻止连接共享库。该选项在其它系统上无效。</p>
+
+<p>-nostdlib&lt;/br&gt; 
+不连接系统标准启动文件和标准库文件，只把指定的文件传递给连接器。</p>
+
+<h4 id="warnings-option">Warnings Option</h4>
+
+<p>-Wall &lt;/br&gt;
+会打开一些很有用的警告选项，建议编译时加此选项。</p>
+
+<p>-W &lt;/br&gt;
+-Wextra&lt;/br&gt; 
+打印一些额外的警告信息。</p>
+
+<p>-w &lt;/br&gt;
+禁止显示所有警告信息。</p>
+
+<p>-Wshadow &lt;/br&gt;
+当一个局部变量遮盖住了另一个局部变量，或者全局变量时，给出警告。很有用的选项，建议打开。 -Wall 并不会打开此项。</p>
+
+<p>-Wpointer-arith &lt;/br&gt;
+对函数指针或者void *类型的指针进行算术操作时给出警告。也很有用。 -Wall 并不会打开此项。</p>
+
+<p>-Wcast-qual &lt;/br&gt;
+当强制转化丢掉了类型修饰符时给出警告。 -Wall 并不会打开此项。</p>
+
+<p>-Waggregate-return &lt;/br&gt;
+如果定义或调用了返回结构体或联合体的函数，编译器就发出警告。</p>
+
+<p>-Winline &lt;/br&gt;
+无论是声明为 inline 或者是指定了-finline-functions 选项，如果某函数不能内联，编译器都将发出警告。如果你的代码含有很多 inline 函数的话，这是很有用的选项。</p>
+
+<p>-Werror &lt;/br&gt;
+把警告当作错误。出现任何警告就放弃编译。</p>
+
+<p>-Wunreachable-code&lt;/br&gt; 
+如果编译器探测到永远不会执行到的代码，就给出警告。也是比较有用的选项。</p>
+
+<p>-Wcast-align&lt;/br&gt; 
+一旦某个指针类型强制转换导致目标所需的地址对齐增加时，编译器就发出警告。</p>
+
+<p>-Wundef&lt;/br&gt;
+当一个没有定义的符号出现在 #if 中时，给出警告。</p>
+
+<p>-Wredundant-decls&lt;/br&gt; 
+如果在同一个可见域内某定义多次声明，编译器就发出警告，即使这些重复声明有效并且毫无差别。</p>
+
+<h4 id="standard">Standard</h4>
+
+<p>-ansi &lt;/br&gt;
+支持符合ANSI标准的C程序。这样就会关闭GNU C中某些不兼容ANSI C的特性。</p>
+
+<p>-std=c89 &lt;/br&gt;
+-iso9899:1990 &lt;/br&gt;
+指明使用标准 ISO C90 作为标准来编译程序。</p>
+
+<p>-std=c99 &lt;/br&gt;
+-std=iso9899:1999 &lt;/br&gt;
+指明使用标准 ISO C99 作为标准来编译程序。</p>
+
+<p>-std=c++98 &lt;/br&gt;
+指明使用标准 C++98 作为标准来编译程序。</p>
+
+<p>-std=gnu9x &lt;/br&gt;
+-std=gnu99 &lt;/br&gt;
+使用 ISO C99 再加上 GNU 的一些扩展。</p>
+
+<p>-fno-asm &lt;/br&gt;
+不把asm, inline或typeof当作关键字，因此这些词可以用做标识符。用 <strong>asm</strong>， __inline__和__typeof__能够替代它们。 <code>-ansi</code> 隐含声明了<code>-fno-asm</code>。</p>
+
+<p>-fgnu89-inline &lt;/br&gt;
+告诉编译器在 C99 模式下看到 inline 函数时使用传统的 GNU 句法。</p>
+
+<h4 id="c-options">C options</h4>
+
+<p>-fsigned-char &lt;/br&gt;
+-funsigned-char &lt;/br&gt;
+把char定义为有/无符号类型，如同signed char/unsigned char。</p>
+
+<p>-traditional &lt;/br&gt;
+尝试支持传统C编译器的某些方面。详见GNU C手册。</p>
+
+<p>-fno-builtin &lt;/br&gt;
+-fno-builtin-function &lt;/br&gt;
+不接受没有 <em>_builtin</em> 前缀的函数作为内建函数。</p>
+
+<p>-trigraphs &lt;/br&gt;
+支持ANSI C的三联符（ trigraphs）。`-ansi’选项隐含声明了此选项。</p>
+
+<p>-fsigned-bitfields &lt;/br&gt;
+-funsigned-bitfields &lt;/br&gt;
+如果没有明确声明<code>signed</code>或<code>unsigned</code>修饰符，这些选项用来定义有符号位域或无符号位域。缺省情况下，位域是有符号的，因为它们继承的基本整数类型，如<code>int</code>，是有符号数。</p>
+
+<p>-Wstrict-prototypes &lt;/br&gt;
+如果函数的声明或定义没有指出参数类型，编译器就发出警告。很有用的警告。</p>
+
+<p>-Wmissing-prototypes &lt;/br&gt;
+如果没有预先声明就定义了全局函数，编译器就发出警告。即使函数定义自身提供了函数原形也会产生这个警告。这个选项 的目的是检查没有在头文件中声明的全局函数。</p>
+
+<p>-Wnested-externs &lt;/br&gt;
+如果某<code>extern</code>声明出现在函数内部，编译器就发出警告。</p>
+
+<h4 id="c-options-1">C++ options</h4>
+
+<p>-ffor-scope &lt;/br&gt;
+从头开始执行程序，也允许进行重定向。</p>
+
+<p>-fno-rtti &lt;/br&gt;
+关闭对 dynamic_cast 和 typeid 的支持。如果你不需要这些功能，关闭它会节省一些空间。</p>
+
+<p>-Wctor-dtor-privacy &lt;/br&gt;
+当一个类没有用时给出警告。因为构造函数和析构函数会被当作私有的。</p>
+
+<p>-Wnon-virtual-dtor &lt;/br&gt;
+当一个类有多态性，而又没有虚析构函数时，发出警告。-Wall会开启这个选项。</p>
+
+<p>-Wreorder &lt;/br&gt;
+如果代码中的成员变量的初始化顺序和它们实际执行时初始化顺序不一致，给出警告。</p>
+
+<p>-Wno-deprecated &lt;/br&gt;
+使用过时的特性时不要给出警告。</p>
+
+<p>-Woverloaded-virtual &lt;/br&gt;
+如果函数的声明隐藏住了基类的虚函数，就给出警告。</p>
+
+<p>Machine Dependent Options (Intel)&lt;/br&gt;</p>
+
+<p>-mtune=cpu-type &lt;/br&gt;
+为指定类型的 CPU 生成代码。cpu-type 可以是：i386，i486，i586，pentium，i686，pentium4 等等。</p>
+
+<p>-msse &lt;/br&gt;
+-msse2 &lt;/br&gt;
+-mmmx &lt;/br&gt;
+-mno-sse &lt;/br&gt;
+-mno-sse2 &lt;/br&gt;
+-mno-mmx &lt;/br&gt;
+使用或者不使用MMX，SSE，SSE2指令。</p>
+
+<p>-m32 &lt;/br&gt;
+-m64 &lt;/br&gt;
+生成32位/64位机器上的代码。</p>
+
+<p>-mpush-args &lt;/br&gt;
+-mno-push-args &lt;/br&gt;
+（不）使用 push 指令来进行存储参数。默认是使用。</p>
+
+<p>-mregparm=num &lt;/br&gt;
+当传递整数参数时，控制所使用寄存器的个数。</p>
+
+<h4 id="optimization-option">Optimization Option</h4>
+
+<p>-O0 &lt;/br&gt;
+禁止编译器进行优化。默认为此项。</p>
+
+<p>-O&lt;/br&gt;
+-O1&lt;/br&gt;
+尝试优化编译时间和可执行文件大小。</p>
+
+<p>-O2 &lt;/br&gt;
+更多的优化，会尝试几乎全部的优化功能，但不会进行“空间换时间”的优化方法。</p>
+
+<p>-O3 &lt;/br&gt;
+在 -O2 的基础上再打开一些优化选项：-finline-functions， -funswitch-loops 和 -fgcse-after-reload 。</p>
+
+<p>-Os &lt;/br&gt;
+对生成文件大小进行优化。它会打开 -O2 开的全部选项，除了会那些增加文件大小的。</p>
+
+<p>-finline-functions &lt;/br&gt;
+把所有简单的函数内联进调用者。编译器会探索式地决定哪些函数足够简单，值得做这种内联。</p>
+
+<p>-fstrict-aliasing &lt;/br&gt;
+施加最强的别名规则（aliasing rules）。</p>
+
+<p><code>gcc</code>默认提供了5级优化选项的集合: </p>
+
+<ul>
+  <li>-O0:无优化(默认)</li>
+  <li>-O和-O1:使用能减少目标文件大小以及执行时间并且不会使编译时间明显增加的优化.在编译大型程序的时候会显著增加编译时内存的使用. </li>
+  <li>-O2: 包含-O1的优化并增加了不需要在目标文件大小和执行速度上进行折衷的优化.编译器不执行循环展开以及函数内联.此选项将增加编译时间和目标文件的执行性 能. </li>
+  <li>-Os:专门优化目标文件大小,执行所有的不增加目标文件大小的-O2优化选项.并且执行专门减小目标文件大小的优化选项. </li>
+  <li>-O3: 打开所有-O2的优化选项并且增加 -finline-functions, -funswitch-loops,-fpredictive-commoning, -fgcse-after-reload and -ftree-vectorize优化选项. </li>
+</ul>
+
+<pre>
+-O1包含的选项-O1通常可以安全的和调试的选项一起使用:
+           -fauto-inc-dec -fcprop-registers -fdce -fdefer-pop -fdelayed-branch 
+           -fdse -fguess-branch-probability -fif-conversion2 -fif-conversion 
+           -finline-small-functions -fipa-pure-const -fipa-reference 
+           -fmerge-constants -fsplit-wide-types -ftree-ccp -ftree-ch 
+           -ftree-copyrename -ftree-dce -ftree-dominator-opts -ftree-dse 
+           -ftree-fre -ftree-sra -ftree-ter -funit-at-a-time 
+</pre>
+
+<p>以下所有的优化选项需要在名字前加上-f,如果不需要此选项可以使用-fno-前缀 </p>
+
+<ul>
+  <li>defer-pop:延迟到只在必要时从函数参数栈中pop参数; </li>
+  <li>thread-jumps:使用跳转线程优化,避免跳转到另一个跳转; </li>
+  <li>branch-probabilities:分支优化; </li>
+  <li>cprop-registers:使用寄存器之间copy-propagation传值; </li>
+  <li>guess-branch-probability:分支预测; </li>
+  <li>omit-frame-pointer:可能的情况下不产生栈帧; </li>
+</ul>
+
+<pre>
+-O2:以下是-O2在-O1基础上增加的优化选项: 
+           -falign-functions  -falign-jumps -falign-loops  -falign-labels 
+           -fcaller-saves -fcrossjumping -fcse-follow-jumps  -fcse-skip-blocks 
+           -fdelete-null-pointer-checks -fexpensive-optimizations -fgcse 
+           -fgcse-lm -foptimize-sibling-calls -fpeephole2 -fregmove 
+           -freorder-blocks  -freorder-functions -frerun-cse-after-loop 
+           -fsched-interblock  -fsched-spec -fschedule-insns 
+           -fschedule-insns2 -fstrict-aliasing -fstrict-overflow -ftree-pre 
+           -ftree-vrp
+</pre>
+
+<p>cpu架构的优化选项,通常是-mcpu(将被取消);-march,-mtune </p>
+
+<h3 id="warning-interpretation">Warning Interpretation</h3>
+
+<ul>
+  <li>unused-function:警告声明但是没有定义的static函数; </li>
+  <li>unusedlabel:声明但是未使用的标签; </li>
+  <li>unused-parameter:警告未使用的函数参数; </li>
+  <li>unused-variable:声明但是未使用的本地变量; </li>
+  <li>unused-value:计算了但是未使用的值; </li>
+  <li>format:printf和scanf这样的函数中的格式字符串的使用不当; </li>
+  <li>implicit-int:未指定类型; </li>
+  <li>implicit-function:函数在声明前使用; </li>
+  <li>charsubscripts:使用char类作为数组下标(因为char可能是有符号数); </li>
+  <li>missingbraces:大括号不匹配; </li>
+  <li>parentheses: 圆括号不匹配; </li>
+  <li>return-type:函数有无返回值以及返回值类型不匹配; </li>
+  <li>sequence-point:违反顺序点的代码,比如 a[i] = c[i++]; </li>
+  <li>switch:switch语句缺少default或者switch使用枚举变量为索引时缺少某个变量的case; </li>
+  <li>strictaliasing=n:使用n设置对指针变量指向的对象类型产生警告的限制程度,默认n=3;只有在-fstrict-aliasing设置的情况下有效; </li>
+  <li>unknow-pragmas:使用未知的#pragma指令; </li>
+  <li>uninitialized:使用的变量为初始化,只在-O2时有效; </li>
+  <li>以下是在-Wall中不会激活的警告选项: </li>
+  <li>cast-align:当指针进行类型转换后有内存对齐要求更严格时发出警告; </li>
+  <li>signcompare:当使用signed和unsigned类型比较时; </li>
+  <li>missing-prototypes:当函数在使用前没有函数原型时; </li>
+  <li>packed:packed 是<code>gcc</code>的一个扩展,是使结构体各成员之间不留内存对齐所需的空间 ,有时候会造成内存对齐的问题; </li>
+  <li>padded:也是<code>gcc</code>的扩展,使结构体成员之间进行内存对齐的填充,会 造成结构体体积增大. </li>
+  <li>unreachable-code:有不会执行的代码时. </li>
+  <li>inline:当inline函数不再保持inline时 (比如对inline函数取地址); </li>
+  <li>disable-optimization:当不能执行指定的优化时.(需要太多时间或系统资源). </li>
+  <li>可以使用 -Werror时所有的警告都变成错误,使出现警告时也停止编译.需要和指定警告的参数一起使用. </li>
+</ul>
+
+<h4 id="warning-multi-character-character-constant">1. Warning: multi-character character constant</h4>
+
+<p>Could be suppressed by -Wno-multichar</p>
+
+<p>There’re three kinds of character constants: Normal character constants, Multicharacter constants and Wide-character constants.</p>
+
+<pre><code>char ch = 'a';
+int mbch = '1234';
+wchar_t wcch = L'ab';
+</code></pre>
+
+<p>Mbch is of type int(signed), has 4 meaningful characters.</p>
+
+<p><code>gcc</code> compiler evaluates a multi-character character constant a character at a time, shifting the previous value left by the number of bits per target character, and then or-ing in the bit-pattern of the new character truncated to the width of a target character.</p>
+
+<p>‘ab’ for a target with an 8-bit char would be interpreted as:</p>
+
+<p>(int) ((unsigned char) ‘a’ * 256 + (unsigned char) ‘b’) = 97*256+98</p>
+
+<p>‘1’,x          0x31
+‘12’,x        0x3132
+‘123’,x      0x313233
+‘1234’,x    0x31323334</p>
+
+<p>判断系统是big endian还是little endian的方法：</p>
+
+<pre><code>if (('1234' &gt;&gt; 24) == '1')
+{
+    //Little endian
+}
+else if (('4321' &gt;&gt; 24) == '1')
+{
+    //Big endian
+}
+</code></pre>
+
+<h4 id="warning-operation-on-xx-may-be-undefined">2. Warning: operation on xx may be undefined</h4>
+
+<p>序列点问题。为什么 a[i] = i++; 不能正常工作？子表达式 i++ 有一个副作用，它会改变 i 的值。由于 i 在同一表达式的其它地方被引用，这会导致无定义的结果，无从判断该引用(左边的 a[i] 中)是旧值还是新值。(尽管 在 K&amp;R 中建议这类表达式的行为不确定，但 C 标准却强烈声明它是无定义的），具体实现取决于编译器。</p>
+
+<h4 id="warning-conversion-to-xxx-from-yyy-may-alter-its-value">3.  Warning: conversion to xxx from yyy may alter its value</h4>
+
+<p><code>gcc</code> promotes unsigned char/uint16_t/uint8_t  to type int for for all arithmetic. Need to apply static_cast&lt;&gt;.</p>
+
+<h4 id="warning-function-might-be-possible-candidate-for-attribute-noreturn">4.  Warning: function might be possible candidate for attribute ‘noreturn’</h4>
+
+<p>打开了 -Wmissing-noreturn。A few standard library functions, such as abort and exit, cannot return. <code>gcc</code> knows this automatically. With noreturn attribute it can then optimize without regard to what would happen if function ever did return. This makes slightly better code. More importantly, it helps avoid spurious warnings of uninitialized variables. The noreturn keyword does not affect the exceptional path. 给函数加上 <strong>attribute</strong>((noreturn)) 即可消除这个warning。</p>
+
+<h4 id="warning-deprecated-conversion-from-string-constant-to-char-">5. Warning: deprecated conversion from string constant to “char *”</h4>
+
+<p>void SomeFunc (char* str)
+{
+}</p>
+
+<p>int _tmain(int argc, _TCHAR* argv[])
+{
+    SomeFunc(“Hello!”);
+    return 0;
+}</p>
+
+<p>SomeFunc() 的输入时char<em>，含义是：给我个字符串，我要修改它。而传给它的字面常量是没办法修改的，将char</em> 改成 const char*，消除这个warning.</p>
+
+<h4 id="warning-implicit-declaration-of-function-mallocfree-incompatible-implicit-declaration-of-built-in-function-mallocfree">6.  Warning: implicit declaration of function ‘malloc’/’free’, incompatible implicit declaration of built-in function ‘malloc’/’free’</h4>
+
+<p>要显示的#include <stdlib.h></stdlib.h></p>
+
+<h4 id="warning-dereferencing-type-punned-pointer-will-break-strict-aliasing-rules">7.  Warning: Dereferencing type-punned pointer will break strict-aliasing rules</h4>
+
+<p>打开了-fstrict-aliasing and -Wstrict-aliasing. Suppress with -fno-strict-aliasing</p>
+
+<p>Strict-aliasing rule: An object of one type is assumed never to reside at the same address as an object of a different type, unless the types are almost the same. 编译器希望不同类型的对象不会指向同一个地址。</p>
+
+<h4 id="warning-inlining-failed-in-call-to-xxx-call-is-unlikely-and-code-size-would-grow">8.  Warning: inlining failed in call to xxx: call is unlikely and code size would grow</h4>
+
+<p>打开了-Winline: Warn if a function can not be inlined and it was declared as inline. Even with this option, the compiler will not warn about failures to inline functions declared in system headers.</p>
+
+<p>相关选项：</p>
+
+<p>-fno-inline: Don’t compile statement functions inline. Might reduce the size of a program unit–which might be at expense of some speed (though it should compile faster). Note that if you are not optimizing, no functions can be expanded inline.</p>
+
+<p>-finline-functions: Interprocedural optimizations occur. However, if you specify -O0, the default is OFF. Enables function inlining for single file compilation.</p>
+
+<h4 id="warning-cannot-optimize-loop-the-loop-counter-may-overflow">9.  Warning: cannot optimize loop, the loop counter may overflow</h4>
+
+<p>打开了-Wunsafe-loop-optimizations: Warn if the loop cannot be optimized because the compiler could not assume anything on the bounds of the loop indices. With -funsafe-loop-optimizations warn if the compiler made such assumptions.</p>
+
+<p>相关选项：</p>
+
+<p>-funsafe-loop-optimizations: Enable unsafe loop optimizations, e.g. assume loop indices never overflow, etc</p>
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-12-31T18:07:00+08:00" pubdate data-updated="true">Dec 31<span>st</span>, 2013</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/tools/'>tools</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2013/12/31/gcc-summary/" data-via="" data-counturl="http://billowkiller.github.io/blog/2013/12/31/gcc-summary/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2013/11/26/nginx-architecture-4-modularity/" title="Previous Post: Nginx architecture(4)--Modularity">&laquo; Nginx architecture(4)--Modularity</a></li>
+            
+            
+            <li class="next"><a href="/blog/2013/12/31/large-site-technical-architecture/" title="Next Post: Large site technical architecture">Large site technical architecture &raquo;</a></li>
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item " href="/blog/2014/06/28/signal-and-forkmarkdown/">Signal and Fork</a>
+    
+    <a class="list-group-item " href="/blog/2014/06/28/signal-and-thread/">Signal and Thread</a>
+    
+    <a class="list-group-item " href="/blog/2014/06/28/signal-status-and-lifecycle/">Signal Status and Lifecycle</a>
+    
+    <a class="list-group-item " href="/blog/2013/12/31/large-site-technical-architecture/">Large Site Technical Architecture</a>
+    
+    <a class="list-group-item active" href="/blog/2013/12/31/gcc-summary/">Gcc Summary</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">3</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">6</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">13</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">3</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">8</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">2</span>
+        algorithm
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2014 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/12/31/gcc-summary/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/12/31/gcc-summary/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>

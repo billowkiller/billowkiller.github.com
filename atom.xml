@@ -1,0 +1,2650 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2014-07-17T22:06:20+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Signal and fork]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/06/28/signal-and-forkmarkdown/"/>
+    <updated>2014-06-28T04:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/06/28/signal-and-forkmarkdown</id>
+    <content type="html"><![CDATA[<p>当线程调用fork时，就为子进程创建了整个进程地址空间的副本。子进程与父进程是完全不同的进程，只要两者都没有对内存作出改动，父进程和子进程之间还可以共享内存副本。注意一下几个情况：</p>
+
+<ol>
+  <li>子进程通过继承整个地址空间的副本，<strong>从父进程那里继承了所有互斥量、读写锁和条件变量的状态</strong>。也就是说，如果它在父进程中被锁住，则它在子进程中也是被锁住的。</li>
+  <li>只有调用fork()的线程被复制到子进程（子进程中线程的ID），如果子进程中包含占有锁的线程的副本，那么子进程就没有办法知道它占有了那些锁并且需要释放那些锁，<strong>容易造成死锁</strong>。</li>
+  <li>thread-specific data的销毁函数和清除函数都不会被调用。在多线程中调用fork()可能会引起内存泄露。比如在其他线程中创建的thread-specific data，在子进程中将没有指针来存取这些数据，<strong>造成内存泄露</strong>。</li>
+</ol>
+
+<p>因为以上这些问题，<strong>在线程中调用fork()的后，我们通常都会在子进程中调用exec()</strong>。因为exec()能让父进程中的所有互斥量，条件变量（pthread objects）在子进程中统统消失（用新数据覆盖所有的内存）。对于那些要使用fork()但不使用exec()的程序，pthread API提供了一个新的函数</p>
+
+<pre><code>pthread_atfor(void (*prepare_func)(void), void(*parent_func)(void), void (*child_func)(void))
+</code></pre>
+
+<p>prepare_func在父进程调用fork之前调用，parent_func在fork执行后在父进程内被调用，child_func在fork执行后子进程内被调用。除非你打算很快的exec一个新程序，否则应该避免在一个多线程的程序中使用fork。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Signal and Thread]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/06/28/signal-and-thread/"/>
+    <updated>2014-06-28T03:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/06/28/signal-and-thread</id>
+    <content type="html"><![CDATA[<p>类UNIX信号以前是专为进程设计的，它比线程的出现早了很多年。当线程模型出现后，专家们试图也在线程上实现信号，这导致了一个问题：即使是在基于进程的编程模式中，信号的处理也可能是很复杂的，因为它打断了正在运行的thread of control， 在signal handler中只能调用可重入函数，修改全局变量的类型必须是<code>sig_atomic_t</code>类型，防止内存访问优化； 而把线程引入编程范型，就使信号的处理变得更加复杂。</p>
+
+<p><strong>避免信号和线程一起使用是明智的选择。</strong>但是，将他们分开又是不可能或不实际的。只要有可能的话，仅仅在主线程内使用<code>pthread_sigmask()</code>来屏蔽信号，然后同步地在专用线程中使用<code>sigwait()</code>来处理信号。</p>
+
+<h2 id="section">信号模型映射到线程模型</h2>
+
+<p>为了理解信号模型是怎样映射到线程模型的，我们需要知道信号模型的哪些方面是影响进程层面的（process-wide），哪些方面只会影响某个线程的。下面列出几点:</p>
+
+<ol>
+  <li>signal actions 是process-wide。如果一个没有处理的信号的默认动作是停止SIGSTOP或终止SIGKILL(该动作是让整个进程停止或终止，而不是只针对某个线程)，那么不管这个信号是发送给哪个线程，整个进程都会停止或终止。</li>
+  <li>signal dispositions信号部署是process-wide。每个线程都有自己的信号屏蔽字，但是<strong>信号的处理是进程中所有线程共享的</strong>。这意味着尽管每个线程可以阻止某些信号，但当线程修改了与某个信号相关的处理行为之后，所有的线程都必须共享这个处理行为的改变。</li>
+  <li>信号通常是被发送到<strong>任意一个线程</strong>，为了保证不会在多线程进程中一个信号多次被执行。但是以下几种情况是传递到<strong>单个线程</strong>的：
+    <ul>
+      <li>信号与硬件故障或计时器超时相关。</li>
+      <li>当线程尝试向一个broken pipe写数据时，会产生一个SIGPIPE。</li>
+      <li>使用<code>pthread_kill()</code>或者<code>pthread_sigqueue()</code>。这些函数允许一个线程发送信号到同一进程的另一个线程。</li>
+    </ul>
+  </li>
+  <li><strong>信号掩码(signal mask)是线程私用的。</strong>在多线程的进程中，不存在process-wide的信号掩码。线程可以使用<code>pthread_sigmask()</code>来独立的屏蔽某些信号。通过这种方法，程序员可以控制那些线程响应那些信号。当线程被创建时，它将继承创建它的线程的信号掩码。</li>
+  <li><strong>内核为每个线程和进程分别维护了一个未决信号的表</strong>。当使用<code>sigpending()</code>时，该函数返回的是整个进程未决信号表和调用该函数的线程的未决信号表的并集。当新线程被创建时，线程的pending signals被设置为空。当线程A阻塞某个信号S后，发送到A中的信号S将会被挂起，直到线程取消了对信号S的阻塞。</li>
+  <li>如果一个信号处理函数打断了<code>pthread_mutex_lock()</code>，该<strong>函数会自动的重新执行</strong>。如果信号处理函数打断了<code>pthread_cond_wait()</code>，该函数要么自动重新自行（linux是这样实现的），或者返回0（这时应用要检查返回值，判断是否为假唤醒）。</li>
+</ol>
+
+<h2 id="section-1">异步信号的处理</h2>
+
+<p>一个函数要么是可重入的（reentrant）,要么是不能被信号处理函数打断的，我们把这种函数叫做是<code>async-signal-safe</code>的。调用非<code>async-signal-safe</code>的函数是危险的，比如，考虑在线程A中，我们调用<code>malloc()</code>来进行内存分配，<code>malloc()</code>刚用互斥量锁住了全局链表，这是异步信号到达，在信号处理函数中也调用<code>malloc()</code>，这时该函数会阻塞在互斥量上，形成死锁（这个例子在单线程的进程中也会出现）。Pthread API不是<code>async-signal-safe</code>的，也就是说在信号处理函数中不要使用pthread相关的函数。</p>
+
+<p><strong>解决这个问题</strong>的最好办法是，在不打断正常程序的前提下，把所有的异步信号都在同一处处理。在单线程程序中，这是做不到的，因为所有发送的信号都会打断程序。而在多线程程序中，我们可以<u>单独创建一个线程来接受信号，处理需要的信号，而不会打断其他线程的工作。</u></p>
+
+<p>上面举的这个例子中还有一点没说到，就是<strong>信号处理函数也会被其他信号所打断</strong>。那我们怎么处理这个问题呢？<u>在处理信号之前，对所有的异步信号进行阻塞，等工作处理完毕后，再恢复阻塞的信号。</u>这个工作就靠下面这个函数执行：</p>
+
+<pre><code>int sigwait(const sigset_t *set, int *sig)
+</code></pre>
+
+<ul>
+  <li><code>sigwait()</code>的好处在于它可以简化信号处理，允许把异步产生的信号用同步方式处理。</li>
+  <li>调用<code>sigwait()</code>等待的信号必须在调用线程中屏蔽，通常我们在所有线程中都会屏蔽。</li>
+  <li>信号仅仅被交付一次。如果两个线程在<code>sigwait()</code>上阻塞（等待同一个信号），只有一个线程（不确定的线程）将收到送给进程的信号。这意味着不能让两个独立的子系统使用<code>sigwait()</code>来捕获相同的信号。信号捕获<code>sigaction</code>建立的信号处理程序和<code>sigwait</code>也同样只有一个可以执行。</li>
+</ul>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Signal status and lifecycle]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/06/28/signal-status-and-lifecycle/"/>
+    <updated>2014-06-28T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/06/28/signal-status-and-lifecycle</id>
+    <content type="html"><![CDATA[<p><i><strong>modified from</strong> <a href="http://blog.csdn.net/sunyubo458/article/details/4484957">http://blog.csdn.net/sunyubo458/article/details/4484957</a></i></p>
+
+<p><em>Lost original source</em></p>
+
+<hr />
+
+<h3 id="section">信号状态</h3>
+
+<p>信号的”未决“是一种状态，指的是从信号的产生到信号被处理前的这一段时间；信号的”阻塞“是一个开关动作，指的是阻止信号被处理，但不是阻止信号产生。 </p>
+
+<p>每个进程都有一个信号屏蔽字，它规定了当前要阻塞地送到该进程的信号集，对于每种可能的信号，该屏蔽字中都有一位与之对应。对于某种信号，若其对应为已设定，则它当前是被阻塞的。进程可以调用<code>sigprocmask</code>来检测和更改当前信号屏蔽字。</p>
+
+<p>APUE例题在<code>sleep</code>前用<code>sigprocmask</code>阻塞了退出信号，然后<code>sleep</code>,然后在<code>sleep</code>的过程中产生一个退出信号，但是此时退出信号被阻塞过，（中文的”阻塞”在这里容易被误解为一种状态，实际上是一种类似于开关的动作，所以说“被阻塞过”，而不是“被阻塞”）所以处于“未决”状态，在 <code>sleep</code>后又用<code>sigprocmask</code>关掉退出信号的阻塞开关，因为之前产生的退出信号一直处于未决状态，当关上阻塞开关后，马上退出“未决”状态，得到处理，这一切发生在<code>sigprocmask</code>返回之前。 </p>
+
+<h3 id="section-1">信号生命周期</h3>
+
+<p>对于一个完整的信号生命周期(从信号发送到相应的处理函数执行完毕)来说，可以分为三个重要的阶段，这三个阶段由四个重要事件来刻画：1.信号诞生；2. 信号在进程中注册完毕；3.信号在进程中的注销完毕；4.信号处理函数执行完毕。相邻两个事件的时间间隔构成信号生命周期的一个阶段。</p>
+
+<p>下面阐述四个事件的实际意义：</p>
+
+<ol>
+  <li>
+    <p>信号”诞生”；</p>
+
+    <p>信号的诞生指的是触发信号的事件发生（如检测到硬件异常、定时器超时以及调用信号发送函数kill()或sigqueue()等）。 </p>
+  </li>
+  <li>
+    <p>信号在目标进程中”注册”；</p>
+
+    <p>进程的<code>task_struct</code>结构中有关于本进程中未决信号的数据成员：</p>
+
+    <pre><code> struct sigpending pending;
+ struct sigpending
+ {
+     struct sigqueue *head, **tail;
+     sigset_t signal;
+ };
+</code></pre>
+
+    <p>第一、第二个成员分别指向一个<code>sigqueue</code>类型的结构链（称之为”未决信号信息链”）的首尾，第三个成员是进程中所有未决信号集，信息链中的每个sigqueue结构体刻画一个特定信号所携带的信息，并指向下一个sigqueue结构: </p>
+
+    <pre><code> struct sigqueue
+ {
+     struct sigqueue *next;
+     siginfo_t info;
+ };
+</code></pre>
+
+    <p>信号在进程中注册指的就是信号值加入到进程的未决信号集中（<code>sigpending</code>结构的第二个成员<code>sigset_t signal</code>），并且信号所携带的信息被保留到未决信号信息链的某个<code>sigqueue</code>结构中。只要信号在进程的未决信号集中，表明进程已经知道这些信号的存在，但还没来得及处理，或者该信号被进程阻塞。 </p>
+
+    <p><strong>注：</strong> 
+ 当一个实时信号发送给一个进程时，不管该信号是否已经在进程中注册，都会被再注册一次，因此，信号不会丢失，因此，实时信号又叫做”可靠信号”。这意味着同一个实时信号可以在同一个进程的未决信号信息链中占有多个<code>sigqueue</code>结构（进程每收到一个实时信号，都会为它分配一个结构来登记该信号信息，并把该结构添加在未决信号链尾，即所有诞生的实时信号都会在目标进程中注册）； </p>
+
+    <p>当一个非实时信号发送给一个进程时，如果该信号已经在进程中注册，则该信号将被丢弃，造成信号丢失。因此，非实时信号又叫做”不可靠信号”。这意味着同一个非实时信号在进程的未决信号信息链中，至多占有一个<code>sigqueue</code>结构（一个非实时信号诞生后，（1）、如果发现相同的信号已经在目标结构中注册，则不再注册，对于进程来说，相当于不知道本次信号发生，信号丢失；（2）、如果进程的未决信号中没有相同信号，则在进程中注册自己）。 </p>
+  </li>
+  <li>
+    <p>信号在进程中的注销。</p>
+
+    <p>在目标进程执行过程中，会检测是否有信号等待处理（每次从系统空间返回到用户空间时都做这样的检查）。如果存在未决信号等待处理且该信号没有被进程阻塞，则在运行相应的信号处理函数前，进程会把信号在未决信号链中占有的结构卸掉。是否将信号从进程未决信号集中删除对于实时与非实时信号是不同的。对于非实时信号来说，由于在未决信号信息链中最多只占用一个sigqueue结构，因此该结构被释放后，应该把信号在进程未决信号集中删除（信号注销完毕）；而对于实时信号来说，可能在未决信号信息链中占用多个sigqueue结构，因此应该针对占用gqueue结构的数目区别对待：如果只占用一个sigqueue结构（进程只收到该信号一次），则应该把信号在进程的未决信号集中删除（信号注销完毕）。否则，不在进程的未决信号集中删除该信号（信号注销完毕）。进程在执行信号相应处理函数之前，首先要把信号在进程中注销。 </p>
+  </li>
+  <li>
+    <p>信号生命终止。</p>
+
+    <p>进程注销信号后，立即执行相应的信号处理函数，执行完毕后，信号的本次发送对进程的影响彻底结束。 </p>
+  </li>
+</ol>
+
+<p><strong>注：</strong> 
+1）信号注册与否，与发送信号的函数（如kill()或sigqueue()等）以及信号安装函数（signal()及sigaction()）无关，只与信号值有关（信号值小于SIGRTMIN的信号最多只注册一次，信号值在SIGRTMIN及SIGRTMAX之间的信号，只要被进程接收到就被注册）。 
+2）在信号被注销到相应的信号处理函数执行完毕这段时间内，如果进程又收到同一信号多次，则对实时信号来说，每一次都会在进程中注册；而对于非实时信号来说，无论收到多少次信号，都会视为只收到一个信号，只在进程中注册一次。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Large site technical architecture]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/12/31/large-site-technical-architecture/"/>
+    <updated>2013-12-31T18:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/12/31/large-site-technical-architecture</id>
+    <content type="html"><![CDATA[<p>本文是李智慧的<a href="http://book.douban.com/subject/25723064/">《大型网站技术架构》</a>的读书笔记。</p>
+
+<p>何为架构，要有大局观，大局观就是提前预防掉那些通用的问题：高可用，工程化，伸缩性，扩展性。对应需要的能力：了解分布式的一些东西，了解项目的业务和流程和运维使之工程化，了解负载均衡，能够对业务的分割和代码的分层。 </p>
+
+<p><img src="http://img3.douban.com/lpic/s27040583.jpg" height="250px" /></p>
+
+<p>本书并没有什么特别的东西，且都比较泛，但是都是很实在的东西，而且能很好的组织起来，也不失为互联网架构的一张蓝图。另外本书还处处透露着一些为人处世的人生哲学，这也是我喜欢的。</p>
+
+<!--more-->
+
+<p>下面就先从目录部分总结勾勒一下蓝图，然后再摘抄一些自己喜欢的句子。</p>
+
+<h2 id="section">蓝图部分</h2>
+
+<ul>
+  <li><strong>大型网站架构演化发展历程</strong>
+    <ul>
+      <li>初始阶段的网站架构
+        <ul>
+          <li>应用程序、数据库、文件等所有资源都在一台服务器上</li>
+        </ul>
+      </li>
+      <li>应用服务和数据服务分离 </li>
+      <li>使用缓存改善网站性能</li>
+      <li>使用应用服务器集群改善网站的并发处理能力</li>
+      <li>数据库读写分离</li>
+      <li>使用反向代理和CDN加速网站响应	</li>
+      <li>使用分布式文件系统和分布式数据库系统</li>
+      <li>使用NoSQL和搜索引擎</li>
+      <li>业务拆分</li>
+      <li>分布式服务</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>网站架构模式</strong></p>
+
+    <blockquote>
+      <p>关于什么是模式，这个来自建筑学的词汇是这样定义的：“每一个模式描述了一个在我们周围不断重复发生的问题及该问题解决方案的核心。这样，你就能一次又一次地使用该方案而不必做重复工作”。模式的关键在于<strong>模式的可重复性</strong>，问题与场景的可重复性带来解决方案的可重复使用。
+ - 分层
+     - 将系统在横向维度上切分成几个部分，每个部分负责一部分相对比较单一的职责，然后通过上层对下层的依赖和调用组成一个完整的系统	 
+ - 分割
+     - 如果说分层是将软件在横向方面进行切分，那么分割就是在纵向方面对软件进行切分 
+ - 分布式
+     - 分层和分割的一个主要目的是为了切分后的模块便于分布式部署，即将不同模块部署在不同的服务器上，通过远程调用协同工作。 
+ -  集群
+ - 缓存
+     - CDN、反向代理、本地缓存、分布式缓存
+     - 28原理 
+ -  异步
+     - 降低软件耦合性<br />
+ -  冗余，自动化，安全</p>
+    </blockquote>
+  </li>
+  <li>大型网站核心架构要素
+    <ul>
+      <li>性能，可用性，伸缩性，扩展性，安全性</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="section-1">网站的高性能架构</h3>
+<ul>
+  <li>网站性能测试
+    <ul>
+      <li>不同视角下的网站性能</li>
+      <li>性能测试指标
+        <ul>
+          <li>响应时间、并发数、吞吐量、性能计数器（服务器或操作系统的一些数据指标）  </li>
+        </ul>
+      </li>
+      <li>性能测试方法
+        <ul>
+          <li>性能测试、负载测试、压力测试、稳定性测试 </li>
+        </ul>
+      </li>
+      <li>性能测试报告</li>
+      <li>性能优化策略</li>
+    </ul>
+  </li>
+  <li>Web前端性能优化
+    <ul>
+      <li>浏览器访问优化
+        <ul>
+          <li>减少http请求（合并请求）、使用浏览器缓存、压缩数据、CSS和JS顺序 </li>
+        </ul>
+      </li>
+      <li>CDN加速 </li>
+      <li>反向代理</li>
+    </ul>
+  </li>
+  <li>应用服务器性能优化	
+    <ul>
+      <li>分布式缓存
+        <ul>
+          <li><strong>网站性能优化第一定律：优先考虑使用缓存优化性能</strong> </li>
+          <li>缓存的本质是一个内存Hash表</li>
+          <li>合理使用缓存：数据的读写比在2:1以上；数据不一致与脏读（应用要容忍一定时间的数据不一致）；缓存雪崩；缓存预热；缓存穿透</li>
+          <li>架构方式有两种，一种是以<code>JBoss Cache</code>为代表的需要更新同步的分布式缓存，一种是以<code>Memcached</code>为代表的不互相通信的分布式缓存</li>
+        </ul>
+      </li>
+      <li>异步操作
+        <ul>
+          <li>消息队列具有很好的消峰作用</li>
+          <li>业务异步处理时候可能需要业务流程配合</li>
+          <li><strong>任何可以晚点做的事情都应该晚点再做</strong> </li>
+        </ul>
+      </li>
+      <li>使用集群</li>
+      <li>代码优化
+        <ul>
+          <li>多线程，线程安全手段：将对象设计为无状态对象；使用局部对象；并发访问使用锁</li>
+          <li>资源复用：单例模式和对象池</li>
+          <li>数据结构</li>
+          <li>垃圾回收 </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>存储性能优化
+    <ul>
+      <li>机械硬盘vs. 固态硬盘</li>
+      <li>B+树vs. LSM树</li>
+    </ul>
+
+    <p><img src="http://img1.tuicool.com/NbeUnm.jpg" alt="LSM树" />
+  - RAID vs. HDFS</p>
+
+    <p><img src="http://www.2cto.com/uploadfile/2013/1016/20131016045031342.jpg" alt="常用的RAID技术原理图" /></p>
+  </li>
+</ul>
+
+<h3 id="section-2">网站的高可用架构</h3>
+
+<ul>
+  <li>高可用的应用	
+    <ul>
+      <li>通过负载均衡进行无状态服务的失效转移	</li>
+      <li>应用服务器集群的Session管理	
+        <ul>
+          <li>Session复制</li>
+          <li>Session绑定</li>
+          <li>利用Cookie记录Session</li>
+          <li>Session服务器 </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>高可用的服务
+    <ul>
+      <li>分级管理，核心应用和服务优先使用更好的硬件</li>
+      <li>超时设置</li>
+      <li>异步调用，避免一个服务失败导致整个应用请求失败</li>
+      <li>服务降级：拒绝服务和关闭服务</li>
+      <li>幂等性设计 	</li>
+    </ul>
+  </li>
+  <li>高可用的数据	
+    <ul>
+      <li><code>CAP</code>原理
+        <ul>
+          <li>在设计和部署分布式应用的时候，存在三个核心的系统需求，这个三个需求之间存在一定的特殊关系。三个需求如下：<code>Consistency</code>所有程序都能访问得到相同的数据; <code>Availability</code>任何时候，任何应用程序都可以读写访问; <code>Partition Tolerance</code>系统可以跨网络分区线性伸缩。</li>
+          <li><code>CAP</code>理论的核心是：一个分布式系统不可能同时很好的满足一致性，可用性和分区容错性这三个需求，最多只能同时较好的满足两个。</li>
+          <li>大型网站设计中，通常选择强化分布式存储系统的可用性(A)和伸缩性(P)，而在某种程度放弃一致性(C)
+  <img src="http://hi.csdn.net/attachment/201109/6/0_1315316512jhTH.gif" alt="" /></li>
+        </ul>
+      </li>
+      <li>数据备份
+        <ul>
+          <li>异步热备：写一份，存储系统异步写其他副本。Master-Slave</li>
+          <li>同步热备：多份副本同步写入。传统的企业级关系数据库</li>
+        </ul>
+      </li>
+      <li>失效转移
+        <ul>
+          <li>失效确认、访问转移、数据恢复 	</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>高可用网站的软件质量保证	
+    <ul>
+      <li>网站发布	</li>
+      <li>自动化测试	</li>
+      <li>预发布验证	</li>
+      <li>代码控制
+        <ul>
+          <li>主干开发、分支发布</li>
+          <li>分支开发、主干发布 	</li>
+        </ul>
+      </li>
+      <li>自动化发布	</li>
+      <li>灰度发布	</li>
+    </ul>
+  </li>
+  <li>网站运行监控	
+    <ul>
+      <li>监控数据采集
+        <ul>
+          <li>用户行为日志收集，服务器端和客户端</li>
+          <li>服务器性能监控</li>
+          <li>运行数据报告，缓冲命中、平均响应延迟时间、每分钟发送邮件数目… </li>
+        </ul>
+      </li>
+      <li>监控管理
+        <ul>
+          <li>系统报警，失效转移，自动降级 </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="section-3">网站的伸缩性架构</h3>
+
+<blockquote>
+  <p>所谓<strong>网站的伸缩性</strong>是指不需要改变网站的软硬件设计，仅仅通过改变部署的服务器数量就可以扩大或缩小网站的服务处理能力。</p>
+</blockquote>
+
+<ul>
+  <li>网站架构的伸缩性设计
+    <ul>
+      <li>不同功能进行物理分离实现伸缩
+        <ul>
+          <li>纵向分离（分层后分离）：将业务处理流程上的不同部分分离部署，实现系统伸缩性。</li>
+          <li>横向分离（业务分割后分离）：将不同的业务模块分离部署，实现系统伸缩性。 </li>
+        </ul>
+      </li>
+      <li>单一功能通过集群规模实现伸缩
+        <ul>
+          <li>应用服务器集群伸缩性、数据服务器集群伸缩性 </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>应用服务器集群的伸缩性设计
+    <ul>
+      <li>HTTP重定向负载均衡</li>
+      <li>DNS域名解析负载均衡	</li>
+      <li>反向代理负载均衡</li>
+      <li>IP负载均衡	</li>
+      <li>数据链路层负载均衡
+        <ul>
+          <li>虚拟IP、LVS </li>
+        </ul>
+      </li>
+      <li>负载均衡算法
+        <ul>
+          <li>轮询、加权轮询、随机、最少连接、源地址散列 </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>分布式缓存集群的伸缩性设计
+    <ul>
+      <li>Memcached分布式缓存集群的访问模型
+  <img src="http://blog.chinaunix.net/attachment/201211/20/27767798_1353432372hzgp.png" alt="" /> 
+  Memcached依赖于libevent，网络模型是典型的reactor模式，主线程通过自己的<code>event_base</code>绑定端口监听网络中的连接。每个worker线程的初始任务就是轮询管道上的<code>notify_receive_fd</code>的读事件，如果有连接，主线程往相应的worker线程的管道的输入端<code>notify_send_fd</code>写入关键字‘c’，代表着网络上有新的连接要派发给worker线程，这样worker进程直接accept就能得到连接的fd了，同时把这个fd的读事件放到每个worker进程的<code>event_base</code>中，如图，每个worker的进程同时监听<code>notify_receive_fd</code>和外部连接的fd上的事件。每个worker都应该为连接上的fd分配一个conn结构体，这个结构体记录了这个连接全部的信息，如连接的fd，读写buf，操作的item，当前connection的状态等等。</li>
+      <li>Memcached分布式缓存集群的伸缩性挑战
+        <ul>
+          <li>数据库的负载能力是以有缓存的前提而设计的，当大部分被缓存的数据因为服务器扩容而不能正确读取时，这些数据访问的压力就落到数据库身上，超过数据库负载能力，造成数据库宕机。</li>
+        </ul>
+      </li>
+      <li>分布式缓存的一致性Hash算法</li>
+    </ul>
+  </li>
+  <li>数据存储服务器集群的伸缩性设计
+    <ul>
+      <li>关系数据库集群的伸缩性设计</li>
+      <li>NoSQL数据库的伸缩性设计</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="section-4">网站的可扩展架构</h3>
+
+<ul>
+  <li>构建可扩展的网站架构
+    <ul>
+      <li>扩展性是对功能而言，应用之间较少依赖和耦合，对需求可以敏捷响应。</li>
+      <li>伸缩性是以资源的规模换取处理事务的能力，更多表现在服务器数量，事务吞吐能力。</li>
+      <li>设计网站可扩展性的核心是<strong>模块化</strong>，并在此基础上，减低模块间的耦合性，提高模块的复用性。	 </li>
+    </ul>
+  </li>
+  <li>利用分布式消息队列降低系统耦合性
+    <ul>
+      <li>事件驱动架构</li>
+      <li>分布式消息队列</li>
+    </ul>
+  </li>
+  <li>利用分布式服务打造可复用的业务平台
+    <ul>
+      <li>Web Service与企业级分布式服务</li>
+      <li>大型网站分布式服务的需求与特点
+        <ul>
+          <li>负载均衡、失效转移、高效的远程通信、整合异构系统、对应用最少侵入、版本管理、实时监控 </li>
+        </ul>
+      </li>
+      <li>分布式服务框架设计</li>
+    </ul>
+  </li>
+  <li>可扩展的数据结构</li>
+  <li>利用开放平台建设网站生态圈</li>
+</ul>
+
+<h2 id="section-5">摘抄与处事哲学</h2>
+
+<p>创新的业务发展模式对网站架构逐步提出更高要求，才使得创新的网站架构得以发展成熟。是业务成就了技术，是事业成就了人，而不是相反。所以网站架构师应该对成就自己技术成绩的网站事业心存感恩，并努力提高技术回馈业务，才能在快速发展的胡两位领域保持持续进步。</p>
+
+<p>网站架构的几个设计误区</p>
+
+<ul>
+  <li>以为追随大公司的解决方案</li>
+  <li>为了技术而技术</li>
+  <li>企图用技术解决所有问题</li>
+</ul>
+
+<p>前沿技术总是出现在前沿业务领域。近几年，以Google为首的互联网企业领跑IT前沿技术潮流，是因为互联网企业的业务发展远超传统IT企业领域，面了更多挑战，对IT系统提出了更高的要求；新技术的出现又会驱动企业开展新的业务。亚马逊等互联网公司利用自己的技术优势进军企业级市场，以技术驱动业务，开展云计算、SaaS等新兴IT业务，逐步蚕食IBM、HP、Oracle、微软等传统软件巨头的市场。</p>
+
+<p>好的设计绝对不是模仿、不是生搬硬套某个模式，而是在对问题深刻理解之上的创造与创新，即使是‘微创新’，也是让人耳目一新的似曾相识。山寨与创新的最大区别不在于是否抄袭、是否模仿，而在于对问题和需求是否真正理解与把握。</p>
+
+<p>一个具有良好伸缩性架构设计的网站，其设计总是走在业务发展的前面，在业务需要处理更多访问和服务之前，就做好充足准备，当业务需要是时候，只需要购买或租用服务器简单部署实施就可以了，技术团队亦可以高枕无忧。反之，设计和技术走在业务的后面，采购来的机器根本就没有方法加入集群，勉强加了进去，却发现瓶颈不在这里，系统整体处理能力依然上不去。技术团队每天加班，却总是托公司发展的后退。架构师对网站伸缩性的把握，一线之间，天堂与地狱。</p>
+
+<p>高手定律：这个世界只有遇不到的问题，没有解决不了的问题，高手之所以成为高手，是因为他们遇到了常人很难遇到的问题，并解决了。所以百度有很多广告搜索高手，淘宝有很多海量数据高手，腾讯有很多高并发业务的高手。</p>
+
+<p>WikiPedia如果Master数据库宕机，立即将应用切换到Salve数据库，同时关闭数据写服务，意味着词条编辑功能关闭。WidiPedia通过约束业务获得更大的技术方案选择余地，很多时候业务后退一小步，技术就可以前进一大步。这个也是他们能够那么省钱的原因啊。</p>
+
+<p>秒杀从根本上来讲并不是很难，首先是页面的静态化，开始秒杀的按钮通过js来实现，js不缓存，js尽量小。开始秒杀的时候使用可以秒杀的js。秒杀很少能达数据层，因为就那么几个能成功。主要的压力在应用服务器，但是用一个记数服务器，收到请求更新这个数字，大于数字的直接返回秒杀失败。所以大部分都会进入失败的逻辑，整个也很简单。只要业务服务器能抗住这些访问压力就基本ok了，如果业务服务器不够，可以直接在负载均衡那边随机失败一部分。 </p>
+
+<hr />
+
+<p>是事情成就了人，而不是人成就了事。</p>
+
+<p>要想成就自己，就必须首先成就他人。我们工作不只是生成产品，还要成就人，并最终成就我们自己。关注人而不是产品。</p>
+
+<p>学会妥协。很多时候，对架构和技术方案的反对意见，其实意味着架构和技术方案被关注、被试图理解和接受。架构师不应该对意见过于敏感，这时架构师应该做的事坦率地分享自己的设计思路，让别人理解自己的想法并努力理解别人的想法，求同存异。</p>
+
+<p>新员工Tips</p>
+
+<ul>
+  <li>刚开始加入的时候不要急于证明自己，要先融入</li>
+</ul>
+
+<p>提出问题Tips</p>
+
+<ul>
+  <li>把“我的问题”表述成“我们的问题”</li>
+  <li>给上司提出封闭式问题，给下属提出开放式问题</li>
+  <li>指出问题而不是批评人，所谓直言有讳是指想要表达的意图要直截了当说明白，不要兜圈子，但是在表达方式上要有所避讳，照顾当事人的感受</li>
+  <li>用赞同的方式提出问题</li>
+</ul>
+
+<p>解决问题Tips</p>
+
+<ul>
+  <li>在解决我的问题之前，先解决你的问题</li>
+  <li>适当的逃避问题</li>
+</ul>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[gcc summary]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/12/31/gcc-summary/"/>
+    <updated>2013-12-31T18:07:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/12/31/gcc-summary</id>
+    <content type="html"><![CDATA[<p>本文介绍在Linux平台下应用程序的编译过程，以及编译程序<a href="http://gcc.gnu.org/">GCC</a>在编译应用程序的过程的具体用法，同时详细说明了GCC的常用选项、模式和警告选项。</p>
+
+<center>![gcc](http://gcc.gnu.org/img/gccegg-65.png)</center>
+
+<!--more-->
+
+<h3 id="compile-process">Compile Process</h3>
+
+<h4 id="four-steps">Four Steps</h4>
+
+<p>对于GUN编译器来说，程序的编译要经历预处理、编译、汇编、连接四个阶段.</p>
+
+<center>![四个阶段](http://new.51cto.com/files/uploadimg/20060926/1714230.jpg)</center>
+
+<p>从功能上分，预处理、编译、汇编是三个不同的阶段，但<code>gcc</code>的实际操作上，它可以把这三个步骤合并为一个步骤来执行。下面我们以C语言为例来谈一下不同阶段的输入和输出情况。</p>
+
+<p>在预处理阶段，输入的是C语言的源文件，通常为<code>*.c</code>。它们通常带有<code>.h</code>之类头文件的包含文件。这个阶段主要处理源文件中的<code>#ifdef</code>、 <code>#include</code>和<code>#define</code>命令。该阶段会生成一个中间文件<code>*.i</code>，但实际工作中通常不用专门生成这种文件，因为基本上用不到；若非要生成这种文件不可，可以利用下面的示例命令：</p>
+
+<pre><code>gcc -E  test.c -o test.i
+</code></pre>
+
+<p>在编译阶段，输入的是中间文件<code>*.i</code>，编译后生成汇编语言文件<code>*.s</code> 。这个阶段对应的<code>gcc</code>命令如下所示：</p>
+
+<pre><code>gcc -S test.i -o test.s 
+</code></pre>
+
+<p>在汇编阶段，将输入的汇编文件<code>*.s</code>转换成机器语言<code>*.o</code>。这个阶段对应的<code>gcc</code>命令如下所示：</p>
+
+<pre><code>gcc -c test.s -o test.o 
+</code></pre>
+
+<p>最后，在连接阶段将输入的机器代码文件<code>*.s</code>（与其它的机器代码文件和库文件）汇集成一个可执行的二进制代码文件。这一步骤，可以利用下面的示例命令完成：</p>
+
+<pre><code>gcc test.o -o test 
+</code></pre>
+
+<h4 id="two-modes">Two Modes</h4>
+
+<p>gcc常用的两种模式：编译模式和编译连接模式。下面以一个例子来说明各种模式的使用方法。为简单起见，假设我们全部的源代码都在一个文件<code>test.c</code>中，要想把这个源文件直接编译成可执行程序，可以使用以下命令：</p>
+
+<pre><code>gcc test.c -o test
+</code></pre>
+
+<p>这里<code>test.c</code>是源文件，生成的可执行代码存放在一个名为<code>test</code>的文件中（该文件是机器代码并且可执行）。<code>-o</code>是生成可执行文件的输出选项。如果我们只想让源文件生成目标文件（给文件虽然也是机器代码但不可执行），可以使用标记<code>-c</code>，详细命令如下所示：</p>
+
+<pre><code>gcc -c test.c
+</code></pre>
+
+<p>默认情况下，生成的目标文件被命名为<code>test.o</code>，但我们也可以为输出文件指定名称，如下所示：</p>
+
+<pre><code>gcc -c test.c -o mytest.o
+</code></pre>
+
+<p>上面这条命令将编译后的目标文件命名为<code>mytest.o</code>，而不是默认的<code>test.o</code>。</p>
+
+<p>迄今为止，我们谈论的程序仅涉及到一个源文件；现实中，一个程序的源代码通常包含在多个源文件之中，这该怎么办？没关系，即使这样，用gcc处理起来也并不复杂，见下例：</p>
+
+<pre><code>gcc -o test  first.c second.c third.c
+</code></pre>
+
+<p>该命令将同时编译三个源文件，即<code>first.c</code>、<code>second.c</code>和 <code>third.c</code>，然后将它们连接成一个可执行程序，名为<code>test</code>。</p>
+
+<h3 id="compile-option">Compile Option</h3>
+
+<h4 id="debug">Debug</h4>
+<p>在<code>gcc</code>编译源代码时指定<code>-g</code>选项可以产生带有调试信息的目标代码,<code>gcc</code>可以为多个不同平台上帝不同调试器提供调试信息,默认<code>gcc</code>产生的调试信息是为<code>gdb</code>使用的,可以使用<code>-gformat</code>指定要生成的调试信息的格式以提供给其他平台的其他调试器使用.</p>
+
+<p>常用的格式有 </p>
+
+<ul>
+  <li>-ggdb:生成gdb专 用的调试信息,使用最适合的格式(DWARF 2,stabs等)会有一些gdb专用的扩展,可能造成其他调试器无法运行. </li>
+  <li>-gstabs:使用 stabs格式,不包含gdb扩展,stabs常用于BSD系统的DBX调试器. </li>
+  <li>-gcoff:产生COFF格式的调试信息,常用于System V下的SDB调试器; </li>
+  <li>-gxcoff:产生XCOFF格式的调试信息,用于IBM的RS/6000下的DBX调试器; </li>
+  <li>-gdwarf-2:产生DWARF version2 的格式的调试信息,常用于IRIXX6上的DBX调试器.<code>gcc</code>会使用DWARF version3的一些特性. </li>
+</ul>
+
+<h4 id="common-option">Common Option</h4>
+
+<p>–help&lt;/br&gt;
+–target-help &lt;/br&gt;
+显示 <code>gcc</code> 帮助说明。‘target-help’是显示目标机器特定的命令行选项。</p>
+
+<p>–version &lt;/br&gt;
+显示 <code>gcc</code> 版本号和版权信息 。</p>
+
+<p>-o outfile &lt;/br&gt;
+输出到指定的文件。</p>
+
+<p>-x language &lt;/br&gt;
+指明使用的编程语言。允许的语言包括：c c++ assembler none 。 ‘none’意味着恢复默认行为，即根据文件的扩展名猜测源文件的语言。</p>
+
+<p>-v &lt;/br&gt;
+打印较多信息，显示编译器调用的程序。</p>
+
+<p>-### &lt;/br&gt;
+与 -v 类似，但选项被引号括住，并且不执行命令。</p>
+
+<p><strong>-E</strong>&lt;/br&gt;
+仅作预处理，不进行编译、汇编和链接。如上图所示。</p>
+
+<p>-S &lt;/br&gt;
+仅编译到汇编语言，不进行汇编和链接。如上图所示。</p>
+
+<p><strong>-c</strong> &lt;/br&gt;
+编译、汇编到目标代码，不进行链接。如上图所示。</p>
+
+<p>-pipe &lt;/br&gt;
+使用管道代替临时文件。</p>
+
+<p>-combine &lt;/br&gt;
+将多个源文件一次性传递给汇编器。</p>
+
+<h4 id="other-option">Other Option</h4>
+
+<p>更多有用的<code>gcc</code>选项：</p>
+
+<p>-l library&lt;/br&gt;
+-llibrary &lt;/br&gt;
+进行链接时搜索名为library的库。 &lt;/br&gt;
+例子： $ <code>gcc</code> test.c -lm -o test</p>
+
+<p>-Idir &lt;/br&gt;
+把dir 加入到搜索头文件的路径列表中。 &lt;/br&gt;
+例子： $ <code>gcc</code> test.c -I../inc -o test</p>
+
+<p>-Ldir &lt;/br&gt;
+把dir 加入到搜索库文件的路径列表中。 &lt;/br&gt;
+例子： $ <code>gcc</code> -I/home/foo -L/home/foo -ltest test.c -o test</p>
+
+<p>-Dname &lt;/br&gt;
+预定义一个名为name 的宏，值为1。 &lt;/br&gt;
+例子： $ <code>gcc</code> -DTEST_CONFIG test.c -o test</p>
+
+<p>-Dname =definition &lt;/br&gt;
+预定义名为name ，值为definition 的宏。</p>
+
+<p>-ggdb &lt;/br&gt;
+-ggdblevel &lt;/br&gt;
+为调试器 gdb 生成调试信息。level 可以为1，2，3，默认值为2。</p>
+
+<p>-g &lt;/br&gt;
+-glevel &lt;/br&gt;
+生成操作系统本地格式的调试信息。-g 和 -ggdb 并不太相同， -g 会生成 gdb 之外的信息。level 取值同上。</p>
+
+<p>-s &lt;/br&gt;
+去除可执行文件中的符号表和重定位信息。用于减小可执行文件的大小。</p>
+
+<p>-M &lt;/br&gt;
+告诉预处理器输出一个适合make的规则，用于描述各目标文件的依赖关系。对于每个 源文件，预处理器输出 一个make规则，该规则的目标项(target)是源文件对应的目标文件名，依赖项(dependency)是源文件中<code>#include</code>引用的所有文件。生成的规则可以是单行，但如果太长，就用<code>\</code>-换行符续成多行。规则 显示在标准输出，不产生预处理过的C程序。</p>
+
+<p>-C &lt;/br&gt;
+告诉预处理器不要丢弃注释。配合`-E’选项使用。</p>
+
+<p>-P &lt;/br&gt;
+告诉预处理器不要产生<code>#line</code>命令。配合<code>-E</code>选项使用。</p>
+
+<p>-static &lt;/br&gt;
+在支持动态链接的系统上，阻止连接共享库。该选项在其它系统上无效。</p>
+
+<p>-nostdlib&lt;/br&gt; 
+不连接系统标准启动文件和标准库文件，只把指定的文件传递给连接器。</p>
+
+<h4 id="warnings-option">Warnings Option</h4>
+
+<p>-Wall &lt;/br&gt;
+会打开一些很有用的警告选项，建议编译时加此选项。</p>
+
+<p>-W &lt;/br&gt;
+-Wextra&lt;/br&gt; 
+打印一些额外的警告信息。</p>
+
+<p>-w &lt;/br&gt;
+禁止显示所有警告信息。</p>
+
+<p>-Wshadow &lt;/br&gt;
+当一个局部变量遮盖住了另一个局部变量，或者全局变量时，给出警告。很有用的选项，建议打开。 -Wall 并不会打开此项。</p>
+
+<p>-Wpointer-arith &lt;/br&gt;
+对函数指针或者void *类型的指针进行算术操作时给出警告。也很有用。 -Wall 并不会打开此项。</p>
+
+<p>-Wcast-qual &lt;/br&gt;
+当强制转化丢掉了类型修饰符时给出警告。 -Wall 并不会打开此项。</p>
+
+<p>-Waggregate-return &lt;/br&gt;
+如果定义或调用了返回结构体或联合体的函数，编译器就发出警告。</p>
+
+<p>-Winline &lt;/br&gt;
+无论是声明为 inline 或者是指定了-finline-functions 选项，如果某函数不能内联，编译器都将发出警告。如果你的代码含有很多 inline 函数的话，这是很有用的选项。</p>
+
+<p>-Werror &lt;/br&gt;
+把警告当作错误。出现任何警告就放弃编译。</p>
+
+<p>-Wunreachable-code&lt;/br&gt; 
+如果编译器探测到永远不会执行到的代码，就给出警告。也是比较有用的选项。</p>
+
+<p>-Wcast-align&lt;/br&gt; 
+一旦某个指针类型强制转换导致目标所需的地址对齐增加时，编译器就发出警告。</p>
+
+<p>-Wundef&lt;/br&gt;
+当一个没有定义的符号出现在 #if 中时，给出警告。</p>
+
+<p>-Wredundant-decls&lt;/br&gt; 
+如果在同一个可见域内某定义多次声明，编译器就发出警告，即使这些重复声明有效并且毫无差别。</p>
+
+<h4 id="standard">Standard</h4>
+
+<p>-ansi &lt;/br&gt;
+支持符合ANSI标准的C程序。这样就会关闭GNU C中某些不兼容ANSI C的特性。</p>
+
+<p>-std=c89 &lt;/br&gt;
+-iso9899:1990 &lt;/br&gt;
+指明使用标准 ISO C90 作为标准来编译程序。</p>
+
+<p>-std=c99 &lt;/br&gt;
+-std=iso9899:1999 &lt;/br&gt;
+指明使用标准 ISO C99 作为标准来编译程序。</p>
+
+<p>-std=c++98 &lt;/br&gt;
+指明使用标准 C++98 作为标准来编译程序。</p>
+
+<p>-std=gnu9x &lt;/br&gt;
+-std=gnu99 &lt;/br&gt;
+使用 ISO C99 再加上 GNU 的一些扩展。</p>
+
+<p>-fno-asm &lt;/br&gt;
+不把asm, inline或typeof当作关键字，因此这些词可以用做标识符。用 <strong>asm</strong>， __inline__和__typeof__能够替代它们。 <code>-ansi</code> 隐含声明了<code>-fno-asm</code>。</p>
+
+<p>-fgnu89-inline &lt;/br&gt;
+告诉编译器在 C99 模式下看到 inline 函数时使用传统的 GNU 句法。</p>
+
+<h4 id="c-options">C options</h4>
+
+<p>-fsigned-char &lt;/br&gt;
+-funsigned-char &lt;/br&gt;
+把char定义为有/无符号类型，如同signed char/unsigned char。</p>
+
+<p>-traditional &lt;/br&gt;
+尝试支持传统C编译器的某些方面。详见GNU C手册。</p>
+
+<p>-fno-builtin &lt;/br&gt;
+-fno-builtin-function &lt;/br&gt;
+不接受没有 <em>_builtin</em> 前缀的函数作为内建函数。</p>
+
+<p>-trigraphs &lt;/br&gt;
+支持ANSI C的三联符（ trigraphs）。`-ansi’选项隐含声明了此选项。</p>
+
+<p>-fsigned-bitfields &lt;/br&gt;
+-funsigned-bitfields &lt;/br&gt;
+如果没有明确声明<code>signed</code>或<code>unsigned</code>修饰符，这些选项用来定义有符号位域或无符号位域。缺省情况下，位域是有符号的，因为它们继承的基本整数类型，如<code>int</code>，是有符号数。</p>
+
+<p>-Wstrict-prototypes &lt;/br&gt;
+如果函数的声明或定义没有指出参数类型，编译器就发出警告。很有用的警告。</p>
+
+<p>-Wmissing-prototypes &lt;/br&gt;
+如果没有预先声明就定义了全局函数，编译器就发出警告。即使函数定义自身提供了函数原形也会产生这个警告。这个选项 的目的是检查没有在头文件中声明的全局函数。</p>
+
+<p>-Wnested-externs &lt;/br&gt;
+如果某<code>extern</code>声明出现在函数内部，编译器就发出警告。</p>
+
+<h4 id="c-options-1">C++ options</h4>
+
+<p>-ffor-scope &lt;/br&gt;
+从头开始执行程序，也允许进行重定向。</p>
+
+<p>-fno-rtti &lt;/br&gt;
+关闭对 dynamic_cast 和 typeid 的支持。如果你不需要这些功能，关闭它会节省一些空间。</p>
+
+<p>-Wctor-dtor-privacy &lt;/br&gt;
+当一个类没有用时给出警告。因为构造函数和析构函数会被当作私有的。</p>
+
+<p>-Wnon-virtual-dtor &lt;/br&gt;
+当一个类有多态性，而又没有虚析构函数时，发出警告。-Wall会开启这个选项。</p>
+
+<p>-Wreorder &lt;/br&gt;
+如果代码中的成员变量的初始化顺序和它们实际执行时初始化顺序不一致，给出警告。</p>
+
+<p>-Wno-deprecated &lt;/br&gt;
+使用过时的特性时不要给出警告。</p>
+
+<p>-Woverloaded-virtual &lt;/br&gt;
+如果函数的声明隐藏住了基类的虚函数，就给出警告。</p>
+
+<p>Machine Dependent Options (Intel)&lt;/br&gt;</p>
+
+<p>-mtune=cpu-type &lt;/br&gt;
+为指定类型的 CPU 生成代码。cpu-type 可以是：i386，i486，i586，pentium，i686，pentium4 等等。</p>
+
+<p>-msse &lt;/br&gt;
+-msse2 &lt;/br&gt;
+-mmmx &lt;/br&gt;
+-mno-sse &lt;/br&gt;
+-mno-sse2 &lt;/br&gt;
+-mno-mmx &lt;/br&gt;
+使用或者不使用MMX，SSE，SSE2指令。</p>
+
+<p>-m32 &lt;/br&gt;
+-m64 &lt;/br&gt;
+生成32位/64位机器上的代码。</p>
+
+<p>-mpush-args &lt;/br&gt;
+-mno-push-args &lt;/br&gt;
+（不）使用 push 指令来进行存储参数。默认是使用。</p>
+
+<p>-mregparm=num &lt;/br&gt;
+当传递整数参数时，控制所使用寄存器的个数。</p>
+
+<h4 id="optimization-option">Optimization Option</h4>
+
+<p>-O0 &lt;/br&gt;
+禁止编译器进行优化。默认为此项。</p>
+
+<p>-O&lt;/br&gt;
+-O1&lt;/br&gt;
+尝试优化编译时间和可执行文件大小。</p>
+
+<p>-O2 &lt;/br&gt;
+更多的优化，会尝试几乎全部的优化功能，但不会进行“空间换时间”的优化方法。</p>
+
+<p>-O3 &lt;/br&gt;
+在 -O2 的基础上再打开一些优化选项：-finline-functions， -funswitch-loops 和 -fgcse-after-reload 。</p>
+
+<p>-Os &lt;/br&gt;
+对生成文件大小进行优化。它会打开 -O2 开的全部选项，除了会那些增加文件大小的。</p>
+
+<p>-finline-functions &lt;/br&gt;
+把所有简单的函数内联进调用者。编译器会探索式地决定哪些函数足够简单，值得做这种内联。</p>
+
+<p>-fstrict-aliasing &lt;/br&gt;
+施加最强的别名规则（aliasing rules）。</p>
+
+<p><code>gcc</code>默认提供了5级优化选项的集合: </p>
+
+<ul>
+  <li>-O0:无优化(默认)</li>
+  <li>-O和-O1:使用能减少目标文件大小以及执行时间并且不会使编译时间明显增加的优化.在编译大型程序的时候会显著增加编译时内存的使用. </li>
+  <li>-O2: 包含-O1的优化并增加了不需要在目标文件大小和执行速度上进行折衷的优化.编译器不执行循环展开以及函数内联.此选项将增加编译时间和目标文件的执行性 能. </li>
+  <li>-Os:专门优化目标文件大小,执行所有的不增加目标文件大小的-O2优化选项.并且执行专门减小目标文件大小的优化选项. </li>
+  <li>-O3: 打开所有-O2的优化选项并且增加 -finline-functions, -funswitch-loops,-fpredictive-commoning, -fgcse-after-reload and -ftree-vectorize优化选项. </li>
+</ul>
+
+<pre>
+-O1包含的选项-O1通常可以安全的和调试的选项一起使用:
+           -fauto-inc-dec -fcprop-registers -fdce -fdefer-pop -fdelayed-branch 
+           -fdse -fguess-branch-probability -fif-conversion2 -fif-conversion 
+           -finline-small-functions -fipa-pure-const -fipa-reference 
+           -fmerge-constants -fsplit-wide-types -ftree-ccp -ftree-ch 
+           -ftree-copyrename -ftree-dce -ftree-dominator-opts -ftree-dse 
+           -ftree-fre -ftree-sra -ftree-ter -funit-at-a-time 
+</pre>
+
+<p>以下所有的优化选项需要在名字前加上-f,如果不需要此选项可以使用-fno-前缀 </p>
+
+<ul>
+  <li>defer-pop:延迟到只在必要时从函数参数栈中pop参数; </li>
+  <li>thread-jumps:使用跳转线程优化,避免跳转到另一个跳转; </li>
+  <li>branch-probabilities:分支优化; </li>
+  <li>cprop-registers:使用寄存器之间copy-propagation传值; </li>
+  <li>guess-branch-probability:分支预测; </li>
+  <li>omit-frame-pointer:可能的情况下不产生栈帧; </li>
+</ul>
+
+<pre>
+-O2:以下是-O2在-O1基础上增加的优化选项: 
+           -falign-functions  -falign-jumps -falign-loops  -falign-labels 
+           -fcaller-saves -fcrossjumping -fcse-follow-jumps  -fcse-skip-blocks 
+           -fdelete-null-pointer-checks -fexpensive-optimizations -fgcse 
+           -fgcse-lm -foptimize-sibling-calls -fpeephole2 -fregmove 
+           -freorder-blocks  -freorder-functions -frerun-cse-after-loop 
+           -fsched-interblock  -fsched-spec -fschedule-insns 
+           -fschedule-insns2 -fstrict-aliasing -fstrict-overflow -ftree-pre 
+           -ftree-vrp
+</pre>
+
+<p>cpu架构的优化选项,通常是-mcpu(将被取消);-march,-mtune </p>
+
+<h3 id="warning-interpretation">Warning Interpretation</h3>
+
+<ul>
+  <li>unused-function:警告声明但是没有定义的static函数; </li>
+  <li>unusedlabel:声明但是未使用的标签; </li>
+  <li>unused-parameter:警告未使用的函数参数; </li>
+  <li>unused-variable:声明但是未使用的本地变量; </li>
+  <li>unused-value:计算了但是未使用的值; </li>
+  <li>format:printf和scanf这样的函数中的格式字符串的使用不当; </li>
+  <li>implicit-int:未指定类型; </li>
+  <li>implicit-function:函数在声明前使用; </li>
+  <li>charsubscripts:使用char类作为数组下标(因为char可能是有符号数); </li>
+  <li>missingbraces:大括号不匹配; </li>
+  <li>parentheses: 圆括号不匹配; </li>
+  <li>return-type:函数有无返回值以及返回值类型不匹配; </li>
+  <li>sequence-point:违反顺序点的代码,比如 a[i] = c[i++]; </li>
+  <li>switch:switch语句缺少default或者switch使用枚举变量为索引时缺少某个变量的case; </li>
+  <li>strictaliasing=n:使用n设置对指针变量指向的对象类型产生警告的限制程度,默认n=3;只有在-fstrict-aliasing设置的情况下有效; </li>
+  <li>unknow-pragmas:使用未知的#pragma指令; </li>
+  <li>uninitialized:使用的变量为初始化,只在-O2时有效; </li>
+  <li>以下是在-Wall中不会激活的警告选项: </li>
+  <li>cast-align:当指针进行类型转换后有内存对齐要求更严格时发出警告; </li>
+  <li>signcompare:当使用signed和unsigned类型比较时; </li>
+  <li>missing-prototypes:当函数在使用前没有函数原型时; </li>
+  <li>packed:packed 是<code>gcc</code>的一个扩展,是使结构体各成员之间不留内存对齐所需的空间 ,有时候会造成内存对齐的问题; </li>
+  <li>padded:也是<code>gcc</code>的扩展,使结构体成员之间进行内存对齐的填充,会 造成结构体体积增大. </li>
+  <li>unreachable-code:有不会执行的代码时. </li>
+  <li>inline:当inline函数不再保持inline时 (比如对inline函数取地址); </li>
+  <li>disable-optimization:当不能执行指定的优化时.(需要太多时间或系统资源). </li>
+  <li>可以使用 -Werror时所有的警告都变成错误,使出现警告时也停止编译.需要和指定警告的参数一起使用. </li>
+</ul>
+
+<h4 id="warning-multi-character-character-constant">1. Warning: multi-character character constant</h4>
+
+<p>Could be suppressed by -Wno-multichar</p>
+
+<p>There’re three kinds of character constants: Normal character constants, Multicharacter constants and Wide-character constants.</p>
+
+<pre><code>char ch = 'a';
+int mbch = '1234';
+wchar_t wcch = L'ab';
+</code></pre>
+
+<p>Mbch is of type int(signed), has 4 meaningful characters.</p>
+
+<p><code>gcc</code> compiler evaluates a multi-character character constant a character at a time, shifting the previous value left by the number of bits per target character, and then or-ing in the bit-pattern of the new character truncated to the width of a target character.</p>
+
+<p>‘ab’ for a target with an 8-bit char would be interpreted as:</p>
+
+<p>(int) ((unsigned char) ‘a’ * 256 + (unsigned char) ‘b’) = 97*256+98</p>
+
+<p>‘1’,x          0x31
+‘12’,x        0x3132
+‘123’,x      0x313233
+‘1234’,x    0x31323334</p>
+
+<p>判断系统是big endian还是little endian的方法：</p>
+
+<pre><code>if (('1234' &gt;&gt; 24) == '1')
+{
+    //Little endian
+}
+else if (('4321' &gt;&gt; 24) == '1')
+{
+    //Big endian
+}
+</code></pre>
+
+<h4 id="warning-operation-on-xx-may-be-undefined">2. Warning: operation on xx may be undefined</h4>
+
+<p>序列点问题。为什么 a[i] = i++; 不能正常工作？子表达式 i++ 有一个副作用，它会改变 i 的值。由于 i 在同一表达式的其它地方被引用，这会导致无定义的结果，无从判断该引用(左边的 a[i] 中)是旧值还是新值。(尽管 在 K&amp;R 中建议这类表达式的行为不确定，但 C 标准却强烈声明它是无定义的），具体实现取决于编译器。</p>
+
+<h4 id="warning-conversion-to-xxx-from-yyy-may-alter-its-value">3.  Warning: conversion to xxx from yyy may alter its value</h4>
+
+<p><code>gcc</code> promotes unsigned char/uint16_t/uint8_t  to type int for for all arithmetic. Need to apply static_cast&lt;&gt;.</p>
+
+<h4 id="warning-function-might-be-possible-candidate-for-attribute-noreturn">4.  Warning: function might be possible candidate for attribute ‘noreturn’</h4>
+
+<p>打开了 -Wmissing-noreturn。A few standard library functions, such as abort and exit, cannot return. <code>gcc</code> knows this automatically. With noreturn attribute it can then optimize without regard to what would happen if function ever did return. This makes slightly better code. More importantly, it helps avoid spurious warnings of uninitialized variables. The noreturn keyword does not affect the exceptional path. 给函数加上 <strong>attribute</strong>((noreturn)) 即可消除这个warning。</p>
+
+<h4 id="warning-deprecated-conversion-from-string-constant-to-char-">5. Warning: deprecated conversion from string constant to “char *”</h4>
+
+<p>void SomeFunc (char* str)
+{
+}</p>
+
+<p>int _tmain(int argc, _TCHAR* argv[])
+{
+    SomeFunc(“Hello!”);
+    return 0;
+}</p>
+
+<p>SomeFunc() 的输入时char<em>，含义是：给我个字符串，我要修改它。而传给它的字面常量是没办法修改的，将char</em> 改成 const char*，消除这个warning.</p>
+
+<h4 id="warning-implicit-declaration-of-function-mallocfree-incompatible-implicit-declaration-of-built-in-function-mallocfree">6.  Warning: implicit declaration of function ‘malloc’/’free’, incompatible implicit declaration of built-in function ‘malloc’/’free’</h4>
+
+<p>要显示的#include <stdlib.h></stdlib.h></p>
+
+<h4 id="warning-dereferencing-type-punned-pointer-will-break-strict-aliasing-rules">7.  Warning: Dereferencing type-punned pointer will break strict-aliasing rules</h4>
+
+<p>打开了-fstrict-aliasing and -Wstrict-aliasing. Suppress with -fno-strict-aliasing</p>
+
+<p>Strict-aliasing rule: An object of one type is assumed never to reside at the same address as an object of a different type, unless the types are almost the same. 编译器希望不同类型的对象不会指向同一个地址。</p>
+
+<h4 id="warning-inlining-failed-in-call-to-xxx-call-is-unlikely-and-code-size-would-grow">8.  Warning: inlining failed in call to xxx: call is unlikely and code size would grow</h4>
+
+<p>打开了-Winline: Warn if a function can not be inlined and it was declared as inline. Even with this option, the compiler will not warn about failures to inline functions declared in system headers.</p>
+
+<p>相关选项：</p>
+
+<p>-fno-inline: Don’t compile statement functions inline. Might reduce the size of a program unit–which might be at expense of some speed (though it should compile faster). Note that if you are not optimizing, no functions can be expanded inline.</p>
+
+<p>-finline-functions: Interprocedural optimizations occur. However, if you specify -O0, the default is OFF. Enables function inlining for single file compilation.</p>
+
+<h4 id="warning-cannot-optimize-loop-the-loop-counter-may-overflow">9.  Warning: cannot optimize loop, the loop counter may overflow</h4>
+
+<p>打开了-Wunsafe-loop-optimizations: Warn if the loop cannot be optimized because the compiler could not assume anything on the bounds of the loop indices. With -funsafe-loop-optimizations warn if the compiler made such assumptions.</p>
+
+<p>相关选项：</p>
+
+<p>-funsafe-loop-optimizations: Enable unsafe loop optimizations, e.g. assume loop indices never overflow, etc</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Nginx architecture(4)--Modularity]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/11/26/nginx-architecture-4-modularity/"/>
+    <updated>2013-11-26T16:52:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/11/26/nginx-architecture-4-modularity</id>
+    <content type="html"><![CDATA[<h2 id="section">1. 概述</h2>
+
+<p>这章的题目说的有些不对，nginx的模块化只是模块化编程的一个案例，我用它来分析所谓的模块化编程，接下来在其他的例子中也有体现模块化，但是为了形成nginx架构这一系列文章，我还是把它命名为nginx架构——模块化。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx-logo_zpsabde8e46.png" /></p>
+
+<!--more-->
+
+<p>好了，言归正传。现代编程的一大特点是：模块化编程，具体来说就是好几个人来完成一个大的的功能：这一个大的功能又拆分为好几个子功能，每一个人做一块子功能，然后导出子功能的API,而大功能的运行实际上就变成子功能导出的API的相互调用。</p>
+
+<p>换言之，模块化编程并不像我们以前开发的强耦合系统，从头到尾一步步或结构化或对象化的把系统功能添加到代码中，各个子功能之间协商好直接通信的接口——可以互相调用的API，子功能和子功能集成后，调试，运行成功就成了完整的系统。这样的系统可以做到软件代码紧凑，开发效率高，如果是互相熟悉，经验丰富实力强的开发团队，可以达到理想的开发速度，和代码质量。</p>
+
+<p>但如果开发人员数量庞大且良莠不齐，那么核心开发者无法兼顾每个子系统的代码质量，一个子系统的失败也许会导致整个项目的失败，这种损失是无法估量的；如果需要开发的子系统纷杂繁多，这样的设计也无法满足日益增多的个性化子功能。</p>
+
+<p>在这样的背景下，模块化编程是十分必要的。优秀的系统，生命周期长的系统，有革命意义的系统，如Linux、eclipse、NetBeans、nginx，它们所利用的都是模块化设计带来的红利，因为模块化系统有一下几个特点：</p>
+
+<ol>
+  <li>而模块化应用由小块的、分散的代码块组成，每一块都是独立的。于是，这些代码块可以由不同的团队进行开发，而他们都有各自的生命周期和时间表。最终的成果则可以由另一个独立的个体，即发行者，进行集成。</li>
+  <li>应用程序（或操作系统）的源代码不再处于某一个开发者完全的掌控之中。源代码被散布至世界各地。毫无疑问，构建这样的软件与传统那种源代码完全在代码库的应用构建是完全不同的。</li>
+  <li>管理者无需对整个项目的时间表有完全的掌控。不单单是源代码，开发者们也遍布世界各地，并以他们自己的时间表工作。每个人都有这样一个权利：使用一个新版本或旧版本类库的自由。</li>
+  <li>使用外部库并使用它们组建应用程序，这意味着人们能够花费更少的时间和精力创造更复杂的软件。比如说，一个模块系统中的组件加入一个XML解析器，或者加入某种数据库驱动。</li>
+</ol>
+
+<p>ok，有了这样统一的一个认识后，再来具体谈谈什么是模块化编程。</p>
+
+<h2 id="section-1">2.模块化编程</h2>
+
+<p>百度百科对模块化设计有这样的定义
+&gt; 模块化设计是指在对一定范围内的不同功能或相同功能不同性能、不同规格的产品进行功能分析的基础上，划分并设计出一系列功能模块，通过模块的选择和组合可以构成不同的产品，以满足市场的不同需求的设计方法。</p>
+
+<p>它的概念是
+&gt; 首先用主程序、子程序、子过程等框架把软件的主要结构和流程描述出来，并定义和调试好各个框架之间的输入、输出链接关系。逐步求精的结果是得到一系列以功能块为单位的算法描述。以功能块为单位进行程序设计，实现其求解算法的方法称为模块化。模块化的目的是为了降低程序复杂度，使程序设计、调试和维护等操作简单化。</p>
+
+<p>这些说法似乎都不够接地气，但它们又能够很好的表现出模块化的特点：总体框架的制定，分功能块的设计减少耦合性，降低代码逻辑复杂性。在我看来，实现一个具有明显物理结构的软件是模块化的，例如带可扩展<code>插件</code>的<code>eclipse</code>；具有明显分层结构的软件是模块化的，例如<code>android</code>手机操作系统；具有明显封装性的软件是模块化的，例如图形引擎<code>OGRE</code>。</p>
+
+<p><img src="https://community.freescale.com/servlet/JiveServlet/showImage/38-1135-1687/android_fig1.png" alt="android architecture" /></p>
+
+<p>可以看出，这些软件都有一个特点：<strong>高对比度</strong>，不会和其他软件代码交杂混合，这可以带来很多显而易见的好处。在开发期，一个模块化的设计有利于程序员实现， 使其在实现过程中一直保持清晰的思路，减少潜伏的BUG；而在维护期，则有利于其他程序 员的理解。</p>
+
+<p>从上面的几个例子中也可以看出，良好模块设计的代码，至少分为两种形式：纵向的模块化和横向的模块化。</p>
+
+<p>横向：整个代码架构是由一个核心和若干外围的模块化代码构成。其中核心构成了软件的业务逻辑，子模块负责子功能的实现。核心和子模块之间有直接的接口，子模块间不需要或很少有交互需求。这样在功能的扩展上具有明显的优势，但对逻辑层的设计带来了更高的要求。</p>
+
+<p>纵向：整个库/软件拥有明显的层次之分，从最底层，与应用业务毫无相关的一层，到最顶层，完全对应用进行直接实现的那一层，每一个相对高层的软件层依赖于更底层的软件层，逐层构建。同一层之中也有独立的子模块，子模块彼此之间耦合甚少，这些子模块构成了一个软件层，共同为上层应用提供服务。</p>
+
+<p>下面就来举两个具体的例子。</p>
+
+<h2 id="nginx">3.nginx的模块化</h2>
+
+<p>网上看到的有关C语言模块化程序设计的一些概念，摘抄一下：</p>
+
+<blockquote>
+  <ol>
+    <li>模块即是一个.c 文件和一个.h 文件的结合，头文件中是对于该模块接口的声明；</li>
+    <li>某模块提供给其它模块调用的外部函数及数据需在.h 中文件中冠以<code>extern</code>关键字声明；</li>
+    <li>模块内的函数和全局变量需在.c 文件开头冠以<code>static</code>关键字声明；</li>
+    <li>永远不要在.h 文件中定义变量！定义变量和声明变量的区别在于定义会产生内存分配的操作，是汇编阶段的概念；而声明则只是告诉包含该声明的模块在连接阶段从其它模块寻找外部函数和变量。</li>
+  </ol>
+</blockquote>
+
+<p>意思是暴露在头文件中的信息，则可能被当作该头文件所描述模块的接口描述。所以， 在C语言中任何置于头文件中的信息都需要慎重考虑。</p>
+
+<p>C中默认的作用域是全局的，<code>static</code>用于限定其修饰对象的作用域，用它去修饰某个函数或变量，旨在告诉：这个函数或变量仅被当前文件（模块）使用，它仅用于本模块实现所依赖，它不是提供给模块外的接口！ <strong>封装内部实现 ，暴露够用的接口，也是保持模块清晰的方式之一。</strong></p>
+
+<p>C语言较缺乏模块设计的语言机制——良好的接口封装。所以，在C语言中，良好的设计更依赖于程序员自己的功底。</p>
+
+<p>nginx就是一个十分优秀的模块化编程的C语言实现，在nginx中，除了少量的核心代码，其他一切皆为模块。并且模块对使用用户只是暴露了很少的接口或者说指令更合适。nginx的每个模块都可以实现一些自定义的指令，这些指令写在配置文件的适当配置项中，每一个指令在源码中对应着一个 <code>ngx_command_t</code>结构的变量，nginx会从配置文件中把模块的指令读取出来放到模块的commands指令数组中，这些指令一般是把配置项的参数值赋给一些程序中的变量或者是在不同的变量之间合并或转换数据。</p>
+
+<p>并且nginx的模块与模块间基本上没有任何的通信措施，拿最常用的http模块来说（这里的http模块是一个泛类，nginx中将模块分为core、event、http和mail四类，用宏定义标识四个分类）。根据使用的情况不同，http模块可以分为处理模块和过滤模块，处理模块用于处理请求并输出内容，过滤模块用于过滤处理模块的输出内容。处理模块在一个请求中只能使用1种，而过滤模块可以使用多个。那么这里要考虑的是，处理模块和核心代码，过滤模块和核心代码，处理模块和过滤模块，过滤模块和过滤模块之间的交互。实际上，过滤模块是用链表串联起来的，而处理模块与过滤模块在不同的阶段处理数据内容，所以现在只需要考虑前两者的交互手段。</p>
+
+<p>以上的特点和需求都可以在nginx的模块化架构最基本的数据结构为<code>ngx_module_t</code>中得到体现。这个数据结构是所有模块的共同基础，类似于Java中的接口。</p>
+
+<p>先来看看nginx的模块化架构最基本的数据结构为<code>ngx_module_t</code>，在系列文章1中有简略的介绍，现在看看具体的代码。</p>
+
+<pre><code>struct ngx_module_s{
+   ngx_uint_t    ctx_index;  //分类模块计数器
+   ngx_uint_t    index;      //模块计数器
+
+   ngx_uint_t    spare0;
+   ngx_uint_t    spare1;
+   ngx_uint_t    spare2;
+   ngx_uint_t    spare3;
+
+   ngx_uint_t    version;    //版本
+
+   void          *ctx;       //该模块的上下文，每个种类的模块有不同的上下文
+   ngx_command_t *commands;  //该模块的命令集，指向一个ngx_command_t结构数组
+   ngx_uint_t    type;       //该模块的种类，为core/event/http/mail中的一种
+   //以下是一些callback函数
+   ngx_uint_t    (*init_master)(ngx_log_t *log);      //初始化master
+
+   ngx_uint_t    (*init_module)(ngx_cycle_t *cycle);  //初始化模块
+
+   ngx_uint_t    (*init_process)(ngx_cycle_t *cycle); //初始化工作进程
+   ngx_uint_t    (*init_thread)(ngx_cycle_t *cycle);  //初始化线程
+   void          (*exit_thread)(ngx_cycle_t *cycle);  //退出线程
+   void          (*exit_process)(ngx_cycle_t *cycle); //退出工作进程
+
+   void          (*exit_master)(ngx_cycle_t *cycle);  //退出master
+
+   uintptr_t     spare_hook0;  //这些字段貌似没用过
+   uintptr_t     spare_hook1;
+   uintptr_t     spare_hook2;
+   uintptr_t     spare_hook3;
+   uintptr_t     spare_hook4;
+   uintptr_t     spare_hook5;
+   uintptr_t     spare_hook6;
+   uintptr_t     spare_hook7;
+};
+</code></pre>
+
+<p>在这些回调函数中有初始化模块的回调函数，在这个回调函数中可以注册模块自身实现的其他函数。在核心代码中，http框架将http的处理阶段分为多个，每个阶段都有phase_handler成员，可以通过初始化时赋值给这个成员来达到注册的效果。这样在处理这个阶段内容的时候，自然就会调用模块实现的方法。</p>
+
+<p>对于过滤模块来说实现机制却又有些不同，前面提到过滤模块是用链表串联起来的，核心代码在遍历过滤链表的时候触发回调函数。每个过滤模块需要实现两个回调函数，类似于：</p>
+
+<pre><code>ngx_int_t
+ngx_http_send_header(ngx_http_request_t *r)
+{
+    ...
+	return ngx_http_top_header_filter(r);
+}
+
+static int
+ngx_http_example_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
+{
+    ...
+    return ngx_http_next_body_filter(r, in);
+}
+</code></pre>
+
+<p>分别用来过滤响应头和内容。注意这里面的<code>ngx_http_top_header_filter</code>和<code>ngx_http_next_body_filter</code>，这里可以看出来，各个模块是由它们是由链表串联起来的，那么是怎么实现这个过程的呢，也就是如何注册过滤模块到核心代码中的链表的。</p>
+
+<p>编译后可以找到<code>ngx_modules.c</code>文件，里面规定了一个数组</p>
+
+<pre><code>ngx_module_t *ngx_modules[] = {
+        ...
+        &amp;ngx_http_write_filter_module,
+        &amp;ngx_http_header_filter_module,
+        &amp;ngx_http_chunked_filter_module,
+        &amp;ngx_http_range_header_filter_module,
+        &amp;ngx_http_gzip_filter_module,
+        &amp;ngx_http_postpone_filter_module,
+        &amp;ngx_http_ssi_filter_module,
+        &amp;ngx_http_charset_filter_module,
+        &amp;ngx_http_userid_filter_module,
+        &amp;ngx_http_headers_filter_module,
+        &amp;ngx_http_copy_filter_module,
+        &amp;ngx_http_range_body_filter_module,
+        &amp;ngx_http_not_modified_filter_module,
+        NULL
+};
+</code></pre>
+
+<p>模块的执行顺序是反向的。也就是说最早执行的是<code>not_modified_filter</code>，然后各个模块依次执行。所有第三方的模块只能加入到<code>copy_filter</code>和<code>headers_filter</code>模块之间。</p>
+
+<p>Nginx执行的时候是怎么安照次序依次来执行各个模块呢？它采用了一种很隐晦的方法，通过局部的全局变量。比如，在每个filter模块，很可能看到如下代码：</p>
+
+<pre><code>static ngx_http_output_header_filter_pt  ngx_http_next_header_filter;
+static ngx_http_output_body_filter_pt    ngx_http_next_body_filter;
+...
+ngx_http_next_header_filter = ngx_http_top_header_filter;
+ngx_http_top_header_filter = ngx_http_example_header_filter;
+
+ngx_http_next_body_filter = ngx_http_top_body_filter;
+ngx_http_top_body_filter = ngx_http_example_body_filter;
+</code></pre>
+
+<p><code>ngx_http_top_header_filter</code>是一个全局变量。当编译进一个filter模块的时候，就被赋值为当前filter模块的处理函数。而<code>ngx_http_next_header_filter</code>是一个局部全局变量，它保存了编译前上一个filter模块的处理函数。所以整体看来，就像用全局变量组成的一条单向链表。</p>
+
+<p>每个模块想执行下一个过滤函数，只要调用一下<code>ngx_http_next_header_filter()</code>这个局部变量。而整个过滤模块链的入口，只要调用<code>ngx_http_top_header_filter</code>这个全局变量就可以了。<code>ngx_http_top_body_filter</code>的行为与header fitler类似。</p>
+
+<p>所以nginx的模块化可以概括为</p>
+
+<ol>
+  <li>核心代码+模块，核心代码负责处理流程的业务逻辑，模块代码负责实现功能。</li>
+  <li>核心代码在处理业务逻辑时候用全局字段保留信息，用统一的结构体传递信息，用相同的名称调用回调函数。</li>
+  <li>模块代码采用统一的数据结构，结构中包括统一变量和回调函数，以及与模块上下文相关的保留字段。</li>
+</ol>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Nginx architecture(3)--memory pool]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-3-memory-pool/"/>
+    <updated>2013-11-14T15:12:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-3-memory-pool</id>
+    <content type="html"><![CDATA[<h2 id="section">1. 概述</h2>
+
+<p>Nginx里内存的使用大都十分有特色：申请了永久保存，抑或伴随着请求的结束而全部释放，还有写满了缓冲再从头接着写。这么做的原因也主要取决于Web Server的特殊的场景，内存的分配和请求相关，一条请求处理完毕，即可释放其相关的内存池，降低了开发中对内存资源管理的复杂度，也减少了内存碎片的存在。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx_zps7d735b88.jpg" alt="Nginx logo" /></p>
+
+<!--more-->
+
+<p>所以在Nginx使用内存池时总是只申请，不释放，使用完毕后直接destroy整个内存池。</p>
+
+<p>Nginx的内存模型实现得很精巧，代码也很简洁。总体来说，所有的内存池遵守一个宗旨：申请大块内存，避免“细水长流”。主要实现代码在<code>ngx_palloc.h</code>和<code>ngx_palloc.c</code>文件中。使用内存池的好处是：</p>
+
+<ol>
+  <li>在大量的小块内存的申请和释放的时候，能更快地进行内存分配；</li>
+  <li>减少内存碎片，防止内存泄露；</li>
+</ol>
+
+<p>这种方式处理起来缺点也是显而易见的，即申请一块大的内存比如会导致内存空间的浪费，但是比起频繁地<code>malloc</code>和<code>free</code>，这样做的代价是非常小的，典型的以空间换时间的做法。</p>
+
+<h2 id="section-1">2. 内存分配</h2>
+
+<p>nginx内存分配将内存需求分成了两种：a) 大块内存, b) 小内存。内存大小的判定依据是申请的内存是否比同页大小与pool的size两者都小。</p>
+
+<p>对于大块内存，单独利用malloc来申请，并且使用单向链表管理起来；</p>
+
+<p>对于小块内存，则从已有的pool数据区中划分出一部分出来，这里的内存划分出去后没有特殊的结构来保存，而是等到申请对象生命周期结束后一起释放。小块内存的存储方式非常类似于sk_buffer，通过tail，end指针来表示多少内存已经被分配出去。</p>
+
+<p>下图是linux kernel中数据结构sk_buff的使用示意图。具体可见<a href="http://linux.chinaunix.net/techdoc/system/2008/08/04/1023273.shtml">http://linux.chinaunix.net/techdoc/system/2008/08/04/1023273.shtml</a>
+<img src="http://blogimg.chinaunix.net/blog/upfile/070330110745.jpg" alt="linux kernel struct sk_buff" /></p>
+
+<p>nginx中分配内存时总是先判断申请内存是否属于大块内存，如果是则调用<code>ngx_palloc_large</code>申请大内存；如果是小内存则在已经存在的内存池中分配。</p>
+
+<p>内存池的作用在于解决小块内存池频繁申请问题，对于大块内存是可以忍受直接申请的，这块内存会直接挂在内存池头部的large字段下。nginx中每块大内存都对应有一个头部结构，这个头部结构式用来将所有大内存串成一个链表用的。这个头部结构不是直接向操作系统申请的，而是单做小块内存直接在内存池中申请的。这样的大块内存在使用完后，可能需要第一时间释放，节省内存空间。</p>
+
+<p>nginx专门提供了接口函数用来释放内存池中的某个大块内存，但它只会释放大内存，不会释放其对应的头部结构，毕竟头部结构式当做小内存在内存池中申请的；遗留下来的头部结构会作为下次申请大内存之用。</p>
+
+<p><img src="http://blog.chinaunix.net/attachment/201306/16/24830931_1371367358NKxn.jpg" alt="nginx内存分配流程" /></p>
+
+<h2 id="section-2">3. 深入内存池</h2>
+
+<p>先来看看内存池中的数据结构以及之间关系的示意图。</p>
+
+<p><img src="http://images.cnblogs.com/cnblogs_com/xiekeli/201210/201210171140226537.png" alt="" /></p>
+
+<p>从这张图中可以看到<code>ngx_pool_data_t</code>和<code>ngx_pool_s</code>的结构。可以看出，nginx的内存池实际是一个由<code>ngx_pool_data_t</code>和<code>ngx_pool_s</code>构成的链表。</p>
+
+<p>主要的数据结构为：</p>
+
+<pre><code>`ngx_pool_data_t`中：
+
+last：是一个unsigned char 类型的指针，保存的是当前内存池分配到末位地址，即下一次分配从此处开始。
+
+end：内存池结束位置；
+
+next：内存池里面有很多块内存，这些内存块就是通过该指针连成链表的，next指向下一块内存。
+
+failed：内存池分配失败次数。
+</code></pre>
+
+<hr />
+
+<pre><code>`ngx_pool_s`
+
+d：内存池的数据块；
+
+max：内存池数据块的最大值；
+
+current：指向当前内存池；
+
+chain：该指针挂接一个ngx_chain_t结构；
+
+large：大块内存链表，即分配空间超过max的情况使用；
+
+cleanup：释放内存池的callback
+
+log：日志信息
+</code></pre>
+
+<p>以上是内存池涉及的主要数据结构，内存池对外的主要方法有：</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td> </td>
+      <td><strong>创建内存池</strong></td>
+      <td> </td>
+      <td>ngx_pool_t *  ngx_create_pool(size_t size, ngx_log_t *log);</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>销毁内存池</strong></td>
+      <td> </td>
+      <td>void ngx_destroy_pool(ngx_pool_t *pool);</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>重置内存池</strong></td>
+      <td> </td>
+      <td>void ngx_reset_pool(ngx_pool_t *pool);</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>内存申请（对齐）</strong></td>
+      <td> </td>
+      <td>void *  ngx_palloc(ngx_pool_t *pool,  size_t size);</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>内存申请（不对齐）</strong></td>
+      <td> </td>
+      <td>void *  ngx_pnalloc(ngx_pool_t *pool, size_t size);</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>内存清除</strong></td>
+      <td> </td>
+      <td>ngx_int_t  ngx_pfree(ngx_pool_t *pool, void *p);</td>
+      <td> </td>
+    </tr>
+  </tbody>
+</table>
+
+<p>需要说明的是，内存池中并没有真正意义调用malloc等函数申请内存，而是移动指针标记而已，所以<code>内存对齐</code>的活，C编译器帮不了你了，得自己动手。并且不同的操作系统对齐方式不同。</p>
+
+<p>这几个函数具体的功能可以见<a href="http://www.cnblogs.com/xiekeli/archive/2012/10/17/2727432.html">http://www.cnblogs.com/xiekeli/archive/2012/10/17/2727432.html</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Nginx architecture(2)--Event Driven]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-2-event-driven/"/>
+    <updated>2013-11-14T00:16:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-2-event-driven</id>
+    <content type="html"><![CDATA[<p>Nginx是一个事件驱动架构的Web服务器。在Linux中，<code>epoll</code>是目前最强大的事件管理机制(I/O多路复用)，定时器事件也是由<code>epoll</code>等事件模块触发的，它是由红黑树实现的。并且Nginx很好的解决多个<code>worker</code>子进程监听同一个端口引起的惊群问题，以及对<code>worker</code>进行负载平衡。最后会讨论下linux内核中的文件异步I/O。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx-logo_zpsabde8e46.png" /></p>
+
+<!--more-->
+
+<h2 id="section">1. 框架概述</h2>
+
+<p>关于事件驱动模型的介绍已经在上篇介绍过了，这里再做一些补充说明。</p>
+
+<p>事件处理框架所要解决的问题是如何收集、管理、分发事件。对于一个基本的web服务器来说，事件通常有三种类型，<strong>网络事件</strong>、<strong>信号</strong>、<strong>定时器</strong>。这里的事件主要是指<code>网络事件</code>（TCP事件）和<code>定时器事件</code>。</p>
+
+<p>网络事件与网卡中断处理程序、内核提供的系统调用密切相关，所以网络事件的驱动受制于不用的操作系统平台，在同一个操作系统中也受制于不同的操作系统内核版本。例如在<code>kernel2.6</code>之前的版本或者大部分类UNIX系统都可以使用<code>poll</code>或<code>select</code>，而2.6后使用<code>epoll</code>。</p>
+
+<p>对比与传统的过程驱动方法(Process-driven method)来说，事件驱动模型可以用更少的线程处理更多的客户请求。</p>
+
+<h3 id="section-1">1.1 事件定义与事件模块</h3>
+
+<p>事件代表过去发生的事件，事件既是技术架构概念，也是业务概念。以事件为驱动的编程模型称为事件驱动架构EDA。</p>
+
+<p>一个事件代表某个发生的事情，在计算机系统中，事件是由一个对象表达，其包含有关事件的数据，比如发生的时间，地点等等。这个事件对象可以存在在一个消息或数据库记录或其他组件的形式中，这样一个对象称为”一个事件”，事件这个概念有两个含义，既代表已经发生的某个事情，也可以表达一个正在发生的对象。至于事件到底是这两个含义中哪一个，取决于事件发生的场景(上下文)。</p>
+
+<p>事件在技术架构上应用能提供无堵塞的高并发性能，如Nginx和<code>Node.js</code>。</p>
+
+<p>所谓事件驱动，简单地说就是你点什么按钮（即产生什么事件），电脑执行什么操作（即调用什么函数）.当然事件不仅限于用户的操作. 事件驱动的核心自然是事件。从事件角度说，事件驱动程序的基本结构是由一个事件收集器、一个事件发送器和一个事件处理器组成。事件收集器专门负责收集所有事件，包括来自用户的（如鼠标、键盘事件等）、来自硬件的（如时钟事件等）和来自软件的（如操作系统、应用程序本身等）。事件发送器负责将收集器收集到的事件分发到目标对象中。事件处理器做具体的事件响应工作，它往往要到实现阶段才完全确定，因而需要运用虚函数机制（函数名往往取为类似于HandleMsg的一个名字）。对于框架的使用者来说，他们唯一能够看到的是事件处理器。这也是他们所关心的内容。</p>
+
+<p>视图（即我们通常所说的“窗口”）是“事件驱动”应用程序的另一个要元。它是我们所说的事件发送器的目标对象。视图接受事件并能够对其进行处理。当我们将事件发送到具体的视图时，实际上我们完成了一个根本性的变化：从传统的流线型程序结构到事件触发方式的转变。这样应用程序具备相当的柔性，可以应付种种离散的、随机的事件。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/ev-server_zps36dcc97a.png" /></p>
+
+<p>在Nginx中，事件都是由<code>ngx_event_t</code>结构体来表示，这个结构体包含了事件的几个要素，方法、状态、参数以及前后事件的链表。</p>
+
+<p>事件模块是一种新的模块类型，<code>ngx_module_t</code>表示Nginx模块的基本接口，而针对每一种不同类型的模块，都有一个结构体来描述这一类模块的通用接口，这个接口保存在<code>ngx_module_t</code>结构体中的<code>ctx</code>成员中。也就是说，不同模块类型的区别就是<code>ctx</code>成员保存内容的区别，而模块还是在一个统一的结构体中表示。事件模块的通用接口则<code>ngx_event_module_t</code>结构体，它里面定义了模块名称、配置项参数的回调函数以及每个事件模块需要实现的10个抽象方法，如初始化添加删除事件等。</p>
+
+<h3 id="nginx">1.2 Nginx事件驱动机制</h3>
+
+<p>在上一篇中提到，Nginx将HTTP请求分为多个阶段进行处理</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td> </td>
+      <td><strong>阶段意义</strong></td>
+      <td> </td>
+      <td><strong>触发条件</strong></td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>建立TCP连接</td>
+      <td> </td>
+      <td>接收到TCP中的SYN包</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>开始接受用户请求</td>
+      <td> </td>
+      <td>接收到TCP中的ACK表示连接建立成功</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>接收到用户请求并分析已接收的请求是否完整</td>
+      <td> </td>
+      <td>接收到用户的数据包</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>接收到完整的用户请求后开始处理用户请求</td>
+      <td> </td>
+      <td>接收到用户的数据包</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>…</td>
+      <td> </td>
+      <td>…</td>
+      <td> </td>
+    </tr>
+  </tbody>
+</table>
+
+<p>而异步处理是与多阶段相辅相成的，当事件发生时，由<code>epoll</code>等事件分发器收到通知，调用事件消费者处理请求，在每个阶段中，事件消费者都不清楚本次完整的操作纠结什么时候会完成，只能异步被动地等待下一次时间的通知。</p>
+
+<p>这种设计配合事件驱动架构，将会极大地提高网络性能，同时使得进程不会或很少出现休眠现象。因为一旦出现进程休眠，必然减少并发处理事件的数目，一定会降低网络性能，同时会增加请求处理时间的平均时延！这时，如果网络新能无法满足业务需求将智能增加进程数目，进程数目过多就会增加操作系统内核的额外操作：进程间切换，频繁地进行进程切换仍会消耗CPU等资源，从而减低网络性能。同时，休眠的进程会使进程占用的内存得不到有效是否，这最终比如会导致系统可用内存的下降，从而影响系统能够处理的最大并发连接数。</p>
+
+<p>另外，异步非阻塞的事件处理机制与多线程相比，是有很大的优势的，不需要创建线程，每个请求占用的内存也很少，没有上下文切换，事件处理非常的轻量级。并发数再多也不会导致无谓的资源浪费（上下文切换）。更多的并发数，只是会占用更多的内存而已。 我之前有对连接数进行过测试，在24G内存的机器上，处理的并发请求数达到过200万。现在的网络服务器基本都采用这种方式，这也是Nginx性能高效的主要原因。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mighttpd_e02gif_zpse3ff26a7.gif" /></p>
+
+<h2 id="linuxepoll">2. Linux事件驱动机制——<code>epoll</code></h2>
+
+<p>事件驱动机制也被称为I/O多路复用，其实也就是非阻塞的I/O。<code>poll</code>、<code>select</code>和<code>epoll</code>的功能在本质上是一样的：都允许进程决定是否可以对一个和多个打开文件做非阻塞操作的读取和写入。这些调用也会阻塞进程，直到给定的文件描述符集合中的任何一个可读取或写入。因此，它们常常用于那些要使用多个输入和输出流而又不会阻塞阻于其中任何一个流的应用程序程序中。同一功能之所以要多个独立函数提供，是因为其中两个几乎是同时由两个不同的unix团体分别实现的：<code>select</code>在<code>BSD unix</code>中引入，而<code>poll</code>由<code>System V</code>引入。<code>epoll</code>系统调用，它用于将poll函数的扩展到能个处理数千个文件描述符。对上述系统调用的支持需要来自设备的驱动程序的相应支持。所有三个系统均通过驱动程序的<code>poll</code>方法提供。</p>
+
+<p><code>select</code>和<code>poll</code>在处理事件的时候会造成用户态到内核态内存的大量复制，这是极大的资源浪费。实际上，它会将所有连接的套接字传给操作系统，如果有100万个连接，在某一个时刻，进程收集事件连接的时候，虽然这100万连接中大部分是没有发生的，但<code>select</code>和<code>poll</code>还是会将这100万连接的套接字传给操作系统，而由操作系统内核寻找这些连接上有没有未处理的时间，这是极大的资源浪费，所以它们最多只能处理几千个并发连接。</p>
+
+<p>而<code>epoll</code>不这么做，它在内核中申请了一个简易的文件系统，把原先的一个select或poll调用分成了3个部分：调用<code>epoll_create</code>,建立1个<code>epoll</code>对象（在<code>epoll</code>文件系统中给这个句柄分配资源）、调用<code>epoll_ctl</code>向<code>epoll</code>对象中添加这100万个连接的套接字、调用<code>epoll_wait</code>收集发生事件的连接。这样，只需要在进程启动时建立1个<code>epoll</code>对象，并在需要的时候向它添加或删除连接就可以了。那么再来看看<code>epoll</code>是如何高效的处理事件的。</p>
+
+<p>当某一个进程调用<code>epoll_create</code>方法时，Linux内核会创建一个<code>eventpoll</code>结构体，这个结构体有一棵红黑树（存储所有添加到<code>epoll</code>中过的事件），还有一个双向链表（保持将要通过<code>epoll_wait</code>返回给用户的、满足条件的事件）。所有添加到<code>epoll</code>中的事件都会与设备驱动程序建立回调关系，这个回调方法会把这样的事件放到上面的双向链表中。当调用<code>epoll_wait</code>检测是否有发生事件的连接时，只是检查<code>eventpoll</code>对象中的双向链表是否有元素而已，如果不为空，则把这里的事件复制到用户内存中，同时将时间数量返回给用户。</p>
+
+<p>所以在<code>epoll</code>中，<code>epoll_ctl</code>向<code>epoll</code>对象中添加、修改、删除事件时，从红黑树中查找事件非常快，同时<code>epoll_wait</code>检查事件的效率也是非常的高。可以处理百万级别的并发事件。</p>
+
+<h2 id="section-2">3. 定时器事件</h2>
+
+<p>要弄清Nginx的定时器事件处理，那么需要搞清楚几个问题：</p>
+
+<ol>
+  <li>定时器事件是如何组织起来的</li>
+  <li>事件超时后又是如何触发的</li>
+  <li>时间又是如何更新的</li>
+</ol>
+
+<p>出于性能原因，Nginx的时间是缓存在内存中，不是每次都通过<code>gettimeofday</code>这个系统函数来实现。在Nginx中，只有在初始化和更新这个缓存时间的时候才会调用<code>gettimeofday</code>。在内存中可以通过各种已经定制好的格式化方法格式化需要转换的时间。</p>
+
+<p>所有的定时器事件是通过红黑树组织起来的。红黑树用事件的超时时间作为关键字，并且以这个关键字组成二叉排序树。这样需要找出最有可能的超时事件，那么只要将最左边的节点取出来即可，可以判断这个时间是否超时或者还需要多久才会超时。红黑树定时器处理添加删除外，还提供了一些方法可以遍历所有的事件，触发事件的<code>handler</code>回调方法。那么何时调用这些方法呢？</p>
+
+<p>首先在程序开始的时候会检测配置选项中是否有<code>timer_resolution</code>这一项内容即用户希望服务器时间精确度是多少毫秒，如果有则采用这个设置项作为阈值时间<code>timer</code>；如果没有设置这一选项，则在红黑树中寻找最近可能发生事件的时间差，以这个时间作为<code>timer</code>。<code>timer</code>也就是用来收集<code>epoll</code>监控事件是否发生的阈值时间，即如果<code>epoll</code>中没有任何一个事件发生，则最多等待<code>timer</code>毫秒后返回。也就是说如果是通过红黑树中找到的<code>timer</code>则肯定会有事件发生，如果是通过<code>timer_resolution</code>赋值的则不一定。</p>
+
+<p>收集来的事件放在队列中按<code>FIFO</code>顺序处理。而如果收集事件消耗的时间大于0，也就是有等待事件发生，那么这时有可能有新的定时器事件被触发，也就需要遍历所有的时间，触发事件的<code>handler</code>回调方法。</p>
+
+<h2 id="section-3">4. 惊群问题</h2>
+
+<p>惊群问题（Thundering Herd）是指多个进程监听同一个事件，操作系统无法判断由谁来负责这个事件，就会索性唤醒所有进程，但最终只有一个进程成功执行，其他进程失败，造成严重的资源浪费。</p>
+
+<p>Nginx的解决思路：<strong>避免惊群</strong>。具体措施有使用全局互斥锁，每个子进程在<code>epoll_wait()</code>之前先去申请锁，申请到则继续处理，获取不到则等待，并设置了一个负载均衡的算法（当某一个子进程的任务量达到总设置量的7/8时，则不会再尝试去申请锁）来均衡各个进程的任务量。</p>
+
+<p>原因和解决方法对比参见<a href="http://blog.163.com/pandalove@126/blog/static/9800324520122633515612/">这篇博客</a>。</p>
+
+<p><a href="http://blog.csdn.net/randyleonard/article/details/9058567">这篇也很精彩</a>。</p>
+
+<h2 id="io">5. 文件异步I/O</h2>
+
+<p>要使用文件异步I/O，则Linux内核必须要支持。这里的异步I/O不同于<code>glibc</code>提供的文件异步I/O库，它是基于多线程实现的，并不是真正意义上的异步I/O。把读取文件的操作异步地提交给内核后，内核会通知I/O设备独立地执行操作，这样，CPU可以得到充分的利用。而且，当大量读事件发生时候，将会发挥出内核读硬盘中“电梯算法”的优势，从而降低随机读取硬盘扇区的成本。</p>
+
+<p>需要注意的是Linux内核级别的文件异步I/O是不支持缓存操作的，所以说文件异步I/O的使用要看场景，并不是所有情况都可以使用，如果用户请求对文件的操作大部分都会落到文件缓存上，那么就不要使用异步I/O，反之则可以试着使用文件异步I/O，看一下是否会为服务器带来并发能力上的提升。</p>
+
+<p>这个文件异步I/O在linux中的称呼是<code>sendfile</code>，那么<code>sendfile</code>的原理是什么呢？</p>
+
+<p>在传统的文件传输里面（read/write方式），在实现上其实是比较复杂的，需要经过多次上下文的切换，我们看一下如下两行代码：</p>
+
+<p>read(file, tmp_buf, len);     <br />
+write(socket, tmp_buf, len);  </p>
+
+<p>以上两行代码是传统的read/write方式进行文件到socket的传输。</p>
+
+<p>当需要对一个文件进行传输的时候，其具体流程细节如下：</p>
+
+<p>1、调用read函数，文件数据被copy到内核缓冲区</p>
+
+<p>2、read函数返回，文件数据从内核缓冲区copy到用户缓冲区</p>
+
+<p>3、write函数调用，将文件数据从用户缓冲区copy到内核与socket相关的缓冲区。</p>
+
+<p>4、数据从socket缓冲区copy到相关协议引擎。</p>
+
+<p>以上细节是传统read/write方式进行网络文件传输的方式，我们可以看到，在这个过程当中，文件数据实际上是经过了四次copy操作：</p>
+
+<p>硬盘—&gt;内核buf—&gt;用户buf—&gt;socket相关缓冲区—&gt;协议引擎</p>
+
+<p>而sendfile系统调用则提供了一种减少以上多次copy，提升文件传输性能的方法。Sendfile系统调用是在2.1版本内核时引进的：</p>
+
+<p>sendfile(socket, file, len);   </p>
+
+<p>运行流程如下：</p>
+
+<p>1、<code>sendfile</code>系统调用，文件数据被copy至内核缓冲区</p>
+
+<p>2、再从内核缓冲区copy至内核中socket相关的缓冲区</p>
+
+<p>3、最后再socket相关的缓冲区copy到协议引擎</p>
+
+<p>相较传统read/write方式，2.1版本内核引进的<code>sendfile</code>已经减少了内核缓冲区到user缓冲区，再由user缓冲区到socket相关缓冲区的文件copy，而在内核版本2.4之后，文件描述符结果被改变，<code>sendfile</code>实现了更简单的方式，系统调用方式仍然一样，细节与2.1版本的 不同之处在于，当文件数据被复制到内核缓冲区时，不再将所有数据copy到socket相关的缓冲区，而是仅仅将记录数据位置和长度相关的数据保存到 socket相关的缓存，而实际数据将由DMA模块直接发送到协议引擎，再次减少了一次copy操作。</p>
+
+<p>目前，Nginx仅支持在读取文件时使用异步I/O，因为正常写入文件时往往是写入内存中就立即返回，效率很高，而使用异步I/O写入时速度会明显的下降。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Nginx architecture(1)--Overview]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/10/13/nginx-architecture-1-overview/"/>
+    <updated>2013-10-13T00:28:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/10/13/nginx-architecture-1-overview</id>
+    <content type="html"><![CDATA[<p>从04年发布以来，Nginx已经成为多个国内外互联网具体首选的高性能Web服务器。其特点是占有内存少，并发能力强，并且由于Nginx使用基于事件驱动的架构能够最有效的利用多核CPU的处理能力，进程可以无阻塞的运行。</p>
+
+<p>特别是Nginx可以利用当前操作系统特有的一些高校API来提高自己的性能，例如Linux上的<code>epoll</code>、Solaris上的event ports和Free BSD上的kqueue。又如对于Linux，Nginx支持其独有的sendfile系统调用，可以高效的讲硬盘中的数据发送到网络上（无需将硬盘数据先复制到用户态内存中）。</p>
+
+<p>所以通过分析Nginx的架构设计，可以怎样充分利用服务器上的硬件资源，以及学习到更为先进的理念。下面就来分析和学习Nginx的架构设计。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx_zps7d735b88.jpg" alt="Nginx logo" /></p>
+
+<!--more-->
+
+<h2 id="section">1. 基础架构</h2>
+
+<p>Nginx是模块化的，事件驱动，异步，单线程的，非无阻塞架构的。</p>
+
+<p><img src="http://www.aosabook.org/images/nginx/architecture.png" width="650px" alt="Diagram of Nginx's architecture" /></p>
+
+<h3 id="nginx">1.1 Nginx配置</h3>
+
+<p><strong>内核参数优化</strong></p>
+
+<p>Nginx需要可以对linux内核参数进行修改，来实现对内核参数的优化，以达到硬件资源的最大化利用。</p>
+
+<p>默认的linux内核参数考虑的是最通用的场景，而高并发访问的Web服务器需要根据具体的业务特点来调整内核参数。Nginx作为静态Web内容服务器、反向代理服务器或是提供内容压缩功能的服务器时，内核参数的调整都是不同的。</p>
+
+<p>具体的文件修改是在<code>/etc/sysctl.conf</code>下。举例来说，滑动窗口的大小与套接字缓存区会在一定程度上影响并发连接的数目。每个TCP连接都会为维护TCP滑动窗口而消耗额昵称，这个窗口会更具服务器的处理速度收缩或扩张。</p>
+
+<p><strong>Nginx配置文件</strong></p>
+
+<p>而Nginx的配置文件则规定了程序运行时几个核心模块的基本配置。具体分为4类：</p>
+
+<ul>
+  <li>用于调试、定位问题的配置项</li>
+  <li>正常运行的必备配置项</li>
+  <li>优化性能的配置项</li>
+  <li>事件类配置项</li>
+</ul>
+
+<p>其他配置项是针对具体模块的，例如对于一个为完整的静态Web服务器提供了8类配置信息（功能）：</p>
+
+<ul>
+  <li>虚拟主机与请求的分发
+    <ul>
+      <li>对特定的Host域名的请求提供不同的服务，以此实现虚拟主机功能</li>
+    </ul>
+  </li>
+  <li>文件路径的定义</li>
+  <li>内存及磁盘资源的分配</li>
+  <li>网络连接的设置</li>
+  <li>MIME类型的设置</li>
+  <li>对客户端请求的限制</li>
+  <li>文件操作的优化
+    <ul>
+      <li>sendfile系统条用</li>
+      <li>aio系统调用</li>
+    </ul>
+  </li>
+  <li>对客户端请求的特殊处理
+    <ul>
+      <li>DNS</li>
+      <li>忽略不合法HTTP头部</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>配置文件读取</strong></p>
+
+<p>Nginx启动的时候读取配置文件过程：</p>
+
+<ol>
+  <li>更具命令行得到配置文件路径</li>
+  <li>调用所有核心模块的<code>create_conf</code>方法生成存放配置项的结构体</li>
+  <li>针对所有核心模块解析<code>Nginx.conf</code>配置文件</li>
+  <li>调用所有核心模块的<code>init_conf</code>方法</li>
+</ol>
+
+<h3 id="section-1">1.2. 事件驱动架构</h3>
+
+<p>事件驱动模型就是事件发生源来产生事件，由一个或者多个事件收集器来收集、分发事件，然后许多事件处理器会注册自己感兴趣的事件，同时会消费这些事件。</p>
+
+<p>对于Nginx来说，事件模块将负责事件的收集、分发操作，而所有的模块都可能是事件消费者，首先需要向事件模块注册感兴趣的事件类型，当有事件产生时，事件模块会把事件分发到相应的模块中进行处理。</p>
+
+<p>Nginx完全采用事件驱动架构处理事务，与其他Web服务器不同。传统的Web服务器采用的事件驱动往往局限在TCP连接建立、关闭事件上，连接建立后将这个会话加入队列排队让事件消费者进行消费。在连接建立与关闭之间会退化为按序执行的批处理模式，通常采用线程或进程执行的处理方式。这样的处理会在连接建立后始终占据系统资源，因为这段时间从1毫秒到1分钟都有可能，并且进程线程之间的切换也会有性能损失，这样影响了系统可以处理的并发连接数。</p>
+
+<p>Nginx中只有事件模块才有资格占用进程资源，它们在分发某个事件时调用事件消费模块使用当前占用的进程资源。这种设计使得网络性能、用户感知的请求时延都得到提升，整个服务器的网络吞吐量都会由于事件的及时响应而增加。但是，每个事件消费者都不能有阻塞行为，否则会长时间占用事件分发进程而导致其他事件得不到及时响应。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/_zpscc820489.jpg" width="600px" alt="Nginx事件驱动" /></p>
+
+<h3 id="section-2">1.3 多模块设计</h3>
+
+<p><strong>Nginx的模块</strong></p>
+
+<p>要知道Nginx有哪些模块，一个快速的方法就是编译Nginx。编译之后，会在源代码根目录下生成objs目录，该目录中包含有ngx_auto_config.h和ngx_auto_headers.h，以及ngx_modules.c文件，当然，还有Makefile文件等。</p>
+
+<p>其中，生成的<code>ngx_modules.c</code>文件中，重新集中申明(使用extern关键字)了Nginx配置的所有模块，这些模块可通过编译前的configure命令进行配置，即设置哪些模块需要编译，哪些不被编译。</p>
+
+<p>Nginx的模块化架构最基本的数据结构为<code>ngx_module_t</code>。整个数据结构规定了：</p>
+
+<ol>
+  <li>该模块的上下文，每个种类的模块有不同的上下文，用void *ctx表示。</li>
+  <li>一些callback函数
+    <ul>
+      <li><code>master</code>初始化和退出</li>
+      <li>模块初始化</li>
+      <li>工作进程初始化和退出</li>
+      <li>线程初始化和退出</li>
+    </ul>
+  </li>
+  <li>模块的命令集，指向一个<code>ngx_command_t</code>结构数组</li>
+  <li>模块的类型，运行定义模块类型这个概念，允许专注于不同领域的模块按照类型来区别。</li>
+</ol>
+
+<p>具体的模块解释可以参考[http://www.linuxidc.com/Linux/2011-08/40949.htm]http://www.linuxidc.com/Linux/2011-08/40949.htm</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx_zps3788eefc.jpg" alt="Nginx模块设计" width="650px" /></p>
+
+<p><strong>模块化设计的优点</strong></p>
+
+<p>高度模块化的设计是Nginx的架构基础。在Nginx中，除了少量的核心代码，其他一切皆为模块。这种模块化设计同时具有以下几个特点：</p>
+
+<ol>
+  <li>
+    <p>高度抽象的模块接口</p>
+
+    <p>所有的模块都遵循同样的<code>ngx_module_t</code>(后面有说明)接口设计规范，这减少整个系统中的变数，这种方式带来良好的简单性、静态可扩展性、可重用性。</p>
+  </li>
+  <li>
+    <p>模块接口非常简单，具有很高的灵活性</p>
+
+    <p>模块的基本接口<code>ngx_module_t</code>足够坚定，只涉及模块的初始化、退出以及对配置项的处理，这同时也带来了足够的灵活性，是的Nginx比较简单地实现了动态可修改性(通过HUP信号在服务正常运行时使用新的配置文件生效，以及通过USR2信号实现平滑升级)。</p>
+  </li>
+  <li>
+    <p>定义基础类型的模块：核心模块。</p>
+
+    <p>这样可以简化Nginx的设计，使得非模块化框架代码只关注于如何调用核心模块(6个)。
+核心模块将ctx上下文进一步实例化为<code>ngx_core_module_t</code>结构体，它是以配置项的解析作为基础的，提供了create_conf回调方法来创建存储配置项的数据结构，在读取Nginx.conf文件时，会更具模块中的ngx_command_t解析出的配置项存放在这个数据结构中；还提供init_conf回调方法，用于在解析配置文件后，使用解析出的配置项初始化核心模块功能。</p>
+  </li>
+  <li>
+    <p>多层次、多类别的模块设计</p>
+
+    <p>所有的模块间是分层次和类别的，官方Nginx共有五大类型的模块：核心模块、配置模块、事件模块、HTTP模块、mail模块。核心模块和配置模块是由Nginx的框架代码所定义的。其他三种模块都不会与框架产生直接关系，实际上核心模块各有这三种模块的一个agent，并在同类模块中有一个作为和核心业务与管理功能的模块。</p>
+  </li>
+</ol>
+
+<h2 id="section-3">2. 请求的多阶段异步处理</h2>
+
+<p>请求的多阶段异步处理是把一个请求的处理过程按照事件的触发方式划分为多个阶段，每个阶段都可以有事件收集、分发来触发。也就是说请求的多阶段异步处理只能基于事件驱动架构实现。</p>
+
+<p>异步处理和多阶段是相辅相成的。只有多阶段了才能进行异步处理，异步处理使得阶段的划分才有意义。那么是什么原则来划分请求阶段呢？一般是找到请求处理流程中的阻塞方法（或造成阻塞的代码段）在阻塞代码段上按照下面4中方式来划分阶段：</p>
+
+<ol>
+  <li>将阻塞进程的方法按照相关的触发事件分解为两个阶段
+    <ul>
+      <li>阻塞方法改为非阻塞，调用这个方法</li>
+      <li>处理非阻塞方法结果返回事件</li>
+    </ul>
+  </li>
+  <li>将阻塞方法调用按照事件分解为多个阶段的方法调用
+    <ul>
+      <li>例如将读取10MB文件(非异步)，这些文件在磁盘中的块未必是联系的，即10MB文件内容不再操作系统的缓存中，可能需要多次驱动硬盘寻址，导致进程休眠或等待。这样可以把文件分为1000份，每份10KB，这样读取的时间就是可控的，系统可以及时地处理其他请求。</li>
+    </ul>
+  </li>
+  <li>等待系统的响应从而导致进程空转时，使用定时器划分阶段</li>
+  <li>如果阻塞方法完全无法继续划分，则必须使用独立的进程执行这个阻塞方法</li>
+</ol>
+
+<h2 id="section-4">3. 进程管理</h2>
+
+<p>Nginx采用一个<code>master</code>管理进程，多个<code>worker</code>工作进程的设计方式，还包括一个可选的<code>cache manager</code>进程以及<code>cache loader</code>进程。</p>
+
+<p>Nginx的<code>worker</code>代码包括核心和功能模块，Nginx的核心是负责维持一个紧凑的运行循环(tight run-loop)，并执行相应的部分模块的代码、每个请求处理阶段。模块包括Nginx在表现层和业务层的功能。模块读取和写入到网络和硬盘，修改内容，出站(outbound)过滤，应用服务器(apply server-side)包括动作，传递请求给上游代理服务器。</p>
+
+<p>Nginx并没有为每个<code>worker</code>分配连接，这个工作是由操作系统内核做的。启动后，<code>worker</code>创建一组初始的监听套接字 ，然后不断接受，读取和写入到sockets，同时处理HTTP请求和响应。</p>
+
+<p>由于Nginx会产生多个<code>worker</code>，所以它在多核的架构中扩展的很好。每个核一个<code>worker</code>可以充分地利用多核的优势，防止颠簸和锁，并且在单线程的的<code>worker</code>进程中没有资源匮乏和资源控制机制。该模型还允许扩展更多的跨物理存储设备，有利于更大的磁盘利用率，避免磁盘I/O阻塞。</p>
+
+<p>根据磁盘的利用和CPU的负载类型，Nginx的<code>worker</code>数量可以调整。一般来说，如果负载模式是CPU密集型处理，例如，TCP/IP的很多，做的SSL或压缩时，<code>worker</code>的数量应该和核的数目相同；如果负载大多数是在磁盘上，如在磁盘上做不同的内容服务或代理，那么<code>worker</code>的数量应该是核的1.5到2倍。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/3_zpsbb4840cf.png" alt="1 process per core" /></p>
+
+<p>Nginx所有的进程使用的是内存共享的通信机制。<code>master</code>运行作为root用户，<code>cache manager</code>，<code>cache loader</code>和<code>worker</code>作为非特权用户运行。<code>master</code>的功能如下：</p>
+
+<ul>
+  <li>读取和验证配置</li>
+  <li>创建，绑定和关闭socket</li>
+  <li>启动，终止和维护配置数量的<code>worker</code>进程</li>
+  <li>在不中断服务的情况下重新配置</li>
+  <li>无需停止的系统升级 (启动新的进程，如果有必要则回滚)</li>
+  <li>编译嵌入式Perl脚本</li>
+  <li>日志文件</li>
+</ul>
+
+<p><code>cache loader</code>是负责检查磁盘上的缓存项和填充缓存元数据到Nginx的in-memory数据库。 从本质上讲，<code>cache loader</code>准备Nginx的实例用来在工作在一个专门分配的目录结构存储的磁盘文件上。它遍历目录，检查缓存内容元数据、更新共享内存中的相关条目，然后退出时准备给下次使用。</p>
+
+<p>缓存管理器主要是负责缓存过期和失效。 在Nginx的正常运行时，它驻留在内存中；在失败的情况下，它由主进程重新启动。</p>
+
+<h2 id="section-5">4. 跨平台实现</h2>
+
+<p>Nginx有两个特点：跨平台、使用C语言实现。这两个特点导致Nginx不宜使用一些第三方中间件提供的容器和算法，并且C语言与每一个操作系统都是强相关的，且C库对操作系统的某些系统调用封装的方法并不是跨平台的。</p>
+
+<p>对于这种情况，Nginx的解决方法很简单，在这些必须特殊化处理的地方，对每个操作系统都给一份特意化的实现。而对于基础的数据结构和算法，Nginx则完全从头实现了一遍，如动态数组、链表、二叉排序树、散列表等等。</p>
+
+<p>要学习这些数据结构和算法的实现时可以看看Nginx源码，有些设计思路还是非常值得借鉴的，例如双向链表并不存储元素，只是存储指针，而且提供了简单的插入排序法。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[deep C and C++]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/10/12/deep-c-and-c-plus-plus/"/>
+    <updated>2013-10-12T16:12:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/10/12/deep-c-and-c-plus-plus</id>
+    <content type="html"><![CDATA[<p>摘自<a href="http://share.csdn.net/#/detail/1050">CSDN Share</a></p>
+
+<p>花了一个上午的时间看了下这个PPT，觉得收获颇多。
+特别是这个PPT的组织方式，采用两个程序员面试对比的方式，非常的实用，也很有触动和感悟。已经很久没见到这样精彩的PPT了。</p>
+
+<p>本PPT介绍了作为普通的程序员和高级的程序员如何看待C与C++，从编译、链接、运行的角度来介绍，有非常多的干货，也许不是很系统，但确实是非常的实用；特别是在回答面试官的提问上，需要认真思考，从<code>不同的角度</code>、<code>深层次</code>地回答技术官的问话。也许两个程序员的功力差不多，但是在回答技术问题的方法上也许对面试官有很大的影响，最终也就是面试是否成功的关键。</p>
+
+<p><img src="http://www.atmel.com/zh/cn/Images/compiler.jpg" alt="" /></p>
+
+<!--more-->
+
+<p>有一点提示就是，今后在看书的时候，要时常记住一些<code>RULE</code>，语言中更有效的惯用用法(<code>effective conventional language</code>)，特别是深入底层细节的知识，要不断的积累实证，而且得<code>学以致用</code>。一点点细小的差距就是<code>professional programmer</code>与common programmer的区别。最重要的一点是常看优秀的代码，学习与你知识相违背的用例。</p>
+
+<p>&lt;iframe height=620 width=670 scrolling=”no” src=”http://share.csdn.net/#/frame/1050” frameborder=0 allowfullscreen&gt;&lt;/iframe&gt;</p>
+
+<p>截取几张精彩的ppt</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/2_zpsde979321.png" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/_zpsfe2bfd71.png" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/3_zpsc78ac177.png" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/5_zps28849be2.png" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/4_zpsff862edf.png" /></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Probabilistic Graphical Models]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/06/02/probabilistic-graphical-models/"/>
+    <updated>2013-06-02T13:49:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/06/02/probabilistic-graphical-models</id>
+    <content type="html"><![CDATA[<h3 id="pgm">1. PGM介绍</h3>
+
+<p>GM(graphical model)，图模型首先它是一个概率模型，用的是图的数据结构，用来表示随机变量之间的以来关系。
+因为是涉及到变量之间的关系，于是在概率理论特别是统计部分得到很长远的应用，另外还包括机器学习。</p>
+
+<p><img src="http://www.stanford.edu/~montanar/TEACHING/Stat375/graph.jpg" width="400px" /></p>
+
+<p>可以看的出来，概率图模型是综合了统计和计算机技术：</p>
+
+<ul>
+  <li>统计方面提供了概率基础，包括概率分布的分析，不确定性的处理，决策判定等等。</li>
+  <li>计算机方面可以将概率中的条件概率置于高维空间中，用图来表示它们的数据结构，并使用高效的算法计算。</li>
+</ul>
+
+<p>使用现实中得到的知识数据来表述图模型，作为declarative representation，它与我们所要使用的算法是
+松耦合的，可以将不同的算法应用到图模型上，在图模型中可以加入专家知识，和从其他数据中学习到的知识。
+<!--more--></p>
+
+<p><strong>什么时候需要用到PGM？</strong></p>
+
+<ul>
+  <li>拥有噪音数据或者不确定性比较大的时候</li>
+  <li>拥有很多先验知识的时候, 要比普通的机器学习来的有效</li>
+  <li>多个变量的推理(reason)，特别是多个变量之间存在内在联系</li>
+  <li>从较小的模块化的模型中建立复杂的模型，疾病诊断或错误诊断</li>
+</ul>
+
+<p><strong>应用</strong></p>
+
+<p>概率图模型能够发现和分析复杂分布的结构，提取出原本非结构化的数据，使得这些分布能够被有效的重构和利用。
+主要在图像和视频智能信息处理领域已有应用。具体的应该用包括：</p>
+
+<ul>
+  <li>Medical diagnosis</li>
+  <li>Fault diagnosis</li>
+  <li>Natural language processing</li>
+  <li>speech recognition</li>
+  <li>Social network models</li>
+  <li>computer vision
+    <ul>
+      <li>Image segmentation</li>
+      <li>3D reconstruction </li>
+      <li>Holistic scene analysis</li>
+    </ul>
+  </li>
+  <li>decoding of low-density parity-check codes</li>
+  <li>Robot localization &amp; mapping</li>
+</ul>
+
+<p>概率图理论共分为三个部分，分别为<strong>表示理论，推理理论和学习理论</strong>。</p>
+
+<h3 id="section">2. 两种模型</h3>
+
+<p>先说说<strong>生成模型和判别模型</strong>。</p>
+
+<p>假设有观察值序列$Y=(Y_1,Y_2,…,Y_n)$，求其对应的状态序列$X=(X_1,X_2,…,X_n)$，则实际上即使求出状态序列$X^*$，使得条件概率$p(X_1,X_2,…,X_n|Y_1,Y_2,…,Y_n)$最大化，即:</p>
+
+<script type="math/tex; mode=display">
+\begin{align}
+X^* = arg max_{X_1,X_2,...,X_n}p(X_1,X_2,...,X_n|Y_1,Y_2,...,Y_n)
+\end{align}
+</script>
+
+<h4 id="generative-models">2.1 生成模型(Generative Models)</h4>
+
+<p>生成模型不直接对$p(X_1,X_2,…,X_n|Y_1,Y_2,…,Y_n)$进行建模，而是先对其进行变换，构建联合概率$p(X_1,X_2,…,X_n\,Y_1,Y_2,…,Y_n)$，即</p>
+
+<script type="math/tex; mode=display">% &lt;![CDATA[
+
+\begin{equation}
+\begin{split}
+p(X_1,X_2,...,X_n|Y_1,Y_2,...,Y_n) &= \frac{p(X_1,X_2,...,X_n,Y_1,Y_2,...,Y_n)}{p(Y_1,Y_2,...,Y_n)} \\
+&= \frac{p(Y_1,Y_2,...,Y_n|X_1,X_2,...,X_n) × p(X_1,X_2,...,X_n)}{p(Y_1,Y_2,...,Y_n)}
+\end{split}
+\end{equation}
+ %]]&gt;</script>
+
+<p>在给定观察值序列的前提下，其出现的概率是一定的，所以得到</p>
+
+<script type="math/tex; mode=display">% &lt;![CDATA[
+
+\begin{equation}
+\begin{split}
+X^* &= arg max_{X_1,X_2,...,X_n}p(X_1,X_2,...,X_n|Y_1,Y_2,...,Y_n) \\
+&= arg max_{X_1,X_2,...,X_n}p(Y_1,Y_2,...,Y_n|X_1,X_2,...,X_n) × p(X_1,X_2,...,X_n)
+\end{split}
+\end{equation}
+ %]]&gt;</script>
+
+<p>生成模型认为观测值是由状态生成的。</p>
+
+<h4 id="discriminative-models">2.2 判别模型(Discriminative Models)</h4>
+
+<p>判别模型克服了生成模型的独立性假设，其直接对条件概率$p(X_1,X_2,…,X_n|Y_1,Y_2,…,Y_n)$进行建模，也就是说，在给定观察序列的条件下，寻找最可能的状态序列的时候，条件分布可以直接使用。</p>
+
+<h4 id="section-1">2.3 生成模型和判别模型对比</h4>
+
+<ul>
+  <li>统计建模方式不同。生成模型构建联合分布$p(X,Y)$；判别模型构建条件概率分布$p(X|Y)$。</li>
+  <li>训练时，二者优化准则不同。生成模型优化训练数据的联合分布概率；判别模型优化训练数据的条件分布概率，判别模型与序列标记问题有较好的对应性。</li>
+  <li>训练复杂度不同。判别模型训练复杂度较高。</li>
+  <li>对于观察序列的处理不同。生成模型中，观察序列作为模型的一部分；判别模型中，观察序列只作为条件，因此可以针对观察序列设计灵活的特征。</li>
+  <li>是否支持无监督训练。生成模型支持无监督训练。</li>
+  <li>应用角度不同。生成模型一般主要是对后验概率建模，从统计的角度表示数据的分布情况，能够反映同类数据本身的相似度；判别模型主要特点是寻找不同类别之间的最优分类面，反映的是异类数据之间的差异。</li>
+</ul>
+
+<h4 id="section-2">2.4 举例</h4>
+
+<p>常见的Generative Model主要有：</p>
+
+<ul>
+  <li>Gaussians, Naive Bayes, Mixtures of multinomials</li>
+  <li>Mixtures of Gaussians, Mixtures of experts, HMMs</li>
+  <li>Sigmoidal belief networks, Bayesian networks</li>
+  <li>Markov random fields</li>
+</ul>
+
+<p>常见的Discriminative Model主要有：</p>
+
+<ul>
+  <li>logistic regression</li>
+  <li>SVMs</li>
+  <li>traditional neural networks</li>
+  <li>Nearest neighbor</li>
+</ul>
+
+<h3 id="section-3">3. 表示理论</h3>
+
+<p>不同的概率图的模型可以分成3类：有向图模型，无向图模型和混合概率图模型。</p>
+
+<h4 id="section-4">3.1 有向图模型</h4>
+
+<p>有向图概率模型使用有向边连接不同的结点，这些有向边通常表示了结点间的因果关系。典型的代表是隐马尔可夫模型，贝叶斯网络和的动态贝叶斯网络。</p>
+
+<ul>
+  <li>
+    <p><strong>HMM(Hidden Markov Model)</strong></p>
+
+    <p>看这个名称就知道，隐马尔可夫模型是马尔可夫模型的扩展，它是在马尔可夫链的基础上发展起来的。马尔可夫链是马尔可夫随机过程的特殊情况，即马尔可夫链的状态和时间参数都是离散的马尔可夫过程。它的$m+1$时刻的状态只是和$m$时刻的状态有关，而与之前的状态无关。实际中，马尔可夫链的每一状态可以对应于一个可观测到的物理事件。比如天气预测中的雨晴雪等，根据这个模型可以算出各种天气在某一时刻出现的概率。</p>
+
+    <p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Hmm_temporal_bayesian_net.svg/500px-Hmm_temporal_bayesian_net.svg.png" width="400px" alt="一个典型的HMM，y为观察值，x为状态值，t为时刻" /></p>
+
+    <p>由于实际问题比马尔可夫链模型所描述的更为复杂，观察到的事件并不是与状态一一对应的，而是通过一组概率分布相联系，这个就是HMM。HMM是一个双重的随机过程，其中之一是马尔可夫链，描述状态转移。另外一个随机过程描述状态和观察值，它并不是与状态一一对应的，需要通过一个随机过程去感知状态的存在及特性。这个就是Hidden的由来。</p>
+
+    <p>具体的一个例子为phone HMM，这是一个语音识别的例子，根据单词的发言可以建立HMM，一个随机的有限自动机，每个状态都产生一个evident或observation。识别出得到的声音特征为观察值evidents，从start到end计算得到概率最大的HMM最终状态即为识别到的单词。</p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/hmm_zpsf0b66b9e.png" width="600px" alt="一个典型的HMM，y为观察值，x为状态值，t为时刻" /></p>
+  </li>
+  <li>
+    <p><strong>贝叶斯网络(Beyesian Network, BN)</strong></p>
+
+    <p>一般是指带有概率信息的有向无环图(directed acyclic graph, DAG)。由两部分组成：</p>
+
+    <ul>
+      <li>图中的节点表示的是随机变量，结点间的连接表示了可能的因果关系。</li>
+      <li>每一个结点都附有与该变量相联系的条件概率分布函数(Conditional Probability Distribution, CPD)，如果变量是离散的，则表现为条件概率表(Conditional Probability Table, CPT)。</li>
+    </ul>
+
+    <p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/SimpleBayesNet.svg/400px-SimpleBayesNet.svg.png" width="400px" alt="一个简单的贝叶斯网络" /></p>
+
+    <p>贝叶斯网络表现的是一个联合概率分布，可以通过Chain Rule来计算$p(X_1,X_2,…,X_n)=\prod{p(X_i|Par_G(X_i))}$。</p>
+
+    <p>贝叶斯网络一个很有用的用途是作为分类器，即通过某对象的先验概率，利用贝叶斯公式计算出其后验概率，即该对象属于某一类的概率，选择具有最大后验概率的类作为该对象所属的类。所谓的先验概率是指在没有观测值的情况下的概率，后验概率是指在加入观测值后的概率。用的比较多的贝叶斯网络分类器有四种: </p>
+  </li>
+  <li>朴素贝叶斯网络(Naive Bayesian Networks, NBN);</li>
+  <li>通用贝叶斯网络(General Bayesian Networks, GBN);</li>
+  <li>增强型朴素贝叶斯网络(Tree-Augmented Naive Bayes, TAN);</li>
+  <li>
+    <p>马尔可夫毯贝叶斯网络(Markov Blanket Bayesian Networks, MBBN)。</p>
+  </li>
+  <li>
+    <p><strong>动态贝叶斯网络(Dynamic Bayesian Networks, DBNs)</strong></p>
+
+    <p>贝叶斯网络只能反映事物的静态特征，也就是在某一个时刻事物不同特征的依赖关系，但在现实生活中，存在着很多的动态随机过程，DBN就是用来对这些过程建模的方法之一。但是动态表示的是一个动态的系统，而系统的结构并不随着时间变化。DBN服从马尔科夫特征：<em>t</em>时刻系统的所有变量的概率分布只与<em>t-1</em>时刻的状态变量概率分布相关。HMM可以当做DBN的一种特殊情况。</p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/DBN_zpse19ad96b.gif" width="400px" alt="车辆位置的DBN" /></p>
+  </li>
+</ul>
+
+<h4 id="section-5">3.2 无向图模型</h4>
+
+<p>无向图概率模型用来建立随机变量间的空间相互关系或只是相互依赖性。典型的代表是马尔科夫随机场和条件随机场。无向连接通常捕捉一对结点之间的互相依赖关系。</p>
+
+<ul>
+  <li>
+    <p><strong>马尔科夫随机场(Markov Random Fields, MRFs)</strong></p>
+
+    <p>MRF也叫马尔科夫网(Markov Network, MN)，MRF是关于一组有马尔科夫性质随机变量<em>X</em>的全联合概率分布模型。一方面MRF可以表示BN无法表示的依赖关系，如循环关系；另外一方面，它不能表示BN所能够表示的推导关系。</p>
+
+    <p>当概率分布为正的时候，被称为Gibbs随机场，因为根据Hammersley–Clifford理论（MN与Gibbs分布的等价性）和局部马尔科夫性质，无向图的概率分布可以被定义为下面的Gibbs公式，即</p>
+  </li>
+</ul>
+
+<script type="math/tex; mode=display">
+\begin{align}
+P(x) = \frac{1}{Z}\prod_C\phi_C(X_C)
+\end{align}
+</script>
+
+<p>其中，$\phi_C(X_C)$是一个关于$X_C$的非负实数函数，表示的是无向图中团的势函数(potential function)。Z是一个归一化常数(Partition Function)，其取值为$\sum_X\phi_C(X_C)$。</p>
+
+<p>MRF可以用来分析物理现象的空间关系或者非因果上下文关系。在图像处理领域，它能够很好地描述相邻的图像像素或者相关特征间的相互依赖关系。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/Isingmodel_zpsbd31e4ba.png" alt="MN的原型，Ising model" width="400px" /></p>
+
+<ul>
+  <li>Pairwise MRF</li>
+</ul>
+
+<p>Pairwise MRF模型是广泛使用的一种MRF模型，其结构形式简单和计算量低。
+  其联合概率分布可以写成如下形式：</p>
+
+<p>$$
+\begin{align}
+P(x) = \frac{1}{Z}\prod_{i,j}\Psi(x_i,y_j)\prod_i\phi(x_i,y_j)
+\end{align}
+$$
+式中，$x$为标注类，$y$为观测值。</p>
+
+<p><img src="http://www.hindawi.com/journals/mpe/2012/814356.fig.004.jpg" alt="Pairwise MRF模型" width="300px" /></p>
+
+<ul>
+  <li><strong>条件随机场(Conditional Random Fields, CRF)</strong></li>
+</ul>
+
+<p>给定输出标识序列X和观察序列Y，CRF通过定义条件概率$p(X|Y)$，而不是联合概率$p(X,Y)$来描述模型。CRF是一个判别模型，在图像分割、形状分析和图像标注等方面优于生成模型MRF。CRF是一种无向图模型，当给定观测值(y)，且能够直接表达类条件概率分布(类变量x)，即</p>
+
+<script type="math/tex; mode=display">
+\begin{align}
+P(x|y) = \frac{1}{Z(y)}\prod_C\phi_C(X_C,y)
+\end{align}
+</script>
+
+<p>其中，$\phi_C(X_C,y)$不仅依赖于集合x，同时也依赖于整个观测值y。</p>
+
+<p>CRF同MRF相比，最主要的优点有：CRF关注于最终的预测问题，避免不必要的观察密度计算；CRF不要求像生成模型中对于观察变量之间条件独立关系的假设。</p>
+
+<p>CRF可以被称为Task-Specify Prediction。因为不像MN，它的判别对象是确定的。例如，对于图像分割来说，它的$X$为输入端，可以是像素值和要处理的特征，targe value为$Y$，也就是每个像素的类别，例如草地，天空等。又如对于文本处理来说，输入端可以为句子中的词，目标则是这些词的标注，例如人名，地名等。</p>
+
+<p>这种情况适用于correlated featureas, 也就是特征之间存在依赖关系；这种情况对于其他模型并不适用，例如从Naive Beysian的模型可以看出，它的特征之间是相互独立的。</p>
+
+<h3 id="inference--learning">4. Inference &amp;&amp; Learning</h3>
+
+<p>Inference和Learning我学习的也是一知半解的，很多东西都是知其然不知其所以然，就不误人子弟了，具体的可以参考<a href="http://freemind.pluskid.org/machine-learning/probabilistic-graphical-model/">pluskid</a>的博文，讲的非常的详细。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[最小生成树]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/zui-xiao-sheng-cheng-shu/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/zui-xiao-sheng-cheng-shu</id>
+    <content type="html"><![CDATA[<p>算法使用的是二叉堆，时间为O(ElgV)。如果V小于E的话，使用Prim更好。</p>
+
+<p>Kruskal算法：</p>
+
+<p>O(ElgE): E&lt;V<sup>2&nbsp;</sup>,所以有 lgE=O(lgV)</p>
+
+<p>集合A是一个森林，加入集合A中的安全边总是图中连接两个不同连通分支的最小权边。</p>
+
+<p>使用不相交集合数据结构。</p>
+
+<p>测试边时，即测试两端点是否在同一棵树上。</p>
+
+<p>若不在则可以对集合进行合并。</p>
+
+<!--more-->
+<p>Prim算法：</p>
+
+<p>集合A形成单棵树，添加集合A的安全边总是连接树与一个不在树中的顶点的最小权边。</p>
+
+<p>使用最小优先队列。优先队列基于Key值，key[v]是所有将v与树中某一顶点相连的边中的最小权值。</p>
+
+<p>一开始除了根节点，其他节点的key为无穷大。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[最短路径算法]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/zui-duan-lu-jing-suan-fa/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/zui-duan-lu-jing-suan-fa</id>
+    <content type="html"><![CDATA[<p><strong>单源最短路径</strong></p>
+
+<p>​1. Dijkstra</p>
+
+<p>Dijkstra算法解决有向图上带权的单源最短路径问题，要求所有边的权值非负。</p>
+
+<p>用到了顶点的最小优先队列，排序关键字为顶点的d值。即开始出了根为0，其他</p>
+
+<p>顶点为正无穷，后来d值根据松弛算法变化。</p>
+
+<p>总计运行时间为O((V+E)lgV)，如果所有顶点都可达的话，则为O(ElgV)。</p>
+
+<p>​2. Bellman-ford</p>
+
+<p>算法用来解决一般，即边的权值可以为负的单源最短路径问题。算法同时也可以检查</p>
+
+<p>是否有从源点可达的负权回路。</p>
+
+<p>算法的运行时间为O(VE)。</p>
+
+<p><!--more--></p>
+
+<p>在Dijkstra算法以及关于有向无回路图的最短路径算法中，对每条边执行一次松弛操作。</p>
+
+<p>在Bellman-Ford算法中，对每条边要执行多次松弛操作。</p>
+
+<p><strong>每对顶点间的最短路径</strong></p>
+
+<p>​1. Floyd-Wallshall</p>
+
+<p>属于动态规划方案，允许存在权值为负的边，但不存在权值为负的回路。</p>
+
+<p>算法考虑最短路径上的中间顶点，自底向上利用中间顶点K值递增的顺序计算权值</p>
+
+<p>利用的递归式为</p>
+
+<p><span style="font-family: 'comic sans ms', sans-serif;"><em>D<sub>i,j,k</sub>&nbsp;= min(D<sub>i,k,k&nbsp;&minus; 1</sub>&nbsp;+&nbsp;D<sub>k,j,k&nbsp;&minus; 1</sub>,D<sub>i,j,k&nbsp;&minus; 1</sub>)　　K &gt;= 1</em></span></p>
+<p><span style="font-family: 'comic sans ms', sans-serif;"><em>　　　= W<sub>i,j</sub>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;　　　　 &nbsp;K = 0</em></span></p>
+<p><span style="font-family: 'comic sans ms', sans-serif;"><em><br /></em>算法运行时间为&Phi;(n<sup>3</sup>)。</span></p>
+
+<p>利用Floyd算法可以计算出有向图的传递闭包，即确定对所有顶点对，图中是否都存在一条</p>
+
+<p>从 i 到 j 的路径。</p>
+
+<p>用相应的逻辑运算或和并来替换 min 和 + 用以增加运算速度。</p>
+
+<p>​2. 稀疏图上的Johnson算法</p>
+
+<p>对于稀疏图改算法在渐进意义上要好于矩阵的重复平方或Floyd-Wallshall算法。</p>
+
+<p>Johnson算法吧Dijkstra算法和Bellman-Ford算法作为其的子程序。</p>
+
+<p>通过重新赋权值保持最短路径和产生非负的权。</p>
+
+<p>若采用斐波那契堆来实现Dijkstra算法的最小优先队列则运算时间是</p>
+
+<p><span>O(V<sup>2</sup>lgV + VE</span>)。更简单的二叉堆实现，则可以得到O(VElgV)的运行时间。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[zip文件乱码解决]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue</id>
+    <content type="html"><![CDATA[<p>在windows上压缩的文件，是以系统默认编码中文来压缩文件。由于zip文件中没有声明其编码，所以linux上的unzip一般以默认编码解压，中文文件名会出现乱码。</p>
+
+<p>虽然2005年就有人把这报告为bug,
+但是info-zip的官方网站没有把自动识别编码列入计划，可能他们不认为这是个问题。Sun对java中存在N年的zip编码问题，采用了同样的处理方式。</p>
+
+<p>1.1 </p>
+
+<p>通过unzip行命令解压，指定字符集</p>
+
+<pre><code>unzip -O CP936 xxx.zip (用GBK, GB18030也可以)
+</code></pre>
+
+<p>有趣的是unzip的manual中并无这个选项的说明, unzip
+–help对这个参数有一行简单的说明。</p>
+
+<p>1.2 </p>
+
+<p>在环境变量中，指定unzip参数，总是以指定的字符集显示和解压文件</p>
+
+<p>解决办法：</p>
+
+<p>引用</p>
+
+<pre><code>vi /etc/environment
+</code></pre>
+
+<p>再最后加入后面的代码即可</p>
+
+<p>UNZIP=”-O CP936”</p>
+
+<p>ZIPINFO=”-O CP936”</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[硝烟中的Scrum和XP]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/xiao-yan-zhong-de-scrumhe-xp/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/xiao-yan-zhong-de-scrumhe-xp</id>
+    <content type="html"><![CDATA[<p><strong>refine from</strong> <em>硝烟中的Scrum和XP–我们如何实施Scrum</em></p>
+
+<hr />
+
+<p>产品的backlog时Scrum的核心，也是一切的起源，从根本上说，它就是一个需求或故事特性等组成的列表，按照重要性的级别进行排序。它里面包含的是客户想要的东西，并用客户的术语加一描述。</p>
+
+<p>backlog的另外一个名称是故事。包括以下字段：</p>
+
+<ul>
+  <li>ID</li>
+  <li>Name：一个简短的描述</li>
+  <li>Importance：100以内打分，分数越高越重要</li>
+  <li>Initial estimate：最小单位为stroy
+point，即为人天。估值无需准确，但是要保证相对的正确性。</li>
+  <li>How to demo：简短的测试规范，先做啥，然后做啥，最后做啥，得到什么结果。</li>
+  <li>Notes：相关信息，解释说明，对其他资料的引用等等，简短。</li>
+</ul>
+
+<p>额外的字段，根据需要：</p>
+
+<ul>
+  <li>Track：当前故事的大致分类（后台系统，优化…）</li>
+  <li>Components：再多个Scrum团队协作的时候很有用，包括数据库，服务器，客户端等组件</li>
+  <li>Requestor：哪个客户活相关人员最先提出的需求，再后续的开发过程中向他反馈</li>
+  <li>Bug tracking ID</li>
+</ul>
+
+<p>产品的backlog应该停留再业务层次上，例如给Events表添加索引，潜在的目标是“提高再后台系统中搜索事件表单的相应速度”，这时需要改写，原先的目标作为一个注释存在。
+<!--more-->
+产品负责人维护backlog，理解每个故事的含义，不需要知道故事的具体实现，但是要知道为什么这个故事会在这里。其他人向负责人申请故事，负责人对它们划分先后次序。</p>
+
+<p>sprint计划会议产生的成果：</p>
+
+<ul>
+  <li>sprint目标</li>
+  <li>团队成员名单（以及他们的投入程度）</li>
+  <li>sprint backlog</li>
+  <li>确定好sprint演示日期</li>
+  <li>确定每日Scrum会议的时间和地点</li>
+</ul>
+
+<p>过程中实践TDD（测试驱动开发），包括开发和提问需求方式…</p>
+
+<p>故事可以分成更小的故事，而小故事又可以分成任务。</p>
+
+<p>一些重要的开发概念：</p>
+
+<ul>
+  <li>结对编程</li>
+  <li>测试驱动开发：Juit/httpnit/JWebUnit，HSQLDB，Jetty，Cobertura，mock</li>
+  <li>增量设计</li>
+  <li>代码集体所有权</li>
+  <li>持续集成：Maven，QuickBuild</li>
+  <li>代码标准</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[ubuntu亮度调节]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/ubuntuliang-du-diao-jie/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/ubuntuliang-du-diao-jie</id>
+    <content type="html"><![CDATA[<p>1.
+sudo gedit /etc/X11/xorg.conf 把
+<br /></p>
+
+<p>Section “Device”<br />
+Identifier “Device0” <br />
+Driver “nvidia” 　　　<br />
+VendorName “NVIDIA Corporation” EndSection <br /></p>
+
+<p>改成</p>
+
+<p>Section “Device”<br />
+Identifier “Device0”<br />
+Driver “nvidia”<br />
+VendorName “NVIDIA Corporation” 　<br />
+Option “RegistryDwords” “<br /> EnableBrightnessControl=1”<br />
+EndSection</p>
+
+<p>然后保存，退出，重启之后，你 就会发现可以调节屏幕背光亮度了</p>
+
+<p>2.
+网上有很多在Ubuntu
+Linux下调节笔记本屏幕亮度的方法，有的调的是亮度但不是背光亮度，有的调背光亮度的方法在我的电脑上不好使……找了半天发现这个方法，适用范围应该比较广（起码在我这里好用）。</p>
+
+<p>首先，进入终端，输入lspci命令，列出各种设备的地址
+<!--more-->
+www.linxidc.com@Ubuntu:~$ lspci</p>
+
+<p>00:00.0 Host bridge: Intel Corporation Mobile 945GM/PM/GMS, 943/940GML
+and 945GT Express Memory Controller Hub (rev 03)</p>
+
+<p>00:02.0 VGA compatible controller: Intel Corporation Mobile 945GM/GMS,
+943/940GML Express Integrated Graphics Controller (rev 03)</p>
+
+<p>00:02.1 Display controller: Intel Corporation Mobile 945GM/GMS/GME,
+943/940GML Express Integrated Graphics Controller (rev 03)</p>
+
+<p>00:1b.0 Audio device: Intel Corporation N10/ICH 7 Family High Definition
+Audio Controller (rev 02)</p>
+
+<p>00:1c.0 PCI bridge: Intel Corporation N10/ICH 7 Family PCI Express Port
+1 (rev 02)</p>
+
+<p>00:1c.1 PCI bridge: Intel Corporation N10/ICH 7 Family PCI Express Port
+2 (rev 02)</p>
+
+<p>……</p>
+
+<p>发现00:02.0是VGA设备，于是我们修改它的属性</p>
+
+<p>sudo setpci -s 00:02.0 F4.B=FF</p>
+
+<p>解释一下：</p>
+
+<p>setpci是修改设备属性的命令</p>
+
+<p>-s表示接下来输入的是设备的地址</p>
+
+<p>00:02.0 VGA设备地址（:.）</p>
+
+<p>F4 要修改的属性的地址，这里应该表示“亮度”</p>
+
+<p>.B
+修改的长度（B应该是字节（Byte），还有W（应该是Word，两个字节）、L（应该是Long，4个字节））</p>
+
+<p>=FF 要修改的值（可以改）</p>
+
+<p>我这里00是最暗，FF是最亮，不同的电脑可能不一样。</p>
+
+<p>比如说我嫌FF太闪眼了，我就可以sudo setpci -s 00:02.0 F4.B=CC，就会暗一些</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[The film-Mona Lisa Smile]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/the-film-mona-lisa-smile/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/the-film-mona-lisa-smile</id>
+    <content type="html"><![CDATA[<p>看了电影《Mona Lisa
+Smile》，这是一部小成本电影。整部影片从头到尾没有任何异样的高潮，没有扣人心弦的打斗或者其他对抗场面，同样也没有任何妙手回春的拍摄手法，但是这部两个小时的电影却牢牢牵住了我的心，时光在刹那间浓缩了电影中的那一年。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/5485107143.jpg" alt="The Mona Lisa Smail" height="450px" /></p>
+
+<!--more-->
+<p>故事是说一个加利福利亚州的艺术教师来到马萨诸塞州的一所女子高中执教一年的故事。独立，自信和聪慧的Katherine
+Ann
+Watson带着50年代未有的自由女权心理来到这所古老封闭，因循守旧的卫斯理女子学院。观念的冲突和陌生的环境并未让Watson退却，故事在Amanda
+Armstrong因在学生中发避孕套而被辞退后引发了高潮。保守的妇德坚贞，封建思想牢牢在学生和父母教师中占据着统治地位，Watson勇于在与学生，校长董事争论中力图宣传自由改革思想。最终Watson无力与社会学校做斗争，不愿屈服选择离开，但是最后她影响了班上的女学生，改变了她们的思想观念，影响了她们的一生，从我们现在的角度来看无疑是让她们脱离了痛苦选择了一条更为宽敞的道路。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/211392045.jpg" alt="The Mona Lisa Smail" height="450px" /></p>
+
+<p>影片的剧情一开始显得比较缓慢，但是到了最后有逐渐加快的趋势，因此似乎显得最后思想的转变过程不够具体和充分。总体上来说还是值得肯定的，影片中刻画人物的形象无疑是成功的，让人印象十分的深刻。整部影片的剧情细分来说很有意思，有点佩服导演，里头的冲突矛盾不断，有主角感情线，学生感情线，学生间冲突线，董事与女主的战争与和平，以及学生与女主学术与社会观念的冲突和理解，这些内容非常的有嚼头，但是总感觉影片中还没有深度的挖掘这些材料，有些是浅尝则止，有些是深入不够显得虎头蛇尾。从人物表演的角度来说，这可能是我见过表演的十分细腻的一部影片，细节部分处理的非常之好，表情变化十分的丰富，特别是女主角Watson，她对人物的感情和肢体表情行为表演的实在是到位，让人叹为观止，这也是上述人物刻画成功的一部分原因。</p>
+
+<p>总结来说一部好的电影有以下几点是必不可少的：吸引人，个性鲜明，有行动力的男女主角，当然对我来说女主角是最重要的，呵呵~~；斗争和和平演绎进行的剧情，最好象巴赫的赋格一般纠结绵延；细腻的画面，格调鲜明风格一致的场景，突出主旨衬托感情的背景音乐。这些条件Mona
+Lisa Smile基本都符合，所以我一看就感觉对它有爱。</p>
+
+<p>最近爱上小成本电影~~</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[十个你可能没用过的Linux命令]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/shi-ge-ni-ke-neng-mei-yong-guo-de-linuxming-ling/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/shi-ge-ni-ke-neng-mei-yong-guo-de-linuxming-ling</id>
+    <content type="html"><![CDATA[<p><em><strong>excerpted</strong> from <a href="http://www.ituring.com.cn/article/1782">图灵社区</a></em></p>
+
+<hr />
+
+<p>如果你是一个硬件系统管理员或者Linux工程师，你可能会记得大多数Linux命令行技巧。下面的这些Linux命令行技巧通常不被Linux用户所使用。</p>
+
+<p><strong>1.使用<em>pgrep</em>快速查找一个PID</strong></p>
+
+<p><strong><em>pgrep</em></strong>遍历目前正在运行的进程然后列出符合查找规则的进程ID（PID）。</p>
+
+<pre><code>pgrep ssh</code></pre>
+
+<p>这条命令会列出所有与ssh有关的进程。</p>
+
+<p><strong>2.执行上次执行过的命令</strong></p>
+
+<p>这个标题有些绕口，但是它是名副其实的。</p>
+
+<pre><code>!!</code></pre>
+<!--more-->
+<p>这会执行你上一次在命令行中执行过的命令。</p>
+
+<p><strong>3.执行最近一次以XX开头的命令</strong></p>
+
+<p>如果你想要从命令行历史中执行一个s开头的命令时，你可以使用如下命令：</p>
+
+<pre><code>!s</code></pre>
+
+<p>它会执行最近一次在命令行中执行且以字母s开头的命令。</p>
+
+<p><strong>4.反复执行一个命令并在屏幕上输出</strong></p>
+
+<p><strong><em>watch</em></strong>会反复运行一个命令，并在屏幕上打印输出。它可以让你实时的观察程序的输出变化。默认情况下，程序每2秒运行一次。<strong><em>watch</em></strong>命令与<strong><em>tail</em></strong>命令很相似。</p>
+
+<pre><code>watch -d ls -l</code></pre>
+
+<p>这条命令会监视当前目录的所有文件，并且高亮文件所发生的改变。</p>
+
+<p><strong>5.在VI/VIM中快速保存</strong></p>
+
+<p>如果你很匆忙，你可以通过<strong><em>【SHIFT + zz】</em></strong> 快速从vi的插入模式中退出。</p>
+
+<p><strong>6.快速登出终端</strong> 你可以快速使用<strong><em>【CTRL+D】</em></strong>快速登出终端。</p>
+
+<p><strong>7.返回你上一个所在目录</strong></p>
+
+<p>你可以使用如下命令返回你上一次所在的目录：</p>
+
+<pre><code>cd -</code></pre>
+
+<p><strong>8.聪明地创建父目录</strong></p>
+
+<p>如下命令可以帮助你创建所有你需要的目录，即便是他们还不存在。为什么要浪费时间做一些愚蠢的事情比如：<strong><em>mkdir
+make ; cd make ; mkdir all ; cd all ; mkdir of ; cd of
+…</em></strong> 你说到点子上了，使用<strong><em>mkdir -p</em></strong>！</p>
+
+<pre><code>mkdir -p /home/adam/make/all/of/these/directories/</code></pre>
+
+<p><strong>9.删除一整行</strong></p>
+
+<p>如果你已经输入一长串的命令，但是你又不在需要他们了，那么你可以使用如下命令直接删除一整行：</p>
+
+<pre><code>CTRL+U</code></pre>
+
+<p><strong>10.设置文件的时间戳</strong></p>
+
+<p>下面这条命令会把文件的时间戳设置成2008-01-01
+8:00。日期格式是(YYMMDDhhmm)</p>
+
+<pre><code>touch -c -t 0801010800 filename.c</code></pre>
+
+<p>你还能想到哪些为大多数人所指的Linux命令？</p>
+
+<p><strong>【摘自回复】</strong></p>
+
+<p><strong>访问上一个命令的最后一个参数</strong> 如果你之前执行了这样一条命令 cp
+assignment.htm /home/phill/reports/2008/
+然后你可以冲 <strong>_$</strong> 访问刚才那条命令最后一个参数”<em>/home/phill/reports/2008/</em>“，例如：</p>
+
+<pre><code>cd $_</code></pre>
+
+<p><strong>清除光标右边的内容</strong> 上文有一个小错误，<strong><em>【Ctrl +
+U】</em></strong>并不是删除一整行，而是删除光标左边的内容，如果光标停留在行首，那么<strong><em>【Ctrl
++ U】</em></strong>将无任何作用，这个时候，需要删除光标右边内容：</p>
+
+<pre><code>ctrl-k</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[少年派]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/shao-nian-pai/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/shao-nian-pai</id>
+    <content type="html"><![CDATA[<h3 id="section">徐子东：他人就是老虎</h3>
+
+<p>老虎三个阶段：</p>
+
+<ol>
+  <li>力量比你大，你得自卫;反过来，你的力量比较强大，你就是老虎</li>
+  <li>自卫后，利用特别的情况，给他好处，给他恩惠，指挥他，利用它</li>
+  <li>产生幻觉，你们是同舟共济，共同面对困难</li>
+</ol>
+
+<p>点睛：</p>
+
+<ul>
+  <li>瘦骨凛丁的老虎头也不回的进入森林</li>
+  <li>pi父亲一开始所说的：你在动物眼里看到的所有的同情，友爱，善良都是你的倒影</li>
+</ul>
+
+<p><!--more--></p>
+
+<h3 id="section-1">梁文道：神，人，动物三角平衡</h3>
+
+<p>人与动物在船上相处，是两点，无法达到平衡状态，所以需要寻找第三点，超自然的第三点——上帝。
+但是那个状态不是每个人都能感觉的到，追求的到，所以透过人和动物的相处，我们去求那未知第三点。</p>
+
+<p>对于某种精神倾向的探讨。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[python特殊语法：filter、map、reduce、lambda [转]]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan</id>
+    <content type="html"><![CDATA[<p><i><strong>from</strong> <a href="http://www.cnblogs.com/longdouhzt/archive/2012/05/19/2508844.html">http://www.cnblogs.com/longdouhzt/archive/2012/05/19/2508844.html</a></i></p>
+
+<hr />
+
+<p>Python内置了一些非常有趣但非常有用的函数，充分体现了Python的语言魅力！</p>
+
+<p><strong>filter(function,
+sequence)</strong> ：对sequence中的item依次执行function(item)，将执行结果为True的item组成一个List/String/Tuple（取决于sequence的类型）返回：</p>
+
+<p>&gt;&gt;&gt; def f(x): return x % 2 != 0 and x % 3 != 0 </p>
+
+<p>&gt;&gt;&gt; filter(f, range(2, 25)) 
+[5, 7, 11, 13, 17, 19, 23]</p>
+
+<p>&gt;&gt;&gt; def f(x): return x != ‘a’ </p>
+
+<p>&gt;&gt;&gt; filter(f, “abcdef”) </p>
+
+<p>‘bcdef’</p>
+
+<p><strong>map(function,
+sequence)</strong> ：对sequence中的item依次执行function(item)，见执行结果组成一个List返回：</p>
+
+<p>&gt;&gt;&gt; def cube(x): return x<em>x</em>x </p>
+
+<p>&gt;&gt;&gt; map(cube, range(1, 11)) </p>
+
+<p>[1, 8, 27, 64, 125, 216, 343, 512, 729, 1000]</p>
+
+<p>&gt;&gt;&gt; def cube(x) : return x + x </p>
+
+<p>… </p>
+
+<p>&gt;&gt;&gt; map(cube , “abcde”) </p>
+
+<p>[‘aa’, ‘bb’, ‘cc’, ‘dd’, ‘ee’]</p>
+
+<p>另外map也支持多个sequence，这就要求function也支持相应数量的参数输入：
+&gt;&gt;&gt; def add(x, y): return x+y </p>
+
+<p>&gt;&gt;&gt; map(add, range(8), range(8))</p>
+
+<p>[0, 2, 4, 6, 8, 10, 12, 14]</p>
+
+<!--more-->
+
+<p><strong>reduce(function, sequence,
+starting_value)</strong>：对sequence中的item顺序迭代调用function，如果有starting_value，还可以作为初始值调用，例如可以用来对List求和：</p>
+
+<p>&gt;&gt;&gt; def add(x,y): return x + y </p>
+
+<p>&gt;&gt;&gt; reduce(add, range(1, 11)) </p>
+
+<p>55 （注：1+2+3+4+5+6+7+8+9+10）</p>
+
+<p>&gt;&gt;&gt; reduce(add, range(1, 11), 20) </p>
+
+<p>75 （注：1+2+3+4+5+6+7+8+9+10+20）</p>
+
+<p><strong>lambda</strong>：这是Python支持一种有趣的语法，它允许你快速定义单行的最小函数，类似与C语言中的宏，这些叫做lambda的函数，是从LISP借用来的，可以用在任何需要函数的地方： </p>
+
+<p>&gt;&gt;&gt; g = lambda x: x * 2 </p>
+
+<p>&gt;&gt;&gt; g(3) </p>
+
+<p>6 </p>
+
+<p>&gt;&gt;&gt; (lambda x: x * 2)(3) </p>
+
+<p>6</p>
+
+<p>我们也可以<strong>把filter map reduce
+和lambda结合起来</strong>用，函数就可以简单的写成一行。</p>
+
+<p>例如</p>
+
+<p>kmpathes = filter(lambda kmpath: kmpath,                <br />
+map(lambda kmpath: string.strip(kmpath),
+string.split(l, ‘:’)))   </p>
+
+<p>看起来麻烦，其实就像用语言来描述问题一样，非常优雅。
+对 l
+中的所有元素以’:’做分割，得出一个列表。对这个列表的每一个元素做字符串strip，形成一个列表。对这个列表的每一个元素做直接返回操作(这个地方可以加上过滤条件限制)，最终获得一个字符串被’:’分割的列表，列表中的每一个字符串都做了strip，并可以对特殊字符串过滤。</p>
+
+<p>[转] <a href="http://hi.baidu.com/black/item/307001d18715fc322a35c747">http://hi.baidu.com/black/item/307001d18715fc322a35c747</a></p>
+
+<hr />
+
+<p><strong>lambda表达式</strong>返回一个函数对象</p>
+
+<p>例子：</p>
+
+<pre><code>func = lambda x,y:x+y
+</code></pre>
+
+<p>func相当于下面这个函数</p>
+
+<pre><code>def func(x,y):
+    return x+y
+</code></pre>
+
+<p>注意def是语句而lambda是表达式</p>
+
+<p>下面这种情况下就只能用lambda而不能用def</p>
+
+<pre><code>[(lambda x:x*x)(x) for x in range(1,11)]
+</code></pre>
+
+<p>map，reduce，filter中的function都可以用lambda表达式来生成！</p>
+
+<p><strong>map(function,sequence)</strong></p>
+
+<p>把sequence中的值当参数逐个传给function，返回一个包含函数执行结果的list。</p>
+
+<p>如果function有两个参数，即
+map(function,sequence1,sequence2)。</p>
+
+<p>例子：</p>
+
+<p>求1<em>1,2</em>2,3<em>3,4</em>4</p>
+
+<pre><code>map(lambda x:x*x,range(1,5))
+</code></pre>
+
+<p>返回值是[1,4,9,16]</p>
+
+<p><strong>reduce(function,sequence)</strong></p>
+
+<p>function接收的参数个数只能为2</p>
+
+<p>先把sequence中第一个值和第二个值当参数传给function，再把function的返回值和第三个值当参数传给</p>
+
+<p>function，然后只返回一个结果。</p>
+
+<p>例子：</p>
+
+<p>求1到10的累加</p>
+
+<pre><code>reduce(lambda x,y:x+y,range(1,11))
+</code></pre>
+
+<p>返回值是55。</p>
+
+<p><strong>filter(function,sequence)</strong></p>
+
+<p>function的返回值只能是True或False</p>
+
+<p>把sequence中的值逐个当参数传给function，如果function(x)的返回值是True，就把x加到filter的返回值里面。一般来说filter的返回值是list，特殊情况如sequence是string或tuple，则返回值按照sequence的类型。</p>
+
+<p>例子：</p>
+
+<p>找出1到10之间的奇数</p>
+
+<pre><code>filter(lambda x:x%2!=0,range(1,11))
+</code></pre>
+
+<p>返回值</p>
+
+<p>[1,3,5,7,9]</p>
+
+<p>如果sequence是一个string</p>
+
+<pre><code>filter(lambda x:len(x)!=0,'hello')
+</code></pre>
+
+<p>返回’hello’</p>
+
+<pre><code>filter(lambda x:len(x)==0,'hello')
+</code></pre>
+
+<p>返回’’</p>
+
+<p>[转] <a href="http://blog.csdn.net/myzhan/article/details/7269471">http://blog.csdn.net/myzhan/article/details/7269471</a></p>
+
+]]></content>
+  </entry>
+  
+</feed>

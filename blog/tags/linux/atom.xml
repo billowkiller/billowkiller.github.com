@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: linux | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/linux/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2014-07-17T22:06:20+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Signal and fork]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/06/28/signal-and-forkmarkdown/"/>
+    <updated>2014-06-28T04:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/06/28/signal-and-forkmarkdown</id>
+    <content type="html"><![CDATA[<p>当线程调用fork时，就为子进程创建了整个进程地址空间的副本。子进程与父进程是完全不同的进程，只要两者都没有对内存作出改动，父进程和子进程之间还可以共享内存副本。注意一下几个情况：</p>
+
+<ol>
+  <li>子进程通过继承整个地址空间的副本，<strong>从父进程那里继承了所有互斥量、读写锁和条件变量的状态</strong>。也就是说，如果它在父进程中被锁住，则它在子进程中也是被锁住的。</li>
+  <li>只有调用fork()的线程被复制到子进程（子进程中线程的ID），如果子进程中包含占有锁的线程的副本，那么子进程就没有办法知道它占有了那些锁并且需要释放那些锁，<strong>容易造成死锁</strong>。</li>
+  <li>thread-specific data的销毁函数和清除函数都不会被调用。在多线程中调用fork()可能会引起内存泄露。比如在其他线程中创建的thread-specific data，在子进程中将没有指针来存取这些数据，<strong>造成内存泄露</strong>。</li>
+</ol>
+
+<p>因为以上这些问题，<strong>在线程中调用fork()的后，我们通常都会在子进程中调用exec()</strong>。因为exec()能让父进程中的所有互斥量，条件变量（pthread objects）在子进程中统统消失（用新数据覆盖所有的内存）。对于那些要使用fork()但不使用exec()的程序，pthread API提供了一个新的函数</p>
+
+<pre><code>pthread_atfor(void (*prepare_func)(void), void(*parent_func)(void), void (*child_func)(void))
+</code></pre>
+
+<p>prepare_func在父进程调用fork之前调用，parent_func在fork执行后在父进程内被调用，child_func在fork执行后子进程内被调用。除非你打算很快的exec一个新程序，否则应该避免在一个多线程的程序中使用fork。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Signal and Thread]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/06/28/signal-and-thread/"/>
+    <updated>2014-06-28T03:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/06/28/signal-and-thread</id>
+    <content type="html"><![CDATA[<p>类UNIX信号以前是专为进程设计的，它比线程的出现早了很多年。当线程模型出现后，专家们试图也在线程上实现信号，这导致了一个问题：即使是在基于进程的编程模式中，信号的处理也可能是很复杂的，因为它打断了正在运行的thread of control， 在signal handler中只能调用可重入函数，修改全局变量的类型必须是<code>sig_atomic_t</code>类型，防止内存访问优化； 而把线程引入编程范型，就使信号的处理变得更加复杂。</p>
+
+<p><strong>避免信号和线程一起使用是明智的选择。</strong>但是，将他们分开又是不可能或不实际的。只要有可能的话，仅仅在主线程内使用<code>pthread_sigmask()</code>来屏蔽信号，然后同步地在专用线程中使用<code>sigwait()</code>来处理信号。</p>
+
+<h2 id="section">信号模型映射到线程模型</h2>
+
+<p>为了理解信号模型是怎样映射到线程模型的，我们需要知道信号模型的哪些方面是影响进程层面的（process-wide），哪些方面只会影响某个线程的。下面列出几点:</p>
+
+<ol>
+  <li>signal actions 是process-wide。如果一个没有处理的信号的默认动作是停止SIGSTOP或终止SIGKILL(该动作是让整个进程停止或终止，而不是只针对某个线程)，那么不管这个信号是发送给哪个线程，整个进程都会停止或终止。</li>
+  <li>signal dispositions信号部署是process-wide。每个线程都有自己的信号屏蔽字，但是<strong>信号的处理是进程中所有线程共享的</strong>。这意味着尽管每个线程可以阻止某些信号，但当线程修改了与某个信号相关的处理行为之后，所有的线程都必须共享这个处理行为的改变。</li>
+  <li>信号通常是被发送到<strong>任意一个线程</strong>，为了保证不会在多线程进程中一个信号多次被执行。但是以下几种情况是传递到<strong>单个线程</strong>的：
+    <ul>
+      <li>信号与硬件故障或计时器超时相关。</li>
+      <li>当线程尝试向一个broken pipe写数据时，会产生一个SIGPIPE。</li>
+      <li>使用<code>pthread_kill()</code>或者<code>pthread_sigqueue()</code>。这些函数允许一个线程发送信号到同一进程的另一个线程。</li>
+    </ul>
+  </li>
+  <li><strong>信号掩码(signal mask)是线程私用的。</strong>在多线程的进程中，不存在process-wide的信号掩码。线程可以使用<code>pthread_sigmask()</code>来独立的屏蔽某些信号。通过这种方法，程序员可以控制那些线程响应那些信号。当线程被创建时，它将继承创建它的线程的信号掩码。</li>
+  <li><strong>内核为每个线程和进程分别维护了一个未决信号的表</strong>。当使用<code>sigpending()</code>时，该函数返回的是整个进程未决信号表和调用该函数的线程的未决信号表的并集。当新线程被创建时，线程的pending signals被设置为空。当线程A阻塞某个信号S后，发送到A中的信号S将会被挂起，直到线程取消了对信号S的阻塞。</li>
+  <li>如果一个信号处理函数打断了<code>pthread_mutex_lock()</code>，该<strong>函数会自动的重新执行</strong>。如果信号处理函数打断了<code>pthread_cond_wait()</code>，该函数要么自动重新自行（linux是这样实现的），或者返回0（这时应用要检查返回值，判断是否为假唤醒）。</li>
+</ol>
+
+<h2 id="section-1">异步信号的处理</h2>
+
+<p>一个函数要么是可重入的（reentrant）,要么是不能被信号处理函数打断的，我们把这种函数叫做是<code>async-signal-safe</code>的。调用非<code>async-signal-safe</code>的函数是危险的，比如，考虑在线程A中，我们调用<code>malloc()</code>来进行内存分配，<code>malloc()</code>刚用互斥量锁住了全局链表，这是异步信号到达，在信号处理函数中也调用<code>malloc()</code>，这时该函数会阻塞在互斥量上，形成死锁（这个例子在单线程的进程中也会出现）。Pthread API不是<code>async-signal-safe</code>的，也就是说在信号处理函数中不要使用pthread相关的函数。</p>
+
+<p><strong>解决这个问题</strong>的最好办法是，在不打断正常程序的前提下，把所有的异步信号都在同一处处理。在单线程程序中，这是做不到的，因为所有发送的信号都会打断程序。而在多线程程序中，我们可以<u>单独创建一个线程来接受信号，处理需要的信号，而不会打断其他线程的工作。</u></p>
+
+<p>上面举的这个例子中还有一点没说到，就是<strong>信号处理函数也会被其他信号所打断</strong>。那我们怎么处理这个问题呢？<u>在处理信号之前，对所有的异步信号进行阻塞，等工作处理完毕后，再恢复阻塞的信号。</u>这个工作就靠下面这个函数执行：</p>
+
+<pre><code>int sigwait(const sigset_t *set, int *sig)
+</code></pre>
+
+<ul>
+  <li><code>sigwait()</code>的好处在于它可以简化信号处理，允许把异步产生的信号用同步方式处理。</li>
+  <li>调用<code>sigwait()</code>等待的信号必须在调用线程中屏蔽，通常我们在所有线程中都会屏蔽。</li>
+  <li>信号仅仅被交付一次。如果两个线程在<code>sigwait()</code>上阻塞（等待同一个信号），只有一个线程（不确定的线程）将收到送给进程的信号。这意味着不能让两个独立的子系统使用<code>sigwait()</code>来捕获相同的信号。信号捕获<code>sigaction</code>建立的信号处理程序和<code>sigwait</code>也同样只有一个可以执行。</li>
+</ul>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Signal status and lifecycle]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/06/28/signal-status-and-lifecycle/"/>
+    <updated>2014-06-28T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/06/28/signal-status-and-lifecycle</id>
+    <content type="html"><![CDATA[<p><i><strong>modified from</strong> <a href="http://blog.csdn.net/sunyubo458/article/details/4484957">http://blog.csdn.net/sunyubo458/article/details/4484957</a></i></p>
+
+<p><em>Lost original source</em></p>
+
+<hr />
+
+<h3 id="section">信号状态</h3>
+
+<p>信号的”未决“是一种状态，指的是从信号的产生到信号被处理前的这一段时间；信号的”阻塞“是一个开关动作，指的是阻止信号被处理，但不是阻止信号产生。 </p>
+
+<p>每个进程都有一个信号屏蔽字，它规定了当前要阻塞地送到该进程的信号集，对于每种可能的信号，该屏蔽字中都有一位与之对应。对于某种信号，若其对应为已设定，则它当前是被阻塞的。进程可以调用<code>sigprocmask</code>来检测和更改当前信号屏蔽字。</p>
+
+<p>APUE例题在<code>sleep</code>前用<code>sigprocmask</code>阻塞了退出信号，然后<code>sleep</code>,然后在<code>sleep</code>的过程中产生一个退出信号，但是此时退出信号被阻塞过，（中文的”阻塞”在这里容易被误解为一种状态，实际上是一种类似于开关的动作，所以说“被阻塞过”，而不是“被阻塞”）所以处于“未决”状态，在 <code>sleep</code>后又用<code>sigprocmask</code>关掉退出信号的阻塞开关，因为之前产生的退出信号一直处于未决状态，当关上阻塞开关后，马上退出“未决”状态，得到处理，这一切发生在<code>sigprocmask</code>返回之前。 </p>
+
+<h3 id="section-1">信号生命周期</h3>
+
+<p>对于一个完整的信号生命周期(从信号发送到相应的处理函数执行完毕)来说，可以分为三个重要的阶段，这三个阶段由四个重要事件来刻画：1.信号诞生；2. 信号在进程中注册完毕；3.信号在进程中的注销完毕；4.信号处理函数执行完毕。相邻两个事件的时间间隔构成信号生命周期的一个阶段。</p>
+
+<p>下面阐述四个事件的实际意义：</p>
+
+<ol>
+  <li>
+    <p>信号”诞生”；</p>
+
+    <p>信号的诞生指的是触发信号的事件发生（如检测到硬件异常、定时器超时以及调用信号发送函数kill()或sigqueue()等）。 </p>
+  </li>
+  <li>
+    <p>信号在目标进程中”注册”；</p>
+
+    <p>进程的<code>task_struct</code>结构中有关于本进程中未决信号的数据成员：</p>
+
+    <pre><code> struct sigpending pending;
+ struct sigpending
+ {
+     struct sigqueue *head, **tail;
+     sigset_t signal;
+ };
+</code></pre>
+
+    <p>第一、第二个成员分别指向一个<code>sigqueue</code>类型的结构链（称之为”未决信号信息链”）的首尾，第三个成员是进程中所有未决信号集，信息链中的每个sigqueue结构体刻画一个特定信号所携带的信息，并指向下一个sigqueue结构: </p>
+
+    <pre><code> struct sigqueue
+ {
+     struct sigqueue *next;
+     siginfo_t info;
+ };
+</code></pre>
+
+    <p>信号在进程中注册指的就是信号值加入到进程的未决信号集中（<code>sigpending</code>结构的第二个成员<code>sigset_t signal</code>），并且信号所携带的信息被保留到未决信号信息链的某个<code>sigqueue</code>结构中。只要信号在进程的未决信号集中，表明进程已经知道这些信号的存在，但还没来得及处理，或者该信号被进程阻塞。 </p>
+
+    <p><strong>注：</strong> 
+ 当一个实时信号发送给一个进程时，不管该信号是否已经在进程中注册，都会被再注册一次，因此，信号不会丢失，因此，实时信号又叫做”可靠信号”。这意味着同一个实时信号可以在同一个进程的未决信号信息链中占有多个<code>sigqueue</code>结构（进程每收到一个实时信号，都会为它分配一个结构来登记该信号信息，并把该结构添加在未决信号链尾，即所有诞生的实时信号都会在目标进程中注册）； </p>
+
+    <p>当一个非实时信号发送给一个进程时，如果该信号已经在进程中注册，则该信号将被丢弃，造成信号丢失。因此，非实时信号又叫做”不可靠信号”。这意味着同一个非实时信号在进程的未决信号信息链中，至多占有一个<code>sigqueue</code>结构（一个非实时信号诞生后，（1）、如果发现相同的信号已经在目标结构中注册，则不再注册，对于进程来说，相当于不知道本次信号发生，信号丢失；（2）、如果进程的未决信号中没有相同信号，则在进程中注册自己）。 </p>
+  </li>
+  <li>
+    <p>信号在进程中的注销。</p>
+
+    <p>在目标进程执行过程中，会检测是否有信号等待处理（每次从系统空间返回到用户空间时都做这样的检查）。如果存在未决信号等待处理且该信号没有被进程阻塞，则在运行相应的信号处理函数前，进程会把信号在未决信号链中占有的结构卸掉。是否将信号从进程未决信号集中删除对于实时与非实时信号是不同的。对于非实时信号来说，由于在未决信号信息链中最多只占用一个sigqueue结构，因此该结构被释放后，应该把信号在进程未决信号集中删除（信号注销完毕）；而对于实时信号来说，可能在未决信号信息链中占用多个sigqueue结构，因此应该针对占用gqueue结构的数目区别对待：如果只占用一个sigqueue结构（进程只收到该信号一次），则应该把信号在进程的未决信号集中删除（信号注销完毕）。否则，不在进程的未决信号集中删除该信号（信号注销完毕）。进程在执行信号相应处理函数之前，首先要把信号在进程中注销。 </p>
+  </li>
+  <li>
+    <p>信号生命终止。</p>
+
+    <p>进程注销信号后，立即执行相应的信号处理函数，执行完毕后，信号的本次发送对进程的影响彻底结束。 </p>
+  </li>
+</ol>
+
+<p><strong>注：</strong> 
+1）信号注册与否，与发送信号的函数（如kill()或sigqueue()等）以及信号安装函数（signal()及sigaction()）无关，只与信号值有关（信号值小于SIGRTMIN的信号最多只注册一次，信号值在SIGRTMIN及SIGRTMAX之间的信号，只要被进程接收到就被注册）。 
+2）在信号被注销到相应的信号处理函数执行完毕这段时间内，如果进程又收到同一信号多次，则对实时信号来说，每一次都会在进程中注册；而对于非实时信号来说，无论收到多少次信号，都会视为只收到一个信号，只在进程中注册一次。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[十个你可能没用过的Linux命令]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/shi-ge-ni-ke-neng-mei-yong-guo-de-linuxming-ling/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/shi-ge-ni-ke-neng-mei-yong-guo-de-linuxming-ling</id>
+    <content type="html"><![CDATA[<p><em><strong>excerpted</strong> from <a href="http://www.ituring.com.cn/article/1782">图灵社区</a></em></p>
+
+<hr />
+
+<p>如果你是一个硬件系统管理员或者Linux工程师，你可能会记得大多数Linux命令行技巧。下面的这些Linux命令行技巧通常不被Linux用户所使用。</p>
+
+<p><strong>1.使用<em>pgrep</em>快速查找一个PID</strong></p>
+
+<p><strong><em>pgrep</em></strong>遍历目前正在运行的进程然后列出符合查找规则的进程ID（PID）。</p>
+
+<pre><code>pgrep ssh</code></pre>
+
+<p>这条命令会列出所有与ssh有关的进程。</p>
+
+<p><strong>2.执行上次执行过的命令</strong></p>
+
+<p>这个标题有些绕口，但是它是名副其实的。</p>
+
+<pre><code>!!</code></pre>
+<!--more-->
+<p>这会执行你上一次在命令行中执行过的命令。</p>
+
+<p><strong>3.执行最近一次以XX开头的命令</strong></p>
+
+<p>如果你想要从命令行历史中执行一个s开头的命令时，你可以使用如下命令：</p>
+
+<pre><code>!s</code></pre>
+
+<p>它会执行最近一次在命令行中执行且以字母s开头的命令。</p>
+
+<p><strong>4.反复执行一个命令并在屏幕上输出</strong></p>
+
+<p><strong><em>watch</em></strong>会反复运行一个命令，并在屏幕上打印输出。它可以让你实时的观察程序的输出变化。默认情况下，程序每2秒运行一次。<strong><em>watch</em></strong>命令与<strong><em>tail</em></strong>命令很相似。</p>
+
+<pre><code>watch -d ls -l</code></pre>
+
+<p>这条命令会监视当前目录的所有文件，并且高亮文件所发生的改变。</p>
+
+<p><strong>5.在VI/VIM中快速保存</strong></p>
+
+<p>如果你很匆忙，你可以通过<strong><em>【SHIFT + zz】</em></strong> 快速从vi的插入模式中退出。</p>
+
+<p><strong>6.快速登出终端</strong> 你可以快速使用<strong><em>【CTRL+D】</em></strong>快速登出终端。</p>
+
+<p><strong>7.返回你上一个所在目录</strong></p>
+
+<p>你可以使用如下命令返回你上一次所在的目录：</p>
+
+<pre><code>cd -</code></pre>
+
+<p><strong>8.聪明地创建父目录</strong></p>
+
+<p>如下命令可以帮助你创建所有你需要的目录，即便是他们还不存在。为什么要浪费时间做一些愚蠢的事情比如：<strong><em>mkdir
+make ; cd make ; mkdir all ; cd all ; mkdir of ; cd of
+…</em></strong> 你说到点子上了，使用<strong><em>mkdir -p</em></strong>！</p>
+
+<pre><code>mkdir -p /home/adam/make/all/of/these/directories/</code></pre>
+
+<p><strong>9.删除一整行</strong></p>
+
+<p>如果你已经输入一长串的命令，但是你又不在需要他们了，那么你可以使用如下命令直接删除一整行：</p>
+
+<pre><code>CTRL+U</code></pre>
+
+<p><strong>10.设置文件的时间戳</strong></p>
+
+<p>下面这条命令会把文件的时间戳设置成2008-01-01
+8:00。日期格式是(YYMMDDhhmm)</p>
+
+<pre><code>touch -c -t 0801010800 filename.c</code></pre>
+
+<p>你还能想到哪些为大多数人所指的Linux命令？</p>
+
+<p><strong>【摘自回复】</strong></p>
+
+<p><strong>访问上一个命令的最后一个参数</strong> 如果你之前执行了这样一条命令 cp
+assignment.htm /home/phill/reports/2008/
+然后你可以冲 <strong>_$</strong> 访问刚才那条命令最后一个参数”<em>/home/phill/reports/2008/</em>“，例如：</p>
+
+<pre><code>cd $_</code></pre>
+
+<p><strong>清除光标右边的内容</strong> 上文有一个小错误，<strong><em>【Ctrl +
+U】</em></strong>并不是删除一整行，而是删除光标左边的内容，如果光标停留在行首，那么<strong><em>【Ctrl
++ U】</em></strong>将无任何作用，这个时候，需要删除光标右边内容：</p>
+
+<pre><code>ctrl-k</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[linux下双网卡配置]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/linuxxia-shuang-wang-qia-pei-zhi/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/linuxxia-shuang-wang-qia-pei-zhi</id>
+    <content type="html"><![CDATA[<p><strong>需求</strong>： 一台PC1拥有双网卡，另外一台PC2需要通过这台pc上网。</p>
+
+<p><img src="http://images.cnblogs.com/cnblogs_com/billowkiller/447098/r_ac345982b2b7d0a207325429cbef76094a369a8e.jpg" alt="网络拓扑图" /></p>
+
+<p><strong>配置过程</strong>：</p>
+
+<p>首先需要配置pc1的两个网卡信息以及pc2的网卡信息。这个比较简单，接下里需要配置pc1中的静态路由。</p>
+
+<p>文件ipt.save表示静态路由表的修改文件。</p>
+
+<pre><code># Generated by iptables-save v1.4.2 on Wed Nov 16 15:04:23 2011
+ *filter
+ :INPUT ACCEPT [203:29797]
+ :FORWARD ACCEPT [0:0]
+ :OUTPUT ACCEPT [83:10885]
+ COMMIT
+ # Completed on Wed Nov 16 15:04:23 2011
+ # Generated by iptables-save v1.4.2 on Wed Nov 16 15:04:23 2011
+ *nat
+ :PREROUTING ACCEPT [82:12935]
+ :POSTROUTING ACCEPT [25:1724]
+ :OUTPUT ACCEPT [25:1724]
+ -A POSTROUTING -s 10.0.0.0/8 ! -d 10.0.0.0/8 -j MASQUERADE 
+ COMMIT
+ # s-&gt;source !d-&gt;not distination-&gt;not in the same subset
+ # Completed on Wed Nov 16 15:04:23 2011
+</code></pre>
+
+<p>进入root权限后，执行命令</p>
+
+<pre><code>iptables-restore /home/angel/net_scripts/ipt.save
+</code></pre>
+
+<p>这样就是修改了静态路由表，但还需要将转发开关打开，需要命令如下</p>
+
+<pre><code>echo '1' &gt; /proc/sys/net/ipv4/ip_forward
+</code></pre>
+
+<p>这样修改之后pc2就可以通过pc1上网了。
+<!--more-->
+但是重启后发现<strong>两个问题</strong>：</p>
+
+<ul>
+  <li>linux下如果有两个网卡eth0和eth1，系统启动时候会先启动eth0，后启动eth1，这样造成eth0的信息被eth1覆盖。</li>
+  <li>以上的两个命令并不是永久的，重启后失效。</li>
+</ul>
+
+<p>第一个问题的解决方案是修改/etc/network/interfaces
+文件，修改网卡接口的信息，修改后的文件如下：</p>
+
+<pre><code># interfaces(5) file used by ifup(8) and ifdown(8)
+ auto lo
+ iface lo inet loopback
+ 
+ auto eth1
+ iface eth1 inet dhcp
+ 
+ auto eth0
+ iface eth0 inet static
+ address 10.0.0.1
+ netmask 255.0.0.0
+ broadcast 10.255.255.255
+</code></pre>
+
+<p>需要重启生效，也可以使用命令</p>
+
+<pre><code>sudo /etc/init.d/networking restart
+</code></pre>
+
+<p>第二个问题可以写一个简单的脚本iptable.sh来实现，每次开机启动自动执行脚本：</p>
+
+<pre><code>iptables-restore /home/angel/net_scripts/ipt.save
+ echo '1' &gt; /proc/sys/net/ipv4/ip_forward
+</code></pre>
+
+<p>将脚本放在任意的位置，如下放入home文件夹下，修改/etc/rc.local文件：</p>
+
+<pre><code>#!/bin/sh -e
+ #
+ # rc.local
+ #
+ # This script is executed at the end of each multiuser runlevel.
+ # Make sure that the script will "exit 0" on success or any other
+ # value on error.
+ #
+ # In order to enable or disable this script just change the execution
+ # bits.
+ #
+ # By default this script does nothing.
+ sh /home/bk/iptable.sh
+ exit 0
+</code></pre>
+
+<p>这样每次启动都会调用脚本，并且使用root权限。</p>
+]]></content>
+  </entry>
+  
+</feed>
