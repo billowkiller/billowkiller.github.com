@@ -105,6 +105,57 @@
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-12T02:18:00+08:00" pubdate data-updated="true">Jul 12<span>th</span>, 2014</time>
+        
+           | <a href="/blog/2014/07/12/c%2B%2B-string-copy-on-write/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/07/12/c%2B%2B-string-copy-on-write/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/12/c%2B%2B-string-copy-on-write/">C++ String Copy-on-write</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>不同版本的C++ string实现时不同的，sizeof(string)得出来的结果也不尽相同，其中有种实现采用copy-on-write的方式来共享内存。</p>
+
+<p>引用计数就是string类中写时才拷贝的原理！当第一个类构造时，string的构造函数会根据 传入的参数从堆上分配内存，当有其它类需要这块内存时，这个计数为自动累加，当有类析构时，这个计数会减一，直到最后一个类析构时，此时的RefCnt为1或是0，此时，程序才会真正的Free这块从堆上分配的内存。</p>
+
+<p>string类的内存是在堆上动态分配的，共享内存的各个类指向的是同一个内存区。这块内存区域还包括引用计数，其位于字符串内存区域的上方，通过<code>_Ptr[-1]</code>来访问。这样所有共享这块内存的类都可以访问到引用计数，也就知道这块内存的引用者有多少了。</p>
+
+<p>于是，有了这样一个机制，每当我们为string分配内存时，我们总是要多分配一个空间用来存放这个引用计数的值，只要发生拷贝构造可是赋值时，这个内存的值就会加一。而在内容修改时，string类为查看这个引用计数是否为0，如果不为零，表示有人在共享这块内存，那么自己需要先做一份拷贝，然后把引用计数减去一，再把数据拷贝过来。</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/07/12/c%2B%2B-string-copy-on-write/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-06-28T04:18:00+08:00" pubdate data-updated="true">Jun 28<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/06/28/signal-and-forkmarkdown/#disqus_thread"
@@ -175,43 +226,12 @@
 
 <p><strong>避免信号和线程一起使用是明智的选择。</strong>但是，将他们分开又是不可能或不实际的。只要有可能的话，仅仅在主线程内使用<code>pthread_sigmask()</code>来屏蔽信号，然后同步地在专用线程中使用<code>sigwait()</code>来处理信号。</p>
 
-<h2 id="section">信号模型映射到线程模型</h2>
-
-<p>为了理解信号模型是怎样映射到线程模型的，我们需要知道信号模型的哪些方面是影响进程层面的（process-wide），哪些方面只会影响某个线程的。下面列出几点:</p>
-
-<ol>
-  <li>signal actions 是process-wide。如果一个没有处理的信号的默认动作是停止SIGSTOP或终止SIGKILL(该动作是让整个进程停止或终止，而不是只针对某个线程)，那么不管这个信号是发送给哪个线程，整个进程都会停止或终止。</li>
-  <li>signal dispositions信号部署是process-wide。每个线程都有自己的信号屏蔽字，但是<strong>信号的处理是进程中所有线程共享的</strong>。这意味着尽管每个线程可以阻止某些信号，但当线程修改了与某个信号相关的处理行为之后，所有的线程都必须共享这个处理行为的改变。</li>
-  <li>信号通常是被发送到<strong>任意一个线程</strong>，为了保证不会在多线程进程中一个信号多次被执行。但是以下几种情况是传递到<strong>单个线程</strong>的：
-    <ul>
-      <li>信号与硬件故障或计时器超时相关。</li>
-      <li>当线程尝试向一个broken pipe写数据时，会产生一个SIGPIPE。</li>
-      <li>使用<code>pthread_kill()</code>或者<code>pthread_sigqueue()</code>。这些函数允许一个线程发送信号到同一进程的另一个线程。</li>
-    </ul>
-  </li>
-  <li><strong>信号掩码(signal mask)是线程私用的。</strong>在多线程的进程中，不存在process-wide的信号掩码。线程可以使用<code>pthread_sigmask()</code>来独立的屏蔽某些信号。通过这种方法，程序员可以控制那些线程响应那些信号。当线程被创建时，它将继承创建它的线程的信号掩码。</li>
-  <li><strong>内核为每个线程和进程分别维护了一个未决信号的表</strong>。当使用<code>sigpending()</code>时，该函数返回的是整个进程未决信号表和调用该函数的线程的未决信号表的并集。当新线程被创建时，线程的pending signals被设置为空。当线程A阻塞某个信号S后，发送到A中的信号S将会被挂起，直到线程取消了对信号S的阻塞。</li>
-  <li>如果一个信号处理函数打断了<code>pthread_mutex_lock()</code>，该<strong>函数会自动的重新执行</strong>。如果信号处理函数打断了<code>pthread_cond_wait()</code>，该函数要么自动重新自行（linux是这样实现的），或者返回0（这时应用要检查返回值，判断是否为假唤醒）。</li>
-</ol>
-
-<h2 id="section-1">异步信号的处理</h2>
-
-<p>一个函数要么是可重入的（reentrant）,要么是不能被信号处理函数打断的，我们把这种函数叫做是<code>async-signal-safe</code>的。调用非<code>async-signal-safe</code>的函数是危险的，比如，考虑在线程A中，我们调用<code>malloc()</code>来进行内存分配，<code>malloc()</code>刚用互斥量锁住了全局链表，这是异步信号到达，在信号处理函数中也调用<code>malloc()</code>，这时该函数会阻塞在互斥量上，形成死锁（这个例子在单线程的进程中也会出现）。Pthread API不是<code>async-signal-safe</code>的，也就是说在信号处理函数中不要使用pthread相关的函数。</p>
-
-<p><strong>解决这个问题</strong>的最好办法是，在不打断正常程序的前提下，把所有的异步信号都在同一处处理。在单线程程序中，这是做不到的，因为所有发送的信号都会打断程序。而在多线程程序中，我们可以<u>单独创建一个线程来接受信号，处理需要的信号，而不会打断其他线程的工作。</u></p>
-
-<p>上面举的这个例子中还有一点没说到，就是<strong>信号处理函数也会被其他信号所打断</strong>。那我们怎么处理这个问题呢？<u>在处理信号之前，对所有的异步信号进行阻塞，等工作处理完毕后，再恢复阻塞的信号。</u>这个工作就靠下面这个函数执行：</p>
-
-<pre><code>int sigwait(const sigset_t *set, int *sig)
-</code></pre>
-
-<ul>
-  <li><code>sigwait()</code>的好处在于它可以简化信号处理，允许把异步产生的信号用同步方式处理。</li>
-  <li>调用<code>sigwait()</code>等待的信号必须在调用线程中屏蔽，通常我们在所有线程中都会屏蔽。</li>
-  <li>信号仅仅被交付一次。如果两个线程在<code>sigwait()</code>上阻塞（等待同一个信号），只有一个线程（不确定的线程）将收到送给进程的信号。这意味着不能让两个独立的子系统使用<code>sigwait()</code>来捕获相同的信号。信号捕获<code>sigaction</code>建立的信号处理程序和<code>sigwait</code>也同样只有一个可以执行。</li>
-</ul>
 </div>
   
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/06/28/signal-and-thread/">Read on &rarr;</a>
+    </footer>
   
 
 
@@ -267,60 +287,12 @@
 
 <p>对于一个完整的信号生命周期(从信号发送到相应的处理函数执行完毕)来说，可以分为三个重要的阶段，这三个阶段由四个重要事件来刻画：1.信号诞生；2. 信号在进程中注册完毕；3.信号在进程中的注销完毕；4.信号处理函数执行完毕。相邻两个事件的时间间隔构成信号生命周期的一个阶段。</p>
 
-<p>下面阐述四个事件的实际意义：</p>
-
-<ol>
-  <li>
-    <p>信号”诞生”；</p>
-
-    <p>信号的诞生指的是触发信号的事件发生（如检测到硬件异常、定时器超时以及调用信号发送函数kill()或sigqueue()等）。 </p>
-  </li>
-  <li>
-    <p>信号在目标进程中”注册”；</p>
-
-    <p>进程的<code>task_struct</code>结构中有关于本进程中未决信号的数据成员：</p>
-
-    <pre><code> struct sigpending pending;
- struct sigpending
- {
-     struct sigqueue *head, **tail;
-     sigset_t signal;
- };
-</code></pre>
-
-    <p>第一、第二个成员分别指向一个<code>sigqueue</code>类型的结构链（称之为”未决信号信息链”）的首尾，第三个成员是进程中所有未决信号集，信息链中的每个sigqueue结构体刻画一个特定信号所携带的信息，并指向下一个sigqueue结构: </p>
-
-    <pre><code> struct sigqueue
- {
-     struct sigqueue *next;
-     siginfo_t info;
- };
-</code></pre>
-
-    <p>信号在进程中注册指的就是信号值加入到进程的未决信号集中（<code>sigpending</code>结构的第二个成员<code>sigset_t signal</code>），并且信号所携带的信息被保留到未决信号信息链的某个<code>sigqueue</code>结构中。只要信号在进程的未决信号集中，表明进程已经知道这些信号的存在，但还没来得及处理，或者该信号被进程阻塞。 </p>
-
-    <p><strong>注：</strong> 
- 当一个实时信号发送给一个进程时，不管该信号是否已经在进程中注册，都会被再注册一次，因此，信号不会丢失，因此，实时信号又叫做”可靠信号”。这意味着同一个实时信号可以在同一个进程的未决信号信息链中占有多个<code>sigqueue</code>结构（进程每收到一个实时信号，都会为它分配一个结构来登记该信号信息，并把该结构添加在未决信号链尾，即所有诞生的实时信号都会在目标进程中注册）； </p>
-
-    <p>当一个非实时信号发送给一个进程时，如果该信号已经在进程中注册，则该信号将被丢弃，造成信号丢失。因此，非实时信号又叫做”不可靠信号”。这意味着同一个非实时信号在进程的未决信号信息链中，至多占有一个<code>sigqueue</code>结构（一个非实时信号诞生后，（1）、如果发现相同的信号已经在目标结构中注册，则不再注册，对于进程来说，相当于不知道本次信号发生，信号丢失；（2）、如果进程的未决信号中没有相同信号，则在进程中注册自己）。 </p>
-  </li>
-  <li>
-    <p>信号在进程中的注销。</p>
-
-    <p>在目标进程执行过程中，会检测是否有信号等待处理（每次从系统空间返回到用户空间时都做这样的检查）。如果存在未决信号等待处理且该信号没有被进程阻塞，则在运行相应的信号处理函数前，进程会把信号在未决信号链中占有的结构卸掉。是否将信号从进程未决信号集中删除对于实时与非实时信号是不同的。对于非实时信号来说，由于在未决信号信息链中最多只占用一个sigqueue结构，因此该结构被释放后，应该把信号在进程未决信号集中删除（信号注销完毕）；而对于实时信号来说，可能在未决信号信息链中占用多个sigqueue结构，因此应该针对占用gqueue结构的数目区别对待：如果只占用一个sigqueue结构（进程只收到该信号一次），则应该把信号在进程的未决信号集中删除（信号注销完毕）。否则，不在进程的未决信号集中删除该信号（信号注销完毕）。进程在执行信号相应处理函数之前，首先要把信号在进程中注销。 </p>
-  </li>
-  <li>
-    <p>信号生命终止。</p>
-
-    <p>进程注销信号后，立即执行相应的信号处理函数，执行完毕后，信号的本次发送对进程的影响彻底结束。 </p>
-  </li>
-</ol>
-
-<p><strong>注：</strong> 
-1）信号注册与否，与发送信号的函数（如kill()或sigqueue()等）以及信号安装函数（signal()及sigaction()）无关，只与信号值有关（信号值小于SIGRTMIN的信号最多只注册一次，信号值在SIGRTMIN及SIGRTMAX之间的信号，只要被进程接收到就被注册）。 
-2）在信号被注销到相应的信号处理函数执行完毕这段时间内，如果进程又收到同一信号多次，则对实时信号来说，每一次都会在进程中注册；而对于非实时信号来说，无论收到多少次信号，都会视为只收到一个信号，只在进程中注册一次。</p>
 </div>
   
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/06/28/signal-status-and-lifecycle/">Read on &rarr;</a>
+    </footer>
   
 
 
@@ -620,58 +592,6 @@
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-10-12T16:12:00+08:00" pubdate data-updated="true">Oct 12<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/10/12/deep-c-and-c-plus-plus/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/10/12/deep-c-and-c-plus-plus/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/10/12/deep-c-and-c-plus-plus/">Deep C and C++</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>摘自<a href="http://share.csdn.net/#/detail/1050">CSDN Share</a></p>
-
-<p>花了一个上午的时间看了下这个PPT，觉得收获颇多。
-特别是这个PPT的组织方式，采用两个程序员面试对比的方式，非常的实用，也很有触动和感悟。已经很久没见到这样精彩的PPT了。</p>
-
-<p>本PPT介绍了作为普通的程序员和高级的程序员如何看待C与C++，从编译、链接、运行的角度来介绍，有非常多的干货，也许不是很系统，但确实是非常的实用；特别是在回答面试官的提问上，需要认真思考，从<code>不同的角度</code>、<code>深层次</code>地回答技术官的问话。也许两个程序员的功力差不多，但是在回答技术问题的方法上也许对面试官有很大的影响，最终也就是面试是否成功的关键。</p>
-
-<p><img src="http://www.atmel.com/zh/cn/Images/compiler.jpg" alt="" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/10/12/deep-c-and-c-plus-plus/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -695,6 +615,8 @@
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2014/07/12/c%2B%2B-string-copy-on-write/">C++ String Copy-on-write</a>
+    
     <a class="list-group-item " href="/blog/2014/06/28/signal-and-forkmarkdown/">Signal and Fork</a>
     
     <a class="list-group-item " href="/blog/2014/06/28/signal-and-thread/">Signal and Thread</a>
@@ -702,8 +624,6 @@
     <a class="list-group-item " href="/blog/2014/06/28/signal-status-and-lifecycle/">Signal Status and Lifecycle</a>
     
     <a class="list-group-item " href="/blog/2013/12/31/large-site-technical-architecture/">Large Site Technical Architecture</a>
-    
-    <a class="list-group-item " href="/blog/2013/12/31/gcc-summary/">Gcc Summary</a>
     
   </div>
 </section>
@@ -715,7 +635,7 @@
     
     
     <a class="list-group-item " href="/blog/categories/language/index.html">
-        <span class="badge">3</span>
+        <span class="badge">4</span>
         language
       </a>
     

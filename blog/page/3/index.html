@@ -107,6 +107,93 @@
 
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
         
+           | <a href="/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan/">Python特殊语法：filter、map、reduce、lambda [转]</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p><i><strong>from</strong> <a href="http://www.cnblogs.com/longdouhzt/archive/2012/05/19/2508844.html">http://www.cnblogs.com/longdouhzt/archive/2012/05/19/2508844.html</a></i></p>
+
+<hr />
+
+<p>Python内置了一些非常有趣但非常有用的函数，充分体现了Python的语言魅力！</p>
+
+<p><strong>filter(function,
+sequence)</strong> ：对sequence中的item依次执行function(item)，将执行结果为True的item组成一个List/String/Tuple（取决于sequence的类型）返回：</p>
+
+<p>&gt;&gt;&gt; def f(x): return x % 2 != 0 and x % 3 != 0 </p>
+
+<p>&gt;&gt;&gt; filter(f, range(2, 25)) 
+[5, 7, 11, 13, 17, 19, 23]</p>
+
+<p>&gt;&gt;&gt; def f(x): return x != ‘a’ </p>
+
+<p>&gt;&gt;&gt; filter(f, “abcdef”) </p>
+
+<p>‘bcdef’</p>
+
+<p><strong>map(function,
+sequence)</strong> ：对sequence中的item依次执行function(item)，见执行结果组成一个List返回：</p>
+
+<p>&gt;&gt;&gt; def cube(x): return x<em>x</em>x </p>
+
+<p>&gt;&gt;&gt; map(cube, range(1, 11)) </p>
+
+<p>[1, 8, 27, 64, 125, 216, 343, 512, 729, 1000]</p>
+
+<p>&gt;&gt;&gt; def cube(x) : return x + x </p>
+
+<p>… </p>
+
+<p>&gt;&gt;&gt; map(cube , “abcde”) </p>
+
+<p>[‘aa’, ‘bb’, ‘cc’, ‘dd’, ‘ee’]</p>
+
+<p>另外map也支持多个sequence，这就要求function也支持相应数量的参数输入：
+&gt;&gt;&gt; def add(x, y): return x+y </p>
+
+<p>&gt;&gt;&gt; map(add, range(8), range(8))</p>
+
+<p>[0, 2, 4, 6, 8, 10, 12, 14]</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
            | <a href="/blog/2013/05/14/pandoc-example/#disqus_thread"
              data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/pandoc-example/">Comments</a>
         
@@ -782,58 +869,6 @@ set fileencodings=utf-8,gbk</p>
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/hugo/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/hugo/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/hugo/">Hugo</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>好久没写影评，或者更确切的是观后感了。</p>
-
-<p>呵呵，电影最近是看了蛮多的，一天差不多至少是一部，两个小时吧。喜欢看泰国片，那种小清新的，没有多少压力和内涵，让人放松，给人一种繁忙后的室外桃园。嗯，还有一些日本片，但是日本的这种电影，给人的感觉不像台湾或者泰国那样的悠闲，自在；可能这么说并不是很恰当，但是日本电影它似乎总想把某种思想哲学，对于人生，对于爱情，对于人性的理解加入到其中，看完后会有一些压抑，脑袋里沉浮了一些东西，所以对于日本片来说，我看的并不像泰国片那么频繁。</p>
-
-<p>最近看的是一部叫<em>&lt;恋空&gt;</em>的电影，回想起来，对于其中的剧情和影片想要表述的意思还是可以回味一二，并且有着不小的余音。但那天看完后并没有写一些东西出来，应该是自己的问题，一方面投入的感情并没有想象中的那么多，所以写出来的东西并不会让我很满意；另一方面应该就是太久未能写影评了，看完电影后也不会去深入挖掘，只是偶尔在脑子里溜达一圈也就罢了，想想好笑，也就是前几天才看的电影，忽然又见到其中的主角，而我却叫不出那部影片的名字，惰性思想还是要不得啊！</p>
-
-<p>今天其实也并没有打算写这篇影评的，我已经是关机上床的状态，但是手机在充电，一时半会开不了机，于是就在脑海里想着今天看过的电影。看了两部，今天晚上，第一部是<em>&lt;宿醉&gt;</em>，嗯，纯粹的商业搞笑片，没有太多的感情，属于那种看过就忘的。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/17285214112051.jpg" alt="hugo" height="500" />
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/hugo/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -857,6 +892,8 @@ set fileencodings=utf-8,gbk</p>
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2014/07/12/c%2B%2B-string-copy-on-write/">C++ String Copy-on-write</a>
+    
     <a class="list-group-item " href="/blog/2014/06/28/signal-and-forkmarkdown/">Signal and Fork</a>
     
     <a class="list-group-item " href="/blog/2014/06/28/signal-and-thread/">Signal and Thread</a>
@@ -864,8 +901,6 @@ set fileencodings=utf-8,gbk</p>
     <a class="list-group-item " href="/blog/2014/06/28/signal-status-and-lifecycle/">Signal Status and Lifecycle</a>
     
     <a class="list-group-item " href="/blog/2013/12/31/large-site-technical-architecture/">Large Site Technical Architecture</a>
-    
-    <a class="list-group-item " href="/blog/2013/12/31/gcc-summary/">Gcc Summary</a>
     
   </div>
 </section>
@@ -877,7 +912,7 @@ set fileencodings=utf-8,gbk</p>
     
     
     <a class="list-group-item " href="/blog/categories/language/index.html">
-        <span class="badge">3</span>
+        <span class="badge">4</span>
         language
       </a>
     

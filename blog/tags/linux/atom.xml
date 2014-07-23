@@ -4,7 +4,7 @@
   <title><![CDATA[tags: linux | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/linux/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-07-17T22:06:20+08:00</updated>
+  <updated>2014-07-23T15:53:12+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -43,6 +43,8 @@
     <content type="html"><![CDATA[<p>类UNIX信号以前是专为进程设计的，它比线程的出现早了很多年。当线程模型出现后，专家们试图也在线程上实现信号，这导致了一个问题：即使是在基于进程的编程模式中，信号的处理也可能是很复杂的，因为它打断了正在运行的thread of control， 在signal handler中只能调用可重入函数，修改全局变量的类型必须是<code>sig_atomic_t</code>类型，防止内存访问优化； 而把线程引入编程范型，就使信号的处理变得更加复杂。</p>
 
 <p><strong>避免信号和线程一起使用是明智的选择。</strong>但是，将他们分开又是不可能或不实际的。只要有可能的话，仅仅在主线程内使用<code>pthread_sigmask()</code>来屏蔽信号，然后同步地在专用线程中使用<code>sigwait()</code>来处理信号。</p>
+
+<!--more-->
 
 <h2 id="section">信号模型映射到线程模型</h2>
 
@@ -104,6 +106,8 @@
 <h3 id="section-1">信号生命周期</h3>
 
 <p>对于一个完整的信号生命周期(从信号发送到相应的处理函数执行完毕)来说，可以分为三个重要的阶段，这三个阶段由四个重要事件来刻画：1.信号诞生；2. 信号在进程中注册完毕；3.信号在进程中的注销完毕；4.信号处理函数执行完毕。相邻两个事件的时间间隔构成信号生命周期的一个阶段。</p>
+
+<!--more-->
 
 <p>下面阐述四个事件的实际意义：</p>
 
