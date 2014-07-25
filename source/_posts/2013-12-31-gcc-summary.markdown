@@ -9,7 +9,7 @@ tags: [gcc, compiler]
 
 本文介绍在Linux平台下应用程序的编译过程，以及编译程序[GCC](http://gcc.gnu.org/)在编译应用程序的过程的具体用法，同时详细说明了GCC的常用选项、模式和警告选项。
 
-<center>![gcc](http://gcc.gnu.org/img/gccegg-65.png)</center>
+![gcc](https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcQkcpI6uyaKSbXltFKcLfpuPyMjC8aw-VZH7x9uUt8bFQMTpsczYg)
 
 <!--more-->
 
