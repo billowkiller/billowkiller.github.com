@@ -4,7 +4,7 @@
   <title><![CDATA[Category: linux | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/linux/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-07-25T15:26:07+08:00</updated>
+  <updated>2014-07-25T21:14:45+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -14,11 +14,94 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Linux thundering herd]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/07/17/thundering-herd/"/>
+    <updated>2014-07-17T09:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/07/17/thundering-herd</id>
+    <content type="html"><![CDATA[<p><em>modified from <a href="http://blog.csdn.net/russell_tao/article/details/7204260">http://blog.csdn.net/russell_tao/article/details/7204260</a></em></p>
+
+<hr />
+
+<h2 id="section">惊群现象</h2>
+
+<p>什么是“惊群”？简单说来，多线程/多进程（linux下线程进程也没多大区别）等待同一个socket事件，当这个事件发生时，这些线程/进程被同时唤醒，就是惊群。可以想见，效率很低下，许多进程被内核重新调度唤醒，同时去响应这一个事件，当然只有一个进程能处理事件成功，其他的进程在处理该事件失败后重新休眠（也有其他选择）。这种性能浪费现象就是惊群。</p>
+
+<p>惊群通常发生在server 上，当父进程绑定一个端口监听socket，然后fork出多个子进程，子进程们开始循环处理（比如accept）这个socket。每当用户发起一个TCP连接时，多个子进程同时被唤醒，然后其中一个子进程accept新连接成功，余者皆失败，重新休眠。</p>
+
+<p>那么，我们不能只用一个进程去accept新连接么？然后通过消息队列等同步方式使其他子进程处理这些新建的连接，这样惊群不就避免了？没错，惊群是避免了，但是效率低下，因为这个进程只能用来accept连接。对多核机器来说，仅有一个进程去accept，这也是程序员在自己创造accept瓶颈。所以，我仍然坚持需要多进程处理accept事件。</p>
+
+<h2 id="linux">linux解决的惊群</h2>
+
+<p>其实，在linux2.6内核上，<strong>accept系统调用已经不存在惊群了</strong>（至少我在2.6.18内核版本上已经不存在）。大家可以写个简单的程序试下，在父进程中bind,listen，然后fork出子进程，所有的子进程都accept这个监听句柄。这样，当新连接过来时，大家会发现，仅有一个子进程返回新建的连接，其他子进程继续休眠在accept调用上，没有被唤醒。</p>
+
+<p>对于一些已知的惊群问题，内核开发者增加了一个“<strong>互斥等待</strong>”选项。一个互斥等待的行为与睡眠基本类似，主要的不同点在于：</p>
+
+<ul>
+  <li>当一个等待队列入口有 WQ_FLAG_EXCLUSEVE 标志置位, 它被添加到等待队列的尾部. 没有这个标志的入口项, 相反, 添加到开始.</li>
+  <li>当 wake_up 被在一个等待队列上调用时, 它在唤醒第一个有 WQ_FLAG_EXCLUSIVE 标志的进程后停止。也就是说，对于互斥等待的行为，比如如对一个listen后的socket描述符，多线程阻塞accept时，系统内核只会唤醒所有正在等待此时间的队列的第一个，队列中的其他人则继续等待下一次事件的发生，这样就避免的多个线程同时监听同一个socket描述符时的惊群问题。</li>
+</ul>
+
+<h2 id="nginx">nginx解决惊群</h2>
+
+<p>但是很不幸，通常我们的程序没那么简单，不会愿意阻塞在accept调用上，我们还有许多其他网络读写事件要处理，linux下我们爱用epoll解决非阻塞socket。所以，即使accept调用没有惊群了，我们也还得处理惊群这事，因为epoll有这问题。上面说的测试程序，如果我们在子进程内不是阻塞调用accept，而是用<code>epoll_wait</code>，就会发现，新连接过来时，多个子进程都会在<code>epoll_wait</code>后被唤醒！</p>
+
+<p>nginx就是这样，master进程监听端口号（例如80），所有的nginx worker进程开始用<code>epoll_wait</code>来处理新事件（linux下），如果不加任何保护，一个新连接来临时，会有多个worker进程在<code>epoll_wait</code>后被唤醒，然后发现自己accept失败。</p>
+
+<p>nginx在同一时刻只允许一个nginx worker在自己的epoll中处理监听句柄。它的负载均衡也很简单，当达到最大connection的7/8时，本worker不会去试图拿accept锁，也不会去处理新连接，这样其他nginx worker进程就更有机会去处理监听句柄，建立新连接了。而且，由于timeout的设定，使得没有拿到锁的worker进程，去拿锁的频繁更高。</p>
+
+<h2 id="nginx-1">nginx的锁</h2>
+
+<p>在用户空间进程间锁实现的原理很简单，就是能弄一个让所有进程共享的东西，比如mmap的内存，比如文件，然后通过这个东西来控制进程的互斥。</p>
+
+<p>nginx的实现分为两种情况：</p>
+
+<ul>
+  <li>一种是支持原子操作的情况，也就是由mmap的内存区域来进行控制的</li>
+  <li>一种是不支持原子操作，这是是使用文件锁来实现。 </li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Linux reentrant function]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/07/15/linux-reentrant-function/"/>
+    <updated>2014-07-15T06:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/07/15/linux-reentrant-function</id>
+    <content type="html"><![CDATA[<p>这种情况出现在多任务系统当中，在任务执行期间捕捉到信号并对其进行处理时，进程正在执行的指令序列就被信号处理程序临时中断。如果从信号处理程序返回，则继续执行进程断点处的正常指令序列，从重新恢复到断点重新执行的过程中，函数所依赖的环境没有发生改变，就说这个函数是可重入的，反之就是不可重入的。简单来说，<strong>可重入函数可以被中断的函数</strong>。</p>
+
+<p>在进程中断期间，系统会保存和恢复进程的上下文，然而恢复的上下文仅限于返回地址，cpu寄存器等之类的少量上下文，而函数内部使用的诸如全局或静态变量，buffer等并不在保护之列，所以如果这些值在函数被中断期间发生了改变，那么当函数回到断点继续执行时，其结果就不可预料了。打个比方，比如<code>malloc</code>，将如一个进程此时正在执行<code>malloc</code>分配堆空间，此时程序捕捉到信号发生中断，执行信号处理程序中恰好也有一个<code>malloc</code>，这样就会对进程的环境造成破坏，因为malloc通常为它所分配的存储区维护一个链接表，插入执行信号处理函数时，进程可能正在对这张表进行操作，而信号处理函数的调用刚好覆盖了进程的操作，造成错误。</p>
+
+<p><strong>基本上下面的函数是不可重入的：</strong></p>
+
+<ul>
+  <li>函数体内使用了静态的数据结构；</li>
+  <li>函数体内调用了malloc()或者free()函数；</li>
+  <li>函数体内调用了标准I/O函数。</li>
+  <li>进行了浮点运算。许多的处理器/编译器中，浮点一般都是不可重入的 （浮点运算大多使用协处理器或者软件模拟来实现）。</li>
+</ul>
+
+<p><strong>两种情况需要考虑：</strong></p>
+
+<ol>
+  <li>信号处理程序A内外都调用了同一个不可重入函数B；B在执行期间被信号打断，进入A (A中调用了B),完事之后返回B被中断点继续执行，这时B函数的环境可能改变，其结果就不可预料了。</li>
+  <li>多线程共享进程内部的资源，如果两个线程A，B调用同一个不可重入函数F，A线程进入F后，线程调度，切换到B，B也执行了F，那么当再次切换到线程A时，其调用F的结果也是不可预料的。</li>
+</ol>
+
+<p><strong>在信号处理程序中即使调用可重入函数也有问题要注意</strong>。作为一个通用的规则，当在信号处理程序中调用可重入函数时，应当在其前保存<code>errno</code>，并在其后恢复<code>errno</code>。（<strong>因为每个线程只有一个errno变量，信号处理函数可能会修改其值，要了解经常被捕捉到的信号是SIGCHLD，其信号处理程序通常要调用一种wait函数，而各种wait函数都能改变errno。</strong>）</p>
+
+<p>如果一个函数对多个线程来说是可重入的，则说这个函数是<strong>线程安全的</strong>。但这并不能说明对信号处理程序来说该函数也是可重入的。如果函数对异步信号处理程序的重入是安全的，那么就可以说函数式<strong>异步-信号安全的</strong>。</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Linux epoll module]]></title>
     <link href="http://billowkiller.github.io/blog/2014/07/15/linux-epoll-module/"/>
     <updated>2014-07-15T02:18:00+08:00</updated>
     <id>http://billowkiller.github.io/blog/2014/07/15/linux-epoll-module</id>
-    <content type="html"><![CDATA[<p><code>select</code>，<code>poll</code>，<code>epoll</code>都是Linux下IO多路复用的机制。Windows下为<code>IOCP</code>模型。I/O多路复用就通过一种机制，可以监视多个描述符，一旦某个文件描述符就绪，能够通知程序进行相应的读写操作。其中文件描述符是一个简单的整数，用以标明每一个被进程所打开的文件和socket，包括<code>filefd</code>、<code>socketfd</code>、<code>signalfd</code>、<code>timerfd</code>、<code>eventfd</code>等。<code>eventfd</code> 是一个比 <code>pipe </code>更高效的线程间事件通知机制。</p>
+    <content type="html"><![CDATA[<p>综合了几个blog以及自己查到的一些资料，总结下Linux中的IO多路复用，主要是<code>epoll</code>模型。</p>
+
+<p><code>select</code>，<code>poll</code>，<code>epoll</code>都是Linux下IO多路复用的机制。Windows下为<code>IOCP</code>模型。I/O多路复用就通过一种机制，可以监视多个描述符，一旦某个文件描述符就绪，能够通知程序进行相应的读写操作。其中文件描述符是一个简单的整数，用以标明每一个被进程所打开的文件和socket，包括<code>filefd</code>、<code>socketfd</code>、<code>signalfd</code>、<code>timerfd</code>、<code>eventfd</code>等。<code>eventfd</code> 是一个比 <code>pipe </code>更高效的线程间事件通知机制。</p>
 
 <p>但<code>select</code>，<code>poll</code>，<code>epoll</code>本质上都是<strong>同步I/O</strong>，因为他们都需要在读写事件就绪后自己负责进行读写，也就是说这个读写过程是阻塞的，而<strong>异步I/O</strong>则无需自己负责进行读写，异步I/O的实现会负责把数据从内核拷贝到用户空间。</p>
 
@@ -64,6 +147,20 @@
 
 <h3 id="section">触发模型</h3>
 
+<h4 id="eagain">EAGAIN</h4>
+
+<p>先说下<code>EAGIN</code>这个返回值。</p>
+
+<p>在一个非阻塞的socket上调用read/write函数, 返回<code>EAGAIN</code>或者<code>EWOULDBLOCK</code>(注: EAGAIN就是EWOULDBLOCK)。从字面上看, 意思是:EAGAIN: 再试一次，EWOULDBLOCK: 如果这是一个阻塞socket, 操作将被block，perror输出: Resource temporarily unavailable</p>
+
+<p><strong>总结:</strong></p>
+
+<p>这个错误表示资源暂时不够，能read时，读缓冲区没有数据，或者write时，写缓冲区满了。遇到这种情况，如果是阻塞socket，read/write就要阻塞掉。而如果是非阻塞socket，read/write立即返回-1， 同时<code>errno</code>设置为<code>EAGAIN</code>。</p>
+
+<p>所以，<strong>对于阻塞socket，read/write返回-1代表网络出错了。但对于非阻塞socket，read/write返回-1不一定网络真的出错了。可能是Resource temporarily unavailable。这时你应该再试，直到Resource available。</strong></p>
+
+<h4 id="lt--et">LT &amp; ET</h4>
+
 <p><code>epoll</code>除了提供<code>select\poll</code>那种IO事件的<strong>电平触发(Level Triggered)</strong>外，还提供了<strong>边沿触发(Edge Triggered)</strong>，这就使得用户空间程序有可能缓存IO状态，减少<code>epoll_wait/epoll_pwait</code>的调用，提供应用程序的效率。</p>
 
 <ul>
@@ -76,6 +173,72 @@
 </ul>
 
 <p><strong>区别：</strong>LT事件不会丢弃，而是只要读buffer里面有数据可以让用户读取，则不断的通知你。而ET则只在事件发生之时通知。</p>
+
+<p><strong>ET方式注意事项：</strong> 必须使用<strong>非阻塞套接口</strong>，以避免由于一个文件句柄的阻塞读/阻塞写操作把处理多个文件描述符的任务饿死。最好以下面的方式调用ET模式的epoll接口：</p>
+
+<ul>
+  <li>基于非阻塞文件句柄</li>
+  <li>
+    <p>只有当read(2)或者write(2)返回<strong>EAGAIN</strong>时才需要挂起，等待。但这并不是说每次read()时都需要循环读，直到读到产生一个EAGAIN才认为此次事件处理完成，<strong>当read()返回的读到的数据长度小于请求的数据长度时，就可以确定此时缓冲中已没有数据了</strong>，也就可以认为此事读事件已处理完成。</p>
+
+    <pre><code>  while(rs)
+  {
+    buflen = recv(activeevents[i].data.fd, buf, sizeof(buf), 0);
+    if(buflen &lt; 0)
+    {
+      // 由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可读
+      // 在这里就当作是该次事件已处理处.
+      if(errno == EAGAIN)
+       break;
+      else
+       return;
+     }
+     else if(buflen == 0)
+     {
+       // 这里表示对端的socket已正常关闭.
+     }
+     if(buflen == sizeof(buf)
+       rs = 1;   // 需要再次读取
+     else
+       rs = 0;
+  }
+</code></pre>
+  </li>
+</ul>
+
+<p><strong>还有，假如发送端流量大于接收端的流量(意思是epoll所在的程序读比转发的socket要快),由于是非阻塞的socket,那么<code>send()</code>函数虽然返回,但实际缓冲区的数据并未真正发给接收端,这样不断的读和发，当缓冲区满后会产生<code>EAGAIN</code>错误(参考<code>man send</code>),同时,不理会这次请求发送的数据.所以,需要封装<code>socket_send()</code>的函数用来处理这种情况,该函数会尽量将数据写完再返回，返回-1表示出错。在<code>socket_send()</code>内部,当写缓冲已满(<code>send()</code>返回-1,且<code>errno</code>为<code>EAGAIN</code>),那么会等待后再重试.这种方式并不很完美,在理论上可能会长时间的阻塞在<code>socket_send()</code>内部,但暂没有更好的办法.</strong></p>
+
+<h4 id="accept">正确的accept</h4>
+
+<p>正确的accept，accept 要考虑 2 个问题</p>
+
+<ol>
+  <li>
+    <p>阻塞模式 accept 存在的问题</p>
+
+    <p>考虑这种情况：TCP连接被客户端夭折，即在服务器调用accept之前，客户端主动发送RST终止连接，导致刚刚建立的连接从就绪队列中移出，如果套接口被设置成阻塞模式，服务器就会一直阻塞在accept调用上，直到其他某个客户建立一个新的连接为止。但是在此期间，服务器单纯地阻塞在accept调用上，就绪队列中的其他描述符都得不到处理。</p>
+
+    <p><strong>解决办法</strong>是把监听套接口设置为非阻塞，当客户在服务器调用accept之前中止某个连接时，accept调用可以立即返回-1，这时源自Berkeley的实现会在内核中处理该事件，并不会将该事件通知给epool，而其他实现把errno设置为ECONNABORTED或者EPROTO错误，我们应该忽略这两个错误。</p>
+  </li>
+  <li>
+    <p>ET模式下accept存在的问题</p>
+
+    <p>考虑这种情况：多个连接同时到达，服务器的TCP就绪队列瞬间积累多个就绪连接，由于是边缘触发模式，epoll只会通知一次，accept只处理一个连接，导致TCP就绪队列中剩下的连接都得不到处理。</p>
+
+    <p><strong>解决办法</strong>是用while循环抱住accept调用，处理完TCP就绪队列中的所有连接后再退出循环。如何知道是否处理完就绪队列中的所有连接呢？accept返回-1并且errno设置为EAGAIN就表示所有连接都处理完。</p>
+  </li>
+</ol>
+
+<p>综合以上两种情况，服务器应该使用非阻塞地accept，accept在ET模式下的正确使用方式为：</p>
+
+<pre><code>while ((conn_sock = accept(listenfd,(struct sockaddr *) &amp;remote, (size_t *)&amp;addrlen)) &gt; 0) {
+    handle_client(conn_sock);
+}
+if (conn_sock == -1) {
+    if (errno != EAGAIN &amp;&amp; errno != ECONNABORTED &amp;&amp; errno != EPROTO &amp;&amp; errno != EINTR)
+    perror("accept");
+}
+</code></pre>
 
 <h2 id="section-1">总结</h2>
 <p><strong>epoll高效的两个原因：</strong></p>
@@ -155,125 +318,6 @@
   <li>调用<code>sigwait()</code>等待的信号必须在调用线程中屏蔽，通常我们在所有线程中都会屏蔽。</li>
   <li>信号仅仅被交付一次。如果两个线程在<code>sigwait()</code>上阻塞（等待同一个信号），只有一个线程（不确定的线程）将收到送给进程的信号。这意味着不能让两个独立的子系统使用<code>sigwait()</code>来捕获相同的信号。信号捕获<code>sigaction</code>建立的信号处理程序和<code>sigwait</code>也同样只有一个可以执行。</li>
 </ul>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Signal status and lifecycle]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/06/28/signal-status-and-lifecycle/"/>
-    <updated>2014-06-28T02:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/06/28/signal-status-and-lifecycle</id>
-    <content type="html"><![CDATA[<p><i><strong>modified from</strong> <a href="http://blog.csdn.net/sunyubo458/article/details/4484957">http://blog.csdn.net/sunyubo458/article/details/4484957</a></i></p>
-
-<p><em>Lost original source</em></p>
-
-<hr />
-
-<h3 id="section">信号状态</h3>
-
-<p>信号的”未决“是一种状态，指的是从信号的产生到信号被处理前的这一段时间；信号的”阻塞“是一个开关动作，指的是阻止信号被处理，但不是阻止信号产生。 </p>
-
-<p>每个进程都有一个信号屏蔽字，它规定了当前要阻塞地送到该进程的信号集，对于每种可能的信号，该屏蔽字中都有一位与之对应。对于某种信号，若其对应为已设定，则它当前是被阻塞的。进程可以调用<code>sigprocmask</code>来检测和更改当前信号屏蔽字。</p>
-
-<p>APUE例题在<code>sleep</code>前用<code>sigprocmask</code>阻塞了退出信号，然后<code>sleep</code>,然后在<code>sleep</code>的过程中产生一个退出信号，但是此时退出信号被阻塞过，（中文的”阻塞”在这里容易被误解为一种状态，实际上是一种类似于开关的动作，所以说“被阻塞过”，而不是“被阻塞”）所以处于“未决”状态，在 <code>sleep</code>后又用<code>sigprocmask</code>关掉退出信号的阻塞开关，因为之前产生的退出信号一直处于未决状态，当关上阻塞开关后，马上退出“未决”状态，得到处理，这一切发生在<code>sigprocmask</code>返回之前。 </p>
-
-<h3 id="section-1">信号生命周期</h3>
-
-<p>对于一个完整的信号生命周期(从信号发送到相应的处理函数执行完毕)来说，可以分为三个重要的阶段，这三个阶段由四个重要事件来刻画：1.信号诞生；2. 信号在进程中注册完毕；3.信号在进程中的注销完毕；4.信号处理函数执行完毕。相邻两个事件的时间间隔构成信号生命周期的一个阶段。</p>
-
-<!--more-->
-
-<p>下面阐述四个事件的实际意义：</p>
-
-<ol>
-  <li>
-    <p>信号”诞生”；</p>
-
-    <p>信号的诞生指的是触发信号的事件发生（如检测到硬件异常、定时器超时以及调用信号发送函数kill()或sigqueue()等）。 </p>
-  </li>
-  <li>
-    <p>信号在目标进程中”注册”；</p>
-
-    <p>进程的<code>task_struct</code>结构中有关于本进程中未决信号的数据成员：</p>
-
-    <pre><code> struct sigpending pending;
- struct sigpending
- {
-     struct sigqueue *head, **tail;
-     sigset_t signal;
- };
-</code></pre>
-
-    <p>第一、第二个成员分别指向一个<code>sigqueue</code>类型的结构链（称之为”未决信号信息链”）的首尾，第三个成员是进程中所有未决信号集，信息链中的每个sigqueue结构体刻画一个特定信号所携带的信息，并指向下一个sigqueue结构: </p>
-
-    <pre><code> struct sigqueue
- {
-     struct sigqueue *next;
-     siginfo_t info;
- };
-</code></pre>
-
-    <p>信号在进程中注册指的就是信号值加入到进程的未决信号集中（<code>sigpending</code>结构的第二个成员<code>sigset_t signal</code>），并且信号所携带的信息被保留到未决信号信息链的某个<code>sigqueue</code>结构中。只要信号在进程的未决信号集中，表明进程已经知道这些信号的存在，但还没来得及处理，或者该信号被进程阻塞。 </p>
-
-    <p><strong>注：</strong> 
- 当一个实时信号发送给一个进程时，不管该信号是否已经在进程中注册，都会被再注册一次，因此，信号不会丢失，因此，实时信号又叫做”可靠信号”。这意味着同一个实时信号可以在同一个进程的未决信号信息链中占有多个<code>sigqueue</code>结构（进程每收到一个实时信号，都会为它分配一个结构来登记该信号信息，并把该结构添加在未决信号链尾，即所有诞生的实时信号都会在目标进程中注册）； </p>
-
-    <p>当一个非实时信号发送给一个进程时，如果该信号已经在进程中注册，则该信号将被丢弃，造成信号丢失。因此，非实时信号又叫做”不可靠信号”。这意味着同一个非实时信号在进程的未决信号信息链中，至多占有一个<code>sigqueue</code>结构（一个非实时信号诞生后，（1）、如果发现相同的信号已经在目标结构中注册，则不再注册，对于进程来说，相当于不知道本次信号发生，信号丢失；（2）、如果进程的未决信号中没有相同信号，则在进程中注册自己）。 </p>
-  </li>
-  <li>
-    <p>信号在进程中的注销。</p>
-
-    <p>在目标进程执行过程中，会检测是否有信号等待处理（每次从系统空间返回到用户空间时都做这样的检查）。如果存在未决信号等待处理且该信号没有被进程阻塞，则在运行相应的信号处理函数前，进程会把信号在未决信号链中占有的结构卸掉。是否将信号从进程未决信号集中删除对于实时与非实时信号是不同的。对于非实时信号来说，由于在未决信号信息链中最多只占用一个sigqueue结构，因此该结构被释放后，应该把信号在进程未决信号集中删除（信号注销完毕）；而对于实时信号来说，可能在未决信号信息链中占用多个sigqueue结构，因此应该针对占用gqueue结构的数目区别对待：如果只占用一个sigqueue结构（进程只收到该信号一次），则应该把信号在进程的未决信号集中删除（信号注销完毕）。否则，不在进程的未决信号集中删除该信号（信号注销完毕）。进程在执行信号相应处理函数之前，首先要把信号在进程中注销。 </p>
-  </li>
-  <li>
-    <p>信号生命终止。</p>
-
-    <p>进程注销信号后，立即执行相应的信号处理函数，执行完毕后，信号的本次发送对进程的影响彻底结束。 </p>
-  </li>
-</ol>
-
-<p><strong>注：</strong> 
-1）信号注册与否，与发送信号的函数（如kill()或sigqueue()等）以及信号安装函数（signal()及sigaction()）无关，只与信号值有关（信号值小于SIGRTMIN的信号最多只注册一次，信号值在SIGRTMIN及SIGRTMAX之间的信号，只要被进程接收到就被注册）。 
-2）在信号被注销到相应的信号处理函数执行完毕这段时间内，如果进程又收到同一信号多次，则对实时信号来说，每一次都会在进程中注册；而对于非实时信号来说，无论收到多少次信号，都会视为只收到一个信号，只在进程中注册一次。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[zip文件乱码解决]]></title>
-    <link href="http://billowkiller.github.io/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue/"/>
-    <updated>2013-05-14T01:09:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue</id>
-    <content type="html"><![CDATA[<p>在windows上压缩的文件，是以系统默认编码中文来压缩文件。由于zip文件中没有声明其编码，所以linux上的unzip一般以默认编码解压，中文文件名会出现乱码。</p>
-
-<p>虽然2005年就有人把这报告为bug,
-但是info-zip的官方网站没有把自动识别编码列入计划，可能他们不认为这是个问题。Sun对java中存在N年的zip编码问题，采用了同样的处理方式。</p>
-
-<p>1.1 </p>
-
-<p>通过unzip行命令解压，指定字符集</p>
-
-<pre><code>unzip -O CP936 xxx.zip (用GBK, GB18030也可以)
-</code></pre>
-
-<p>有趣的是unzip的manual中并无这个选项的说明, unzip
-–help对这个参数有一行简单的说明。</p>
-
-<p>1.2 </p>
-
-<p>在环境变量中，指定unzip参数，总是以指定的字符集显示和解压文件</p>
-
-<p>解决办法：</p>
-
-<p>引用</p>
-
-<pre><code>vi /etc/environment
-</code></pre>
-
-<p>再最后加入后面的代码即可</p>
-
-<p>UNZIP=”-O CP936”</p>
-
-<p>ZIPINFO=”-O CP936”</p>
 ]]></content>
   </entry>
   

@@ -117,7 +117,9 @@
   </header>
 
 
-<div class="entry-content clearfix"><p><code>select</code>，<code>poll</code>，<code>epoll</code>都是Linux下IO多路复用的机制。Windows下为<code>IOCP</code>模型。I/O多路复用就通过一种机制，可以监视多个描述符，一旦某个文件描述符就绪，能够通知程序进行相应的读写操作。其中文件描述符是一个简单的整数，用以标明每一个被进程所打开的文件和socket，包括<code>filefd</code>、<code>socketfd</code>、<code>signalfd</code>、<code>timerfd</code>、<code>eventfd</code>等。<code>eventfd</code> 是一个比 <code>pipe </code>更高效的线程间事件通知机制。</p>
+<div class="entry-content clearfix"><p>综合了几个blog以及自己查到的一些资料，总结下Linux中的IO多路复用，主要是<code>epoll</code>模型。</p>
+
+<p><code>select</code>，<code>poll</code>，<code>epoll</code>都是Linux下IO多路复用的机制。Windows下为<code>IOCP</code>模型。I/O多路复用就通过一种机制，可以监视多个描述符，一旦某个文件描述符就绪，能够通知程序进行相应的读写操作。其中文件描述符是一个简单的整数，用以标明每一个被进程所打开的文件和socket，包括<code>filefd</code>、<code>socketfd</code>、<code>signalfd</code>、<code>timerfd</code>、<code>eventfd</code>等。<code>eventfd</code> 是一个比 <code>pipe </code>更高效的线程间事件通知机制。</p>
 
 <p>但<code>select</code>，<code>poll</code>，<code>epoll</code>本质上都是<strong>同步I/O</strong>，因为他们都需要在读写事件就绪后自己负责进行读写，也就是说这个读写过程是阻塞的，而<strong>异步I/O</strong>则无需自己负责进行读写，异步I/O的实现会负责把数据从内核拷贝到用户空间。</p>
 
@@ -163,6 +165,20 @@
 
 <h3 id="section">触发模型</h3>
 
+<h4 id="eagain">EAGAIN</h4>
+
+<p>先说下<code>EAGIN</code>这个返回值。</p>
+
+<p>在一个非阻塞的socket上调用read/write函数, 返回<code>EAGAIN</code>或者<code>EWOULDBLOCK</code>(注: EAGAIN就是EWOULDBLOCK)。从字面上看, 意思是:EAGAIN: 再试一次，EWOULDBLOCK: 如果这是一个阻塞socket, 操作将被block，perror输出: Resource temporarily unavailable</p>
+
+<p><strong>总结:</strong></p>
+
+<p>这个错误表示资源暂时不够，能read时，读缓冲区没有数据，或者write时，写缓冲区满了。遇到这种情况，如果是阻塞socket，read/write就要阻塞掉。而如果是非阻塞socket，read/write立即返回-1， 同时<code>errno</code>设置为<code>EAGAIN</code>。</p>
+
+<p>所以，<strong>对于阻塞socket，read/write返回-1代表网络出错了。但对于非阻塞socket，read/write返回-1不一定网络真的出错了。可能是Resource temporarily unavailable。这时你应该再试，直到Resource available。</strong></p>
+
+<h4 id="lt--et">LT &amp; ET</h4>
+
 <p><code>epoll</code>除了提供<code>select\poll</code>那种IO事件的<strong>电平触发(Level Triggered)</strong>外，还提供了<strong>边沿触发(Edge Triggered)</strong>，这就使得用户空间程序有可能缓存IO状态，减少<code>epoll_wait/epoll_pwait</code>的调用，提供应用程序的效率。</p>
 
 <ul>
@@ -175,6 +191,72 @@
 </ul>
 
 <p><strong>区别：</strong>LT事件不会丢弃，而是只要读buffer里面有数据可以让用户读取，则不断的通知你。而ET则只在事件发生之时通知。</p>
+
+<p><strong>ET方式注意事项：</strong> 必须使用<strong>非阻塞套接口</strong>，以避免由于一个文件句柄的阻塞读/阻塞写操作把处理多个文件描述符的任务饿死。最好以下面的方式调用ET模式的epoll接口：</p>
+
+<ul>
+  <li>基于非阻塞文件句柄</li>
+  <li>
+    <p>只有当read(2)或者write(2)返回<strong>EAGAIN</strong>时才需要挂起，等待。但这并不是说每次read()时都需要循环读，直到读到产生一个EAGAIN才认为此次事件处理完成，<strong>当read()返回的读到的数据长度小于请求的数据长度时，就可以确定此时缓冲中已没有数据了</strong>，也就可以认为此事读事件已处理完成。</p>
+
+    <pre><code>  while(rs)
+  {
+    buflen = recv(activeevents[i].data.fd, buf, sizeof(buf), 0);
+    if(buflen &lt; 0)
+    {
+      // 由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可读
+      // 在这里就当作是该次事件已处理处.
+      if(errno == EAGAIN)
+       break;
+      else
+       return;
+     }
+     else if(buflen == 0)
+     {
+       // 这里表示对端的socket已正常关闭.
+     }
+     if(buflen == sizeof(buf)
+       rs = 1;   // 需要再次读取
+     else
+       rs = 0;
+  }
+</code></pre>
+  </li>
+</ul>
+
+<p><strong>还有，假如发送端流量大于接收端的流量(意思是epoll所在的程序读比转发的socket要快),由于是非阻塞的socket,那么<code>send()</code>函数虽然返回,但实际缓冲区的数据并未真正发给接收端,这样不断的读和发，当缓冲区满后会产生<code>EAGAIN</code>错误(参考<code>man send</code>),同时,不理会这次请求发送的数据.所以,需要封装<code>socket_send()</code>的函数用来处理这种情况,该函数会尽量将数据写完再返回，返回-1表示出错。在<code>socket_send()</code>内部,当写缓冲已满(<code>send()</code>返回-1,且<code>errno</code>为<code>EAGAIN</code>),那么会等待后再重试.这种方式并不很完美,在理论上可能会长时间的阻塞在<code>socket_send()</code>内部,但暂没有更好的办法.</strong></p>
+
+<h4 id="accept">正确的accept</h4>
+
+<p>正确的accept，accept 要考虑 2 个问题</p>
+
+<ol>
+  <li>
+    <p>阻塞模式 accept 存在的问题</p>
+
+    <p>考虑这种情况：TCP连接被客户端夭折，即在服务器调用accept之前，客户端主动发送RST终止连接，导致刚刚建立的连接从就绪队列中移出，如果套接口被设置成阻塞模式，服务器就会一直阻塞在accept调用上，直到其他某个客户建立一个新的连接为止。但是在此期间，服务器单纯地阻塞在accept调用上，就绪队列中的其他描述符都得不到处理。</p>
+
+    <p><strong>解决办法</strong>是把监听套接口设置为非阻塞，当客户在服务器调用accept之前中止某个连接时，accept调用可以立即返回-1，这时源自Berkeley的实现会在内核中处理该事件，并不会将该事件通知给epool，而其他实现把errno设置为ECONNABORTED或者EPROTO错误，我们应该忽略这两个错误。</p>
+  </li>
+  <li>
+    <p>ET模式下accept存在的问题</p>
+
+    <p>考虑这种情况：多个连接同时到达，服务器的TCP就绪队列瞬间积累多个就绪连接，由于是边缘触发模式，epoll只会通知一次，accept只处理一个连接，导致TCP就绪队列中剩下的连接都得不到处理。</p>
+
+    <p><strong>解决办法</strong>是用while循环抱住accept调用，处理完TCP就绪队列中的所有连接后再退出循环。如何知道是否处理完就绪队列中的所有连接呢？accept返回-1并且errno设置为EAGAIN就表示所有连接都处理完。</p>
+  </li>
+</ol>
+
+<p>综合以上两种情况，服务器应该使用非阻塞地accept，accept在ET模式下的正确使用方式为：</p>
+
+<pre><code>while ((conn_sock = accept(listenfd,(struct sockaddr *) &amp;remote, (size_t *)&amp;addrlen)) &gt; 0) {
+    handle_client(conn_sock);
+}
+if (conn_sock == -1) {
+    if (errno != EAGAIN &amp;&amp; errno != ECONNABORTED &amp;&amp; errno != EPROTO &amp;&amp; errno != EINTR)
+    perror("accept");
+}
+</code></pre>
 
 <h2 id="section-1">总结</h2>
 <p><strong>epoll高效的两个原因：</strong></p>
@@ -234,6 +316,8 @@
             <li class="previous"><a href="/blog/2014/07/12/c%2B%2B-string-copy-on-write/" title="Previous Post: C++ string copy-on-write">&laquo; C++ string copy-on-write</a></li>
             
             
+            <li class="next"><a href="/blog/2014/07/15/linux-reentrant-function/" title="Next Post: Linux reentrant function">Linux reentrant function &raquo;</a></li>
+            
           </ul>
         
       </footer>
@@ -257,15 +341,15 @@
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2014/07/17/thundering-herd/">Linux Thundering Herd</a>
+    
+    <a class="list-group-item " href="/blog/2014/07/15/linux-reentrant-function/">Linux Reentrant Function</a>
+    
     <a class="list-group-item active" href="/blog/2014/07/15/linux-epoll-module/">Linux Epoll Module</a>
     
     <a class="list-group-item " href="/blog/2014/07/12/c%2B%2B-string-copy-on-write/">C++ String Copy-on-write</a>
     
     <a class="list-group-item " href="/blog/2014/06/28/signal-and-forkmarkdown/">Signal and Fork</a>
-    
-    <a class="list-group-item " href="/blog/2014/06/28/signal-and-thread/">Signal and Thread</a>
-    
-    <a class="list-group-item " href="/blog/2014/06/28/signal-status-and-lifecycle/">Signal Status and Lifecycle</a>
     
   </div>
 </section>
@@ -289,7 +373,7 @@
     
     
     <a class="list-group-item " href="/blog/categories/linux/index.html">
-        <span class="badge">14</span>
+        <span class="badge">16</span>
         linux
       </a>
     
