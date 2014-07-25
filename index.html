@@ -105,6 +105,53 @@
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-15T02:18:00+08:00" pubdate data-updated="true">Jul 15<span>th</span>, 2014</time>
+        
+           | <a href="/blog/2014/07/15/linux-epoll-module/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/07/15/linux-epoll-module/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/15/linux-epoll-module/">Linux Epoll Module</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p><code>select</code>，<code>poll</code>，<code>epoll</code>都是Linux下IO多路复用的机制。Windows下为<code>IOCP</code>模型。I/O多路复用就通过一种机制，可以监视多个描述符，一旦某个文件描述符就绪，能够通知程序进行相应的读写操作。其中文件描述符是一个简单的整数，用以标明每一个被进程所打开的文件和socket，包括<code>filefd</code>、<code>socketfd</code>、<code>signalfd</code>、<code>timerfd</code>、<code>eventfd</code>等。<code>eventfd</code> 是一个比 <code>pipe </code>更高效的线程间事件通知机制。</p>
+
+<p>但<code>select</code>，<code>poll</code>，<code>epoll</code>本质上都是<strong>同步I/O</strong>，因为他们都需要在读写事件就绪后自己负责进行读写，也就是说这个读写过程是阻塞的，而<strong>异步I/O</strong>则无需自己负责进行读写，异步I/O的实现会负责把数据从内核拷贝到用户空间。</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/07/15/linux-epoll-module/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-12T02:18:00+08:00" pubdate data-updated="true">Jul 12<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/07/12/c%2B%2B-string-copy-on-write/#disqus_thread"
@@ -383,7 +430,7 @@
 
   <div class="entry-content clearfix"><p>本文介绍在Linux平台下应用程序的编译过程，以及编译程序<a href="http://gcc.gnu.org/">GCC</a>在编译应用程序的过程的具体用法，同时详细说明了GCC的常用选项、模式和警告选项。</p>
 
-<center>![gcc](http://gcc.gnu.org/img/gccegg-65.png)</center>
+<p><img src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcQkcpI6uyaKSbXltFKcLfpuPyMjC8aw-VZH7x9uUt8bFQMTpsczYg" alt="gcc" /></p>
 
 </div>
   
@@ -541,57 +588,6 @@
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-10-13T00:28:00+08:00" pubdate data-updated="true">Oct 13<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/10/13/nginx-architecture-1-overview/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/10/13/nginx-architecture-1-overview/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/10/13/nginx-architecture-1-overview/">Nginx architecture(1)&#8211;Overview</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>从04年发布以来，Nginx已经成为多个国内外互联网具体首选的高性能Web服务器。其特点是占有内存少，并发能力强，并且由于Nginx使用基于事件驱动的架构能够最有效的利用多核CPU的处理能力，进程可以无阻塞的运行。</p>
-
-<p>特别是Nginx可以利用当前操作系统特有的一些高校API来提高自己的性能，例如Linux上的<code>epoll</code>、Solaris上的event ports和Free BSD上的kqueue。又如对于Linux，Nginx支持其独有的sendfile系统调用，可以高效的讲硬盘中的数据发送到网络上（无需将硬盘数据先复制到用户态内存中）。</p>
-
-<p>所以通过分析Nginx的架构设计，可以怎样充分利用服务器上的硬件资源，以及学习到更为先进的理念。下面就来分析和学习Nginx的架构设计。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx_zps7d735b88.jpg" alt="Nginx logo" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/10/13/nginx-architecture-1-overview/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -615,6 +611,8 @@
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2014/07/15/linux-epoll-module/">Linux Epoll Module</a>
+    
     <a class="list-group-item " href="/blog/2014/07/12/c%2B%2B-string-copy-on-write/">C++ String Copy-on-write</a>
     
     <a class="list-group-item " href="/blog/2014/06/28/signal-and-forkmarkdown/">Signal and Fork</a>
@@ -622,8 +620,6 @@
     <a class="list-group-item " href="/blog/2014/06/28/signal-and-thread/">Signal and Thread</a>
     
     <a class="list-group-item " href="/blog/2014/06/28/signal-status-and-lifecycle/">Signal Status and Lifecycle</a>
-    
-    <a class="list-group-item " href="/blog/2013/12/31/large-site-technical-architecture/">Large Site Technical Architecture</a>
     
   </div>
 </section>
@@ -647,7 +643,7 @@
     
     
     <a class="list-group-item " href="/blog/categories/linux/index.html">
-        <span class="badge">13</span>
+        <span class="badge">14</span>
         linux
       </a>
     

@@ -4,7 +4,7 @@
   <title><![CDATA[tags: linux | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/linux/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-07-23T15:53:12+08:00</updated>
+  <updated>2014-07-25T15:26:07+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,80 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Linux epoll module]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/07/15/linux-epoll-module/"/>
+    <updated>2014-07-15T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/07/15/linux-epoll-module</id>
+    <content type="html"><![CDATA[<p><code>select</code>，<code>poll</code>，<code>epoll</code>都是Linux下IO多路复用的机制。Windows下为<code>IOCP</code>模型。I/O多路复用就通过一种机制，可以监视多个描述符，一旦某个文件描述符就绪，能够通知程序进行相应的读写操作。其中文件描述符是一个简单的整数，用以标明每一个被进程所打开的文件和socket，包括<code>filefd</code>、<code>socketfd</code>、<code>signalfd</code>、<code>timerfd</code>、<code>eventfd</code>等。<code>eventfd</code> 是一个比 <code>pipe </code>更高效的线程间事件通知机制。</p>
+
+<p>但<code>select</code>，<code>poll</code>，<code>epoll</code>本质上都是<strong>同步I/O</strong>，因为他们都需要在读写事件就绪后自己负责进行读写，也就是说这个读写过程是阻塞的，而<strong>异步I/O</strong>则无需自己负责进行读写，异步I/O的实现会负责把数据从内核拷贝到用户空间。</p>
+
+<!--more-->
+
+<h2 id="select">select实现</h2>
+
+<p><img src="http://www.ibm.com/developerworks/cn/linux/l-async/figure4.gif" alt="" /></p>
+
+<p><strong><code>select</code>的几大缺点：</strong></p>
+
+<ul>
+  <li>
+    <u>每次调用`select`，都需要把fd集合从用户态拷贝到内核态，这个开销在fd很多时会很大</u>
+  </li>
+  <li>
+    <u>同时每次调用`select`都需要在内核遍历传递进来的所有fd，这个开销在fd很多时也很大</u>
+  </li>
+  <li>
+    <u>`select`支持的文件描述符数量太小了，默认是`1024`</u>
+  </li>
+</ul>
+
+<h2 id="poll">poll实现</h2>
+
+<p><code>poll</code>的实现和<code>select</code>非常相似，只是描述fd集合的方式不同，poll使用<code>pollfd</code>结构而不是select的<code>fd_set</code>结构，其他的都差不多。</p>
+
+<h2 id="epoll">epoll</h2>
+
+<p><code>epoll</code>是对<code>select</code>和<code>poll</code>的改进，能避免上述的三个缺点。我们先看一下<code>epoll</code>和<code>select</code>和<code>poll</code>的调用接口上的不同，<code>select</code>和<code>poll</code>都只提供了一个函数——<code>select</code>或者<code>poll</code>函数。而<code>epoll</code>提供了三个函数：</p>
+
+<ul>
+  <li><code>epoll_create</code>，创建一个epoll句柄；</li>
+  <li><code>epoll_ctl</code>，注册要监听的事件类型；</li>
+  <li><code>epoll_wait</code>，等待事件的产生。</li>
+</ul>
+
+<p>对于第一个缺点，<code>epoll</code>的解决方案在<code>epoll_ctl</code>函数中。每次注册新的事件到<code>epoll</code>句柄中时（在<code>epoll_ctl</code>中指定<code>EPOLL_CTL_ADD</code>），会把所有的fd拷贝进内核，而不是在<code>epoll_wait</code>的时候重复拷贝。<code>epoll</code>保证了每个fd在整个过程中只会拷贝一次。</p>
+
+<p>对于第二个缺点，<code>epoll</code>的解决方案不像<code>select</code>或<code>poll</code>一样每次都把current轮流加入fd对应的设备等待队列中，而只在<code>epoll_ctl</code>时把current挂一遍（这一遍必不可少）并为每个fd指定一个回调函数，当设备就绪，唤醒等待队列上的等待者时，就会调用这个回调函数，而这个回调函数会把就绪的fd加入一个就绪链表）。<code>epoll_wait</code>的工作实际上就是在这个就绪链表中查看有没有就绪的fd（利用<code>schedule_timeout()</code>实现睡一会，判断一会的效果，和<code>select</code>实现中的是类似的）。</p>
+
+<p>对于第三个缺点，<code>epoll</code>没有这个限制，它所支持的FD上限是最大可以打开文件的数目，这个数字一般远大于2048,举个例子,在1GB内存的机器上大约是10万左右，具体数目可以<code>cat /proc/sys/fs/file-max</code>察看,一般来说这个数目和系统内存关系很大。</p>
+
+<h3 id="section">触发模型</h3>
+
+<p><code>epoll</code>除了提供<code>select\poll</code>那种IO事件的<strong>电平触发(Level Triggered)</strong>外，还提供了<strong>边沿触发(Edge Triggered)</strong>，这就使得用户空间程序有可能缓存IO状态，减少<code>epoll_wait/epoll_pwait</code>的调用，提供应用程序的效率。</p>
+
+<ul>
+  <li>
+    <p><strong>LT(level triggered)：</strong>水平触发，缺省方式，同时支持block和no-block socket，在这种做法中，内核告诉我们一个文件描述符是否被就绪了，如果就绪了，你就可以对这个就绪的fd进行IO操作。如果你不作任何操作，内核还是会继续通知你的，所以，这种模式编程出错的可能性较小。传统的<code>select\poll</code>都是这种模型的代表。</p>
+  </li>
+  <li>
+    <p><strong>ET(edge-triggered)：</strong>边沿触发，高速工作方式，只支持no-block socket。在这种模式下，当描述符从未就绪变为就绪状态时，内核通过<code>epoll</code>告诉你。然后它会假设你知道文件描述符已经就绪，并且不会再为那个描述符发送更多的就绪通知，直到你做了某些操作导致那个文件描述符不再为就绪状态了(比如：你在发送、接受或者接受请求，或者发送接受的数据少于一定量时导致了一个EWOULDBLOCK错误)。但是请注意，如果一直不对这个fs做IO操作(从而导致它再次变成未就绪状态)，内核不会发送更多的通知。</p>
+  </li>
+</ul>
+
+<p><strong>区别：</strong>LT事件不会丢弃，而是只要读buffer里面有数据可以让用户读取，则不断的通知你。而ET则只在事件发生之时通知。</p>
+
+<h2 id="section-1">总结</h2>
+<p><strong>epoll高效的两个原因：</strong></p>
+
+<ul>
+  <li><code>epoll</code>会复用文件描述符集合来传递结果而不是迫使开发者每次等待事件之前都必须重新准备要被侦听的文件描述符集合，</li>
+  <li>另一个原因就是获取事件的时候，它无须遍历整个被侦听的描述符集，只要遍历那些被内核IO事件异步唤醒而加入Ready队列的描述符集合就行了</li>
+</ul>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Signal and fork]]></title>
@@ -255,108 +329,6 @@ U】</em></strong>并不是删除一整行，而是删除光标左边的内容�
 + U】</em></strong>将无任何作用，这个时候，需要删除光标右边内容：</p>
 
 <pre><code>ctrl-k</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[linux下双网卡配置]]></title>
-    <link href="http://billowkiller.github.io/blog/2013/05/14/linuxxia-shuang-wang-qia-pei-zhi/"/>
-    <updated>2013-05-14T01:09:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2013/05/14/linuxxia-shuang-wang-qia-pei-zhi</id>
-    <content type="html"><![CDATA[<p><strong>需求</strong>： 一台PC1拥有双网卡，另外一台PC2需要通过这台pc上网。</p>
-
-<p><img src="http://images.cnblogs.com/cnblogs_com/billowkiller/447098/r_ac345982b2b7d0a207325429cbef76094a369a8e.jpg" alt="网络拓扑图" /></p>
-
-<p><strong>配置过程</strong>：</p>
-
-<p>首先需要配置pc1的两个网卡信息以及pc2的网卡信息。这个比较简单，接下里需要配置pc1中的静态路由。</p>
-
-<p>文件ipt.save表示静态路由表的修改文件。</p>
-
-<pre><code># Generated by iptables-save v1.4.2 on Wed Nov 16 15:04:23 2011
- *filter
- :INPUT ACCEPT [203:29797]
- :FORWARD ACCEPT [0:0]
- :OUTPUT ACCEPT [83:10885]
- COMMIT
- # Completed on Wed Nov 16 15:04:23 2011
- # Generated by iptables-save v1.4.2 on Wed Nov 16 15:04:23 2011
- *nat
- :PREROUTING ACCEPT [82:12935]
- :POSTROUTING ACCEPT [25:1724]
- :OUTPUT ACCEPT [25:1724]
- -A POSTROUTING -s 10.0.0.0/8 ! -d 10.0.0.0/8 -j MASQUERADE 
- COMMIT
- # s-&gt;source !d-&gt;not distination-&gt;not in the same subset
- # Completed on Wed Nov 16 15:04:23 2011
-</code></pre>
-
-<p>进入root权限后，执行命令</p>
-
-<pre><code>iptables-restore /home/angel/net_scripts/ipt.save
-</code></pre>
-
-<p>这样就是修改了静态路由表，但还需要将转发开关打开，需要命令如下</p>
-
-<pre><code>echo '1' &gt; /proc/sys/net/ipv4/ip_forward
-</code></pre>
-
-<p>这样修改之后pc2就可以通过pc1上网了。
-<!--more-->
-但是重启后发现<strong>两个问题</strong>：</p>
-
-<ul>
-  <li>linux下如果有两个网卡eth0和eth1，系统启动时候会先启动eth0，后启动eth1，这样造成eth0的信息被eth1覆盖。</li>
-  <li>以上的两个命令并不是永久的，重启后失效。</li>
-</ul>
-
-<p>第一个问题的解决方案是修改/etc/network/interfaces
-文件，修改网卡接口的信息，修改后的文件如下：</p>
-
-<pre><code># interfaces(5) file used by ifup(8) and ifdown(8)
- auto lo
- iface lo inet loopback
- 
- auto eth1
- iface eth1 inet dhcp
- 
- auto eth0
- iface eth0 inet static
- address 10.0.0.1
- netmask 255.0.0.0
- broadcast 10.255.255.255
-</code></pre>
-
-<p>需要重启生效，也可以使用命令</p>
-
-<pre><code>sudo /etc/init.d/networking restart
-</code></pre>
-
-<p>第二个问题可以写一个简单的脚本iptable.sh来实现，每次开机启动自动执行脚本：</p>
-
-<pre><code>iptables-restore /home/angel/net_scripts/ipt.save
- echo '1' &gt; /proc/sys/net/ipv4/ip_forward
-</code></pre>
-
-<p>将脚本放在任意的位置，如下放入home文件夹下，修改/etc/rc.local文件：</p>
-
-<pre><code>#!/bin/sh -e
- #
- # rc.local
- #
- # This script is executed at the end of each multiuser runlevel.
- # Make sure that the script will "exit 0" on success or any other
- # value on error.
- #
- # In order to enable or disable this script just change the execution
- # bits.
- #
- # By default this script does nothing.
- sh /home/bk/iptable.sh
- exit 0
-</code></pre>
-
-<p>这样每次启动都会调用脚本，并且使用root权限。</p>
 ]]></content>
   </entry>
   

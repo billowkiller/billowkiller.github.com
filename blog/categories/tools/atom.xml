@@ -4,7 +4,7 @@
   <title><![CDATA[Category: tools | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/tools/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-07-23T15:53:12+08:00</updated>
+  <updated>2014-07-25T15:26:07+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -20,7 +20,7 @@
     <id>http://billowkiller.github.io/blog/2013/12/31/gcc-summary</id>
     <content type="html"><![CDATA[<p>本文介绍在Linux平台下应用程序的编译过程，以及编译程序<a href="http://gcc.gnu.org/">GCC</a>在编译应用程序的过程的具体用法，同时详细说明了GCC的常用选项、模式和警告选项。</p>
 
-<center>![gcc](http://gcc.gnu.org/img/gccegg-65.png)</center>
+<p><img src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcQkcpI6uyaKSbXltFKcLfpuPyMjC8aw-VZH7x9uUt8bFQMTpsczYg" alt="gcc" /></p>
 
 <!--more-->
 
