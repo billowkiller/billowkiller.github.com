@@ -4,7 +4,7 @@
   <title><![CDATA[tags: linux | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/linux/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-07-25T21:14:45+08:00</updated>
+  <updated>2014-07-25T21:38:47+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -147,7 +147,7 @@
 
 <h3 id="section">触发模型</h3>
 
-<h4 id="eagain">EAGAIN</h4>
+<h4 id="eagain">1. EAGAIN</h4>
 
 <p>先说下<code>EAGIN</code>这个返回值。</p>
 
@@ -159,7 +159,7 @@
 
 <p>所以，<strong>对于阻塞socket，read/write返回-1代表网络出错了。但对于非阻塞socket，read/write返回-1不一定网络真的出错了。可能是Resource temporarily unavailable。这时你应该再试，直到Resource available。</strong></p>
 
-<h4 id="lt--et">LT &amp; ET</h4>
+<h4 id="lt--et">2. LT &amp; ET</h4>
 
 <p><code>epoll</code>除了提供<code>select\poll</code>那种IO事件的<strong>电平触发(Level Triggered)</strong>外，还提供了<strong>边沿触发(Edge Triggered)</strong>，这就使得用户空间程序有可能缓存IO状态，减少<code>epoll_wait/epoll_pwait</code>的调用，提供应用程序的效率。</p>
 
@@ -208,7 +208,7 @@
 
 <p><strong>还有，假如发送端流量大于接收端的流量(意思是epoll所在的程序读比转发的socket要快),由于是非阻塞的socket,那么<code>send()</code>函数虽然返回,但实际缓冲区的数据并未真正发给接收端,这样不断的读和发，当缓冲区满后会产生<code>EAGAIN</code>错误(参考<code>man send</code>),同时,不理会这次请求发送的数据.所以,需要封装<code>socket_send()</code>的函数用来处理这种情况,该函数会尽量将数据写完再返回，返回-1表示出错。在<code>socket_send()</code>内部,当写缓冲已满(<code>send()</code>返回-1,且<code>errno</code>为<code>EAGAIN</code>),那么会等待后再重试.这种方式并不很完美,在理论上可能会长时间的阻塞在<code>socket_send()</code>内部,但暂没有更好的办法.</strong></p>
 
-<h4 id="accept">正确的accept</h4>
+<h4 id="accept">3. 正确的accept</h4>
 
 <p>正确的accept，accept 要考虑 2 个问题</p>
 

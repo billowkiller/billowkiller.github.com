@@ -4,7 +4,7 @@
   <title><![CDATA[Category: book | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/book/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-07-25T21:14:45+08:00</updated>
+  <updated>2014-07-25T21:38:47+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,18 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Some NB Translations]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/07/17/Some-NB-translation/"/>
+    <updated>2014-07-17T20:07:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/07/17/Some-NB-translation</id>
+    <content type="html"><![CDATA[<ul>
+  <li><a href="http://blog.csdn.net/eroswang/article/details/1787456">Unix编程常见问题解答</a></li>
+  <li><a href="http://blog.csdn.net/eroswang/article/details/1790351">从程序员角度看ELF</a></li>
+</ul>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Large site technical architecture]]></title>

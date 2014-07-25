@@ -206,35 +206,39 @@
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/2014/07/15/linux-epoll-module/</loc>
-        <lastmod>2014-07-25T21:09:52+08:00</lastmod>
+        <lastmod>2014-07-25T21:18:03+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/2014/07/15/linux-reentrant-function/</loc>
-        <lastmod>2014-07-25T21:14:28+08:00</lastmod>
+        <lastmod>2014-07-25T21:18:26+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/2014/07/17/thundering-herd/</loc>
         <lastmod>2014-07-25T21:14:28+08:00</lastmod>
     </url>
     <url>
+        <loc>http://billowkiller.github.io/blog/2014/07/17/Some-NB-translation/</loc>
+        <lastmod>2014-07-25T21:38:28+08:00</lastmod>
+    </url>
+    <url>
         <loc>http://billowkiller.github.io/blog/archives/</loc>
-        <lastmod>2014-07-25T21:14:28+08:00</lastmod>
+        <lastmod>2014-07-25T21:38:28+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/categories/</loc>
-        <lastmod>2014-07-25T21:14:28+08:00</lastmod>
+        <lastmod>2014-07-25T21:38:28+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/category/</loc>
-        <lastmod>2014-07-25T21:14:28+08:00</lastmod>
+        <lastmod>2014-07-25T21:38:28+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/tags/</loc>
-        <lastmod>2014-07-25T21:14:28+08:00</lastmod>
+        <lastmod>2014-07-25T21:38:28+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/</loc>
-        <lastmod>2014-07-25T21:14:28+08:00</lastmod>
+        <lastmod>2014-07-25T21:38:28+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/components.html</loc>
@@ -256,7 +260,7 @@
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/</loc>
-        <lastmod>2014-07-25T21:14:28+08:00</lastmod>
+        <lastmod>2014-07-25T21:38:28+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/javascript.html</loc>
