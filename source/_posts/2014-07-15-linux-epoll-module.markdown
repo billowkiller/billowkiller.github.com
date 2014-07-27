@@ -45,7 +45,7 @@ tags: [linux, epoll]
 
 ### 触发模型
 
-#### EAGAIN
+#### 1. EAGAIN
 
 先说下`EAGIN`这个返回值。
 
@@ -57,7 +57,7 @@ tags: [linux, epoll]
 
 所以，**对于阻塞socket，read/write返回-1代表网络出错了。但对于非阻塞socket，read/write返回-1不一定网络真的出错了。可能是Resource temporarily unavailable。这时你应该再试，直到Resource available。**
 
-#### LT & ET
+#### 2. LT & ET
 
 `epoll`除了提供`select\poll`那种IO事件的**电平触发(Level Triggered)**外，还提供了**边沿触发(Edge Triggered)**，这就使得用户空间程序有可能缓存IO状态，减少`epoll_wait/epoll_pwait`的调用，提供应用程序的效率。
 
@@ -96,7 +96,7 @@ tags: [linux, epoll]
 
 **还有，假如发送端流量大于接收端的流量(意思是epoll所在的程序读比转发的socket要快),由于是非阻塞的socket,那么`send()`函数虽然返回,但实际缓冲区的数据并未真正发给接收端,这样不断的读和发，当缓冲区满后会产生`EAGAIN`错误(参考`man send`),同时,不理会这次请求发送的数据.所以,需要封装`socket_send()`的函数用来处理这种情况,该函数会尽量将数据写完再返回，返回-1表示出错。在`socket_send()`内部,当写缓冲已满(`send()`返回-1,且`errno`为`EAGAIN`),那么会等待后再重试.这种方式并不很完美,在理论上可能会长时间的阻塞在`socket_send()`内部,但暂没有更好的办法.**
 
-#### 正确的accept
+#### 3. 正确的accept
 
 正确的accept，accept 要考虑 2 个问题
 
