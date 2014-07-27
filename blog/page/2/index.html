@@ -105,6 +105,66 @@
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-02-16T09:18:00+08:00" pubdate data-updated="true">Feb 16<span>th</span>, 2014</time>
+        
+           | <a href="/blog/2014/02/16/c%2B%2B-inline/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/02/16/c%2B%2B-inline/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/02/16/c%2B%2B-inline/">C++ Inline</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p><code>inline</code>定义的函数，比起没有<code>inline</code>的函数来说，没有执行函数调用所带来的负担，因此它是高效率的；比起宏来，它具有<strong>函数的可预期行为和参数类型检验</strong>。</p>
+
+<p><code>inline</code>对于编译器而言，意味着“在编译阶段，将调用动作以被调用函数的本体替换之”。但是它只是一种建议，编译器可以去做，也可以不去做。从逻辑上来说，编译器将函数<code>inline</code>的步骤如下：</p>
+
+<ol>
+  <li>将<code>inline</code>函数体复制到<code>inline</code>函数调用点处；</li>
+  <li>为所用<code>inline</code>函数中的局部变量分配内存；</li>
+  <li>将<code>inline</code>函数的的输入参数和返回值映射到调用方法的局部变量空间中；</li>
+  <li>如果<code>inline</code>函数有多个返回点，将其转变为<code>inline</code>函数代码块末尾的分支（使用GOTO）。</li>
+</ol>
+
+<p><code>inline</code>函数的缺点有哪些呢？</p>
+
+<ol>
+  <li><strong>代码膨胀。</strong>如果<code>inline</code>函数体过大且编译器还让它<code>inline</code>成功，那么你最终的程序会代码膨胀，从而造成设备缓冲命中率低，引起较多的页面错误，读写硬盘的次数增多，这样程序的性能就下降了！建议：<strong><code>inline</code>函数体一般不要超过5行，不包括循环，不包括递归调用。</strong></li>
+  <li><strong><code>inline</code>函数内部不要有static变量。</strong><code>inline</code>函数的定义几乎总是放在头文件（.h）里，这允许多个实现文件（.cpp）得以引用。我们知道编译器是分别编译的，所以这个时候，在多个实现文件里就会有多个<code>inline</code>函数的展开，也就是说有个多个static变量，这恐怕不是我们期望的！</li>
+  <li><strong><code>inline</code>函数无法随着函数库升级而升级。</strong>如果f是函数库中的一个<code>inline</code>函数，使用它的用户会将f函数实体编译到他们的程序中。一旦函数库实现者改变f，所有用到f的程序都必须重新编译。如果f是non-<code>inline</code>的，用户程序只需重新连接即可。如果函数库采用的是动态连接，那这一升级的f函数可以不知不觉的被程序使用。</li>
+  <li><strong>不要获取<code>inline</code>函数的地址。</strong>如果要取得一个<code>inline</code>函数的地址，编译器就必须为此函数产生一个函数实体，无论如何，编译器无法交出一个“不存在函数”的指针。注意，有些编译器可能会使用类的constructors和destructors的函数指针，用以构造和析构一个class对象的数组。另外类的constructors和destructors可能简单，但是其父类的类的constructors和destructors可能是复杂的，所以<strong>类的constructors和destructors往往不是<code>inline</code>函数的最佳选择</strong>！</li>
+  <li><strong><code>inline</code>虚函数往往是无效的。</strong>虚函数往往是运行时确定的，而<code>inline</code>是在编译时进行的，所以<code>inline</code>虚函数往往无效。当然如果直接用类的对象来使用虚函数，那么对有的编译器而言，也可起到优化的作用。</li>
+  <li><strong><code>inline</code>函数无法调试。</strong>原因请参见上面编译器将函数<code>inline</code>的步骤。所以请在项目后期，<strong>对程序进行profile后，再决定将那些函数<code>inline</code>化。</strong></li>
+</ol>
+</div>
+  
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-12-31T18:09:00+08:00" pubdate data-updated="true">Dec 31<span>st</span>, 2013</time>
         
            | <a href="/blog/2013/12/31/large-site-technical-architecture/#disqus_thread"
@@ -548,69 +608,6 @@
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/zui-duan-lu-jing-suan-fa/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/zui-duan-lu-jing-suan-fa/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/zui-duan-lu-jing-suan-fa/">最短路径算法</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p><strong>单源最短路径</strong></p>
-
-<p>​1. Dijkstra</p>
-
-<p>Dijkstra算法解决有向图上带权的单源最短路径问题，要求所有边的权值非负。</p>
-
-<p>用到了顶点的最小优先队列，排序关键字为顶点的d值。即开始出了根为0，其他</p>
-
-<p>顶点为正无穷，后来d值根据松弛算法变化。</p>
-
-<p>总计运行时间为O((V+E)lgV)，如果所有顶点都可达的话，则为O(ElgV)。</p>
-
-<p>​2. Bellman-ford</p>
-
-<p>算法用来解决一般，即边的权值可以为负的单源最短路径问题。算法同时也可以检查</p>
-
-<p>是否有从源点可达的负权回路。</p>
-
-<p>算法的运行时间为O(VE)。</p>
-
-<p></div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/zui-duan-lu-jing-suan-fa/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -672,7 +669,7 @@
     
     
     <a class="list-group-item " href="/blog/categories/book/index.html">
-        <span class="badge">5</span>
+        <span class="badge">6</span>
         book
       </a>
     
