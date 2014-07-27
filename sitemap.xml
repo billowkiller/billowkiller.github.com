@@ -189,6 +189,10 @@
         <lastmod>2014-07-16T23:49:52+08:00</lastmod>
     </url>
     <url>
+        <loc>http://billowkiller.github.io/blog/2014/02/16/c%2B%2B-inline/</loc>
+        <lastmod>2014-07-27T14:33:19+08:00</lastmod>
+    </url>
+    <url>
         <loc>http://billowkiller.github.io/blog/2014/06/28/signal-status-and-lifecycle/</loc>
         <lastmod>2014-07-23T15:49:15+08:00</lastmod>
     </url>
@@ -221,24 +225,28 @@
         <lastmod>2014-07-25T21:38:28+08:00</lastmod>
     </url>
     <url>
+        <loc>http://billowkiller.github.io/blog/2014/07/18/+TCP-IP/</loc>
+        <lastmod>2014-07-27T14:36:48+08:00</lastmod>
+    </url>
+    <url>
         <loc>http://billowkiller.github.io/blog/archives/</loc>
-        <lastmod>2014-07-25T21:38:28+08:00</lastmod>
+        <lastmod>2014-07-27T14:36:48+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/categories/</loc>
-        <lastmod>2014-07-25T21:38:28+08:00</lastmod>
+        <lastmod>2014-07-27T14:36:48+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/category/</loc>
-        <lastmod>2014-07-25T21:38:28+08:00</lastmod>
+        <lastmod>2014-07-27T14:36:48+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/tags/</loc>
-        <lastmod>2014-07-25T21:38:28+08:00</lastmod>
+        <lastmod>2014-07-27T14:36:48+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/</loc>
-        <lastmod>2014-07-25T21:38:28+08:00</lastmod>
+        <lastmod>2014-07-27T14:36:48+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/components.html</loc>
@@ -260,7 +268,7 @@
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/</loc>
-        <lastmod>2014-07-25T21:38:28+08:00</lastmod>
+        <lastmod>2014-07-27T14:36:48+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/javascript.html</loc>

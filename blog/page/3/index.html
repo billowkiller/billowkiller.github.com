@@ -107,6 +107,147 @@
 
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
         
+           | <a href="/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue/">Zip文件乱码解决</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>在windows上压缩的文件，是以系统默认编码中文来压缩文件。由于zip文件中没有声明其编码，所以linux上的unzip一般以默认编码解压，中文文件名会出现乱码。</p>
+
+<p>虽然2005年就有人把这报告为bug,
+但是info-zip的官方网站没有把自动识别编码列入计划，可能他们不认为这是个问题。Sun对java中存在N年的zip编码问题，采用了同样的处理方式。</p>
+
+<p>1.1 </p>
+
+<p>通过unzip行命令解压，指定字符集</p>
+
+<pre><code>unzip -O CP936 xxx.zip (用GBK, GB18030也可以)
+</code></pre>
+
+<p>有趣的是unzip的manual中并无这个选项的说明, unzip
+–help对这个参数有一行简单的说明。</p>
+
+<p>1.2 </p>
+
+<p>在环境变量中，指定unzip参数，总是以指定的字符集显示和解压文件</p>
+
+<p>解决办法：</p>
+
+<p>引用</p>
+
+<pre><code>vi /etc/environment
+</code></pre>
+
+<p>再最后加入后面的代码即可</p>
+
+<p>UNZIP=”-O CP936”</p>
+
+<p>ZIPINFO=”-O CP936”</p>
+</div>
+  
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/05/14/xiao-yan-zhong-de-scrumhe-xp/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/xiao-yan-zhong-de-scrumhe-xp/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/xiao-yan-zhong-de-scrumhe-xp/">硝烟中的Scrum和XP</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p><strong>refine from</strong> <em>硝烟中的Scrum和XP–我们如何实施Scrum</em></p>
+
+<hr />
+
+<p>产品的backlog时Scrum的核心，也是一切的起源，从根本上说，它就是一个需求或故事特性等组成的列表，按照重要性的级别进行排序。它里面包含的是客户想要的东西，并用客户的术语加一描述。</p>
+
+<p>backlog的另外一个名称是故事。包括以下字段：</p>
+
+<ul>
+  <li>ID</li>
+  <li>Name：一个简短的描述</li>
+  <li>Importance：100以内打分，分数越高越重要</li>
+  <li>Initial estimate：最小单位为stroy
+point，即为人天。估值无需准确，但是要保证相对的正确性。</li>
+  <li>How to demo：简短的测试规范，先做啥，然后做啥，最后做啥，得到什么结果。</li>
+  <li>Notes：相关信息，解释说明，对其他资料的引用等等，简短。</li>
+</ul>
+
+<p>额外的字段，根据需要：</p>
+
+<ul>
+  <li>Track：当前故事的大致分类（后台系统，优化…）</li>
+  <li>Components：再多个Scrum团队协作的时候很有用，包括数据库，服务器，客户端等组件</li>
+  <li>Requestor：哪个客户活相关人员最先提出的需求，再后续的开发过程中向他反馈</li>
+  <li>Bug tracking ID</li>
+</ul>
+
+<p>产品的backlog应该停留再业务层次上，例如给Events表添加索引，潜在的目标是“提高再后台系统中搜索事件表单的相应速度”，这时需要改写，原先的目标作为一个注释存在。
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/xiao-yan-zhong-de-scrumhe-xp/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
            | <a href="/blog/2013/05/14/ubuntuliang-du-diao-jie/#disqus_thread"
              data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/ubuntuliang-du-diao-jie/">Comments</a>
         
@@ -630,195 +771,6 @@ name of the output file:</p>
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/">Linux下解决中文乱码——文件，标签</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>文件是在WIndows 下创建的,Windows
-的文件名中文编码默认为GBK,而Linux中默认文件名编码为UTF8,由于编码不一致所以导致了文件名乱码的问题，解决这个问题需要对文件名进行转码。</p>
-
-<ul>
-  <li><strong>文件与文件夹乱码，使用convmv来解决</strong></li>
-</ul>
-
-<p>convmv 使用方法：</p>
-
-<p>convmv -f 源编码 -t 新编码 [选项] 文件名</p>
-
-<p>常用参数：</p>
-
-<ul>
-  <li>-r 递归处理子文件夹</li>
-  <li>–notest 真正进行操作，默认情况下是不对文件进行真实操作</li>
-  <li>–list 显示所有支持的编码</li>
-  <li>–unescap 可以做一下转义，比如把%20变成空格</li>
-</ul>
-
-<p>举例：</p>
-
-<p>在当前目录下</p>
-
-<pre><code>convmv -f GBK -t UTF-8 --notest * //所有文件转gbk为utf8
-</code></pre>
-
-<ul>
-  <li><strong>转换 mp3 标签编码，使用mutagen</strong></li>
-</ul>
-
-<p>安装：</p>
-
-<pre><code>sudo apt-get install python-mutagen
-</code></pre>
-
-<p>举例：</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/linuxxia-dhcpfu-wu-qi-pei-zhi/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/linuxxia-dhcpfu-wu-qi-pei-zhi/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/linuxxia-dhcpfu-wu-qi-pei-zhi/">Linux下DHCP服务器配置</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>环境为Ubuntu 12.10，机器为3网卡，需要再eth2上配置一个dhcp服务。</p>
-
-<p>因为eth2后接一个交换机，交换机上的机器需要自动分配网址，并且对于某一台或多台机器需要固定网址，例如打印机。</p>
-
-<h3 id="dhcp">1.   安装DHCP服务</h3>
-
-<pre><code>sudo apt-get install dhcp3-server
-</code></pre>
-
-<p>但是安装的是
-isp-dhcp-server。可能是ubuntu进行的版本替换。但是不影响后面的操作。</p>
-
-<p>服务器上用友3块网卡，需要选择哪一块网卡用来监听DHCP服务。</p>
-
-<p>输入下面命令修改配置文件</p>
-
-<pre><code>vim /etc/default/isc-dhcp-server
-</code></pre>
-
-<p>在文件的注释部分可以看到dhcpd的配置文件在</p>
-
-<pre><code>/etc/dhcp/dhcpd.conf
-</code></pre>
-
-<p>其他注释部分为格外选项，下面要修改INTERFACES</p>
-
-<pre><code>INTERFACES=“eth2” &lt;!--more--&gt; ### 2.  配置DHCP服务
-</code></pre>
-
-<p>修改在上一步查到的dhcpd文件</p>
-
-<p>修改的部分如下：</p>
-
-<pre><code>default-lease-time 600;
- max-lease-time 7200;
- option subnet-mask 255.255.255.0;
- option broadcast-address 192.168.1.255;
- option routers 192.168.1.254;
- option domain-name-servers 192.168.1.1, 192.168.1.2;
- subnet 192.168.1.0 netmask 255.255.255.0 {
- 　　range 192.168.1.10 192.168.1.200;
- }
-</code></pre>
-
-<p>注意：不要忘了每句后面加上分号，当时我就粗心了，花了好久时间查出。</p>
-
-<p>这样修改自动分配的地址范围就在</p>
-
-<pre><code>192.168.1.10 与 192.168.1.200
-</code></pre>
-
-<p>还需要绑定MAC地址与ip地址，在添加代码</p>
-
-<pre><code>host printer1 {
- 　　hardware ethernet 00:0a:95:f5:8f:b3;
- 　　fixed-address 192.168.1.23;
- }
-</code></pre>
-
-<p>重启电脑，就ok了。</p>
-
-<p>需要找到DHCP服务器的IP地址，使用下面的命令</p>
-
-<pre><code>sudo dhclient
-</code></pre>
-
-<p>或者</p>
-
-<pre><code>tail -n 15 /var/lib/dhcp3/dhclient.*.leases
-</code></pre>
-
-</div>
-  
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -842,6 +794,8 @@ isp-dhcp-server。可能是ubuntu进行的版本替换。但是不影响后面�
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2014/07/18/+TCP-IP/">Summary of TCP/IP ILLustrated Volume 1</a>
+    
     <a class="list-group-item " href="/blog/2014/07/17/Some-NB-translation/">Some NB Translations</a>
     
     <a class="list-group-item " href="/blog/2014/07/17/thundering-herd/">Linux Thundering Herd</a>
@@ -849,8 +803,6 @@ isp-dhcp-server。可能是ubuntu进行的版本替换。但是不影响后面�
     <a class="list-group-item " href="/blog/2014/07/15/linux-reentrant-function/">Linux Reentrant Function</a>
     
     <a class="list-group-item " href="/blog/2014/07/15/linux-epoll-module/">Linux Epoll Module</a>
-    
-    <a class="list-group-item " href="/blog/2014/07/12/c%2B%2B-string-copy-on-write/">C++ String Copy-on-write</a>
     
   </div>
 </section>
@@ -862,7 +814,7 @@ isp-dhcp-server。可能是ubuntu进行的版本替换。但是不影响后面�
     
     
     <a class="list-group-item " href="/blog/categories/language/index.html">
-        <span class="badge">4</span>
+        <span class="badge">5</span>
         language
       </a>
     
@@ -880,7 +832,7 @@ isp-dhcp-server。可能是ubuntu进行的版本替换。但是不影响后面�
     
     
     <a class="list-group-item " href="/blog/categories/book/index.html">
-        <span class="badge">4</span>
+        <span class="badge">5</span>
         book
       </a>
     
