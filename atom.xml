@@ -4,7 +4,7 @@
   <title><![CDATA[Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-07-28T00:04:06+08:00</updated>
+  <updated>2014-07-28T00:06:23+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Summary of TCP/IP ILLustrated Volume 1]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/07/18/+TCP-IP/"/>
+    <link href="http://billowkiller.github.io/blog/2014/07/18/TCP-IP/"/>
     <updated>2014-07-18T09:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/07/18/ TCP-IP</id>
+    <id>http://billowkiller.github.io/blog/2014/07/18/TCP-IP</id>
     <content type="html"><![CDATA[<p>Modified from several blogs. Sorry for failing to detailed list.</p>
 
 <hr />
