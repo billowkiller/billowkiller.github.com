@@ -607,43 +607,39 @@
 
 
 
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-12T02:18:00+08:00" pubdate data-updated="true">Apr 12<span>th</span>, 2014</time>
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-17T02:18:00+08:00" pubdate data-updated="true">Apr 17<span>th</span>, 2014</time>
         
-           | <a href="/blog/2014/04/12/Inside-C%2B%2B-Object/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/04/12/Inside-C%2B%2B-Object/">Comments</a>
+           | <a href="/blog/2014/04/17/Effective-C%2B%2B/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/04/17/Effective-C%2B%2B/">Comments</a>
         
       </p>
     
     
-      <h1 class="entry-title"><a href="/blog/2014/04/12/Inside-C%2B%2B-Object/">Inside C++ Object</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/04/17/Effective-C%2B%2B/">Effective C++ Rework</a></h1>
     
   </header>
 
 
-  <div class="entry-content clearfix"><p>modified from <a href="http://blog.csdn.net/eroswang/article/details/1749609">http://blog.csdn.net/eroswang/article/details/1749609</a></p>
+  <div class="entry-content clearfix"><h2 id="c">让自己习惯C++</h2>
+<p>###Item 01： View C++ as a federation of languages
+C++同时支持过程形式、面对对象形式、函数形式、泛型形式、元编程形式。</p>
 
-<hr />
-
-<h2 id="ooob">面对对象（OO）和基于对象（OB）</h2>
-
-<p>基于对象的数据类型可以展示封装的非多态形式，但是不支持类型的扩充。一个OB设计可能比一个对等的OO设计速度更快而且空间更紧凑。速度快是因为所有的函数引发操作都在编译时期解析完成，对象建构起来时不需要设置virtual机制；空间紧凑则是因为每一个class object不需要负担传统上为了支持virtual机制而需要的额外符合。不过，OB设计比较没有弹性。 </p>
-
-<h2 id="c">C++对象模型</h2>
-
-<p>在C++中，有两种<strong>class data members：static和nonstatic</strong>，以及三种<strong>class member functions：static、nonstatic和virtual</strong>。</p>
-
-<p>Nonstatic data members被配置于每一个class object之内，static data members则被存放在所有的class object之外。Static和nonstatic function members也被放在所有的class object之外，Virtual functions则以两个步骤支持之：</p>
+<p>次语言有</p>
 
 <ul>
-  <li>每一个class产生出一堆指向virtual functions的指针，放在表格之中，这个表格被称为<strong>virtual table（vtbl）</strong>。每一个class所关联的type_info object（用以支持<strong>runtime type identification，RTTI</strong>）也经由virtual table被指出来，通常是放在表格的第一个slot处。</li>
-  <li>每一个class object被添加了一个指针，指向相关的virtual table。通常这个指针被称为<strong>vptr</strong>。</li>
+  <li>C</li>
+  <li>Object-Oriented C++</li>
+  <li>Template C++</li>
+  <li>STL</li>
 </ul>
+
+<p>C++高效编程守则视状况而变化，取决于你使用C++的那一部分。</p>
 
 </div>
   
   
     <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/04/12/Inside-C%2B%2B-Object/">Read on &rarr;</a>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/04/17/Effective-C%2B%2B/">Read on &rarr;</a>
     </footer>
   
 
@@ -711,7 +707,7 @@
     
     
     <a class="list-group-item " href="/blog/categories/book/index.html">
-        <span class="badge">6</span>
+        <span class="badge">7</span>
         book
       </a>
     
