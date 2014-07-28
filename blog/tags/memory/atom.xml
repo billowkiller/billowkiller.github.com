@@ -4,7 +4,7 @@
   <title><![CDATA[tags: memory | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/memory/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-07-28T08:59:08+08:00</updated>
+  <updated>2014-07-28T10:09:21+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -455,14 +455,23 @@ unsigned int (*)();
 
 <h3 id="section-3">对象构造</h3>
 
-<pre><code>class Point {
-public:
-	Point(float x = 0.0, float y = 0.0) : _x(x),_y(y) {}
-	virtual float z();
-protected:
-	float _x,_y;
-};
-</code></pre>
+<p><strong>必须在构造函数初始化列表初始化的类型</strong>：</p>
+
+<ul>
+  <li>没有默认构造函数的类型成员</li>
+  <li>const成员（整数型的可以申明时赋值）</li>
+  <li>
+    <p>引用类型的成员</p>
+
+    <p>class Point {
+  public:
+      Point(float x = 0.0, float y = 0.0) : _x(x),_y(y) {}
+      virtual float z();
+  protected:
+      float _x,_y;
+  };</p>
+  </li>
+</ul>
 
 <p>不能小看z()这个virtual function给class Point带来的巨大变化。virtual function的引入促使每一个class Point拥有一个vtpr，这样一来，编译器在constructor中添加了对vptr进行初始化的代码，而copy constructor和copy assignment operator也会对vptr进行设定，而不再是原先简单的bitwise操作了。</p>
 

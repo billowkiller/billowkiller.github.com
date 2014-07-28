@@ -4,7 +4,7 @@
   <title><![CDATA[tags: insight | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/insight/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-07-28T08:59:08+08:00</updated>
+  <updated>2014-07-28T10:09:21+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -14,13 +14,113 @@
 
   
   <entry>
+    <title type="html"><![CDATA[C/C++ Byte Alignment]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/04/22/byte-alignment/"/>
+    <updated>2014-04-22T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/04/22/byte-alignment</id>
+    <content type="html"><![CDATA[<p><strong>字节对齐的细节和编译器实现相关，但一般而言，满足三个准则</strong>：</p>
+
+<ol>
+  <li>结构体变量的首地址能够被其<strong>最宽基本类型</strong>成员的大小所整除；</li>
+  <li>结构体每个成员相对于结构体首地址的偏移量（offset）都是<strong>成员大小的整数倍</strong>，如有需要编译器会在成员之间加上填充字节（internal adding）；</li>
+  <li>结构体的总大小为结构体最宽基本类型成员大小的整数倍，如有需要编译器会在最末一个成员之后加上填充字节（trailing padding）。</li>
+</ol>
+
+<p>需要仔细体会上面的三个准则。</p>
+
+<!--more-->
+
+<ul>
+  <li>
+    <p>结构体某个成员相对于结构体首地址的偏移量可以通过宏offsetof()来获得，这个宏也在stddef.h中定义，如下：</p>
+
+    <pre><code>  #define offsetof(s,m) (size_t)&amp;(((s *)0)-&gt;m)
+</code></pre>
+  </li>
+  <li>
+    <p>基本类型是指前面提到的像char、short、int、float、double这样的内置数据类型。这里所说的“数据宽度”就是指其sizeof的大小。由于结构体的成员可以是复合类型，比如另外一个结构体，所以在寻找最宽基本类型成员时，应当包括复合类型成员的子成员，而不是把复合成员看成是一个整体。但在确定复合类型成员的偏移位置时则是将复合类型作为整体看待。</p>
+
+    <pre><code>  struct S1
+  {
+      char c;
+      int i;
+  };
+
+  struct S3
+  {
+      char c1;
+      S1 s;
+      char c2;
+  };
+</code></pre>
+
+    <p>S1的最宽简单成员的类型为int，S3在考虑最宽简单类型成员时是将S1“打散”看的，所以S3的最宽简单类型为int。这样，通过S3定义的变量，其存储空间首地址需要被4整除，整个sizeof(S3)的值也应该被4整除。</p>
+
+    <p>c1的偏移量为0，s的偏移量呢？这时s是一个整体，它作为结构体变量也满足前面三个准则，所以其大小为8，偏移量为4，c1与s之间便需要3个填充字节，而c2与s之间就不需要了，所以c2的偏移量为12，算上c2的大小为13，13是不能被4整除的，这样末尾还得补上3个填充字节。最后得到sizeof(S3)的值为16。</p>
+  </li>
+</ul>
+
+<h2 id="pragma-pack"><code> #pragma pack</code></h2>
+
+<p><code>#pragma pack</code>规定的对齐长度，实际使用的规则是：</p>
+
+<p>结构，联合，或者类的数据成员，第一个放在偏移为0的地方，以后每个数据成员的对齐，按照<code>#pragma pack</code>指定的数值和这个数据成员自身长度中，比较小的那个进行。也就是说，当<code>#pragma pack</code>的值等于或超过所有数据成员长度的时候，这个值的大小将不产生任何效果。而结构整体的对齐，则按照结构体中最大的数据成员和<code>#pragma pack</code>指定值之间，较小的那个进行。</p>
+
+<pre><code>   #pragma pack(4)
+　　class TestB
+　　{
+　　public:
+　　　　int aa; //第一个成员，放在[0,3]偏移的位置，
+　　　　char a; //第二个成员，自身长为1，#pragma pack(4),取小值，也就是1，所以
+这个成员按一字节对齐，放在偏移[4]的位置。
+　　　　short b; //第三个成员，自身长2，#pragma pack(4)，取2，按2字节对齐，所以
+放在偏移[6,7]的位置。
+　　　　char c; //第四个，自身长为1，放在[8]的位置。
+　　};
+</code></pre>
+
+<p>这个类实际占据的内存空间是9字节类之间的对齐，是按照类内部最大的成员的长度，和<code>#pragma pack</code>规定的值之中较小的一个对齐的。所以这个例子中，类之间对齐的长度是<code>min(sizeof(int),4)</code>，也就是4。9按照4字节圆整的结果是12，所以<code>sizeof(TestB)</code>是12。</p>
+
+<pre><code>	#pragma pack(2)
+    class TestB
+　　{
+　　public:
+　　　　int aa; //第一个成员，放在[0,3]偏移的位置，
+　　　　char a; //第二个成员，自身长为1，#pragma pack(4),取小值，也就是1，所以
+这个成员按一字节对齐，放在偏移[4]的位置。
+　　　　short b; //第三个成员，自身长2，#pragma pack(4)，取2，按2字节对齐，所以
+放在偏移[6,7]的位置。
+　　　　char c; //第四个，自身长为1，放在[8]的位置。
+　　};
+</code></pre>
+
+<p>可以看出，上面的位置完全没有变化，只是类之间改为按2字节对齐，9按2圆整的结果是10。所以<code>sizeof(TestB)</code>是10。</p>
+
+<pre><code>	#pragma pack(4)
+　　class TestC
+　　{
+　　public:
+　　　　char a;//第一个成员，放在[0]偏移的位置，
+　　　　short b;//第二个成员，自身长2，#pragma pack(4)，取2，按2字节对齐，所以
+放在偏移[2,3]的位置。
+　　　　char c;//第三个，自身长为1，放在[4]的位置。
+　　};
+</code></pre>
+
+<p>整个类的大小是5字节，按照<code>min(sizeof(short),4)</code>字节对齐，也就是2字节对齐，结果是6</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Effective C++ Rework]]></title>
     <link href="http://billowkiller.github.io/blog/2014/04/17/Effective-C%2B%2B/"/>
     <updated>2014-04-17T02:18:00+08:00</updated>
     <id>http://billowkiller.github.io/blog/2014/04/17/Effective-C++</id>
     <content type="html"><![CDATA[<h2 id="c">让自己习惯C++</h2>
-<p>###Item 01： View C++ as a federation of languages
-C++同时支持过程形式、面对对象形式、函数形式、泛型形式、元编程形式。</p>
+
+<h3 id="item-01-view-c-as-a-federation-of-languages">Item 01： View C++ as a federation of languages</h3>
+
+<p>C++同时支持过程形式、面对对象形式、函数形式、泛型形式、元编程形式。</p>
 
 <p>次语言有</p>
 
@@ -50,7 +150,7 @@ private:
 };
 </code></pre>
 
-<p>通常C++要求你对你所使用的任何东西提供一个定义式，但那如果它是<code>class</code>专属常量又是<code>static</code>且为整数型(ints,chars,bools)则需特殊处理。只要是不取它们的地址，你可以申明并使用它们而无需提供定义式。如果需要取址，必须提供定义式：</p>
+<p>通常C++要求你对你所使用的任何东西提供一个定义式，但那如果它是<code>class</code>专属常量又是<code>static</code>且为<strong>整数型</strong>(ints, chars, bools)则需特殊处理。只要是不取它们的地址，你可以申明并使用它们而无需提供定义式。如果需要取址，必须提供定义式：</p>
 
 <pre><code>const int GamePlayer::NumTurns; //申明时获取了初值，定义不必赋值
 </code></pre>
@@ -152,9 +252,13 @@ AWOV::~AWOV() {}  //pure virtual 析构函数的定义
 
 <h3 id="item-09-never-call-virtual-functions-during-construction-or-destruction">Item 09: Never call virtual functions during construction or destruction</h3>
 
-<p>在base class构造期间，virtual函数不是virtual函数。因为derived class对象还未构造好，所以base class构造期间virtual函数绝不会下降到derived classes阶层。在derived class对象的base class构造期间，对象类型是base class而不是derived class。</p>
+<p><strong>在base class构造期间，virtual函数不是virtual函数</strong>。因为derived class对象还未构造好，所以base class构造期间virtual函数绝不会下降到derived classes阶层。在derived class对象的base class构造期间，对象类型是base class而不是derived class。</p>
 
 <p>在构造期间，可以借由“令derived classes将必要的构造信息向上传递至base class构造函数”替换之。</p>
+
+<p><strong>同样的道理也适用于析构函数</strong>。一旦derived class析构函数开始执行，对象内的derived class成员变量变成未定义值，所以C++是它们仿佛不再存在。进入base class析构函数后对象就称为一个base class 对象，而C++的任何部分包括virtual函数、<code>dynamic_cast</code>等等也就这么看它。</p>
+
+<p>所以，在构造和析构席间不要调用virtual函数，因为这类调用从不降至derived class（比起当前执行构造函数和析构函数的那层）。</p>
 
 <h3 id="item-10-have-assignment-operators-return-a-reference-to-this">Item 10: Have assignment operators return a reference to *this</h3>
 
@@ -444,7 +548,7 @@ public:
 };
 
 class Derived: public Base {
-public:
+public:	
 	using Base::mf1;  //让base class内名为mf1和mf3的所有东西
 	using Base::mf3;  //在Derived作用域内都可见
 	virtual void mf1();
@@ -547,7 +651,8 @@ class HoldsAnInt: private Empty { int x; }; //sizeof HoldsAnInt == 4;
 
 <ul>
   <li>多重继承比单一继承复杂。它可能导致新的歧义性，以及对virtual继承的需要。</li>
-  <li>virtual继承会增加大小、速度、初始化（及赋值）复杂度等等成本。如果virutal base classes不带任何数据，将是最具使用价值的情况。Java和.Net的Interfaces指的注意，它在许多方面兼容于C++的virtual base classes，而且也不允许含有任何数据。</li>
+  <li>virtual继承会增加大小、速度、</li>
+  <li>初始化（及赋值）复杂度等等成本。如果virutal base classes不带任何数据，将是最具使用价值的情况。Java和.Net的Interfaces指的注意，它在许多方面兼容于C++的virtual base classes，而且也不允许含有任何数据。</li>
   <li>多重继承的确有正当用途。其中一个情节涉及public继承某个Interface class和private继承某个协助实现的class的两相结合。</li>
 </ul>
 
@@ -1154,14 +1259,23 @@ unsigned int (*)();
 
 <h3 id="section-3">对象构造</h3>
 
-<pre><code>class Point {
-public:
-	Point(float x = 0.0, float y = 0.0) : _x(x),_y(y) {}
-	virtual float z();
-protected:
-	float _x,_y;
-};
-</code></pre>
+<p><strong>必须在构造函数初始化列表初始化的类型</strong>：</p>
+
+<ul>
+  <li>没有默认构造函数的类型成员</li>
+  <li>const成员（整数型的可以申明时赋值）</li>
+  <li>
+    <p>引用类型的成员</p>
+
+    <p>class Point {
+  public:
+      Point(float x = 0.0, float y = 0.0) : _x(x),_y(y) {}
+      virtual float z();
+  protected:
+      float _x,_y;
+  };</p>
+  </li>
+</ul>
 
 <p>不能小看z()这个virtual function给class Point带来的巨大变化。virtual function的引入促使每一个class Point拥有一个vtpr，这样一来，编译器在constructor中添加了对vptr进行初始化的代码，而copy constructor和copy assignment operator也会对vptr进行设定，而不再是原先简单的bitwise操作了。</p>
 

@@ -194,11 +194,15 @@
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/2014/04/12/Inside-C%2B%2B-Object/</loc>
-        <lastmod>2014-07-27T23:58:08+08:00</lastmod>
+        <lastmod>2014-07-28T09:38:22+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/2014/04/17/Effective-C%2B%2B/</loc>
-        <lastmod>2014-07-28T08:58:53+08:00</lastmod>
+        <lastmod>2014-07-28T09:49:22+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://billowkiller.github.io/blog/2014/04/22/byte-alignment/</loc>
+        <lastmod>2014-07-28T10:08:56+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/2014/06/28/signal-status-and-lifecycle/</loc>
@@ -238,23 +242,23 @@
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/archives/</loc>
-        <lastmod>2014-07-28T08:58:53+08:00</lastmod>
+        <lastmod>2014-07-28T10:08:56+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/categories/</loc>
-        <lastmod>2014-07-28T08:58:53+08:00</lastmod>
+        <lastmod>2014-07-28T10:08:56+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/category/</loc>
-        <lastmod>2014-07-28T08:58:53+08:00</lastmod>
+        <lastmod>2014-07-28T10:08:56+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/tags/</loc>
-        <lastmod>2014-07-28T08:58:53+08:00</lastmod>
+        <lastmod>2014-07-28T10:08:56+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/</loc>
-        <lastmod>2014-07-28T08:58:53+08:00</lastmod>
+        <lastmod>2014-07-28T10:08:56+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/components.html</loc>
@@ -276,7 +280,7 @@
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/</loc>
-        <lastmod>2014-07-28T08:58:53+08:00</lastmod>
+        <lastmod>2014-07-28T10:08:56+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/javascript.html</loc>

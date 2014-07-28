@@ -4,7 +4,7 @@
   <title><![CDATA[Category: book | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/book/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-07-28T08:59:08+08:00</updated>
+  <updated>2014-07-28T10:09:21+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -394,8 +394,10 @@ RARP以与ARP相反的方式工作。<strong>RARP发出要反向解析的物理�
     <updated>2014-04-17T02:18:00+08:00</updated>
     <id>http://billowkiller.github.io/blog/2014/04/17/Effective-C++</id>
     <content type="html"><![CDATA[<h2 id="c">让自己习惯C++</h2>
-<p>###Item 01： View C++ as a federation of languages
-C++同时支持过程形式、面对对象形式、函数形式、泛型形式、元编程形式。</p>
+
+<h3 id="item-01-view-c-as-a-federation-of-languages">Item 01： View C++ as a federation of languages</h3>
+
+<p>C++同时支持过程形式、面对对象形式、函数形式、泛型形式、元编程形式。</p>
 
 <p>次语言有</p>
 
@@ -425,7 +427,7 @@ private:
 };
 </code></pre>
 
-<p>通常C++要求你对你所使用的任何东西提供一个定义式，但那如果它是<code>class</code>专属常量又是<code>static</code>且为整数型(ints,chars,bools)则需特殊处理。只要是不取它们的地址，你可以申明并使用它们而无需提供定义式。如果需要取址，必须提供定义式：</p>
+<p>通常C++要求你对你所使用的任何东西提供一个定义式，但那如果它是<code>class</code>专属常量又是<code>static</code>且为<strong>整数型</strong>(ints, chars, bools)则需特殊处理。只要是不取它们的地址，你可以申明并使用它们而无需提供定义式。如果需要取址，必须提供定义式：</p>
 
 <pre><code>const int GamePlayer::NumTurns; //申明时获取了初值，定义不必赋值
 </code></pre>
@@ -527,9 +529,13 @@ AWOV::~AWOV() {}  //pure virtual 析构函数的定义
 
 <h3 id="item-09-never-call-virtual-functions-during-construction-or-destruction">Item 09: Never call virtual functions during construction or destruction</h3>
 
-<p>在base class构造期间，virtual函数不是virtual函数。因为derived class对象还未构造好，所以base class构造期间virtual函数绝不会下降到derived classes阶层。在derived class对象的base class构造期间，对象类型是base class而不是derived class。</p>
+<p><strong>在base class构造期间，virtual函数不是virtual函数</strong>。因为derived class对象还未构造好，所以base class构造期间virtual函数绝不会下降到derived classes阶层。在derived class对象的base class构造期间，对象类型是base class而不是derived class。</p>
 
 <p>在构造期间，可以借由“令derived classes将必要的构造信息向上传递至base class构造函数”替换之。</p>
+
+<p><strong>同样的道理也适用于析构函数</strong>。一旦derived class析构函数开始执行，对象内的derived class成员变量变成未定义值，所以C++是它们仿佛不再存在。进入base class析构函数后对象就称为一个base class 对象，而C++的任何部分包括virtual函数、<code>dynamic_cast</code>等等也就这么看它。</p>
+
+<p>所以，在构造和析构席间不要调用virtual函数，因为这类调用从不降至derived class（比起当前执行构造函数和析构函数的那层）。</p>
 
 <h3 id="item-10-have-assignment-operators-return-a-reference-to-this">Item 10: Have assignment operators return a reference to *this</h3>
 
@@ -819,7 +825,7 @@ public:
 };
 
 class Derived: public Base {
-public:
+public:	
 	using Base::mf1;  //让base class内名为mf1和mf3的所有东西
 	using Base::mf3;  //在Derived作用域内都可见
 	virtual void mf1();
@@ -922,7 +928,8 @@ class HoldsAnInt: private Empty { int x; }; //sizeof HoldsAnInt == 4;
 
 <ul>
   <li>多重继承比单一继承复杂。它可能导致新的歧义性，以及对virtual继承的需要。</li>
-  <li>virtual继承会增加大小、速度、初始化（及赋值）复杂度等等成本。如果virutal base classes不带任何数据，将是最具使用价值的情况。Java和.Net的Interfaces指的注意，它在许多方面兼容于C++的virtual base classes，而且也不允许含有任何数据。</li>
+  <li>virtual继承会增加大小、速度、</li>
+  <li>初始化（及赋值）复杂度等等成本。如果virutal base classes不带任何数据，将是最具使用价值的情况。Java和.Net的Interfaces指的注意，它在许多方面兼容于C++的virtual base classes，而且也不允许含有任何数据。</li>
   <li>多重继承的确有正当用途。其中一个情节涉及public继承某个Interface class和private继承某个协助实现的class的两相结合。</li>
 </ul>
 
@@ -1529,14 +1536,23 @@ unsigned int (*)();
 
 <h3 id="section-3">对象构造</h3>
 
-<pre><code>class Point {
-public:
-	Point(float x = 0.0, float y = 0.0) : _x(x),_y(y) {}
-	virtual float z();
-protected:
-	float _x,_y;
-};
-</code></pre>
+<p><strong>必须在构造函数初始化列表初始化的类型</strong>：</p>
+
+<ul>
+  <li>没有默认构造函数的类型成员</li>
+  <li>const成员（整数型的可以申明时赋值）</li>
+  <li>
+    <p>引用类型的成员</p>
+
+    <p>class Point {
+  public:
+      Point(float x = 0.0, float y = 0.0) : _x(x),_y(y) {}
+      virtual float z();
+  protected:
+      float _x,_y;
+  };</p>
+  </li>
+</ul>
 
 <p>不能小看z()这个virtual function给class Point带来的巨大变化。virtual function的引入促使每一个class Point拥有一个vtpr，这样一来，编译器在constructor中添加了对vptr进行初始化的代码，而copy constructor和copy assignment operator也会对vptr进行设定，而不再是原先简单的bitwise操作了。</p>
 
