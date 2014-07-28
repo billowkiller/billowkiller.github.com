@@ -381,6 +381,12 @@ static member function经常被用作回调（callback）函数。
 
 ###对象构造
 
+**必须在构造函数初始化列表初始化的类型**：
+
+- 没有默认构造函数的类型成员
+- const成员（整数型的可以申明时赋值）
+- 引用类型的成员
+
 	class Point {
 	public:
 		Point(float x = 0.0, float y = 0.0) : _x(x),_y(y) {}
