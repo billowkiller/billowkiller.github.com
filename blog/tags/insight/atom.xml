@@ -4,7 +4,7 @@
   <title><![CDATA[tags: insight | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/insight/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-07-28T10:09:21+08:00</updated>
+  <updated>2014-07-29T14:33:15+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -1165,6 +1165,8 @@ obj.normalize();
 normalize_7Point3dFv(&amp;obj);
 </code></pre>
 
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/virtualtable_zpsc5065cda.png" alt="" /></p>
+
 <h3 id="static-member-functions">静态成员函数（Static Member Functions）</h3>
 
 <p>编译器的开发者针对static member functions，分别从编译层面和语言层面对其进行了支持：</p>
@@ -1240,6 +1242,14 @@ unsigned int (*)();
     <p>当运行pb1-&gt;clone()时，pb1会被调整指向Derived对象的起始地址，于是clone()的Derived版会被调用：它会传回一个指针，指向一个新的Derived对象；该对象的地址在被指定给pb2之前，必须先经过调整，以指向Base2 subobject。</p>
   </li>
 </ol>
+
+<p>virtual table多重继承内存布局图：</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/virtualtable_zps7dae0fad.png" alt="多重继承" /></p>
+
+<p>virtual table虚拟继承内存布局图：</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/virtualtable_zpsb4d94533.png" alt="" /></p>
 
 <h2 id="section-1">其他</h2>
 

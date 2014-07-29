@@ -105,66 +105,6 @@
 
 
 
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-17T02:18:00+08:00" pubdate data-updated="true">Apr 17<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/04/17/Effective-C%2B%2B/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/04/17/Effective-C%2B%2B/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/17/Effective-C%2B%2B/">Effective C++ Rework</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><h2 id="c">让自己习惯C++</h2>
-
-<h3 id="item-01-view-c-as-a-federation-of-languages">Item 01： View C++ as a federation of languages</h3>
-
-<p>C++同时支持过程形式、面对对象形式、函数形式、泛型形式、元编程形式。</p>
-
-<p>次语言有</p>
-
-<ul>
-  <li>C</li>
-  <li>Object-Oriented C++</li>
-  <li>Template C++</li>
-  <li>STL</li>
-</ul>
-
-<p>C++高效编程守则视状况而变化，取决于你使用C++的那一部分。</p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/04/17/Effective-C%2B%2B/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-12T02:18:00+08:00" pubdate data-updated="true">Apr 12<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/04/12/Inside-C%2B%2B-Object/#disqus_thread"
@@ -202,6 +142,57 @@
   
     <footer>
       <a class="btn btn-default" rel="full-article" href="/blog/2014/04/12/Inside-C%2B%2B-Object/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-03-12T02:18:00+08:00" pubdate data-updated="true">Mar 12<span>th</span>, 2014</time>
+        
+           | <a href="/blog/2014/03/12/c%2B%2B-string-copy-on-write/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/03/12/c%2B%2B-string-copy-on-write/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/03/12/c%2B%2B-string-copy-on-write/">C++ String Copy-on-write</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>不同版本的C++ string实现时不同的，sizeof(string)得出来的结果也不尽相同，其中有种实现采用copy-on-write的方式来共享内存。</p>
+
+<p>引用计数就是string类中写时才拷贝的原理！当第一个类构造时，string的构造函数会根据 传入的参数从堆上分配内存，当有其它类需要这块内存时，这个计数为自动累加，当有类析构时，这个计数会减一，直到最后一个类析构时，此时的RefCnt为1或是0，此时，程序才会真正的Free这块从堆上分配的内存。</p>
+
+<p>string类的内存是在堆上动态分配的，共享内存的各个类指向的是同一个内存区。这块内存区域还包括引用计数，其位于字符串内存区域的上方，通过<code>_Ptr[-1]</code>来访问。这样所有共享这块内存的类都可以访问到引用计数，也就知道这块内存的引用者有多少了。</p>
+
+<p>于是，有了这样一个机制，每当我们为string分配内存时，我们总是要多分配一个空间用来存放这个引用计数的值，只要发生拷贝构造可是赋值时，这个内存的值就会加一。而在内容修改时，string类为查看这个引用计数是否为0，如果不为零，表示有人在共享这块内存，那么自己需要先做一份拷贝，然后把引用计数减去一，再把数据拷贝过来。</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/03/12/c%2B%2B-string-copy-on-write/">Read on &rarr;</a>
     </footer>
   
 
