@@ -16,7 +16,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://billowkiller.github.io/blog/2014/07/12/network-programming">
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2014/07/22/network-programming">
   <link href="/favicon.png" type="image/png" rel="icon">
   <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
 
@@ -101,7 +101,7 @@
 
 
 
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-12T09:18:00+08:00" pubdate data-updated="true">Jul 12<span>th</span>, 2014</time>
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-22T09:18:00+08:00" pubdate data-updated="true">Jul 22<span>nd</span>, 2014</time>
         
            | <a href="#disqus_thread"
              data-disqus-identifier="http://billowkiller.github.io">Comments</a>
@@ -124,12 +124,12 @@
 <h3 id="section">网络编程可能会遇到的三种情况</h3>
 
 <ol>
-  <li>当fork子进程时，必须捕获SIGCHLD信号。</li>
+  <li>当<code>fork</code>子进程时，必须捕获<code>SIGCHLD</code>信号。</li>
   <li>当捕获信号时，必须处理被中断的系统调用；</li>
   <li>
-    <p>SIGCHLD的信号处理函数必须正确编写，应使用waitpid函数以免留下僵死进程。</p>
+    <p><code>SIGCHLD</code>的信号处理函数必须正确编写，应使用<code>waitpid</code>函数以免留下僵死进程。</p>
 
-    <p>waitpid是可以非阻塞的等待信号终止，因此可以使用循环调用。</p>
+    <p><code>waitpid</code>是可以非阻塞的等待信号终止，因此可以使用循环调用。</p>
   </li>
 </ol>
 
@@ -137,53 +137,53 @@
 
 <h3 id="shutdown">shutdown函数</h3>
 
-<p>终止网络连接的通常方法是调用close函数。不过close有两个限制，可以使用shutdown来避免。</p>
+<p>终止网络连接的通常方法是调用<code>close</code>函数。不过<code>close</code>有两个限制，可以使用<code>shutdown</code>来避免。</p>
 
 <ol>
-  <li>close把描述符的引用计数减1，仅在该计数变为0时才关闭套接字。使用shutdown可以不管引用计数就激发TCP的正常连接终止序列。</li>
-  <li>close终止读和写两个方向的数据传送。</li>
+  <li><code>close</code>把描述符的引用计数减1，仅在该计数变为0时才关闭套接字。使用<code>shutdown</code>可以不管引用计数就激发TCP的正常连接终止序列。</li>
+  <li><code>close</code>终止读和写两个方向的数据传送。</li>
 </ol>
 
 <p>说明：</p>
 
 <ul>
-  <li>shutdown根本没有关闭socket,任何与socket关联的资源直到调用closesocket才释放。</li>
+  <li><code>shutdown</code>根本没有关闭socket,任何与socket关联的资源直到调用closesocket才释放。</li>
   <li>TCP连接的socket是全双工的，也就是说它可以发送和接收数据，但是一个方向上的数据流动和另一个方向上的数据流动是不相关的，shutdown函数的功能也就是体现在这里，它通过设置how选择关闭哪条数据通道(发送通道和接收通道)，如果关闭了发送通道，那么这个socket其实还可以通过接收通道接受数据.</li>
-  <li>当通过以how=1的方式调用shutdown，就可以保证对方收到一个EOF，而不管其他的进程是否已经打开了套接字，而调用close或closesocket就不能保证，因为直到套接字的引用计数减为0时才会发送FIN消息给对方，也就是说，直到所有的进程都关闭了套接字。</li>
+  <li>当通过以how=1(<code>SHUT_WR</code>)的方式调用<code>shutdown</code>，就可以保证对方收到一个EOF，而不管其他的进程是否已经打开了套接字，而调用<code>close</code>或closesocket就不能保证，因为直到套接字的引用计数减为0时才会发送FIN消息给对方，也就是说，直到所有的进程都关闭了套接字。</li>
 </ul>
 
 <p><strong>为了保证在连接撤销之前，保证双方都能接收到对等方的所有数据，在调用closesocket之前，先调用shutdown关闭发送数据通道。</strong></p>
 
 <h3 id="tcpclosewait">tcp中close_wait状态出现的原因</h3>
 
-<p>close_wait出现的原因: 就是某一方在网络连接断开后，对等方没有检测到这个错误（对方断开）而没有调   用 closesocket，导致了这个状态的出现.</p>
+<p><code>close_wait</code>出现的原因: 就是某一方在网络连接断开后，对等方没有检测到这个错误（对方断开）而没有调   用 closesocket，导致了这个状态的出现.</p>
 
 <p>模拟这样一个环境:服务器192.168.1.112:4500在接收到一个客户端的连接后，休眠五秒后，服务器关闭与客户 端通讯的socket后正常退出，而客户端在连接服务器后，等待用户输入字符后，发送给客户端。现在有这样几个问题:</p>
 
 <ol>
   <li>
-    <p>服务器在休眠五秒后，正常退出了，但是由于客户端还在等待用户输入，此时服务器端TCP的状态是什么？(FIN_WAIT_2)，客户端的TCP状态是什么?(CLOSE_WAIT)</p>
+    <p>服务器在休眠五秒后，正常退出了，但是由于客户端还在等待用户输入，此时服务器端TCP的状态是什么？(<code>FIN_WAIT_2</code>)，客户端的TCP状态是什么?(<code>CLOSE_WAIT</code>)</p>
   </li>
   <li>
     <p>服务器在休眠五秒后，正常退出了，在服务器退出后，如果客户端异常退出，那么服务器端TCP的状态是什么？客户端的TCP状态是什么?</p>
   </li>
 </ol>
 
-<pre><code>   在服务器正常退出后，客户端异常退出，那么客户端就会向服务器发送RST标志，然后客户端和服务器端的TCP状态都是CLOSED
+<pre><code>   在服务器正常退出后，客户端异常退出，那么客户端就会向服务器发送RST标志，然后客户端和服务器端的TCP状态都是`CLOSED`
 </code></pre>
 
 <ol>
   <li>服务器在休眠五秒后，正常退出了，在服务器退出后,从客户端输入数据后，向服务器发送，此时服务器怎样处理这个数据?</li>
 </ol>
 
-<pre><code>   客户端通过PSH标志向服务器段发送数据，能够发送成功，但因为服务器的TCP处于(FIN_WAIT_2)状态，此时服务器会向客户端发送一个RST标示，并且服务器端口状态和客户端的TCP状态都变为CLOSED。
+<pre><code>   客户端通过PSH标志向服务器段发送数据，能够发送成功，但因为服务器的TCP处于(`FIN_WAIT_2`)状态，此时服务器会向客户端发送一个RST标示，并且服务器端口状态和客户端的TCP状态都变为`CLOSED`。
 </code></pre>
 
 <ol>
   <li>在服务器休眠的过程中，杀死服务器进程，服务器端TCP状态是什么?客户端的TCP状态是什么?</li>
 </ol>
 
-<pre><code>在服务器休眠的过程中，杀死服务器进程，此时服务器方会向客户端发送一个RST标志，服务器TCP状态是CLOSED，客户端的TCP状态也是CLOSE.
+<pre><code>在服务器休眠的过程中，杀死服务器进程，此时服务器方会向客户端发送一个RST标志，服务器TCP状态是`CLOSED`，客户端的TCP状态也是`CLOSE`.
 在服务器休眠五秒后，如果不关闭与客户端通讯的Socket直接正常退出，此时，服务器方也向客户端发送了RST标志。
 </code></pre>
 
@@ -226,7 +226,7 @@ struct linger {
 </ul>
 
 <p>设置<code>SO_LINGER</code>套接字选项后，<code>close</code>的成功返回只是告诉我们先前发送的数据（和FIN）已由对端TCP确认，而不能告诉我们对端应用进程是否已读取数据。如果不设置该套接字选项，那么我们连对断TCP是否确认了数据都不知道。
-让客户知道服务器已读取其数据的一个方法是改为调用<code>shutdown</code>，并设置它的第二个参数为<code>SHUT_W</code>R，而不是调用<code>close</code>。</p>
+让客户知道服务器已读取其数据的一个方法是改为调用<code>shutdown</code>，并设置它的第二个参数为<code>SHUT_WR</code>，而不是调用<code>close</code>。</p>
 
 <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/1_zps7ad163b0.png" alt="" /></p>
 
@@ -239,7 +239,7 @@ struct linger {
 </ol>
 
 <p><strong>下图汇总了对shutdown的两种可能调用和对close的三种可能调用，以及它们对TCP套接字的影响。</strong>
-<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/_zps2eb2715 7.png" alt="" /></p>
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/_zps2eb27157.png" alt="" /></p>
 
 <h3 id="soreuseaddr">SO_REUSEADDR套接字选项</h3>
 
@@ -286,7 +286,7 @@ struct linger {
 
 
 
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-12T09:18:00+08:00" pubdate data-updated="true">Jul 12<span>th</span>, 2014</time>
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-22T09:18:00+08:00" pubdate data-updated="true">Jul 22<span>nd</span>, 2014</time>
           
 
 <span class="glyphicon glyphicon-tags"></span>&nbsp;
@@ -301,7 +301,7 @@ struct linger {
         
           <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2014/07/12/network-programming/" data-via="" data-counturl="http://billowkiller.github.io/blog/2014/07/12/network-programming/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2014/07/22/network-programming/" data-via="" data-counturl="http://billowkiller.github.io/blog/2014/07/22/network-programming/" >Tweet</a>
   
   
   
@@ -311,10 +311,8 @@ struct linger {
         
           <ul class="meta text-muted pager">
             
-            <li class="previous"><a href="/blog/2014/06/28/signal-and-forkmarkdown/" title="Previous Post: Signal and fork">&laquo; Signal and fork</a></li>
+            <li class="previous"><a href="/blog/2014/07/18/TCP-IP/" title="Previous Post: Summary of TCP/IP ILLustrated Volume 1">&laquo; Summary of TCP/IP ILLustrated Volume 1</a></li>
             
-            
-            <li class="next"><a href="/blog/2014/07/15/linux-epoll-module/" title="Next Post: Linux epoll module">Linux epoll module &raquo;</a></li>
             
           </ul>
         
@@ -339,6 +337,8 @@ struct linger {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item active" href="/blog/2014/07/22/network-programming/">Unix Network Programming Notes</a>
+    
     <a class="list-group-item " href="/blog/2014/07/18/TCP-IP/">Summary of TCP/IP ILLustrated Volume 1</a>
     
     <a class="list-group-item " href="/blog/2014/07/17/Some-NB-translation/">Some NB Translations</a>
@@ -346,8 +346,6 @@ struct linger {
     <a class="list-group-item " href="/blog/2014/07/17/thundering-herd/">Linux Thundering Herd</a>
     
     <a class="list-group-item " href="/blog/2014/07/15/linux-reentrant-function/">Linux Reentrant Function</a>
-    
-    <a class="list-group-item " href="/blog/2014/07/15/linux-epoll-module/">Linux Epoll Module</a>
     
   </div>
 </section>
@@ -460,8 +458,8 @@ struct linger {
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://billowkiller.github.io/blog/2014/07/12/network-programming/';
-        var disqus_url = 'http://billowkiller.github.io/blog/2014/07/12/network-programming/';
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2014/07/22/network-programming/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2014/07/22/network-programming/';
         var disqus_script = 'embed.js';
       
     (function () {

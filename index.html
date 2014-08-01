@@ -105,6 +105,65 @@
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-22T09:18:00+08:00" pubdate data-updated="true">Jul 22<span>nd</span>, 2014</time>
+        
+           | <a href="/blog/2014/07/22/network-programming/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/07/22/network-programming/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/22/network-programming/">Unix Network Programming Notes</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>记录Linux网络编程中的一些知识点…</p>
+
+<hr />
+
+<h3 id="section">网络编程可能会遇到的三种情况</h3>
+
+<ol>
+  <li>当<code>fork</code>子进程时，必须捕获<code>SIGCHLD</code>信号。</li>
+  <li>当捕获信号时，必须处理被中断的系统调用；</li>
+  <li>
+    <p><code>SIGCHLD</code>的信号处理函数必须正确编写，应使用<code>waitpid</code>函数以免留下僵死进程。</p>
+
+    <p><code>waitpid</code>是可以非阻塞的等待信号终止，因此可以使用循环调用。</p>
+  </li>
+</ol>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/07/22/network-programming/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-18T09:18:00+08:00" pubdate data-updated="true">Jul 18<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/07/18/TCP-IP/#disqus_thread"
@@ -395,65 +454,6 @@
 
 
 
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-12T09:18:00+08:00" pubdate data-updated="true">Jul 12<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/07/12/network-programming/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/07/12/network-programming/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/12/network-programming/">Unix Network Programming Notes</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>记录Linux网络编程中的一些知识点…</p>
-
-<hr />
-
-<h3 id="section">网络编程可能会遇到的三种情况</h3>
-
-<ol>
-  <li>当fork子进程时，必须捕获SIGCHLD信号。</li>
-  <li>当捕获信号时，必须处理被中断的系统调用；</li>
-  <li>
-    <p>SIGCHLD的信号处理函数必须正确编写，应使用waitpid函数以免留下僵死进程。</p>
-
-    <p>waitpid是可以非阻塞的等待信号终止，因此可以使用循环调用。</p>
-  </li>
-</ol>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/07/12/network-programming/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-06-28T04:18:00+08:00" pubdate data-updated="true">Jun 28<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/06/28/signal-and-forkmarkdown/#disqus_thread"
@@ -672,6 +672,8 @@
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2014/07/22/network-programming/">Unix Network Programming Notes</a>
+    
     <a class="list-group-item " href="/blog/2014/07/18/TCP-IP/">Summary of TCP/IP ILLustrated Volume 1</a>
     
     <a class="list-group-item " href="/blog/2014/07/17/Some-NB-translation/">Some NB Translations</a>
@@ -679,8 +681,6 @@
     <a class="list-group-item " href="/blog/2014/07/17/thundering-herd/">Linux Thundering Herd</a>
     
     <a class="list-group-item " href="/blog/2014/07/15/linux-reentrant-function/">Linux Reentrant Function</a>
-    
-    <a class="list-group-item " href="/blog/2014/07/15/linux-epoll-module/">Linux Epoll Module</a>
     
   </div>
 </section>
