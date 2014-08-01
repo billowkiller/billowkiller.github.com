@@ -303,6 +303,8 @@ mangling手法可在链接时期检查出任何不正确的调用操作，但由
 	// 而会被转化未
 	normalize_7Point3dFv(&obj);
 
+![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/virtualtable_zpsc5065cda.png)
+
 ###静态成员函数（Static Member Functions）
 
 编译器的开发者针对static member functions，分别从编译层面和语言层面对其进行了支持：
@@ -366,6 +368,14 @@ static member function经常被用作回调（callback）函数。
 		Base2 *pb2 = pb1->clone();
 
 	当运行pb1->clone()时，pb1会被调整指向Derived对象的起始地址，于是clone()的Derived版会被调用：它会传回一个指针，指向一个新的Derived对象；该对象的地址在被指定给pb2之前，必须先经过调整，以指向Base2 subobject。
+
+virtual table多重继承内存布局图：
+
+![多重继承](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/virtualtable_zps7dae0fad.png)
+
+virtual table虚拟继承内存布局图：
+
+![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/virtualtable_zpsb4d94533.png)
 
 ##其他
 
