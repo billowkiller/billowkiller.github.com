@@ -395,6 +395,65 @@
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-12T09:18:00+08:00" pubdate data-updated="true">Jul 12<span>th</span>, 2014</time>
+        
+           | <a href="/blog/2014/07/12/network-programming/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/07/12/network-programming/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/12/network-programming/">Unix Network Programming Notes</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>记录Linux网络编程中的一些知识点…</p>
+
+<hr />
+
+<h3 id="section">网络编程可能会遇到的三种情况</h3>
+
+<ol>
+  <li>当fork子进程时，必须捕获SIGCHLD信号。</li>
+  <li>当捕获信号时，必须处理被中断的系统调用；</li>
+  <li>
+    <p>SIGCHLD的信号处理函数必须正确编写，应使用waitpid函数以免留下僵死进程。</p>
+
+    <p>waitpid是可以非阻塞的等待信号终止，因此可以使用循环调用。</p>
+  </li>
+</ol>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/07/12/network-programming/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-06-28T04:18:00+08:00" pubdate data-updated="true">Jun 28<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/06/28/signal-and-forkmarkdown/#disqus_thread"
@@ -590,66 +649,6 @@
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-17T02:18:00+08:00" pubdate data-updated="true">Apr 17<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/04/17/Effective-C%2B%2B/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/04/17/Effective-C%2B%2B/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/17/Effective-C%2B%2B/">Effective C++ Rework</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><h2 id="c">让自己习惯C++</h2>
-
-<h3 id="item-01-view-c-as-a-federation-of-languages">Item 01： View C++ as a federation of languages</h3>
-
-<p>C++同时支持过程形式、面对对象形式、函数形式、泛型形式、元编程形式。</p>
-
-<p>次语言有</p>
-
-<ul>
-  <li>C</li>
-  <li>Object-Oriented C++</li>
-  <li>Template C++</li>
-  <li>STL</li>
-</ul>
-
-<p>C++高效编程守则视状况而变化，取决于你使用C++的那一部分。</p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/04/17/Effective-C%2B%2B/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -711,7 +710,7 @@
     
     
     <a class="list-group-item " href="/blog/categories/book/index.html">
-        <span class="badge">7</span>
+        <span class="badge">8</span>
         book
       </a>
     

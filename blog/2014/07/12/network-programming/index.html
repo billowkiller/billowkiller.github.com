@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Unix Network Programming Notes - Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2014/07/12/network-programming">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-12T09:18:00+08:00" pubdate data-updated="true">Jul 12<span>th</span>, 2014</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        Unix Network Programming Notes
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><p>记录Linux网络编程中的一些知识点…</p>
+
+<hr />
+
+<h3 id="section">网络编程可能会遇到的三种情况</h3>
+
+<ol>
+  <li>当fork子进程时，必须捕获SIGCHLD信号。</li>
+  <li>当捕获信号时，必须处理被中断的系统调用；</li>
+  <li>
+    <p>SIGCHLD的信号处理函数必须正确编写，应使用waitpid函数以免留下僵死进程。</p>
+
+    <p>waitpid是可以非阻塞的等待信号终止，因此可以使用循环调用。</p>
+  </li>
+</ol>
+
+<!--more-->
+
+<h3 id="shutdown">shutdown函数</h3>
+
+<p>终止网络连接的通常方法是调用close函数。不过close有两个限制，可以使用shutdown来避免。</p>
+
+<ol>
+  <li>close把描述符的引用计数减1，仅在该计数变为0时才关闭套接字。使用shutdown可以不管引用计数就激发TCP的正常连接终止序列。</li>
+  <li>close终止读和写两个方向的数据传送。</li>
+</ol>
+
+<p>说明：</p>
+
+<ul>
+  <li>shutdown根本没有关闭socket,任何与socket关联的资源直到调用closesocket才释放。</li>
+  <li>TCP连接的socket是全双工的，也就是说它可以发送和接收数据，但是一个方向上的数据流动和另一个方向上的数据流动是不相关的，shutdown函数的功能也就是体现在这里，它通过设置how选择关闭哪条数据通道(发送通道和接收通道)，如果关闭了发送通道，那么这个socket其实还可以通过接收通道接受数据.</li>
+  <li>当通过以how=1的方式调用shutdown，就可以保证对方收到一个EOF，而不管其他的进程是否已经打开了套接字，而调用close或closesocket就不能保证，因为直到套接字的引用计数减为0时才会发送FIN消息给对方，也就是说，直到所有的进程都关闭了套接字。</li>
+</ul>
+
+<p><strong>为了保证在连接撤销之前，保证双方都能接收到对等方的所有数据，在调用closesocket之前，先调用shutdown关闭发送数据通道。</strong></p>
+
+<h3 id="tcpclosewait">tcp中close_wait状态出现的原因</h3>
+
+<p>close_wait出现的原因: 就是某一方在网络连接断开后，对等方没有检测到这个错误（对方断开）而没有调   用 closesocket，导致了这个状态的出现.</p>
+
+<p>模拟这样一个环境:服务器192.168.1.112:4500在接收到一个客户端的连接后，休眠五秒后，服务器关闭与客户 端通讯的socket后正常退出，而客户端在连接服务器后，等待用户输入字符后，发送给客户端。现在有这样几个问题:</p>
+
+<ol>
+  <li>
+    <p>服务器在休眠五秒后，正常退出了，但是由于客户端还在等待用户输入，此时服务器端TCP的状态是什么？(FIN_WAIT_2)，客户端的TCP状态是什么?(CLOSE_WAIT)</p>
+  </li>
+  <li>
+    <p>服务器在休眠五秒后，正常退出了，在服务器退出后，如果客户端异常退出，那么服务器端TCP的状态是什么？客户端的TCP状态是什么?</p>
+  </li>
+</ol>
+
+<pre><code>   在服务器正常退出后，客户端异常退出，那么客户端就会向服务器发送RST标志，然后客户端和服务器端的TCP状态都是CLOSED
+</code></pre>
+
+<ol>
+  <li>服务器在休眠五秒后，正常退出了，在服务器退出后,从客户端输入数据后，向服务器发送，此时服务器怎样处理这个数据?</li>
+</ol>
+
+<pre><code>   客户端通过PSH标志向服务器段发送数据，能够发送成功，但因为服务器的TCP处于(FIN_WAIT_2)状态，此时服务器会向客户端发送一个RST标示，并且服务器端口状态和客户端的TCP状态都变为CLOSED。
+</code></pre>
+
+<ol>
+  <li>在服务器休眠的过程中，杀死服务器进程，服务器端TCP状态是什么?客户端的TCP状态是什么?</li>
+</ol>
+
+<pre><code>在服务器休眠的过程中，杀死服务器进程，此时服务器方会向客户端发送一个RST标志，服务器TCP状态是CLOSED，客户端的TCP状态也是CLOSE.
+在服务器休眠五秒后，如果不关闭与客户端通讯的Socket直接正常退出，此时，服务器方也向客户端发送了RST标志。
+</code></pre>
+
+<p>对于上面的四个问题，必须注意到服务器正常断开的时候，向客户端发送的FIN根本不能被客户端的所正常处理，因为客户端正处于接收用户的输入。所以由于每次都是服务器主动断开，但是服务器TCP状态却有可能不能进入到<code>Time_Wait</code>状态。</p>
+
+<h3 id="section-1">服务器终止可能出现的情况</h3>
+
+<ol>
+  <li><code>accept、read、write、select、open</code>等慢系统调用中断，系统调用可能返回<code>EINTR</code>错误。需要重启被中断的系统调用。并且编写捕获信号的程序时，必须对慢系统调用返回<code>EINTR</code>有所准备。</li>
+  <li>三路握手完成后，客户TCP发送一个RST。服务器进程在调用<code>accept</code>的时候RST到达。accept返回一个错误给服务器进程，POSIX指出返回的errno值必须是<code>ECONNABORTED</code>（“software caused connection abort.”）。服务器忽略它，再次调用accept。</li>
+  <li>服务器进程终止。服务端调用<code>kill</code>命令杀死服务器子进程。子进程中所有打开的描述符都被关闭，进而会向客户发送一个FIN，客户TCP则响应一个ACK。而客户进程此时阻塞在<code>fgets</code>调用上。由于FIN的接收并没有告知客户服务器进程已经终止，所以客户进程照常发送数据。此时服务端响应RST。客户进程看不到这个RST，因为它在调用<code>writen</code>后立即调用<code>readline</code>，并且由于接收到FIN，<strong>所调用的readline立即返回0（EOF）</strong>。于是以出错信息（“server terminated prematurely”）退出。</li>
+  <li>如果客户不理会<code>readline</code>函数返回的错误，写更多的数据到服务器上。当一个进程向某个已收到RST的套接字执行写操作时，内核向该进程发送一个<code>SIGPIPE</code>信号。该信号的默认行为是终止进程，因此进程必须捕获它以免不情愿地被终止。</li>
+  <li>服务器主机崩溃。客户端到服务端之间网络断掉，或者服务端断电等，物理连接断掉了，这种情况下客户端不会退出（此情况称为<strong>半开连接</strong>），<code>send</code>函数正常执行，不会感觉到自己出错。因为由于物理网络断开，服务端不会给客户端回应错误消息。此时，客户TCP持续重传数据分节，试图从服务器上接收一个ACK。最终返回的错误是<code>ETIMEDOUT</code>。然而如果某个中间路由器判定服务器主机已不可达，从而响应一个“destination unreachable”ICMP消息，那么返回的错误是<code>EHOSTUNREACH</code>或<code>ENETUNREACH</code>。</li>
+  <li>服务器主机崩溃后重启。服务进程对客户端<code>send</code>来的消息会产生RST响应。客户收到RST时，客户正阻塞于<code>read</code>调用，导致该调用返回<code>ECONNESET</code>错误。</li>
+  <li>服务器主机关机。unix系统关机时，<code>init</code>进程通常先给所有进程发送<code>SIGTERM</code>信号（可捕获），等待固定一段时间后，给所有仍在运行的进程发送<code>SIGKILL</code>信号。接下里就和3一样。</li>
+</ol>
+
+<p>下图是检测各种TCP条件的方法</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/2014-08-01183756__zpse1970a67.jpg" alt="" /></p>
+
+<h3 id="solinger">SO_LINGER套接字选项</h3>
+
+<p>在默认情况下,当调用<code>close</code>关闭socke的使用,<code>close</code>会立即返回,但是,如果send buffer中还有数据,系统会试着先把send buffer中的数据发送出去,然后close才返回.</p>
+
+<p><code>SO_LINGER</code>选项则是用来修改这种默认操作的.于SO_LINGER相关联的一个结构体如下:</p>
+
+<pre><code>#include &lt;sys/socket.h&gt;
+struct linger {
+      int l_onoff  //0=off, nonzero=on(开关)
+      int l_linger //linger time(延迟时间)
+}
+</code></pre>
+
+<p>当调用<code>setsockopt</code>之后,该选项产生的影响取决于<code>linger</code>结构体中<code>l_onoff</code>和<code>l_linger</code>的值:</p>
+
+<ul>
+  <li>当<code>l_onoff</code>被设置为0的时候,将会关闭<code>SO_LINGER</code>选项,即TCP或则SCTP保持默认操作:<code>close</code>立即返回、<code>l_linger</code>值被忽略.</li>
+  <li><code>l_lineoff</code>值非0，<code>l_linger</code>为0，那么当<code>close</code>某个连接时TCP将终止该连接。send buffer中未被发送的数据将被丢弃,并向对方发送一个RST信息.值得注意的是，由于这种方式，是非正常的4中握手方式结束TCP链接，所以，TCP连接将不会进入<code>TIME_WAIT</code>状态，这样会导致新建立的可能和就连接的数据造成混乱。</li>
+</ul>
+
+<p>设置<code>SO_LINGER</code>套接字选项后，<code>close</code>的成功返回只是告诉我们先前发送的数据（和FIN）已由对端TCP确认，而不能告诉我们对端应用进程是否已读取数据。如果不设置该套接字选项，那么我们连对断TCP是否确认了数据都不知道。
+让客户知道服务器已读取其数据的一个方法是改为调用<code>shutdown</code>，并设置它的第二个参数为<code>SHUT_W</code>R，而不是调用<code>close</code>。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/1_zps7ad163b0.png" alt="" /></p>
+
+<p>关闭连接的本地端（客户端）时，根据所调用的函数（<code>close</code>和<code>shutdown</code>）以及是否设置了<code>SO_LINGER</code>套接字选项，<strong>可在以下3个不同的时机返回</strong>。</p>
+
+<ol>
+  <li><code>close</code>立即返回，根本不等待（默认情况）。</li>
+  <li><code>close</code>一直拖延到接受了对于客户端FIN的ACK才返回。</li>
+  <li>后跟一个<code>read</code>调用的<code>shutdown</code>一直等到接受对端FIN才返回。</li>
+</ol>
+
+<p><strong>下图汇总了对shutdown的两种可能调用和对close的三种可能调用，以及它们对TCP套接字的影响。</strong>
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/_zps2eb2715 7.png" alt="" /></p>
+
+<h3 id="soreuseaddr">SO_REUSEADDR套接字选项</h3>
+
+<p>SO_REUSEADDR套接字选项能起到以下功能。</p>
+
+<ol>
+  <li>
+    <p>SO_REUSEADDR允许一个server程序listen监听并bind到一个端口,既是这个端口已经被一个正在运行的连接使用了.</p>
+
+    <p>例如，以下情况：
+ 1. 一个监听(listen)server已经启动
+ 1. 	当有client有连接请求的时候,server产生一个子进程去处理该client的事物.
+ 1. 	server主进程终止了,但是子进程还在占用该连接处理client的事情.虽然子进程终止了,但是由于子进程没有终止,该socket的引用计数不会为0，所以该socket不会被关闭.
+ 1. 	server程序重启.</p>
+
+    <p><strong>所有的TCP server都必须设定此选项,用以应对server重启的现象.</strong></p>
+  </li>
+  <li>
+    <p>SO_REUSEADDR允许多个server绑定到同一个port上,只要这些server指定的IP不同</p>
+
+    <p>SO_REUSEADDR需要在bind调用之前就设定。另外，还可以在绑定IP通配符。但是最好是先绑定确定的IP，最后绑定通配符IP。运行在这些端口上的服务器实例可以相同，也可以不同。在TCP中，不允许建立起一个已经存在的相同的IP和端口的连接。但是在UDP中，是允许的，特别是在多播中。</p>
+  </li>
+</ol>
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-12T09:18:00+08:00" pubdate data-updated="true">Jul 12<span>th</span>, 2014</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/book/'>book</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2014/07/12/network-programming/" data-via="" data-counturl="http://billowkiller.github.io/blog/2014/07/12/network-programming/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2014/06/28/signal-and-forkmarkdown/" title="Previous Post: Signal and fork">&laquo; Signal and fork</a></li>
+            
+            
+            <li class="next"><a href="/blog/2014/07/15/linux-epoll-module/" title="Next Post: Linux epoll module">Linux epoll module &raquo;</a></li>
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item " href="/blog/2014/07/18/TCP-IP/">Summary of TCP/IP ILLustrated Volume 1</a>
+    
+    <a class="list-group-item " href="/blog/2014/07/17/Some-NB-translation/">Some NB Translations</a>
+    
+    <a class="list-group-item " href="/blog/2014/07/17/thundering-herd/">Linux Thundering Herd</a>
+    
+    <a class="list-group-item " href="/blog/2014/07/15/linux-reentrant-function/">Linux Reentrant Function</a>
+    
+    <a class="list-group-item " href="/blog/2014/07/15/linux-epoll-module/">Linux Epoll Module</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">6</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">6</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">16</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">8</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">8</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">2</span>
+        algorithm
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2014 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2014/07/12/network-programming/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2014/07/12/network-programming/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>
