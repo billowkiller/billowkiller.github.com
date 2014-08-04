@@ -105,6 +105,116 @@
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-23T02:18:00+08:00" pubdate data-updated="true">Apr 23<span>rd</span>, 2014</time>
+        
+           | <a href="/blog/2014/04/23/Template-in-C%2B%2B/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/04/23/Template-in-C%2B%2B/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/23/Template-in-C%2B%2B/">C++ Template</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>modified from <a href="http://www.cnblogs.com/assemble8086/archive/2011/10/02/2198308.html">http://www.cnblogs.com/assemble8086/archive/2011/10/02/2198308.html</a></p>
+
+<h2 id="section">模版</h2>
+
+<p><code>template</code> 是声明类模板的关键字，表示声明一个模板，模板参数可以是一个，也可以是多个，可以是<strong>类型参数</strong> ，也可以是<strong>非类型参数</strong>。类型参数由关键字<code>class</code>或<code>typename</code>及其后面的标识符构成。非类型参数由一个普通参数构成，代表模板定义中的一个常量。</p>
+
+<p><strong>类模板什么时候会被实例化呢？</strong></p>
+
+<ol>
+  <li>当使用了类模板实例的名字，并且上下文环境要求存在类的定义时。</li>
+  <li>对象类型是一个类模板实例，当对象被定义时。此点被称作类的实例化点。</li>
+  <li>一个指针或引用指向一个类模板实例，当检查这个指针或引用所指的对象时。</li>
+</ol>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/04/23/Template-in-C%2B%2B/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-22T02:18:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2014</time>
+        
+           | <a href="/blog/2014/04/22/byte-alignment/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/04/22/byte-alignment/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/22/byte-alignment/">C/C++ Byte Alignment</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p><strong>字节对齐的细节和编译器实现相关，但一般而言，满足三个准则</strong>：</p>
+
+<ol>
+  <li>结构体变量的首地址能够被其<strong>最宽基本类型</strong>成员的大小所整除；</li>
+  <li>结构体每个成员相对于结构体首地址的偏移量（offset）都是<strong>成员大小的整数倍</strong>，如有需要编译器会在成员之间加上填充字节（internal adding）；</li>
+  <li>结构体的总大小为结构体最宽基本类型成员大小的整数倍，如有需要编译器会在最末一个成员之后加上填充字节（trailing padding）。</li>
+</ol>
+
+<p>需要仔细体会上面的三个准则。</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/04/22/byte-alignment/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-17T02:18:00+08:00" pubdate data-updated="true">Apr 17<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/04/17/Effective-C%2B%2B/#disqus_thread"
@@ -515,104 +625,6 @@
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-11-14T00:16:00+08:00" pubdate data-updated="true">Nov 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/11/14/nginx-architecture-2-event-driven/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-2-event-driven/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/11/14/nginx-architecture-2-event-driven/">Nginx architecture(2)&#8211;Event Driven</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>Nginx是一个事件驱动架构的Web服务器。在Linux中，<code>epoll</code>是目前最强大的事件管理机制(I/O多路复用)，定时器事件也是由<code>epoll</code>等事件模块触发的，它是由红黑树实现的。并且Nginx很好的解决多个<code>worker</code>子进程监听同一个端口引起的惊群问题，以及对<code>worker</code>进行负载平衡。最后会讨论下linux内核中的文件异步I/O。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx-logo_zpsabde8e46.png" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/11/14/nginx-architecture-2-event-driven/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-10-13T00:28:00+08:00" pubdate data-updated="true">Oct 13<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/10/13/nginx-architecture-1-overview/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/10/13/nginx-architecture-1-overview/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/10/13/nginx-architecture-1-overview/">Nginx architecture(1)&#8211;Overview</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>从04年发布以来，Nginx已经成为多个国内外互联网具体首选的高性能Web服务器。其特点是占有内存少，并发能力强，并且由于Nginx使用基于事件驱动的架构能够最有效的利用多核CPU的处理能力，进程可以无阻塞的运行。</p>
-
-<p>特别是Nginx可以利用当前操作系统特有的一些高校API来提高自己的性能，例如Linux上的<code>epoll</code>、Solaris上的event ports和Free BSD上的kqueue。又如对于Linux，Nginx支持其独有的sendfile系统调用，可以高效的讲硬盘中的数据发送到网络上（无需将硬盘数据先复制到用户态内存中）。</p>
-
-<p>所以通过分析Nginx的架构设计，可以怎样充分利用服务器上的硬件资源，以及学习到更为先进的理念。下面就来分析和学习Nginx的架构设计。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx_zps7d735b88.jpg" alt="Nginx logo" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/10/13/nginx-architecture-1-overview/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -636,6 +648,8 @@
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2014/08/02/probability-problem/">Probability Problem</a>
+    
     <a class="list-group-item " href="/blog/2014/07/22/network-programming/">Unix Network Programming Notes</a>
     
     <a class="list-group-item " href="/blog/2014/07/18/TCP-IP/">Summary of TCP/IP ILLustrated Volume 1</a>
@@ -643,8 +657,6 @@
     <a class="list-group-item " href="/blog/2014/07/17/Some-NB-translation/">Some NB Translations</a>
     
     <a class="list-group-item " href="/blog/2014/07/17/thundering-herd/">Linux Thundering Herd</a>
-    
-    <a class="list-group-item " href="/blog/2014/07/15/linux-reentrant-function/">Linux Reentrant Function</a>
     
   </div>
 </section>
@@ -656,7 +668,7 @@
     
     
     <a class="list-group-item " href="/blog/categories/language/index.html">
-        <span class="badge">6</span>
+        <span class="badge">7</span>
         language
       </a>
     
@@ -698,7 +710,7 @@
     
     
     <a class="list-group-item " href="/blog/categories/algorithm/index.html">
-        <span class="badge">2</span>
+        <span class="badge">3</span>
         algorithm
       </a>
     

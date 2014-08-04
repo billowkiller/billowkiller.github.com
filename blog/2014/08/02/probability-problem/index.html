@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Probability Problem - Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2014/08/02/probability-problem">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-02T02:18:00+08:00" pubdate data-updated="true">Aug 2<span>nd</span>, 2014</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        Probability Problem
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><h2 id="section">一、抛硬币问题</h2>
+
+<p><strong>问题1 有一苹果，两个人抛硬币来决定谁吃这个苹果，先抛到正面者吃。问先抛这吃到苹果的概率是多少？</strong></p>
+
+<p>假设第一个人吃到苹果的概率是P。第一次抛硬币若为正面则先抛者赢；若为负面且后抛者也为负面，则主动权回到先抛者，回到原问题。</p>
+
+<p>得到关系：P = 1/2 + 1/2 * 1/2 * P  </p>
+
+<p>得出 P = 2/3</p>
+
+<p><strong>问题2 游戏规则为，连续2次抛到硬币朝上，则游戏结束。问平均抛多少次游戏可以结束？</strong></p>
+
+<!--more-->
+
+<p>平均抛多少次，即是求问题的期望。</p>
+
+<p>首先先抛一枚硬币，如果是花，那么需要重头开始；如果是字，那么再抛一枚硬币，新抛的这枚如果也是字，则游戏结束，如果是花，那么又需要重头开始。根据这个过程，设抛硬币的期望次数为T，可以得到关系：T = 1/2(1 + T) + 1/4 * 2 + 1/4(2 + T)</p>
+
+<p>得出 T = 6 </p>
+
+<p><strong>问题3 连续抛 k 次朝上的解法：</strong></p>
+
+<p>假设连续k次正面朝上的期望为Ek，在连续出现k次正面朝上后，下次一也为正面的期望为</p>
+
+<p>E(k+1) = 1/2 (Ek + 1) + 1/2(Ek + 1 + E(k+1))</p>
+
+<p>推到出公式 (E(k+1) +2) /(Ek +2) = 2 得出 Ek = 2^(k+1) -2</p>
+
+<p><strong>问题4 A和B2人投硬币,正面A得1元,反面B得一元.起始时A有1元,B有100元.游戏持续进行,直到其中1人破产才终止.</strong></p>
+
+<ol>
+  <li>
+    <p>如果硬币正反概率相同,游戏的期待长度(expected duration)是几次投掷?</p>
+
+    <p>目前认为只有奇数次才可能破产。<code>1*0.5 + 3*0.5^3 + 5*0.5^5+...</code></p>
+  </li>
+  <li>
+    <p>如果硬币是不公正的,正面概率为P,反面概率为Q.(P+Q=1), 那么游戏的期待长度(expectedduration)是几次投掷?</p>
+
+    <p>那么问题的答案是计算E(T(n)),即该事件的期望值。</p>
+
+    <p>第1次出现破产的概率是p  //只可能A破产</p>
+
+    <p>第2次出现            0  //因为A第1次赢了1个，共2个了，最多只能输1个，还会剩1个</p>
+
+    <p>第3次出现            <code>q×p×p</code></p>
+
+    <p>第4次出现            0</p>
+
+    <p>第5次                <code>q*q*p*p*p</code></p>
+
+    <p>第99次               q(49次方)×P(50次方)</p>
+
+    <hr />
+
+    <p>在100次以下投掷次数时，不可能是B破产，只有可能是A破产</p>
+
+    <p>第100次时            只有B破产可能  即  q（100次方）</p>
+
+    <p>第101次              q(50次方)×P(51次方) </p>
+
+    <p>第102次              q(102次方)*p</p>
+
+    <p><strong>综上所述，奇数次时，唯A可能破产，偶数次&gt;=100时，唯B可能破产</strong>。</p>
+
+    <p>E（T(n))=<code>∑ n*T(n)  n=1...+∞</code>
+         =<code>∑奇数次  +∑偶数次</code>
+          =<code>p/(1-p*q)+q(100次方)/(1-P*q)</code></p>
+
+    <p>其中q=1-p
+ 问题1把p=q=1/2 代入即可。</p>
+  </li>
+</ol>
+
+<h2 id="section-1">二、骰子问题</h2>
+
+<p><strong>问题1 一个骰子，6面，1个面是 1， 2个面是2， 3个面是3， 问平均掷多少次能使1,2,3都至少出现一次？</strong></p>
+
+<p>这是一个求数学期望的问题，最终是求1，2，3出现至少一次的最短长度的期望。</p>
+
+<p>这样分叉树的每个节点是一个期望状态，而每个分叉是一次投掷结果。将后续期望出现1、2、3各至少一次的情形记作L123（即题目所求），将后续期望出现1、2各至少一次（3无关）情形记作L12，而1至少一次（2，3无关）情形L1，其余数值符号类推，则树结构如下（列出4级结构已经足够）：</p>
+
+<pre><code>           L123
+	   /1    |2    \3
+      L23    L13    L12
+   /1  |2  \3 
+  L23  L3   L2
+		  /1 |2 \3  
+         L2  P2  L3  
+
+L123 = p1 (L23+ 1) + p2 (L13+1) + p3 (L12 + 1) = p1*L23 +p2*L13+ p3*L12 + 1
+L23 = p1*L23 +p2*L3+ p3*L2 + 1
+L13 = p1*L3 +p2*L13+ p3*L1 + 1
+L12 = p1*L2 +p2*L1+ p3*L12 + 1
+L1 = p1 + p2*(L1+1) + p3*(L1 +1) =p2*L1+ p3*L1 + 1
+L2 = p1*L2 + p3*L2 + 1
+L3 = p1*L3 + p2*L3 + 1
+
+解得：
+L1 = 6， L2 = 3， L3 = 2
+L12 = 7， L13 = 13/2， L23 = 19/56
+L123 = 219/30 = 7.3
+</code></pre>
+
+<h2 id="section-2">其他</h2>
+
+<p><strong>从n个数中生成m个不重复的随机数</strong></p>
+
+<p>对于第一个数，可以用概率m/n选取；但是对于下一个，必须考虑之前的数是否被选取而以(m-1)/(n-1)或m/(n-1)的概率选取。</p>
+
+<p>可用下列代码得到结果：</p>
+
+<pre><code>void random_generate(int n, int m)  
+{  
+    int i=1,t，remain;  
+    while(n-i&gt;m)  
+    {  
+        t = rand()%(n-i);  
+        if(t&lt;m){  
+            printf("%d ",i);  
+            m--;  
+        }  
+        i++;  
+    }  
+    while(++i&lt;=n)printf("%d ",i);  
+}  
+</code></pre>
+
+<p><strong>利用等概率Rand互换</strong></p>
+
+<pre><code>#Rand5到Rand3
+def Rand3():
+  x = -1
+  while not 0 &lt;= x &lt; 3:
+    x = Rand5()
+  return x
+
+#Rand5到Rand7
+def Rand7():
+  x = -1
+  while not 0 &lt;= x &lt; 21:
+    x = Rand5() * 5 + Rand5()
+  return x % 7
+</code></pre>
+
+<p><strong>单次遍历，等概率随机选取问题</strong></p>
+
+<p><a href="http://www.gocalf.com/blog/random-selection.html">http://www.gocalf.com/blog/random-selection.html</a></p>
+
+<p><strong>条件概率：两个都是男孩的概率</strong></p>
+
+<p><a href="http://www.gocalf.com/blog/the-probability-of-two-boys.html">http://www.gocalf.com/blog/the-probability-of-two-boys.html</a></p>
+
+<p><strong>平均要取多少个(0,1)中的随机数才能让和超过1</strong></p>
+
+<p><img src="http://hi.csdn.net/attachment/201203/13/0_1331634834uu6L.gif" alt="" /></p>
+
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-02T02:18:00+08:00" pubdate data-updated="true">Aug 2<span>nd</span>, 2014</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/algorithm/'>algorithm</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2014/08/02/probability-problem/" data-via="" data-counturl="http://billowkiller.github.io/blog/2014/08/02/probability-problem/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2014/07/22/network-programming/" title="Previous Post: Unix Network Programming Notes">&laquo; Unix Network Programming Notes</a></li>
+            
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item active" href="/blog/2014/08/02/probability-problem/">Probability Problem</a>
+    
+    <a class="list-group-item " href="/blog/2014/07/22/network-programming/">Unix Network Programming Notes</a>
+    
+    <a class="list-group-item " href="/blog/2014/07/18/TCP-IP/">Summary of TCP/IP ILLustrated Volume 1</a>
+    
+    <a class="list-group-item " href="/blog/2014/07/17/Some-NB-translation/">Some NB Translations</a>
+    
+    <a class="list-group-item " href="/blog/2014/07/17/thundering-herd/">Linux Thundering Herd</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">7</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">6</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">16</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">8</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">8</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">3</span>
+        algorithm
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2014 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2014/08/02/probability-problem/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2014/08/02/probability-problem/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>

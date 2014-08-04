@@ -105,6 +105,61 @@
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-02T02:18:00+08:00" pubdate data-updated="true">Aug 2<span>nd</span>, 2014</time>
+        
+           | <a href="/blog/2014/08/02/probability-problem/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/08/02/probability-problem/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/02/probability-problem/">Probability Problem</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><h2 id="section">一、抛硬币问题</h2>
+
+<p><strong>问题1 有一苹果，两个人抛硬币来决定谁吃这个苹果，先抛到正面者吃。问先抛这吃到苹果的概率是多少？</strong></p>
+
+<p>假设第一个人吃到苹果的概率是P。第一次抛硬币若为正面则先抛者赢；若为负面且后抛者也为负面，则主动权回到先抛者，回到原问题。</p>
+
+<p>得到关系：P = 1/2 + 1/2 * 1/2 * P  </p>
+
+<p>得出 P = 2/3</p>
+
+<p><strong>问题2 游戏规则为，连续2次抛到硬币朝上，则游戏结束。问平均抛多少次游戏可以结束？</strong></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/08/02/probability-problem/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-22T09:18:00+08:00" pubdate data-updated="true">Jul 22<span>nd</span>, 2014</time>
         
            | <a href="/blog/2014/07/22/network-programming/#disqus_thread"
@@ -596,59 +651,6 @@
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-22T02:18:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2014</time>
-        
-           | <a href="/blog/2014/04/22/byte-alignment/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/04/22/byte-alignment/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/22/byte-alignment/">C/C++ Byte Alignment</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p><strong>字节对齐的细节和编译器实现相关，但一般而言，满足三个准则</strong>：</p>
-
-<ol>
-  <li>结构体变量的首地址能够被其<strong>最宽基本类型</strong>成员的大小所整除；</li>
-  <li>结构体每个成员相对于结构体首地址的偏移量（offset）都是<strong>成员大小的整数倍</strong>，如有需要编译器会在成员之间加上填充字节（internal adding）；</li>
-  <li>结构体的总大小为结构体最宽基本类型成员大小的整数倍，如有需要编译器会在最末一个成员之后加上填充字节（trailing padding）。</li>
-</ol>
-
-<p>需要仔细体会上面的三个准则。</p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/04/22/byte-alignment/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -672,6 +674,8 @@
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2014/08/02/probability-problem/">Probability Problem</a>
+    
     <a class="list-group-item " href="/blog/2014/07/22/network-programming/">Unix Network Programming Notes</a>
     
     <a class="list-group-item " href="/blog/2014/07/18/TCP-IP/">Summary of TCP/IP ILLustrated Volume 1</a>
@@ -679,8 +683,6 @@
     <a class="list-group-item " href="/blog/2014/07/17/Some-NB-translation/">Some NB Translations</a>
     
     <a class="list-group-item " href="/blog/2014/07/17/thundering-herd/">Linux Thundering Herd</a>
-    
-    <a class="list-group-item " href="/blog/2014/07/15/linux-reentrant-function/">Linux Reentrant Function</a>
     
   </div>
 </section>
@@ -692,7 +694,7 @@
     
     
     <a class="list-group-item " href="/blog/categories/language/index.html">
-        <span class="badge">6</span>
+        <span class="badge">7</span>
         language
       </a>
     
@@ -734,7 +736,7 @@
     
     
     <a class="list-group-item " href="/blog/categories/algorithm/index.html">
-        <span class="badge">2</span>
+        <span class="badge">3</span>
         algorithm
       </a>
     

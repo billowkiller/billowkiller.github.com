@@ -105,6 +105,104 @@
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-11-14T00:16:00+08:00" pubdate data-updated="true">Nov 14<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/11/14/nginx-architecture-2-event-driven/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-2-event-driven/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/14/nginx-architecture-2-event-driven/">Nginx architecture(2)&#8211;Event Driven</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>Nginx是一个事件驱动架构的Web服务器。在Linux中，<code>epoll</code>是目前最强大的事件管理机制(I/O多路复用)，定时器事件也是由<code>epoll</code>等事件模块触发的，它是由红黑树实现的。并且Nginx很好的解决多个<code>worker</code>子进程监听同一个端口引起的惊群问题，以及对<code>worker</code>进行负载平衡。最后会讨论下linux内核中的文件异步I/O。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx-logo_zpsabde8e46.png" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/11/14/nginx-architecture-2-event-driven/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-10-13T00:28:00+08:00" pubdate data-updated="true">Oct 13<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/10/13/nginx-architecture-1-overview/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/10/13/nginx-architecture-1-overview/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/10/13/nginx-architecture-1-overview/">Nginx architecture(1)&#8211;Overview</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>从04年发布以来，Nginx已经成为多个国内外互联网具体首选的高性能Web服务器。其特点是占有内存少，并发能力强，并且由于Nginx使用基于事件驱动的架构能够最有效的利用多核CPU的处理能力，进程可以无阻塞的运行。</p>
+
+<p>特别是Nginx可以利用当前操作系统特有的一些高校API来提高自己的性能，例如Linux上的<code>epoll</code>、Solaris上的event ports和Free BSD上的kqueue。又如对于Linux，Nginx支持其独有的sendfile系统调用，可以高效的讲硬盘中的数据发送到网络上（无需将硬盘数据先复制到用户态内存中）。</p>
+
+<p>所以通过分析Nginx的架构设计，可以怎样充分利用服务器上的硬件资源，以及学习到更为先进的理念。下面就来分析和学习Nginx的架构设计。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx_zps7d735b88.jpg" alt="Nginx logo" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/10/13/nginx-architecture-1-overview/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-10-12T16:12:00+08:00" pubdate data-updated="true">Oct 12<span>th</span>, 2013</time>
         
            | <a href="/blog/2013/10/12/deep-c-and-c-plus-plus/#disqus_thread"
@@ -574,128 +672,6 @@ Smile》，这是一部小成本电影。整部影片从头到尾没有任何异
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/shi-ge-ni-ke-neng-mei-yong-guo-de-linuxming-ling/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/shi-ge-ni-ke-neng-mei-yong-guo-de-linuxming-ling/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/shi-ge-ni-ke-neng-mei-yong-guo-de-linuxming-ling/">十个你可能没用过的Linux命令</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p><em><strong>excerpted</strong> from <a href="http://www.ituring.com.cn/article/1782">图灵社区</a></em></p>
-
-<hr />
-
-<p>如果你是一个硬件系统管理员或者Linux工程师，你可能会记得大多数Linux命令行技巧。下面的这些Linux命令行技巧通常不被Linux用户所使用。</p>
-
-<p><strong>1.使用<em>pgrep</em>快速查找一个PID</strong></p>
-
-<p><strong><em>pgrep</em></strong>遍历目前正在运行的进程然后列出符合查找规则的进程ID（PID）。</p>
-
-<pre><code>pgrep ssh</code></pre>
-
-<p>这条命令会列出所有与ssh有关的进程。</p>
-
-<p><strong>2.执行上次执行过的命令</strong></p>
-
-<p>这个标题有些绕口，但是它是名副其实的。</p>
-
-<pre><code>!!</code></pre>
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/shi-ge-ni-ke-neng-mei-yong-guo-de-linuxming-ling/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/shao-nian-pai/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/shao-nian-pai/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/shao-nian-pai/">少年派</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><h3 id="section">徐子东：他人就是老虎</h3>
-
-<p>老虎三个阶段：</p>
-
-<ol>
-  <li>力量比你大，你得自卫;反过来，你的力量比较强大，你就是老虎</li>
-  <li>自卫后，利用特别的情况，给他好处，给他恩惠，指挥他，利用它</li>
-  <li>产生幻觉，你们是同舟共济，共同面对困难</li>
-</ol>
-
-<p>点睛：</p>
-
-<ul>
-  <li>瘦骨凛丁的老虎头也不回的进入森林</li>
-  <li>pi父亲一开始所说的：你在动物眼里看到的所有的同情，友爱，善良都是你的倒影</li>
-</ul>
-
-<p></div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/shao-nian-pai/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -719,6 +695,8 @@ Smile》，这是一部小成本电影。整部影片从头到尾没有任何异
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2014/08/02/probability-problem/">Probability Problem</a>
+    
     <a class="list-group-item " href="/blog/2014/07/22/network-programming/">Unix Network Programming Notes</a>
     
     <a class="list-group-item " href="/blog/2014/07/18/TCP-IP/">Summary of TCP/IP ILLustrated Volume 1</a>
@@ -726,8 +704,6 @@ Smile》，这是一部小成本电影。整部影片从头到尾没有任何异
     <a class="list-group-item " href="/blog/2014/07/17/Some-NB-translation/">Some NB Translations</a>
     
     <a class="list-group-item " href="/blog/2014/07/17/thundering-herd/">Linux Thundering Herd</a>
-    
-    <a class="list-group-item " href="/blog/2014/07/15/linux-reentrant-function/">Linux Reentrant Function</a>
     
   </div>
 </section>
@@ -739,7 +715,7 @@ Smile》，这是一部小成本电影。整部影片从头到尾没有任何异
     
     
     <a class="list-group-item " href="/blog/categories/language/index.html">
-        <span class="badge">6</span>
+        <span class="badge">7</span>
         language
       </a>
     
@@ -781,7 +757,7 @@ Smile》，这是一部小成本电影。整部影片从头到尾没有任何异
     
     
     <a class="list-group-item " href="/blog/categories/algorithm/index.html">
-        <span class="badge">2</span>
+        <span class="badge">3</span>
         algorithm
       </a>
     

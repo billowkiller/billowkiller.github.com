@@ -4,7 +4,7 @@
   <title><![CDATA[tags: linux， network | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/linux,-network/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-08-01T22:36:09+08:00</updated>
+  <updated>2014-08-04T21:42:27+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -108,9 +108,9 @@
 
 <h3 id="solinger">SO_LINGER套接字选项</h3>
 
-<p>在默认情况下,当调用<code>close</code>关闭socke的使用,<code>close</code>会立即返回,但是,如果send buffer中还有数据,系统会试着先把send buffer中的数据发送出去,然后close才返回.</p>
+<p>在默认情况下，当调用<code>close</code>关闭socket的使用，<code>close</code>会立即返回；但是，如果send buffer中还有数据，系统会试着先把send buffer中的数据发送出去，然后close才返回。</p>
 
-<p><code>SO_LINGER</code>选项则是用来修改这种默认操作的.于SO_LINGER相关联的一个结构体如下:</p>
+<p><code>SO_LINGER</code>选项则是用来修改这种默认操作的。于SO_LINGER相关联的一个结构体如下:</p>
 
 <pre><code>#include &lt;sys/socket.h&gt;
 struct linger {
@@ -150,11 +150,14 @@ struct linger {
   <li>
     <p>SO_REUSEADDR允许一个server程序listen监听并bind到一个端口,既是这个端口已经被一个正在运行的连接使用了.</p>
 
-    <p>例如，以下情况：
- 1. 一个监听(listen)server已经启动
- 1. 	当有client有连接请求的时候,server产生一个子进程去处理该client的事物.
- 1. 	server主进程终止了,但是子进程还在占用该连接处理client的事情.虽然子进程终止了,但是由于子进程没有终止,该socket的引用计数不会为0，所以该socket不会被关闭.
- 1. 	server程序重启.</p>
+    <p>例如，以下情况：</p>
+
+    <ol>
+      <li>一个监听(listen)server已经启动</li>
+      <li>当有client有连接请求的时候,server产生一个子进程去处理该client的事物.</li>
+      <li>server主进程终止了,但是子进程还在占用该连接处理client的事情.虽然子进程终止了,但是由于子进程没有终止,该socket的引用计数不会为0，所以该socket不会被关闭.</li>
+      <li>server程序重启.</li>
+    </ol>
 
     <p><strong>所有的TCP server都必须设定此选项,用以应对server重启的现象.</strong></p>
   </li>
