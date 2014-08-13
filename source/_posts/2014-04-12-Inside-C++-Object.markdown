@@ -46,6 +46,7 @@ ZooAnimal class object以另一个ZooAnimal class object作为初值，或Bear c
 
 
 ##Constructor的建构操作
+
 ###Default Constructor的建构操作
 
 default constructor仅在编译器需要它时，才会被合成出来。
@@ -323,6 +324,10 @@ mangling手法可在链接时期检查出任何不正确的调用操作，但由
 	// 而是
 	unsigned int (*)();
 
+- 它不能够直接存取其class的nonstatic members。
+- 它不能够被声明为const、volatile或virtual。
+- 它不需要经由class object才被调用。
+
 static member function经常被用作回调（callback）函数。
 
 
@@ -379,7 +384,7 @@ virtual table虚拟继承内存布局图：
 
 ##其他
 
-###纯虚拟函数
+###纯虚函数
 
 在设计抽象基类时，需要注意以下几点：
 

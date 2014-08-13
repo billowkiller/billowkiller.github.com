@@ -87,9 +87,10 @@ C++高效编程守则视状况而变化，取决于你使用C++的那一部分�
 
 
 ##Constructors, destructors, and Assignment Operators
+
 ###Item 05： Know what functions C++ silently writes and calls
 
-- `default`构造函数和析构函数调用`base classes`和`none-static`成员变量的构造函数和析构函数。且只有base是`virtual`析构时，它才是`virtual`的。
+- `default`构造函数和析构函数调用`base classes`和`non-static`成员变量的构造函数和析构函数。且只有base是`virtual`析构时，它才是`virtual`的。
 - 如果类内含`reference`或`const`成员，或者`base classes`将`copy assignment`操作符申明为`private`，则需要自己定义`copy assignment`
 
 ###Item 06: Explicitly disallow the use of compiler-generated functions you do not want
@@ -105,7 +106,7 @@ C++高效编程守则视状况而变化，取决于你使用C++的那一部分�
 	Base *pt = new Derived;
 	delete pt;
 
-`derived class`对象经由一个`base class`指针被删除，如果`base class`有个k析构函数，则对象的`derived`成分没被销毁。
+`derived class`对象经由一个`base class`指针被删除，如果`base class`有个`non-virtual`析构函数，则对象的`derived`成分没被销毁。
 
 无端地将所有classes的析构函数声明为`virtual`，就像从未声明它们为`virtual`一样，都是错误的，带来对象体积的增加。只有当class内含有至少一个`virtual`函数才为它声明`virtual`析构函数。
 
@@ -162,6 +163,7 @@ C++高效编程守则视状况而变化，取决于你使用C++的那一部分�
 - 不要尝试以某个copying函数实现另一个copying函数。应该讲共同机能放进第三个函数中，并有两个copying函数共同调用。
 
 ##资源管理
+
 ###Item 13: Use objects to manage resources.
 
 -   获得资源后立即放进资源对象内。`RAII`--Resource Acquisition Is initialization
@@ -226,6 +228,7 @@ new对应delete，new[] 对应delete[]
 只能保证new Widget在shared_ptr构造函数之前被调用。如果priority在两者中间被调用，而且导致异常。那么new Widget返回的指针将会遗失。
 
 ##设计与声明
+
 ###Item 18: Make interfaces easy to use correctly and hard to use incorrectly
 
 - 好的接口很容易被正确使用，不容易被误用。你应该在你的所有接口中努力达成这些性质。
@@ -236,7 +239,7 @@ new对应delete，new[] 对应delete[]
 ###Item 20: Prefer pass-by-reference-to-const to pass-by-value.
 
 - 尽量以`pass-by-reference-to-const`替换`pass-by-value`。前者通常比较高效，并可以避免切割问题。
-- 以上规则并不适用于内置类型，以及STL的迭代器和函数对象。对它们而言，pass-by-value往往比较适当。
+- 以上规则并不适用于**内置类型，以及STL的迭代器和函数对象**。对它们而言，pass-by-value往往比较适当。
 
 ###Item 21: Don't try to return a reference when you must return an object
 
@@ -290,6 +293,7 @@ new对应delete，new[] 对应delete[]
 - 为“用户定义类型”进行`std templates`全特化是好的，但千万不要尝试在`std`内加入某些对`std`而言是全新的东西
 
 ##实现
+
 ###Item 26: Postpone variable definitions as long as possible
 
 不止应该延后变量的定义，这道非得使用该变量的前一刻为止，甚至应该尝试延后这份定义知道能够给它初值实参为止。
@@ -359,7 +363,10 @@ new对应delete，new[] 对应delete[]
 - 为声明式和定义式提供不同的头文件。这种方法无论是否涉及templates都适用。
 	- <iosfwd>内含iostream各组件的声明式，包括<sstream>, <streambuf>, <fstream>和<iostream>
 
+
+
 ##继承和面向对象设计
+
 ###Item 32: Make sure public inheritance models "is-a"
 
 ###Item 33: Avoid hiding inherited names

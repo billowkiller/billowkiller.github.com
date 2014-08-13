@@ -22,6 +22,14 @@ tags: [linux， network]
 
 <!--more-->
 
+### 网络socket ###
+
+![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/socket_zpsdcdfab1b.png)
+
+**对应的TCP分组**
+
+![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/TCP_zpsb7790efe.png)
+
 ### shutdown函数 ###
 
 终止网络连接的通常方法是调用`close`函数。不过`close`有两个限制，可以使用`shutdown`来避免。
@@ -77,9 +85,9 @@ tags: [linux， network]
 
 ### SO_LINGER套接字选项
 
-在默认情况下,当调用`close`关闭socke的使用,`close`会立即返回,但是,如果send buffer中还有数据,系统会试着先把send buffer中的数据发送出去,然后close才返回.
+在默认情况下，当调用`close`关闭socket的使用，`close`会立即返回；但是，如果send buffer中还有数据，系统会试着先把send buffer中的数据发送出去，然后close才返回。
 
-`SO_LINGER`选项则是用来修改这种默认操作的.于SO_LINGER相关联的一个结构体如下:
+`SO_LINGER`选项则是用来修改这种默认操作的。于SO_LINGER相关联的一个结构体如下:
 
 	#include <sys/socket.h>
 	struct linger {
@@ -113,6 +121,7 @@ SO_REUSEADDR套接字选项能起到以下功能。
 1. SO_REUSEADDR允许一个server程序listen监听并bind到一个端口,既是这个端口已经被一个正在运行的连接使用了.
 
 	例如，以下情况：
+
 	1. 一个监听(listen)server已经启动
 	1. 	当有client有连接请求的时候,server产生一个子进程去处理该client的事物.
 	1. 	server主进程终止了,但是子进程还在占用该连接处理client的事情.虽然子进程终止了,但是由于子进程没有终止,该socket的引用计数不会为0，所以该socket不会被关闭.
