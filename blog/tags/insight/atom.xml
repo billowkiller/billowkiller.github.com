@@ -4,7 +4,7 @@
   <title><![CDATA[tags: insight | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/insight/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-08-04T21:42:27+08:00</updated>
+  <updated>2014-08-13T15:46:44+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -205,10 +205,11 @@ char&amp; operator[](std::size_t position); //operator[] for non-const object
 为免除跨编译单元初始化次序问题。以<code>local static</code>对象替代<code>non-local static</code>对象。</p>
 
 <h2 id="constructors-destructors-and-assignment-operators">Constructors, destructors, and Assignment Operators</h2>
-<p>###Item 05： Know what functions C++ silently writes and calls</p>
+
+<h3 id="item-05-know-what-functions-c-silently-writes-and-calls">Item 05： Know what functions C++ silently writes and calls</h3>
 
 <ul>
-  <li><code>default</code>构造函数和析构函数调用<code>base classes</code>和<code>none-static</code>成员变量的构造函数和析构函数。且只有base是<code>virtual</code>析构时，它才是<code>virtual</code>的。</li>
+  <li><code>default</code>构造函数和析构函数调用<code>base classes</code>和<code>non-static</code>成员变量的构造函数和析构函数。且只有base是<code>virtual</code>析构时，它才是<code>virtual</code>的。</li>
   <li>如果类内含<code>reference</code>或<code>const</code>成员，或者<code>base classes</code>将<code>copy assignment</code>操作符申明为<code>private</code>，则需要自己定义<code>copy assignment</code></li>
 </ul>
 
@@ -228,7 +229,7 @@ char&amp; operator[](std::size_t position); //operator[] for non-const object
 delete pt;
 </code></pre>
 
-<p><code>derived class</code>对象经由一个<code>base class</code>指针被删除，如果<code>base class</code>有个k析构函数，则对象的<code>derived</code>成分没被销毁。</p>
+<p><code>derived class</code>对象经由一个<code>base class</code>指针被删除，如果<code>base class</code>有个<code>non-virtual</code>析构函数，则对象的<code>derived</code>成分没被销毁。</p>
 
 <p>无端地将所有classes的析构函数声明为<code>virtual</code>，就像从未声明它们为<code>virtual</code>一样，都是错误的，带来对象体积的增加。只有当class内含有至少一个<code>virtual</code>函数才为它声明<code>virtual</code>析构函数。</p>
 
@@ -292,7 +293,8 @@ AWOV::~AWOV() {}  //pure virtual 析构函数的定义
 </ul>
 
 <h2 id="section">资源管理</h2>
-<p>###Item 13: Use objects to manage resources.</p>
+
+<h3 id="item-13-use-objects-to-manage-resources">Item 13: Use objects to manage resources.</h3>
 
 <ul>
   <li>获得资源后立即放进资源对象内。<code>RAII</code>–Resource Acquisition Is initialization</li>
@@ -369,7 +371,8 @@ void processWidget(std::tr1::shared_ptr&lt;Widget&gt; pw, int priority);
 <p>只能保证new Widget在shared_ptr构造函数之前被调用。如果priority在两者中间被调用，而且导致异常。那么new Widget返回的指针将会遗失。</p>
 
 <h2 id="section-1">设计与声明</h2>
-<p>###Item 18: Make interfaces easy to use correctly and hard to use incorrectly</p>
+
+<h3 id="item-18-make-interfaces-easy-to-use-correctly-and-hard-to-use-incorrectly">Item 18: Make interfaces easy to use correctly and hard to use incorrectly</h3>
 
 <ul>
   <li>好的接口很容易被正确使用，不容易被误用。你应该在你的所有接口中努力达成这些性质。</li>
@@ -382,7 +385,7 @@ void processWidget(std::tr1::shared_ptr&lt;Widget&gt; pw, int priority);
 
 <ul>
   <li>尽量以<code>pass-by-reference-to-const</code>替换<code>pass-by-value</code>。前者通常比较高效，并可以避免切割问题。</li>
-  <li>以上规则并不适用于内置类型，以及STL的迭代器和函数对象。对它们而言，pass-by-value往往比较适当。</li>
+  <li>以上规则并不适用于<strong>内置类型，以及STL的迭代器和函数对象</strong>。对它们而言，pass-by-value往往比较适当。</li>
 </ul>
 
 <h3 id="item-21-dont-try-to-return-a-reference-when-you-must-return-an-object">Item 21: Don’t try to return a reference when you must return an object</h3>
@@ -445,7 +448,8 @@ public:
 </ul>
 
 <h2 id="section-2">实现</h2>
-<p>###Item 26: Postpone variable definitions as long as possible</p>
+
+<h3 id="item-26-postpone-variable-definitions-as-long-as-possible">Item 26: Postpone variable definitions as long as possible</h3>
 
 <p>不止应该延后变量的定义，这道非得使用该变量的前一刻为止，甚至应该尝试延后这份定义知道能够给它初值实参为止。</p>
 
@@ -528,13 +532,16 @@ pf(); //或许不被inlined，因为它通过函数指针达成。
       <li>
         <iosfwd>内含iostream各组件的声明式，包括<sstream>, <streambuf>, <fstream>和<iostream>
 
+
+
 </iostream></fstream></streambuf></sstream></iosfwd>
       </li>
     </ul>
   </li>
 </ul>
-<p>##继承和面向对象设计
-###Item 32: Make sure public inheritance models “is-a”</p>
+<p>##继承和面向对象设计</p>
+
+<h3 id="item-32-make-sure-public-inheritance-models-is-a">Item 32: Make sure public inheritance models “is-a”</h3>
 
 <h3 id="item-33-avoid-hiding-inherited-names">Item 33: Avoid hiding inherited names</h3>
 
@@ -863,7 +870,8 @@ za.rotate();
 <p>而当一个base class object以其derived class object内容做初始化操作时，其vptr复制操作也必须保证其安全。编译器必须确保如果某个object含有一个或一个以上的vptrs，那些vptrs的内容不会被base class object初始化改变。</p>
 
 <h2 id="constructor">Constructor的建构操作</h2>
-<p>###Default Constructor的建构操作</p>
+
+<h3 id="default-constructor">Default Constructor的建构操作</h3>
 
 <p>default constructor仅在编译器需要它时，才会被合成出来。
 通常来说，由编译器合成出来的default constructor是没啥用的（trivial），但有以下几种例外：</p>
@@ -1187,6 +1195,12 @@ unsigned int (Point3d::*)();
 unsigned int (*)();
 </code></pre>
 
+<ul>
+  <li>它不能够直接存取其class的nonstatic members。</li>
+  <li>它不能够被声明为const、volatile或virtual。</li>
+  <li>它不需要经由class object才被调用。</li>
+</ul>
+
 <p>static member function经常被用作回调（callback）函数。</p>
 
 <h3 id="virtual-functions">多重继承下的Virtual Functions</h3>
@@ -1253,7 +1267,7 @@ unsigned int (*)();
 
 <h2 id="section-1">其他</h2>
 
-<h3 id="section-2">纯虚拟函数</h3>
+<h3 id="section-2">纯虚函数</h3>
 
 <p>在设计抽象基类时，需要注意以下几点：</p>
 

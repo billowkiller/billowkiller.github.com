@@ -198,11 +198,11 @@
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/2014/04/12/Inside-C%2B%2B-Object/</loc>
-        <lastmod>2014-07-28T11:20:03+08:00</lastmod>
+        <lastmod>2014-08-12T10:20:35+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/2014/04/17/Effective-C%2B%2B/</loc>
-        <lastmod>2014-07-28T09:49:22+08:00</lastmod>
+        <lastmod>2014-08-12T10:50:32+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/2014/04/22/byte-alignment/</loc>
@@ -246,31 +246,35 @@
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/2014/07/22/network-programming/</loc>
-        <lastmod>2014-08-02T21:11:18+08:00</lastmod>
+        <lastmod>2014-08-13T14:55:57+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/2014/08/02/probability-problem/</loc>
         <lastmod>2014-08-04T21:39:29+08:00</lastmod>
     </url>
     <url>
+        <loc>http://billowkiller.github.io/blog/2014/08/04/modules-in-network-programming/</loc>
+        <lastmod>2014-08-13T15:46:26+08:00</lastmod>
+    </url>
+    <url>
         <loc>http://billowkiller.github.io/blog/archives/</loc>
-        <lastmod>2014-08-04T21:39:29+08:00</lastmod>
+        <lastmod>2014-08-13T15:46:26+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/categories/</loc>
-        <lastmod>2014-08-04T21:39:29+08:00</lastmod>
+        <lastmod>2014-08-13T15:46:26+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/category/</loc>
-        <lastmod>2014-08-04T21:39:29+08:00</lastmod>
+        <lastmod>2014-08-13T15:46:26+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/tags/</loc>
-        <lastmod>2014-08-04T21:39:29+08:00</lastmod>
+        <lastmod>2014-08-13T15:46:26+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/</loc>
-        <lastmod>2014-08-04T21:39:29+08:00</lastmod>
+        <lastmod>2014-08-13T15:46:26+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/components.html</loc>
@@ -292,7 +296,7 @@
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/</loc>
-        <lastmod>2014-08-04T21:39:29+08:00</lastmod>
+        <lastmod>2014-08-13T15:46:26+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/javascript.html</loc>

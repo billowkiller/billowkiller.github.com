@@ -158,7 +158,8 @@ za.rotate();
 <p>而当一个base class object以其derived class object内容做初始化操作时，其vptr复制操作也必须保证其安全。编译器必须确保如果某个object含有一个或一个以上的vptrs，那些vptrs的内容不会被base class object初始化改变。</p>
 
 <h2 id="constructor">Constructor的建构操作</h2>
-<p>###Default Constructor的建构操作</p>
+
+<h3 id="default-constructor">Default Constructor的建构操作</h3>
 
 <p>default constructor仅在编译器需要它时，才会被合成出来。
 通常来说，由编译器合成出来的default constructor是没啥用的（trivial），但有以下几种例外：</p>
@@ -482,6 +483,12 @@ unsigned int (Point3d::*)();
 unsigned int (*)();
 </code></pre>
 
+<ul>
+  <li>它不能够直接存取其class的nonstatic members。</li>
+  <li>它不能够被声明为const、volatile或virtual。</li>
+  <li>它不需要经由class object才被调用。</li>
+</ul>
+
 <p>static member function经常被用作回调（callback）函数。</p>
 
 <h3 id="virtual-functions">多重继承下的Virtual Functions</h3>
@@ -548,7 +555,7 @@ unsigned int (*)();
 
 <h2 id="section-1">其他</h2>
 
-<h3 id="section-2">纯虚拟函数</h3>
+<h3 id="section-2">纯虚函数</h3>
 
 <p>在设计抽象基类时，需要注意以下几点：</p>
 
@@ -862,6 +869,8 @@ simplify_conv_op(ptype pt)
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2014/08/04/modules-in-network-programming/">Modules in Network Programming</a>
+    
     <a class="list-group-item " href="/blog/2014/08/02/probability-problem/">Probability Problem</a>
     
     <a class="list-group-item " href="/blog/2014/07/22/network-programming/">Unix Network Programming Notes</a>
@@ -869,8 +878,6 @@ simplify_conv_op(ptype pt)
     <a class="list-group-item " href="/blog/2014/07/18/TCP-IP/">Summary of TCP/IP ILLustrated Volume 1</a>
     
     <a class="list-group-item " href="/blog/2014/07/17/Some-NB-translation/">Some NB Translations</a>
-    
-    <a class="list-group-item " href="/blog/2014/07/17/thundering-herd/">Linux Thundering Herd</a>
     
   </div>
 </section>
@@ -912,7 +919,7 @@ simplify_conv_op(ptype pt)
     
     
     <a class="list-group-item " href="/blog/categories/rework/index.html">
-        <span class="badge">8</span>
+        <span class="badge">9</span>
         rework
       </a>
     

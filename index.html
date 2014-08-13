@@ -105,6 +105,66 @@
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-04T09:18:00+08:00" pubdate data-updated="true">Aug 4<span>th</span>, 2014</time>
+        
+           | <a href="/blog/2014/08/04/modules-in-network-programming/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/08/04/modules-in-network-programming/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/04/modules-in-network-programming/">Modules in Network Programming</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>发现自己总喜欢把各种东西混合在一块，所以这又是一篇长文…</p>
+
+<p>本文将会介绍网络编程中的几种模型，包括<strong>I/O模型、服务器编程模型、事件模型、并发模型</strong>。</p>
+
+<hr />
+
+<h2 id="io">I/O模型</h2>
+
+<p>I/O模型包括<strong>阻塞模型、非阻塞模型、信号量驱动模型、多路复用模型、异步模型</strong>。</p>
+
+<p>总体来说包括两大类：</p>
+
+<ol>
+  <li><strong>同步I/O，向程序通知的是I/O就绪事件</strong>，由程序完成读写。包括前四类I/O模型。</li>
+  <li><strong>异步I/O，向程序通知的是I/O完成事件</strong>，读写操作由内核完成。</li>
+</ol>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/08/04/modules-in-network-programming/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-02T02:18:00+08:00" pubdate data-updated="true">Aug 2<span>nd</span>, 2014</time>
         
            | <a href="/blog/2014/08/02/probability-problem/#disqus_thread"
@@ -590,67 +650,6 @@
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-06-28T02:18:00+08:00" pubdate data-updated="true">Jun 28<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/06/28/signal-status-and-lifecycle/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/06/28/signal-status-and-lifecycle/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/28/signal-status-and-lifecycle/">Signal Status and Lifecycle</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p><i><strong>modified from</strong> <a href="http://blog.csdn.net/sunyubo458/article/details/4484957">http://blog.csdn.net/sunyubo458/article/details/4484957</a></i></p>
-
-<p><em>Lost original source</em></p>
-
-<hr />
-
-<h3 id="section">信号状态</h3>
-
-<p>信号的”未决“是一种状态，指的是从信号的产生到信号被处理前的这一段时间；信号的”阻塞“是一个开关动作，指的是阻止信号被处理，但不是阻止信号产生。 </p>
-
-<p>每个进程都有一个信号屏蔽字，它规定了当前要阻塞地送到该进程的信号集，对于每种可能的信号，该屏蔽字中都有一位与之对应。对于某种信号，若其对应为已设定，则它当前是被阻塞的。进程可以调用<code>sigprocmask</code>来检测和更改当前信号屏蔽字。</p>
-
-<p>APUE例题在<code>sleep</code>前用<code>sigprocmask</code>阻塞了退出信号，然后<code>sleep</code>,然后在<code>sleep</code>的过程中产生一个退出信号，但是此时退出信号被阻塞过，（中文的”阻塞”在这里容易被误解为一种状态，实际上是一种类似于开关的动作，所以说“被阻塞过”，而不是“被阻塞”）所以处于“未决”状态，在 <code>sleep</code>后又用<code>sigprocmask</code>关掉退出信号的阻塞开关，因为之前产生的退出信号一直处于未决状态，当关上阻塞开关后，马上退出“未决”状态，得到处理，这一切发生在<code>sigprocmask</code>返回之前。 </p>
-
-<h3 id="section-1">信号生命周期</h3>
-
-<p>对于一个完整的信号生命周期(从信号发送到相应的处理函数执行完毕)来说，可以分为三个重要的阶段，这三个阶段由四个重要事件来刻画：1.信号诞生；2. 信号在进程中注册完毕；3.信号在进程中的注销完毕；4.信号处理函数执行完毕。相邻两个事件的时间间隔构成信号生命周期的一个阶段。</p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/06/28/signal-status-and-lifecycle/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -674,6 +673,8 @@
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2014/08/04/modules-in-network-programming/">Modules in Network Programming</a>
+    
     <a class="list-group-item " href="/blog/2014/08/02/probability-problem/">Probability Problem</a>
     
     <a class="list-group-item " href="/blog/2014/07/22/network-programming/">Unix Network Programming Notes</a>
@@ -681,8 +682,6 @@
     <a class="list-group-item " href="/blog/2014/07/18/TCP-IP/">Summary of TCP/IP ILLustrated Volume 1</a>
     
     <a class="list-group-item " href="/blog/2014/07/17/Some-NB-translation/">Some NB Translations</a>
-    
-    <a class="list-group-item " href="/blog/2014/07/17/thundering-herd/">Linux Thundering Herd</a>
     
   </div>
 </section>
@@ -724,7 +723,7 @@
     
     
     <a class="list-group-item " href="/blog/categories/rework/index.html">
-        <span class="badge">8</span>
+        <span class="badge">9</span>
         rework
       </a>
     
