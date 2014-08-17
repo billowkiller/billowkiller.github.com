@@ -1,0 +1,122 @@
+---
+layout: post
+title: "Number Theory Introduction"
+date: 2014-08-09 02:18
+comments: true
+categories: algorithm
+tags: [algorithm, number theory, Catalan, Euler]
+---
+
+## Catalan数 ##
+
+卡塔兰数是组合数学中一个常在各种计数问题中出现的数列。卡塔兰数的一般项公式为：
+
+![](http://upload.wikimedia.org/math/d/1/1/d118d8cea7b639dfd5244fcba65910cf.png)
+
+它的另外一个表达式是：
+
+![](http://upload.wikimedia.org/math/f/7/9/f7943e307a891716ca1266a5f5957cdd.png)
+
+**递推关系：**
+
+![](http://upload.wikimedia.org/math/6/2/1/6217b3c99a3243afcd5d8dbd58186822.png)
+
+![](http://upload.wikimedia.org/math/8/a/4/8a49332e4a46b3a2c7accec81160f5e3.png)
+
+### 组合数学中的应用 ###
+
+1. 长度2n的dyck word的个数。Dyck word是一个有n个X和n个Y组成的字串，且所有的前缀字串皆满足X的个数大于等于Y的个数。以下为长度为6的dyck words: `XXXYYY` `XYXXYY` `XYXYXY` `XXYYXY` `XXYXYY`
+2. 将上例的X换成左括号，Y换成右括号，Cn表示所有包含n组括号的合法运算式的个数
+3. Cn表示有n个节点组成不同构二叉树的方案数。下图中，n等于3，圆形表示节点，月牙形表示什么都没有。
+
+	![](http://upload.wikimedia.org/wikipedia/commons/0/01/Catalan_number_binary_tree_example.png)
+
+4. Cn表示有2n+1个节点组成不同构满二叉树（full binary tree）的方案数。
+
+	证明：
+	令1表示进栈，0表示出栈，则可转化为求一个2n位、含n个1、n个0的二进制数，满足从左往右扫描到任意一位时，经过的0数不多于1数。显然含n个1、n个0的2n位二进制数共有![](http://upload.wikimedia.org/math/c/9/2/c92da943df73dc077dbee5514376346a.png)个，下面考虑不满足要求的数目。
+
+	考虑一个含n个1、n个0的2n位二进制数，扫描到第2m+1位上时有m+1个0和m个1（容易证明一定存在这样的情况），则后面的0-1排列中必有n-m个1和n-m-1个0。将2m+2及其以后的部分0变成1、1变成0，则对应一个n+1个0和n-1个1的二进制数。反之亦然（相似的思路证明两者一一对应）。从而：
+    
+	![](http://upload.wikimedia.org/math/4/8/2/4828faf1c29e4b699529f2275cc63453.png)
+
+5. Cn表示所有在n × n格点中不越过对角线的单调路径的个数。一个单调路径从格点左下角出发，在格点右上角结束，每一步均为向上或向右。计算这种路径的个数等价于计算Dyck word的个数：X代表“向右”，Y代表“向上”。下图为n = 4的情况：
+
+	![](http://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Catalan_number_4x4_grid_example.svg/450px-Catalan_number_4x4_grid_example.svg.png)
+
+6. Cn表示通过连结顶点而将n + 2边的凸多边形分成三角形的方法个数。下图中为n = 4的情况：
+
+	![](http://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Catalan-Hexagons-example.svg/400px-Catalan-Hexagons-example.svg.png)
+
+7. Cn表示用n个长方形填充一个高度为n的阶梯状图形的方法个数。下图为n = 4的情况：
+
+	![](http://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Catalan_stairsteps_4.svg/400px-Catalan_stairsteps_4.svg.png)
+
+### 面试题 ###
+
+**12个高矮不同的人，排成两排，每排必须是从矮到高排列，而且第二排比对应的第一排的人高，问排列方式有多少种？**
+
+我们先把这12个人从低到高排列，然后，选择6个人排在第一排，那么剩下的6个肯定是在第二排。
+
+用0表示对应的人在第一排，用1表示对应的人在第二排，那么含有6个0，6个1的序列，就对应一种方案。问题转换为，这样的满足条件的01序列有多少个。
+
+**给乘积X1X,X3......Xn加括号的方法数**
+
+**n+m个人排队买票，并且满足$n \\ge m$，票价为50元，其中n个人各手持一张50元钞票，m个人各手持一张100元钞票，除此之外大家身上没有任何其他的钱币，并且初始时候售票窗口没有钱，问有多少种排队的情况数能够让大家都买到票。**
+
+这个题目是Catalan数的变形，不考虑人与人的差异，如果m=n的话那么就是我们初始的Catalan数问题，也就是将手持50元的人看成是+1，手持100元的人看成是-1，任前k个数值的和都非负的序列数。
+
+这个题目区别就在于$n>m$的情况，此时我们仍然可以用原先的证明方法考虑，假设我们要的情况数是$D\_{n+m}$，无法让每个人都买到的情况数是$U\_{n + m}$，那么就有$D\_{n + m} + U\_{n +m} = {n + m \\choose n}$，此时我们求$U\_{n + m}$，我们假设最早买不到票的人编号是k，他手持的是100元并且售票处没有钱，那么将前k个人的钱从50元变成100元，从100元变成50元，这时候就有$n+1$个人手持50元，$m-1$个手持100元的，所以就得到$U\_{n + m} = {n + m \\choose n + 1}$，于是我们的结果就因此得到了，表达式是$D\_{n + m} = {n + m \\choose n} - {n + m \\choose n + 1}$。
+
+## 欧拉函数 ##
+
+在数论中，对正整数n，欧拉函数$\varphi(n)$是小于或等于n的正整数中与n互质的数的数目。例如$\varphi(8)=4$，因为1,3,5,7均和8互质。
+
+* $\varphi(1)=1$（小于等于1的正整数中唯一和1互质的数就是1本身）。
+
+* 若$n$是质数$p$的$k$次幂，$\varphi(n)=\varphi(p^k)=p^k-p^{k-1}=(p-1)p^{k-1}$，因为除了$p$的倍数外，其他数都跟$n$互质。
+
+* 若$n = p\_1^{k\_1} p\_2^{k\_2} \\cdots p\_r^{k\_r}$, 则$\varphi(n) = \prod\_{i=1}^r p\_i^{k\_i-1}(p\_i-1) = \prod\_{p\\mid n} p^{\alpha\_p-1}(p-1) = n\prod\_{p|n}\left(1-\frac{1}{p}\right)$。
+其中$\alpha_p$是使得$p^{\alpha}$整除$n$的最大整数$\alpha（这里\alpha_{p\_i} = k\_i）$。
+
+	例如$\varphi(72)=\varphi(2^3\times3^2)=72\times(1 - \frac{1}{2})\times(1 - \frac{1}{3})=24$
+
+* 对任何两个互质的正整数$a, m（即 gcd(a,m) = 1），m\ge2$，有$a^{\varphi(m)} \equiv 1 \pmod m$。即**欧拉定理**。
+
+* 当$m$是质数$p$时，此式则为：$a^{p-1} \equiv 1 \pmod p$。即**费马小定理**。
+
+**欧拉函数的程序:**
+
+``` c++
+int phi(int x) {
+    int ans = x;
+    int m = (int)sqrt(x+0.5);
+    for(int i = 2; i <= m; i++) {
+        if(x % i == 0) {   // 求素因子
+            ans = ans / i * (i - 1);    // 运用通项求解欧拉函数
+            while(x % i == 0)  x /= i;  // 每个素因子只计算一次
+        }
+    }
+    if(x > 1)  ans = ans / x * (x - 1);  // 防质数
+    return ans;
+}
+```
+    
+**1-n中所有树的欧拉phi函数值。**并不需要一次计算。可以用与筛法求素数类似的方法，在$O(nloglogn)$时间内计算完毕。
+
+``` c++
+void phi_table(int n, int* phi) {
+    for(int i = 2; i <= N; i++)  p[i] = 0;
+    phi[1] = 1;
+    
+    for(int i = 2; i <= N; i++) {
+        if(!phi[i]) {
+            for(int j = i; j <= n; j += i) {    // 处理素因子phi[i]
+                if(!phi[j]) phi[j] = j;
+                 phi[j] = phi[j] / i * (i - 1);    // 先除后乘，防止中间过程超出范围
+            }
+        }
+    }
+}
+```
+
