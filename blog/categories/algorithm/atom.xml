@@ -4,7 +4,7 @@
   <title><![CDATA[Category: algorithm | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/algorithm/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-08-13T15:46:44+08:00</updated>
+  <updated>2014-08-17T16:02:53+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,142 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Number Theory Introduction]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/08/09/Number-theory-introduction/"/>
+    <updated>2014-08-09T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/08/09/Number-theory-introduction</id>
+    <content type="html"><![CDATA[<h2 id="catalan">Catalan数</h2>
+
+<p>卡塔兰数是组合数学中一个常在各种计数问题中出现的数列。卡塔兰数的一般项公式为：</p>
+
+<p><img src="http://upload.wikimedia.org/math/d/1/1/d118d8cea7b639dfd5244fcba65910cf.png" alt="" /></p>
+
+<p>它的另外一个表达式是：</p>
+
+<p><img src="http://upload.wikimedia.org/math/f/7/9/f7943e307a891716ca1266a5f5957cdd.png" alt="" /></p>
+
+<p><strong>递推关系：</strong></p>
+
+<p><img src="http://upload.wikimedia.org/math/6/2/1/6217b3c99a3243afcd5d8dbd58186822.png" alt="" /></p>
+
+<p><img src="http://upload.wikimedia.org/math/8/a/4/8a49332e4a46b3a2c7accec81160f5e3.png" alt="" /></p>
+
+<h3 id="section">组合数学中的应用</h3>
+
+<ol>
+  <li>长度2n的dyck word的个数。Dyck word是一个有n个X和n个Y组成的字串，且所有的前缀字串皆满足X的个数大于等于Y的个数。以下为长度为6的dyck words: <code>XXXYYY</code> <code>XYXXYY</code> <code>XYXYXY</code> <code>XXYYXY</code> <code>XXYXYY</code></li>
+  <li>将上例的X换成左括号，Y换成右括号，Cn表示所有包含n组括号的合法运算式的个数</li>
+  <li>
+    <p>Cn表示有n个节点组成不同构二叉树的方案数。下图中，n等于3，圆形表示节点，月牙形表示什么都没有。</p>
+
+    <p><img src="http://upload.wikimedia.org/wikipedia/commons/0/01/Catalan_number_binary_tree_example.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Cn表示有2n+1个节点组成不同构满二叉树（full binary tree）的方案数。</p>
+
+    <p>证明：
+ 令1表示进栈，0表示出栈，则可转化为求一个2n位、含n个1、n个0的二进制数，满足从左往右扫描到任意一位时，经过的0数不多于1数。显然含n个1、n个0的2n位二进制数共有<img src="http://upload.wikimedia.org/math/c/9/2/c92da943df73dc077dbee5514376346a.png" alt="" />个，下面考虑不满足要求的数目。</p>
+
+    <p>考虑一个含n个1、n个0的2n位二进制数，扫描到第2m+1位上时有m+1个0和m个1（容易证明一定存在这样的情况），则后面的0-1排列中必有n-m个1和n-m-1个0。将2m+2及其以后的部分0变成1、1变成0，则对应一个n+1个0和n-1个1的二进制数。反之亦然（相似的思路证明两者一一对应）。从而：</p>
+
+    <p><img src="http://upload.wikimedia.org/math/4/8/2/4828faf1c29e4b699529f2275cc63453.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Cn表示所有在n × n格点中不越过对角线的单调路径的个数。一个单调路径从格点左下角出发，在格点右上角结束，每一步均为向上或向右。计算这种路径的个数等价于计算Dyck word的个数：X代表“向右”，Y代表“向上”。下图为n = 4的情况：</p>
+
+    <p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Catalan_number_4x4_grid_example.svg/450px-Catalan_number_4x4_grid_example.svg.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Cn表示通过连结顶点而将n + 2边的凸多边形分成三角形的方法个数。下图中为n = 4的情况：</p>
+
+    <p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Catalan-Hexagons-example.svg/400px-Catalan-Hexagons-example.svg.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Cn表示用n个长方形填充一个高度为n的阶梯状图形的方法个数。下图为n = 4的情况：</p>
+
+    <p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Catalan_stairsteps_4.svg/400px-Catalan_stairsteps_4.svg.png" alt="" /></p>
+  </li>
+</ol>
+
+<h3 id="section-1">面试题</h3>
+
+<p><strong>12个高矮不同的人，排成两排，每排必须是从矮到高排列，而且第二排比对应的第一排的人高，问排列方式有多少种？</strong></p>
+
+<p>我们先把这12个人从低到高排列，然后，选择6个人排在第一排，那么剩下的6个肯定是在第二排。</p>
+
+<p>用0表示对应的人在第一排，用1表示对应的人在第二排，那么含有6个0，6个1的序列，就对应一种方案。问题转换为，这样的满足条件的01序列有多少个。</p>
+
+<p><strong>给乘积X1X,X3……Xn加括号的方法数</strong></p>
+
+<p><strong>n+m个人排队买票，并且满足$n \ge m$，票价为50元，其中n个人各手持一张50元钞票，m个人各手持一张100元钞票，除此之外大家身上没有任何其他的钱币，并且初始时候售票窗口没有钱，问有多少种排队的情况数能够让大家都买到票。</strong></p>
+
+<p>这个题目是Catalan数的变形，不考虑人与人的差异，如果m=n的话那么就是我们初始的Catalan数问题，也就是将手持50元的人看成是+1，手持100元的人看成是-1，任前k个数值的和都非负的序列数。</p>
+
+<p>这个题目区别就在于$n&gt;m$的情况，此时我们仍然可以用原先的证明方法考虑，假设我们要的情况数是$D_{n+m}$，无法让每个人都买到的情况数是$U_{n + m}$，那么就有$D_{n + m} + U_{n +m} = {n + m \choose n}$，此时我们求$U_{n + m}$，我们假设最早买不到票的人编号是k，他手持的是100元并且售票处没有钱，那么将前k个人的钱从50元变成100元，从100元变成50元，这时候就有$n+1$个人手持50元，$m-1$个手持100元的，所以就得到$U_{n + m} = {n + m \choose n + 1}$，于是我们的结果就因此得到了，表达式是$D_{n + m} = {n + m \choose n} - {n + m \choose n + 1}$。</p>
+
+<h2 id="section-2">欧拉函数</h2>
+
+<p>在数论中，对正整数n，欧拉函数$\varphi(n)$是小于或等于n的正整数中与n互质的数的数目。例如$\varphi(8)=4$，因为1,3,5,7均和8互质。</p>
+
+<ul>
+  <li>
+    <p>$\varphi(1)=1$（小于等于1的正整数中唯一和1互质的数就是1本身）。</p>
+  </li>
+  <li>
+    <p>若$n$是质数$p$的$k$次幂，$\varphi(n)=\varphi(p^k)=p^k-p^{k-1}=(p-1)p^{k-1}$，因为除了$p$的倍数外，其他数都跟$n$互质。</p>
+  </li>
+  <li>
+    <p>若$n = p_1^{k_1} p_2^{k_2} \cdots p_r^{k_r}$, 则$\varphi(n) = \prod_{i=1}^r p_i^{k_i-1}(p_i-1) = \prod_{p\mid n} p^{\alpha_p-1}(p-1) = n\prod_{p|n}\left(1-\frac{1}{p}\right)$。
+其中$\alpha_p$是使得$p^{\alpha}$整除$n$的最大整数$\alpha（这里\alpha_{p_i} = k_i）$。</p>
+
+    <p>例如$\varphi(72)=\varphi(2^3\times3^2)=72\times(1 - \frac{1}{2})\times(1 - \frac{1}{3})=24$</p>
+  </li>
+  <li>
+    <p>对任何两个互质的正整数$a, m（即 gcd(a,m) = 1），m\ge2$，有$a^{\varphi(m)} \equiv 1 \pmod m$。即<strong>欧拉定理</strong>。</p>
+  </li>
+  <li>
+    <p>当$m$是质数$p$时，此式则为：$a^{p-1} \equiv 1 \pmod p$。即<strong>费马小定理</strong>。</p>
+  </li>
+</ul>
+
+<p><strong>欧拉函数的程序:</strong></p>
+
+<p><code>c++
+int phi(int x) {
+    int ans = x;
+    int m = (int)sqrt(x+0.5);
+    for(int i = 2; i &lt;= m; i++) {
+        if(x % i == 0) {   // 求素因子
+            ans = ans / i * (i - 1);    // 运用通项求解欧拉函数
+            while(x % i == 0)  x /= i;  // 每个素因子只计算一次
+        }
+    }
+    if(x &gt; 1)  ans = ans / x * (x - 1);  // 防质数
+    return ans;
+}
+</code></p>
+
+<p><strong>1-n中所有树的欧拉phi函数值。</strong>并不需要一次计算。可以用与筛法求素数类似的方法，在$O(nloglogn)$时间内计算完毕。</p>
+
+<p>``` c++
+void phi_table(int n, int* phi) {
+    for(int i = 2; i &lt;= N; i++)  p[i] = 0;
+    phi[1] = 1;</p>
+
+<pre><code>for(int i = 2; i &lt;= N; i++) {
+    if(!phi[i]) {
+        for(int j = i; j &lt;= n; j += i) {    // 处理素因子phi[i]
+            if(!phi[j]) phi[j] = j;
+             phi[j] = phi[j] / i * (i - 1);    // 先除后乘，防止中间过程超出范围
+        }
+    }
+} } ```
+</code></pre>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Probability Problem]]></title>
@@ -175,6 +311,61 @@ def Rand7():
 
 <p><img src="http://hi.csdn.net/attachment/201203/13/0_1331634834uu6L.gif" alt="" /></p>
 
+<p><strong>一个口袋内有10个红色球，20个蓝色球，30个绿色球，你随机地
+把球一个一个取出来，请问红色球最先被拿完的概率？也就是当第10个红
+色球被取出时，口袋内至少还有一个蓝色球和一个绿色球的概率。</strong></p>
+
+<p>60个球随机排列，红球先取完就等于说后面至少还有一个蓝球，
+一个绿球。<strong>如果把这个排列倒过来看，就是说看见红球前先看见
+蓝球和绿球</strong>。这样一来就容易了。总共有两种情况，先蓝后绿再
+红，或者先绿后蓝再红。</p>
+
+<p>先蓝的概率是<code>1/3</code>，绿红两色中先绿再红的概率是<code>3/4</code> （先蓝以后
+其它蓝球不影响绿红的概率）。所以第一种情况的概率是<code>1/3×3/4=1/4</code></p>
+
+<p>先绿的概率是1/2，蓝红两色中先蓝再红的概率是<code>2/3</code> （先绿以后
+其它绿球不影响蓝红的概率）。所以第二种情况的概率是<code>1/2×2/3=1/3</code></p>
+
+<p>所以，总概率是<code>1/4+1/3=7/12</code>.</p>
+
+<p>仔细看一看上面的解法，我们会发现红蓝绿球的数量不重要，比例最重
+要。也就是说如果有100红，200蓝，300绿，答案还是一样的。</p>
+
+<p><strong>在圆环上随机取N个点，请问这N个点正好都在同一半圆环内的概
+率是多少？要注意的是这个半圆环可以是任意半圆环。</strong></p>
+
+<p>起来无从下手，但很多概率组合题都是如此，只要想对了思路就容易了。</p>
+
+<p>一共N个点，固定一个点，从这点开始顺时针，逆时针各有一个半圆，其它N-1个点都落在同
+一个（比如顺时针）半圆上的概率是1/2^（N-1). 总共N个点，所以总概率是N/2^（N-1）。</p>
+
+<p><strong>你分别写好5封信给5个朋友，你在5个信封上分别写上他们的地址，
+如果你把5封信随机地放进5个信封，请问所有5封信都寄错人的概率是多少？</strong></p>
+
+<p>这题是著名的Derangement问题。关键步骤是要找到递推公式。</p>
+
+<p>如果假设N个人有S_n种 derangement。考虑第N+1个与每一个的交换。我们可以证明<code>S_(n+1) = n*(S_n + S_(n-1))</code></p>
+
+<p>有了这个递推公式以后，可以证明Derangement的概率是<code>p_n = sum((-1)^k/k!, k=0,n)</code></p>
+
+<p>对这道题来说，N=6. 当N趋于无穷大时，<code>p_n趋于e^(-1)</code></p>
+
+<p><strong>一个骰子6面分别是1到6，请问你平均要投多少次才能让每个数字都
+投中过？</strong></p>
+
+<p>掷第一次可以得到一个数，第二次掷出不同的数的概率是5/6，所以掷出第
+二个数的期望长度是6/5，掷出第三个不同的数的概率是4/6，所以掷出第二
+个数的期望长度是6/4，以此类推，所以掷出所有六个数的期望长度是</p>
+
+<pre><code>1+6/5+6/4+6/3+6/2+6/1=6×（1/6+1/5+1/4+1/3+1/2+1/1） = 14.7
+</code></pre>
+
+<p>当然这个题也可以推广到任意N面的骰子。
+在第一个数已经出现的情况下，抛出第二个数的期望次数是</p>
+
+<pre><code>E(x) = 5/6 + 1/6*5/6*2 + 1/6^2 * 5/6 *3 + 1/6^3 * 5/6 * 4 +....
+E(x) = 6/5
+</code></pre>
 ]]></content>
   </entry>
   

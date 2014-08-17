@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Number Theory Introduction - Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2014/08/09/Number-theory-introduction">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-09T02:18:00+08:00" pubdate data-updated="true">Aug 9<span>th</span>, 2014</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        Number Theory Introduction
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><h2 id="catalan">Catalan数</h2>
+
+<p>卡塔兰数是组合数学中一个常在各种计数问题中出现的数列。卡塔兰数的一般项公式为：</p>
+
+<p><img src="http://upload.wikimedia.org/math/d/1/1/d118d8cea7b639dfd5244fcba65910cf.png" alt="" /></p>
+
+<p>它的另外一个表达式是：</p>
+
+<p><img src="http://upload.wikimedia.org/math/f/7/9/f7943e307a891716ca1266a5f5957cdd.png" alt="" /></p>
+
+<p><strong>递推关系：</strong></p>
+
+<p><img src="http://upload.wikimedia.org/math/6/2/1/6217b3c99a3243afcd5d8dbd58186822.png" alt="" /></p>
+
+<p><img src="http://upload.wikimedia.org/math/8/a/4/8a49332e4a46b3a2c7accec81160f5e3.png" alt="" /></p>
+
+<h3 id="section">组合数学中的应用</h3>
+
+<ol>
+  <li>长度2n的dyck word的个数。Dyck word是一个有n个X和n个Y组成的字串，且所有的前缀字串皆满足X的个数大于等于Y的个数。以下为长度为6的dyck words: <code>XXXYYY</code> <code>XYXXYY</code> <code>XYXYXY</code> <code>XXYYXY</code> <code>XXYXYY</code></li>
+  <li>将上例的X换成左括号，Y换成右括号，Cn表示所有包含n组括号的合法运算式的个数</li>
+  <li>
+    <p>Cn表示有n个节点组成不同构二叉树的方案数。下图中，n等于3，圆形表示节点，月牙形表示什么都没有。</p>
+
+    <p><img src="http://upload.wikimedia.org/wikipedia/commons/0/01/Catalan_number_binary_tree_example.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Cn表示有2n+1个节点组成不同构满二叉树（full binary tree）的方案数。</p>
+
+    <p>证明：
+ 令1表示进栈，0表示出栈，则可转化为求一个2n位、含n个1、n个0的二进制数，满足从左往右扫描到任意一位时，经过的0数不多于1数。显然含n个1、n个0的2n位二进制数共有<img src="http://upload.wikimedia.org/math/c/9/2/c92da943df73dc077dbee5514376346a.png" alt="" />个，下面考虑不满足要求的数目。</p>
+
+    <p>考虑一个含n个1、n个0的2n位二进制数，扫描到第2m+1位上时有m+1个0和m个1（容易证明一定存在这样的情况），则后面的0-1排列中必有n-m个1和n-m-1个0。将2m+2及其以后的部分0变成1、1变成0，则对应一个n+1个0和n-1个1的二进制数。反之亦然（相似的思路证明两者一一对应）。从而：</p>
+
+    <p><img src="http://upload.wikimedia.org/math/4/8/2/4828faf1c29e4b699529f2275cc63453.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Cn表示所有在n × n格点中不越过对角线的单调路径的个数。一个单调路径从格点左下角出发，在格点右上角结束，每一步均为向上或向右。计算这种路径的个数等价于计算Dyck word的个数：X代表“向右”，Y代表“向上”。下图为n = 4的情况：</p>
+
+    <p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Catalan_number_4x4_grid_example.svg/450px-Catalan_number_4x4_grid_example.svg.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Cn表示通过连结顶点而将n + 2边的凸多边形分成三角形的方法个数。下图中为n = 4的情况：</p>
+
+    <p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Catalan-Hexagons-example.svg/400px-Catalan-Hexagons-example.svg.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Cn表示用n个长方形填充一个高度为n的阶梯状图形的方法个数。下图为n = 4的情况：</p>
+
+    <p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Catalan_stairsteps_4.svg/400px-Catalan_stairsteps_4.svg.png" alt="" /></p>
+  </li>
+</ol>
+
+<h3 id="section-1">面试题</h3>
+
+<p><strong>12个高矮不同的人，排成两排，每排必须是从矮到高排列，而且第二排比对应的第一排的人高，问排列方式有多少种？</strong></p>
+
+<p>我们先把这12个人从低到高排列，然后，选择6个人排在第一排，那么剩下的6个肯定是在第二排。</p>
+
+<p>用0表示对应的人在第一排，用1表示对应的人在第二排，那么含有6个0，6个1的序列，就对应一种方案。问题转换为，这样的满足条件的01序列有多少个。</p>
+
+<p><strong>给乘积X1X,X3……Xn加括号的方法数</strong></p>
+
+<p><strong>n+m个人排队买票，并且满足$n \ge m$，票价为50元，其中n个人各手持一张50元钞票，m个人各手持一张100元钞票，除此之外大家身上没有任何其他的钱币，并且初始时候售票窗口没有钱，问有多少种排队的情况数能够让大家都买到票。</strong></p>
+
+<p>这个题目是Catalan数的变形，不考虑人与人的差异，如果m=n的话那么就是我们初始的Catalan数问题，也就是将手持50元的人看成是+1，手持100元的人看成是-1，任前k个数值的和都非负的序列数。</p>
+
+<p>这个题目区别就在于$n&gt;m$的情况，此时我们仍然可以用原先的证明方法考虑，假设我们要的情况数是$D_{n+m}$，无法让每个人都买到的情况数是$U_{n + m}$，那么就有$D_{n + m} + U_{n +m} = {n + m \choose n}$，此时我们求$U_{n + m}$，我们假设最早买不到票的人编号是k，他手持的是100元并且售票处没有钱，那么将前k个人的钱从50元变成100元，从100元变成50元，这时候就有$n+1$个人手持50元，$m-1$个手持100元的，所以就得到$U_{n + m} = {n + m \choose n + 1}$，于是我们的结果就因此得到了，表达式是$D_{n + m} = {n + m \choose n} - {n + m \choose n + 1}$。</p>
+
+<h2 id="section-2">欧拉函数</h2>
+
+<p>在数论中，对正整数n，欧拉函数$\varphi(n)$是小于或等于n的正整数中与n互质的数的数目。例如$\varphi(8)=4$，因为1,3,5,7均和8互质。</p>
+
+<ul>
+  <li>
+    <p>$\varphi(1)=1$（小于等于1的正整数中唯一和1互质的数就是1本身）。</p>
+  </li>
+  <li>
+    <p>若$n$是质数$p$的$k$次幂，$\varphi(n)=\varphi(p^k)=p^k-p^{k-1}=(p-1)p^{k-1}$，因为除了$p$的倍数外，其他数都跟$n$互质。</p>
+  </li>
+  <li>
+    <p>若$n = p_1^{k_1} p_2^{k_2} \cdots p_r^{k_r}$, 则$\varphi(n) = \prod_{i=1}^r p_i^{k_i-1}(p_i-1) = \prod_{p\mid n} p^{\alpha_p-1}(p-1) = n\prod_{p|n}\left(1-\frac{1}{p}\right)$。
+其中$\alpha_p$是使得$p^{\alpha}$整除$n$的最大整数$\alpha（这里\alpha_{p_i} = k_i）$。</p>
+
+    <p>例如$\varphi(72)=\varphi(2^3\times3^2)=72\times(1 - \frac{1}{2})\times(1 - \frac{1}{3})=24$</p>
+  </li>
+  <li>
+    <p>对任何两个互质的正整数$a, m（即 gcd(a,m) = 1），m\ge2$，有$a^{\varphi(m)} \equiv 1 \pmod m$。即<strong>欧拉定理</strong>。</p>
+  </li>
+  <li>
+    <p>当$m$是质数$p$时，此式则为：$a^{p-1} \equiv 1 \pmod p$。即<strong>费马小定理</strong>。</p>
+  </li>
+</ul>
+
+<p><strong>欧拉函数的程序:</strong></p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="kt">int</span> <span class="n">phi</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">    <span class="kt">int</span> <span class="n">ans</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
+</span><span class="line">    <span class="kt">int</span> <span class="n">m</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="mf">0.5</span><span class="p">);</span>
+</span><span class="line">    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">m</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">        <span class="k">if</span><span class="p">(</span><span class="n">x</span> <span class="o">%</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>   <span class="c1">// 求素因子</span>
+</span><span class="line">            <span class="n">ans</span> <span class="o">=</span> <span class="n">ans</span> <span class="o">/</span> <span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>    <span class="c1">// 运用通项求解欧拉函数</span>
+</span><span class="line">            <span class="k">while</span><span class="p">(</span><span class="n">x</span> <span class="o">%</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>  <span class="n">x</span> <span class="o">/=</span> <span class="n">i</span><span class="p">;</span>  <span class="c1">// 每个素因子只计算一次</span>
+</span><span class="line">        <span class="p">}</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">    <span class="k">if</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>  <span class="n">ans</span> <span class="o">=</span> <span class="n">ans</span> <span class="o">/</span> <span class="n">x</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>  <span class="c1">// 防质数</span>
+</span><span class="line">    <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p><strong>1-n中所有树的欧拉phi函数值。</strong>并不需要一次计算。可以用与筛法求素数类似的方法，在$O(nloglogn)$时间内计算完毕。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="kt">void</span> <span class="n">phi_table</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">int</span><span class="o">*</span> <span class="n">phi</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>  <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line">    <span class="n">phi</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">        <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">phi</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="p">{</span>
+</span><span class="line">            <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">;</span> <span class="n">j</span> <span class="o">+=</span> <span class="n">i</span><span class="p">)</span> <span class="p">{</span>    <span class="c1">// 处理素因子phi[i]</span>
+</span><span class="line">                <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">phi</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="n">phi</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">j</span><span class="p">;</span>
+</span><span class="line">                 <span class="n">phi</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">phi</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">/</span> <span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>    <span class="c1">// 先除后乘，防止中间过程超出范围</span>
+</span><span class="line">            <span class="p">}</span>
+</span><span class="line">        <span class="p">}</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-09T02:18:00+08:00" pubdate data-updated="true">Aug 9<span>th</span>, 2014</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/algorithm/'>algorithm</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2014/08/09/Number-theory-introduction/" data-via="" data-counturl="http://billowkiller.github.io/blog/2014/08/09/Number-theory-introduction/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2014/08/04/modules-in-network-programming/" title="Previous Post: Modules in Network Programming">&laquo; Modules in Network Programming</a></li>
+            
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item active" href="/blog/2014/08/09/Number-theory-introduction/">Number Theory Introduction</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/04/modules-in-network-programming/">Modules in Network Programming</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/02/probability-problem/">Probability Problem</a>
+    
+    <a class="list-group-item " href="/blog/2014/07/22/network-programming/">Unix Network Programming Notes</a>
+    
+    <a class="list-group-item " href="/blog/2014/07/18/TCP-IP/">Summary of TCP/IP ILLustrated Volume 1</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">7</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">6</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">16</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">8</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">9</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">4</span>
+        algorithm
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2014 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2014/08/09/Number-theory-introduction/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2014/08/09/Number-theory-introduction/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>

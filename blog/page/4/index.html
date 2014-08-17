@@ -24,6 +24,37 @@
 <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
 <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
 
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
 
   <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
   
@@ -85,6 +116,74 @@
   <div class="page-content col-md-9">
     <div class="blog-index">
       
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/05/14/ubuntuliang-du-diao-jie/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/ubuntuliang-du-diao-jie/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/ubuntuliang-du-diao-jie/">Ubuntu亮度调节</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>1.
+sudo gedit /etc/X11/xorg.conf 把
+<br /></p>
+
+<p>Section “Device”<br />
+Identifier “Device0” <br />
+Driver “nvidia” 　　　<br />
+VendorName “NVIDIA Corporation” EndSection <br /></p>
+
+<p>改成</p>
+
+<p>Section “Device”<br />
+Identifier “Device0”<br />
+Driver “nvidia”<br />
+VendorName “NVIDIA Corporation” 　<br />
+Option “RegistryDwords” “<br /> EnableBrightnessControl=1”<br />
+EndSection</p>
+
+<p>然后保存，退出，重启之后，你 就会发现可以调节屏幕背光亮度了</p>
+
+<p>2.
+网上有很多在Ubuntu
+Linux下调节笔记本屏幕亮度的方法，有的调的是亮度但不是背光亮度，有的调背光亮度的方法在我的电脑上不好使……找了半天发现这个方法，适用范围应该比较广（起码在我这里好用）。</p>
+
+<p>首先，进入终端，输入lspci命令，列出各种设备的地址
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/ubuntuliang-du-diao-jie/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
       
       
         <article class="post">
@@ -751,99 +850,6 @@ isp-dhcp-server。可能是ubuntu进行的版本替换。但是不影响后面�
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/linuxnei-he-dai-ma-feng-ge/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/linuxnei-he-dai-ma-feng-ge/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/linuxnei-he-dai-ma-feng-ge/">Linux内核代码风格</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>Chinese translated version of Documentation/CodingStyle</p>
-
-<p>If you have any comment or update to the content, please post to LKML
-directly.</p>
-
-<p>However, if you have problem communicating in English you can also ask
-the</p>
-
-<p>Chinese maintainer for help. Contact the Chinese maintainer, if this</p>
-
-<p>translation is outdated or there is problem with translation.</p>
-
-<p>Chinese maintainer: Zhang Le &lt;r0bertz@gentoo.org&gt;</p>
-
-<hr />
-
-<p>Documentation/CodingStyle的中文翻译</p>
-
-<p>如果想评论或更新本文的内容，请直接发信到LKML。如果你使用英文交流有困难的话，也可</p>
-
-<p>以向中文版维护者求助。如果本翻译更新不及时或者翻译存在问题，请联系中文版维护者。</p>
-
-<p>中文版维护者： 张乐 Zhang Le <a href="&#109;&#097;&#105;&#108;&#116;&#111;:&#114;&#048;&#098;&#101;&#114;&#116;&#122;&#064;&#103;&#101;&#110;&#116;&#111;&#111;&#046;&#111;&#114;&#103;">&#114;&#048;&#098;&#101;&#114;&#116;&#122;&#064;&#103;&#101;&#110;&#116;&#111;&#111;&#046;&#111;&#114;&#103;</a></p>
-
-<p>中文版翻译者： 张乐 Zhang Le <a href="&#109;&#097;&#105;&#108;&#116;&#111;:&#114;&#048;&#098;&#101;&#114;&#116;&#122;&#064;&#103;&#101;&#110;&#116;&#111;&#111;&#046;&#111;&#114;&#103;">&#114;&#048;&#098;&#101;&#114;&#116;&#122;&#064;&#103;&#101;&#110;&#116;&#111;&#111;&#046;&#111;&#114;&#103;</a></p>
-
-<p>中文版校译者： 王聪 Wang Cong <a href="&#109;&#097;&#105;&#108;&#116;&#111;:&#120;&#105;&#121;&#111;&#117;&#046;&#119;&#097;&#110;&#103;&#099;&#111;&#110;&#103;&#064;&#103;&#109;&#097;&#105;&#108;&#046;&#099;&#111;&#109;">&#120;&#105;&#121;&#111;&#117;&#046;&#119;&#097;&#110;&#103;&#099;&#111;&#110;&#103;&#064;&#103;&#109;&#097;&#105;&#108;&#046;&#099;&#111;&#109;</a></p>
-
-<pre><code>        wheelz &lt;kernel.zeng@gmail.com&gt;
-
-        管旭东 Xudong Guan &lt;xudong.guan@gmail.com&gt;
-
-        Li Zefan &lt;lizf@cn.fujitsu.com&gt;
-
-        Wang Chen &lt;wangchen@cn.fujitsu.com&gt;
-</code></pre>
-
-<p>以下为正文</p>
-
-<hr />
-
-<p>Linux内核代码风格</p>
-
-<p>这是一个简短的文档，描述了linux内核的首选代码风格。代码风格是因人而异的，而且我</p>
-
-<p>不愿意把我的观点强加给任何人，不过这里所讲述的是我必须要维护的代码所遵守的风格，</p>
-
-<p>并且我也希望绝大多数其他代码也能遵守这个风格。请在写代码时至少考虑一下本文所述的</p>
-
-<p>风格。
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/linuxnei-he-dai-ma-feng-ge/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -867,6 +873,8 @@ the</p>
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2014/08/09/Number-theory-introduction/">Number Theory Introduction</a>
+    
     <a class="list-group-item " href="/blog/2014/08/04/modules-in-network-programming/">Modules in Network Programming</a>
     
     <a class="list-group-item " href="/blog/2014/08/02/probability-problem/">Probability Problem</a>
@@ -874,8 +882,6 @@ the</p>
     <a class="list-group-item " href="/blog/2014/07/22/network-programming/">Unix Network Programming Notes</a>
     
     <a class="list-group-item " href="/blog/2014/07/18/TCP-IP/">Summary of TCP/IP ILLustrated Volume 1</a>
-    
-    <a class="list-group-item " href="/blog/2014/07/17/Some-NB-translation/">Some NB Translations</a>
     
   </div>
 </section>
@@ -929,7 +935,7 @@ the</p>
     
     
     <a class="list-group-item " href="/blog/categories/algorithm/index.html">
-        <span class="badge">3</span>
+        <span class="badge">4</span>
         algorithm
       </a>
     
