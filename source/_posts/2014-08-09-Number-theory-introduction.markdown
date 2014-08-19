@@ -23,6 +23,8 @@ tags: [algorithm, number theory, Catalan, Euler]
 
 ![](http://upload.wikimedia.org/math/8/a/4/8a49332e4a46b3a2c7accec81160f5e3.png)
 
+<!--more-->
+
 ### 组合数学中的应用 ###
 
 1. 长度2n的dyck word的个数。Dyck word是一个有n个X和n个Y组成的字串，且所有的前缀字串皆满足X的个数大于等于Y的个数。以下为长度为6的dyck words: `XXXYYY` `XYXXYY` `XYXYXY` `XXYYXY` `XXYXYY`
