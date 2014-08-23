@@ -4,7 +4,7 @@
   <title><![CDATA[tags: string | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/string/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-08-19T11:28:32+08:00</updated>
+  <updated>2014-08-23T15:23:10+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[C++ string copy-on-write]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/03/12/c%2B%2B-string-copy-on-write/"/>
+    <link href="http://billowkiller.github.io/blog/2014/03/12/string-copy-on-write/"/>
     <updated>2014-03-12T02:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/03/12/c++-string-copy-on-write</id>
+    <id>http://billowkiller.github.io/blog/2014/03/12/string-copy-on-write</id>
     <content type="html"><![CDATA[<p>不同版本的C++ string实现时不同的，sizeof(string)得出来的结果也不尽相同，其中有种实现采用copy-on-write的方式来共享内存。</p>
 
 <p>引用计数就是string类中写时才拷贝的原理！当第一个类构造时，string的构造函数会根据 传入的参数从堆上分配内存，当有其它类需要这块内存时，这个计数为自动累加，当有类析构时，这个计数会减一，直到最后一个类析构时，此时的RefCnt为1或是0，此时，程序才会真正的Free这块从堆上分配的内存。</p>

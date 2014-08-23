@@ -4,7 +4,7 @@
   <title><![CDATA[tags: memory | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/memory/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-08-19T11:28:32+08:00</updated>
+  <updated>2014-08-23T15:23:10+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Inside C++ Object]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/04/12/Inside-C%2B%2B-Object/"/>
+    <link href="http://billowkiller.github.io/blog/2014/04/12/Inside-Object/"/>
     <updated>2014-04-12T02:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/04/12/Inside-C++-Object</id>
+    <id>http://billowkiller.github.io/blog/2014/04/12/Inside-Object</id>
     <content type="html"><![CDATA[<p>modified from <a href="http://blog.csdn.net/eroswang/article/details/1749609">http://blog.csdn.net/eroswang/article/details/1749609</a></p>
 
 <hr />

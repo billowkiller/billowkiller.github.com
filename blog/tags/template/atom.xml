@@ -4,7 +4,7 @@
   <title><![CDATA[tags: template | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/template/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-08-19T11:28:32+08:00</updated>
+  <updated>2014-08-23T15:23:10+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[C++ Template]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/04/23/Template-in-C%2B%2B/"/>
+    <link href="http://billowkiller.github.io/blog/2014/04/23/Template/"/>
     <updated>2014-04-23T02:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/04/23/Template-in-C++</id>
+    <id>http://billowkiller.github.io/blog/2014/04/23/Template</id>
     <content type="html"><![CDATA[<p>modified from <a href="http://www.cnblogs.com/assemble8086/archive/2011/10/02/2198308.html">http://www.cnblogs.com/assemble8086/archive/2011/10/02/2198308.html</a></p>
 
 <h2 id="section">模版</h2>

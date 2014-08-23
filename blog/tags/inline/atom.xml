@@ -4,7 +4,7 @@
   <title><![CDATA[tags: inline | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/inline/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-08-19T11:28:32+08:00</updated>
+  <updated>2014-08-23T15:23:10+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[C++ inline]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/02/16/c%2B%2B-inline/"/>
+    <link href="http://billowkiller.github.io/blog/2014/02/16/inline/"/>
     <updated>2014-02-16T09:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/02/16/c++-inline</id>
+    <id>http://billowkiller.github.io/blog/2014/02/16/inline</id>
     <content type="html"><![CDATA[<p><code>inline</code>定义的函数，比起没有<code>inline</code>的函数来说，没有执行函数调用所带来的负担，因此它是高效率的；比起宏来，它具有<strong>函数的可预期行为和参数类型检验</strong>。</p>
 
 <p><code>inline</code>对于编译器而言，意味着“在编译阶段，将调用动作以被调用函数的本体替换之”。但是它只是一种建议，编译器可以去做，也可以不去做。从逻辑上来说，编译器将函数<code>inline</code>的步骤如下：</p>

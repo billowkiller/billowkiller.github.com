@@ -189,19 +189,19 @@
         <lastmod>2014-07-16T23:49:52+08:00</lastmod>
     </url>
     <url>
-        <loc>http://billowkiller.github.io/blog/2014/02/16/c%2B%2B-inline/</loc>
+        <loc>http://billowkiller.github.io/blog/2014/02/16/inline/</loc>
         <lastmod>2014-07-27T14:33:19+08:00</lastmod>
     </url>
     <url>
-        <loc>http://billowkiller.github.io/blog/2014/03/12/c%2B%2B-string-copy-on-write/</loc>
+        <loc>http://billowkiller.github.io/blog/2014/03/12/string-copy-on-write/</loc>
         <lastmod>2014-07-28T11:15:32+08:00</lastmod>
     </url>
     <url>
-        <loc>http://billowkiller.github.io/blog/2014/04/12/Inside-C%2B%2B-Object/</loc>
+        <loc>http://billowkiller.github.io/blog/2014/04/12/Inside-Object/</loc>
         <lastmod>2014-08-12T10:20:35+08:00</lastmod>
     </url>
     <url>
-        <loc>http://billowkiller.github.io/blog/2014/04/17/Effective-C%2B%2B/</loc>
+        <loc>http://billowkiller.github.io/blog/2014/04/17/Effective/</loc>
         <lastmod>2014-08-12T10:50:32+08:00</lastmod>
     </url>
     <url>
@@ -209,8 +209,12 @@
         <lastmod>2014-07-28T10:08:56+08:00</lastmod>
     </url>
     <url>
-        <loc>http://billowkiller.github.io/blog/2014/04/23/Template-in-C%2B%2B/</loc>
+        <loc>http://billowkiller.github.io/blog/2014/04/23/Template/</loc>
         <lastmod>2014-08-04T21:37:24+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://billowkiller.github.io/blog/2014/04/27/New-features-in/</loc>
+        <lastmod>2014-08-23T15:22:52+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/2014/06/28/signal-status-and-lifecycle/</loc>
@@ -266,23 +270,23 @@
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/archives/</loc>
-        <lastmod>2014-08-19T11:27:27+08:00</lastmod>
+        <lastmod>2014-08-23T15:22:52+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/categories/</loc>
-        <lastmod>2014-08-19T11:27:27+08:00</lastmod>
+        <lastmod>2014-08-23T15:22:52+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/category/</loc>
-        <lastmod>2014-08-19T11:27:27+08:00</lastmod>
+        <lastmod>2014-08-23T15:22:52+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/tags/</loc>
-        <lastmod>2014-08-19T11:27:27+08:00</lastmod>
+        <lastmod>2014-08-23T15:22:52+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/</loc>
-        <lastmod>2014-08-19T11:27:27+08:00</lastmod>
+        <lastmod>2014-08-23T15:22:52+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/components.html</loc>
@@ -304,7 +308,7 @@
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/</loc>
-        <lastmod>2014-08-19T11:27:27+08:00</lastmod>
+        <lastmod>2014-08-23T15:22:52+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/javascript.html</loc>

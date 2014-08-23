@@ -136,6 +136,57 @@
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-12-31T18:09:00+08:00" pubdate data-updated="true">Dec 31<span>st</span>, 2013</time>
+        
+           | <a href="/blog/2013/12/31/large-site-technical-architecture/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/12/31/large-site-technical-architecture/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/12/31/large-site-technical-architecture/">Large Site Technical Architecture</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>本文是李智慧的<a href="http://book.douban.com/subject/25723064/">《大型网站技术架构》</a>的读书笔记。</p>
+
+<p>何为架构，要有大局观，大局观就是提前预防掉那些通用的问题：高可用，工程化，伸缩性，扩展性。对应需要的能力：了解分布式的一些东西，了解项目的业务和流程和运维使之工程化，了解负载均衡，能够对业务的分割和代码的分层。 </p>
+
+<p><img src="http://img3.douban.com/lpic/s27040583.jpg" height="250px" /></p>
+
+<p>本书并没有什么特别的东西，且都比较泛，但是都是很实在的东西，而且能很好的组织起来，也不失为互联网架构的一张蓝图。另外本书还处处透露着一些为人处世的人生哲学，这也是我喜欢的。</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/12/31/large-site-technical-architecture/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-12-31T18:07:00+08:00" pubdate data-updated="true">Dec 31<span>st</span>, 2013</time>
         
            | <a href="/blog/2013/12/31/gcc-summary/#disqus_thread"
@@ -591,76 +642,6 @@
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue/">Zip文件乱码解决</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>在windows上压缩的文件，是以系统默认编码中文来压缩文件。由于zip文件中没有声明其编码，所以linux上的unzip一般以默认编码解压，中文文件名会出现乱码。</p>
-
-<p>虽然2005年就有人把这报告为bug,
-但是info-zip的官方网站没有把自动识别编码列入计划，可能他们不认为这是个问题。Sun对java中存在N年的zip编码问题，采用了同样的处理方式。</p>
-
-<p>1.1 </p>
-
-<p>通过unzip行命令解压，指定字符集</p>
-
-<pre><code>unzip -O CP936 xxx.zip (用GBK, GB18030也可以)
-</code></pre>
-
-<p>有趣的是unzip的manual中并无这个选项的说明, unzip
-–help对这个参数有一行简单的说明。</p>
-
-<p>1.2 </p>
-
-<p>在环境变量中，指定unzip参数，总是以指定的字符集显示和解压文件</p>
-
-<p>解决办法：</p>
-
-<p>引用</p>
-
-<pre><code>vi /etc/environment
-</code></pre>
-
-<p>再最后加入后面的代码即可</p>
-
-<p>UNZIP=”-O CP936”</p>
-
-<p>ZIPINFO=”-O CP936”</p>
-</div>
-  
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -704,7 +685,7 @@
     
     
     <a class="list-group-item " href="/blog/categories/language/index.html">
-        <span class="badge">7</span>
+        <span class="badge">8</span>
         language
       </a>
     

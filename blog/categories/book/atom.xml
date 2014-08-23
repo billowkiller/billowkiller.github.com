@@ -4,7 +4,7 @@
   <title><![CDATA[Category: book | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/book/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-08-19T11:28:32+08:00</updated>
+  <updated>2014-08-23T15:23:10+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -566,9 +566,9 @@ RARP以与ARP相反的方式工作。<strong>RARP发出要反向解析的物理�
   
   <entry>
     <title type="html"><![CDATA[Effective C++ Rework]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/04/17/Effective-C%2B%2B/"/>
+    <link href="http://billowkiller.github.io/blog/2014/04/17/Effective/"/>
     <updated>2014-04-17T02:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/04/17/Effective-C++</id>
+    <id>http://billowkiller.github.io/blog/2014/04/17/Effective</id>
     <content type="html"><![CDATA[<h2 id="c">让自己习惯C++</h2>
 
 <h3 id="item-01-view-c-as-a-federation-of-languages">Item 01： View C++ as a federation of languages</h3>
@@ -1279,9 +1279,9 @@ result = oneHalf * 2; // 无法通过编译，不加模板则可以
   
   <entry>
     <title type="html"><![CDATA[Inside C++ Object]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/04/12/Inside-C%2B%2B-Object/"/>
+    <link href="http://billowkiller.github.io/blog/2014/04/12/Inside-Object/"/>
     <updated>2014-04-12T02:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/04/12/Inside-C++-Object</id>
+    <id>http://billowkiller.github.io/blog/2014/04/12/Inside-Object</id>
     <content type="html"><![CDATA[<p>modified from <a href="http://blog.csdn.net/eroswang/article/details/1749609">http://blog.csdn.net/eroswang/article/details/1749609</a></p>
 
 <hr />

@@ -4,7 +4,7 @@
   <title><![CDATA[tags: effective | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/effective/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-08-19T11:28:32+08:00</updated>
+  <updated>2014-08-23T15:23:10+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Effective C++ Rework]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/04/17/Effective-C%2B%2B/"/>
+    <link href="http://billowkiller.github.io/blog/2014/04/17/Effective/"/>
     <updated>2014-04-17T02:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/04/17/Effective-C++</id>
+    <id>http://billowkiller.github.io/blog/2014/04/17/Effective</id>
     <content type="html"><![CDATA[<h2 id="c">让自己习惯C++</h2>
 
 <h3 id="item-01-view-c-as-a-federation-of-languages">Item 01： View C++ as a federation of languages</h3>

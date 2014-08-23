@@ -4,7 +4,7 @@
   <title><![CDATA[Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-08-19T11:28:32+08:00</updated>
+  <updated>2014-08-23T15:23:10+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -1837,10 +1837,421 @@ if (conn_sock == -1) {
   </entry>
   
   <entry>
+    <title type="html"><![CDATA[New features in C++11]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/04/27/New-features-in/"/>
+    <updated>2014-04-27T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/04/27/New-features-in</id>
+    <content type="html"><![CDATA[<p>modified from <a href="http://coolshell.cn/articles/5265.html">http://coolshell.cn/articles/5265.html</a></p>
+
+<hr />
+
+<p>C++11在2011年8月通过ISO用来替换C++03。是对目前C++语言的扩展和修正，C++11不仅包含核心语言的新机能，而且扩展了C++的标准程序库（STL），并入了大部分的C++ Technical Report 1（TR1）程序库(数学的特殊函数除外)。</p>
+
+<p>C++11包括大量的新特性：包括lambda表达式，类型推导关键字auto、decltype，和模板的大量改进。下面就来介绍下这些新特性。</p>
+
+<!--more-->
+<hr />
+
+<h2 id="lambda-">Lambda 表达式</h2>
+
+<p>Lambda表达式来源于函数式编程，说白就了就是在使用的地方定义函数，有的语言叫“闭包”。表达式的简单语法如下，</p>
+
+<pre><code>[capture](parameters)-&gt;return_type {body}
+</code></pre>
+
+<p>来看个计数某个字符序列中有几个大写字母的例子：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">   <span class="kt">char</span> <span class="n">s</span><span class="p">[]</span><span class="o">=</span><span class="s">&quot;Hello World!&quot;</span><span class="p">;</span>
+</span><span class="line">   <span class="kt">int</span> <span class="n">Uppercase</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">//modified by the lambda</span>
+</span><span class="line">   <span class="n">for_each</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">s</span><span class="o">+</span><span class="k">sizeof</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="p">[</span><span class="o">&amp;</span><span class="n">Uppercase</span><span class="p">]</span> <span class="p">(</span><span class="kt">char</span> <span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">      <span class="k">if</span> <span class="p">(</span><span class="n">isupper</span><span class="p">(</span><span class="n">c</span><span class="p">))</span> <span class="n">Uppercase</span><span class="o">++</span><span class="p">;</span> <span class="p">});</span>
+</span><span class="line">   <span class="n">cout</span><span class="o">&lt;&lt;</span> <span class="n">Uppercase</span><span class="o">&lt;&lt;</span><span class="s">&quot; uppercase letters in: &quot;</span><span class="o">&lt;&lt;</span> <span class="n">s</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>其中 <code>[&amp;Uppercase]</code> 中的 <code>&amp;</code> 的意义是 lambda 函数体要获取一个 <code>Uppercase</code> 引用，以便能够改变它的值，如果没有 <code>&amp;</code>，那就 <code>Uppercase</code> 将以传值的形式传递过去。</p>
+
+<p>C++引入Lambda的最主要原因就是1）可以定义匿名函数，2）编译器会把其转成函数对象**。这种函数限制了别人的访问，更私有。也可以认为是一次性的方法。Lambda表达式应该是简洁的，极私有的，为了更易的代码和更方便的编程。</p>
+
+<h2 id="auto-decltype">自动类型推导 auto decltype</h2>
+
+<h3 id="auto">auto</h3>
+
+<p>在 C++03 中，声明对象的同时必须指明其类型，其实大多数情况下，声明对象的同时也会包括一个初始值，C++11 在这种情况下就能够让你声明对象时不再指定类型了：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="k">auto</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="c1">//0 是 int 类型，所以 x 也是 int 类型</span>
+</span><span class="line"><span class="k">auto</span> <span class="n">c</span><span class="o">=</span><span class="sc">&#39;a&#39;</span><span class="p">;</span> <span class="c1">//char</span>
+</span><span class="line"><span class="k">auto</span> <span class="n">d</span><span class="o">=</span><span class="mf">0.5</span><span class="p">;</span> <span class="c1">//double</span>
+</span><span class="line"><span class="k">auto</span> <span class="n">national_debt</span><span class="o">=</span><span class="mi">14400000000000LL</span><span class="p">;</span><span class="c1">//long long</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>这个特性在对象的类型很大很长的时候很有用，特别是迭代器类型。但是，我们不应该把其滥用。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="k">auto</span> <span class="n">obj</span> <span class="o">=</span> <span class="n">ProcessData</span><span class="p">(</span><span class="n">someVariables</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>我们完全不知道ProcessData返回什么，这种代码的可读性就降低很多了，但是下面程序就没有问题，因为pObject的型别在后面的new中有了。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="k">auto</span> <span class="n">pObject</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SomeType</span><span class="o">&lt;</span><span class="n">OtherType</span><span class="o">&gt;::</span><span class="n">SomeOtherType</span><span class="p">();</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h3 id="decltype">decltype</h3>
+
+<p>关于 decltype 是一个操作符，其可以评估括号内表达式的类型，其规则如下：</p>
+
+<ol>
+  <li>如果表达式e是一个变量，那么就是这个变量的类型。</li>
+  <li>如果表达式e是一个函数，那么就是这个函数返回值的类型。</li>
+  <li>如果不符合1和2，如果e是左值，类型为T，那么decltype(e)是T&amp;；如果是右值，则是T。</li>
+</ol>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="k">const</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">vi</span><span class="p">;</span>
+</span><span class="line"><span class="k">typedef</span> <span class="n">decltype</span> <span class="p">(</span><span class="n">vi</span><span class="p">.</span><span class="n">begin</span><span class="p">())</span> <span class="n">CIT</span><span class="p">;</span>
+</span><span class="line"><span class="n">CIT</span> <span class="n">another_const_iterator</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>还有一个适合的用法是用来typedef函数指针，也会省很多事。比如：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="n">decltype</span><span class="p">(</span><span class="o">&amp;</span><span class="n">myfunc</span><span class="p">)</span> <span class="n">pfunc</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line"><span class="k">typedef</span> <span class="n">decltype</span><span class="p">(</span><span class="o">&amp;</span><span class="n">A</span><span class="o">::</span><span class="n">func1</span><span class="p">)</span> <span class="n">type</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h3 id="auto--decltype-">auto 和 decltype 的差别和关系</h3>
+
+<p>Wikipedia 上是这么说的（关于decltype的规则见上）</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class="line">    <span class="k">auto</span> <span class="n">a</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>        <span class="c1">// a 的类型是 int</span>
+</span><span class="line">    <span class="n">decltype</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// b 的类型是 const int&amp;, 因为函数的返回类型是</span>
+</span><span class="line">                          <span class="c1">// std::vector&lt;int&gt;::operator[](size_type) const</span>
+</span><span class="line">    <span class="k">auto</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>           <span class="c1">// c 的类型是 int</span>
+</span><span class="line">    <span class="k">auto</span> <span class="n">d</span> <span class="o">=</span> <span class="n">c</span><span class="p">;</span>           <span class="c1">// d 的类型是 int</span>
+</span><span class="line">    <span class="n">decltype</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="n">e</span><span class="p">;</span>        <span class="c1">// e 的类型是 int, 因为 c 的类型是int</span>
+</span><span class="line">    <span class="n">decltype</span><span class="p">((</span><span class="n">c</span><span class="p">))</span> <span class="n">f</span> <span class="o">=</span> <span class="n">c</span><span class="p">;</span>  <span class="c1">// f 的类型是 int&amp;, 因为 (c) 是左值</span>
+</span><span class="line">    <span class="n">decltype</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="n">g</span><span class="p">;</span>        <span class="c1">// g 的类型是 int, 因为 0 是右值</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>如果auto 和 decltype 在一起使用会是什么样子？能看下面的示例，下面这个示例也是引入decltype的一个原因——让C++有能力写一个 “ forwarding function 模板”，</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="k">template</span><span class="o">&lt;</span> <span class="k">typename</span> <span class="n">LHS</span><span class="p">,</span> <span class="k">typename</span> <span class="n">RHS</span><span class="o">&gt;</span>
+</span><span class="line">  <span class="k">auto</span> <span class="n">AddingFunc</span><span class="p">(</span><span class="k">const</span> <span class="n">LHS</span> <span class="o">&amp;</span><span class="n">lhs</span><span class="p">,</span> <span class="k">const</span> <span class="n">RHS</span> <span class="o">&amp;</span><span class="n">rhs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">decltype</span><span class="p">(</span><span class="n">lhs</span><span class="o">+</span><span class="n">rhs</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span><span class="k">return</span> <span class="n">lhs</span> <span class="o">+</span> <span class="n">rhs</span><span class="p">;}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>这个函数模板看起来相当费解，其用到了auto 和 decltype 来扩展了已有的模板技术的不足。怎么个不足呢？在上例中，我不知道AddingFunc会接收什么样类型的对象，这两个对象的 + 操作符返回的类型也不知道，老的模板函数无法定义AddingFunc返回值和这两个对象相加后的返回值匹配，所以，你可以使用上述的这种定义。</p>
+
+<h2 id="section">统一的初始化语法</h2>
+
+<p>C/C++的初始化的方法比较，C++ 11 用大括号统一了这些初始化的方法。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="n">C</span> <span class="n">c</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">};</span> <span class="c1">//C++11 only. 相当于: C c(0,0);</span>
+</span><span class="line"><span class="kt">int</span><span class="o">*</span> <span class="n">a</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span> <span class="p">};</span> <span class="c1">//C++11 only</span>
+</span><span class="line"><span class="k">class</span> <span class="nc">X</span> <span class="p">{</span>
+</span><span class="line">    <span class="kt">int</span> <span class="n">a</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+</span><span class="line">    <span class="k">public</span><span class="o">:</span>
+</span><span class="line">        <span class="n">X</span><span class="p">()</span> <span class="o">:</span> <span class="n">a</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">}</span> <span class="p">{}</span> <span class="c1">//C++11, member array initializer</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">// C++11 container initializer</span>
+</span><span class="line"><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">vs</span><span class="o">=</span><span class="p">{</span> <span class="s">&quot;first&quot;</span><span class="p">,</span> <span class="s">&quot;second&quot;</span><span class="p">,</span> <span class="s">&quot;third&quot;</span><span class="p">};</span>
+</span><span class="line"><span class="n">map</span> <span class="n">singers</span> <span class="o">=</span>
+</span><span class="line"><span class="p">{</span> <span class="p">{</span><span class="s">&quot;Lady Gaga&quot;</span><span class="p">,</span> <span class="s">&quot;+1 (212) 555-7890&quot;</span><span class="p">},</span>
+</span><span class="line"><span class="p">{</span><span class="s">&quot;Beyonce Knowles&quot;</span><span class="p">,</span> <span class="s">&quot;+1 (212) 555-0987&quot;</span><span class="p">}};</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">//class member initializer</span>
+</span><span class="line"><span class="k">class</span> <span class="nc">C</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">   <span class="kt">int</span> <span class="n">a</span><span class="o">=</span><span class="mi">7</span><span class="p">;</span> <span class="c1">//C++11 only</span>
+</span><span class="line">   <span class="k">public</span><span class="o">:</span> <span class="n">C</span><span class="p">();</span>
+</span><span class="line"><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="delete--default-">Delete 和 Default 函数</h2>
+
+<p>我们知道C++的编译器在你没有定义某些成员函数的时候会给你的类自动生成这些函数，比如，构造函数，拷贝构造，析构函数，赋值函数。有些时候，我们不想要这些函数，比如，构造函数，因为我们想做实现单例模式。传统的做法是将其声明成private类型。</p>
+
+<p>在新的C++中引入了两个指示符，delete意为告诉编译器不自动产生这个函数，default告诉编译器产生一个默认的。下面两个例子：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="k">struct</span> <span class="n">A</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="n">A</span><span class="p">()</span><span class="o">=</span><span class="k">default</span><span class="p">;</span> <span class="c1">//C++11</span>
+</span><span class="line">    <span class="k">virtual</span> <span class="o">~</span><span class="n">A</span><span class="p">()</span><span class="o">=</span><span class="k">default</span><span class="p">;</span> <span class="c1">//C++11</span>
+</span><span class="line"><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>再如delete</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="k">struct</span> <span class="n">NoCopy</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="n">NoCopy</span> <span class="o">&amp;</span> <span class="k">operator</span> <span class="o">=</span><span class="p">(</span> <span class="k">const</span> <span class="n">NoCopy</span> <span class="o">&amp;</span> <span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+</span><span class="line">    <span class="n">NoCopy</span> <span class="p">(</span> <span class="k">const</span> <span class="n">NoCopy</span> <span class="o">&amp;</span> <span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line"><span class="n">NoCopy</span> <span class="n">a</span><span class="p">;</span>
+</span><span class="line"><span class="n">NoCopy</span> <span class="n">b</span><span class="p">(</span><span class="n">a</span><span class="p">);</span> <span class="c1">//compilation error, copy ctor is deleted</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>这里，我想说一下，为什么我们需要default？我什么都不写不就是default吗？不全然是，比如构造函数，因为只要你定义了一个构造函数，编译器就不会给你生成一个默认的了。所以，为了要让默认的和自定义的共存，才引入这个参数，如下例所示：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="k">struct</span> <span class="n">SomeType</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line"> <span class="n">SomeType</span><span class="p">()</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span> <span class="c1">// 使用编译器生成的默认构造函数</span>
+</span><span class="line"> <span class="n">SomeType</span><span class="p">(</span><span class="n">OtherType</span> <span class="n">value</span><span class="p">);</span>
+</span><span class="line"><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>关于delete还有两个有用的地方是</p>
+
+<ol>
+  <li>
+    <p>让你的对象只能生成在栈内存上：</p>
+
+    <pre><code> struct NonNewable {
+     void *operator new(std::size_t) = delete;
+ };
+</code></pre>
+  </li>
+  <li>
+    <p>阻止函数的其形参的类型调用：（若尝试以 double 的形参调用 f()，将会引发编译期错误， 编译器不会自动将 double 形参转型为 int 再调用f()，如果传入的参数是double，则会出现编译错误）</p>
+
+    <pre><code> void f(int i);
+ void f(double) = delete;
+</code></pre>
+  </li>
+</ol>
+
+<h2 id="nullptr">nullptr</h2>
+
+<p>nullptr 是一个新的 C++ 关键字，它是空指针常量，它是用来替代高风险的 NULL 宏和 0 字面量的。nullptr 是强类型的：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="kt">int</span><span class="p">);</span> <span class="c1">//#1</span>
+</span><span class="line"><span class="kt">void</span> <span class="n">f</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">);</span><span class="c1">//#2</span>
+</span><span class="line"><span class="c1">//C++03</span>
+</span><span class="line"><span class="n">f</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span> <span class="c1">//调用的是哪个 f?</span>
+</span><span class="line"><span class="c1">//C++11</span>
+</span><span class="line"><span class="n">f</span><span class="p">(</span><span class="n">nullptr</span><span class="p">)</span> <span class="c1">//毫无疑问，调用的是 #2</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>所有跟指针有关的地方都可以用 nullptr，包括函数指针和成员指针：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">pc</span><span class="o">=</span><span class="n">str</span><span class="p">.</span><span class="n">c_str</span><span class="p">();</span> <span class="c1">//data pointers</span>
+</span><span class="line"><span class="k">if</span> <span class="p">(</span><span class="n">pc</span><span class="o">!=</span><span class="n">nullptr</span><span class="p">)</span>
+</span><span class="line">  <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">pc</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+</span><span class="line"><span class="kt">int</span> <span class="p">(</span><span class="n">A</span><span class="o">::*</span><span class="n">pmf</span><span class="p">)()</span><span class="o">=</span><span class="n">nullptr</span><span class="p">;</span> <span class="c1">//指向成员函数的指针</span>
+</span><span class="line"><span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">pmf</span><span class="p">)()</span><span class="o">=</span><span class="n">nullptr</span><span class="p">;</span> <span class="c1">//指向函数的指针</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="section-1">委托构造</h2>
+
+<p>C++11 中构造函数可以调用同一个类的另一个构造函数：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="k">class</span> <span class="nc">M</span> <span class="c1">//C++11 delegating constructors</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">;</span>
+</span><span class="line">	<span class="kt">char</span> <span class="o">*</span><span class="n">p</span><span class="p">;</span>
+</span><span class="line"><span class="k">public</span><span class="o">:</span>
+</span><span class="line">	<span class="n">M</span><span class="p">(</span><span class="kt">int</span> <span class="n">v</span><span class="p">)</span> <span class="o">:</span> <span class="n">x</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">y</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>  <span class="n">p</span><span class="p">(</span><span class="k">new</span> <span class="kt">char</span> <span class="p">[</span><span class="n">MAX</span><span class="p">])</span>  <span class="p">{}</span> <span class="c1">//#1 target</span>
+</span><span class="line">	<span class="n">M</span><span class="p">()</span><span class="o">:</span> <span class="n">M</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;delegating ctor&quot;</span><span class="o">&lt;&lt;</span><span class="n">end</span><span class="p">;}</span> <span class="c1">//#2 delegating</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>但是，为了方便并不足让“委托构造”这个事出现，最主要的问题是，基类的构造不能直接成为派生类的构造，就算是基类的构造函数够了，派生类还要自己写自己的构造函数：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="k">class</span> <span class="nc">BaseClass</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line"><span class="k">public</span><span class="o">:</span>
+</span><span class="line">  <span class="n">BaseClass</span><span class="p">(</span><span class="kt">int</span> <span class="n">iValue</span><span class="p">);</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line">
+</span><span class="line"><span class="k">class</span> <span class="nc">DerivedClass</span> <span class="o">:</span> <span class="k">public</span> <span class="n">BaseClass</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line"><span class="k">public</span><span class="o">:</span>
+</span><span class="line">  <span class="k">using</span> <span class="n">BaseClass</span><span class="o">::</span><span class="n">BaseClass</span><span class="p">;</span>
+</span><span class="line"><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>上例中，派生类手动继承基类的构造函数， 编译器可以使用基类的构造函数完成派生类的构造。 而将基类的构造函数带入派生类的动作 无法选择性地部分带入， 所以，要不就是继承基类全部的构造函数，要不就是一个都不继承(不手动带入)。 此外，若牵涉到多重继承，从多个基类继承而来的构造函数不可以有相同的函数签名(signature)。 而派生类的新加入的构造函数也不可以和继承而来的基类构造函数有相同的函数签名，因为这相当于重复声明。（所谓函数签名就是函数的参数类型和顺序不）</p>
+
+<h2 id="move">右值引用和move语义</h2>
+
+<p><strong>左值和右值</strong>概念的本质区别就是，左值是用户显示声明或分配内存的变量，能够直接用变量名访问，而右值主要是临时变量。</p>
+
+<p><strong>std::move</strong>是一个用于提示优化的函数，过去的c++98中，由于无法将作为右值的临时变量从左值当中区别出来，所以程序运行时有大量临时变量白白的创建后又立刻销毁，其中又尤其是返回字符串std::string的函数存在最大的浪费。因为并不是所有情况下，C++编译器都能进行返回值优化，所以在C++11中，编码者可以主动提示编译器，返回的对象是临时的，可以被挪作他用. </p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">fileContent</span> <span class="o">=</span> <span class="err">“</span><span class="n">oldContent</span><span class="err">”</span><span class="p">;</span>
+</span><span class="line"><span class="n">s</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">readFileContent</span><span class="p">(</span><span class="n">fileName</span><span class="p">));</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>对象s在被赋值的时候，方法std::string::operator =(std::string&amp;&amp;)会被调用，符号&amp;&amp;告诉std::string类的编写者，传入的参数是一个临时对象，可以挪用其数据，于是std::string::operator =(std::string&amp;&amp;)的实现代码中，会置空形参，同时将原本保存在中形参中的数据移动到自身。</p>
+
+<p><strong>std::forward</strong>是用于模板编程中的.当一个临时变量传入形参为T&amp;&amp; t的模板函数时，T被推演为U，参数t所引用的临时变量因为开始能够被据名访问了，所以它变成了左值。这也就是std::forward存在的原因！当你以为实参是右值所以t也应该是右值时，它跟你开了个玩笑，它是左值！如果你要进一步调用的函数会根据左右值引用性来进行不同操作，那么你在将t传给其他函数时，应该先用std::forward恢复t的本来引用性，恢复的依据是模板参数T的推演结果。虽然t的右值引用行会退化，变成左值引用，但根据实参的左右引用性不同，T会被分别推演为U&amp;和U.</p>
+
+<p>使用std::forward的原因：<strong>由于声明为f(T&amp;&amp; t)的模板函数的形参t会失去右值引用性质，所以在将t传给更深层函数前，可能会需要回复t的正确引用行</strong>，当然，修改t的引用性办不到，但根据t返回另一个引用还是可以的。</p>
+
+<h2 id="c-11-stl-">C++ 11 STL 标准库</h2>
+
+<p>C++ STL库在2003年经历了很大的整容手术 Library Technical Report 1 (TR1)。 TR1 中出现了很多新的容器类 (<code>unordered_set</code>, <code>unordered_map</code>, <code>unordered_multiset</code>, 和 <code>unordered_multimap</code>) 以及一些新的库支持诸如：正则表达式， <code>tuples</code>，函数对象包装，等等。 C++11 批准了 TR1 成为正式的C++标准，还有一些TR1 后新加的一些库，从而成为了新的C++ 11 STL标准库。这个库主要包含下面的功能：</p>
+
+<h3 id="section-2">线程库</h3>
+
+<p>这就不多说了，以前的STL饱受线程安全的批评。现在好 了。C++ 11 支持线程类了。这将涉及两个部分：第一、设计一个可以使多个线程在一个进程中共存的内存模型；第二、为线程之间的交互提供支持。第二部分将由程序库提供支持。大家可以看看<a href="http://en.wikipedia.org/wiki/Futures_and_promises">promises and futures</a>，其用于对象的同步。 <a href="http://www.stdthread.co.uk/doc/headers/future/async.html">async()</a> 函数模板用于发起并发任务，而 <a href="http://www.devx.com/cplus/10MinuteSolution/37436">thread_local</a> 为线程内的数据指定存储类型。更多的东西，可以查看 Anthony Williams的 <a href="http://www.devx.com/SpecialReports/Article/38883">Simpler Multithreading in C++0x</a>.</p>
+
+<h3 id="section-3">新型智能指针</h3>
+
+<p>C++98 的智能指针是 <code>auto_ptr</code>， 在C++ 11中被废弃了。C++11  引入了两个指针类： <code>shared_ptr</code> 和 <code>unique_ptr</code>。 <code>shared_ptr</code>只是单纯的引用计数指针，<code>unique_ptr</code> 是用来取代<code>auto_ptr</code>。 <code>unique_ptr</code> 提供 <code>auto_ptr</code> 大部份特性，唯一的例外是 <code>auto_ptr</code> 的不安全、隐性的左值搬移。不像 <code>auto_ptr</code>，<code>unique_ptr</code> 可以存放在 C++0x 提出的那些能察觉搬移动作的容器之中。</p>
+
+<h3 id="section-4">新的算法</h3>
+
+<p>定义了一些新的算法： <code>all_of()</code>, <code>any_of()</code> 和 <code>none_of()</code>。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="c1">//are all of the elements positive?</span>
+</span><span class="line"><span class="n">all_of</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">first</span><span class="o">+</span><span class="n">n</span><span class="p">,</span> <span class="n">ispositive</span><span class="p">());</span> <span class="c1">//false</span>
+</span><span class="line"><span class="c1">//is there at least one positive element?</span>
+</span><span class="line"><span class="n">any_of</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">first</span><span class="o">+</span><span class="n">n</span><span class="p">,</span> <span class="n">ispositive</span><span class="p">());</span><span class="c1">//true</span>
+</span><span class="line"><span class="c1">// are none of the elements positive?</span>
+</span><span class="line"><span class="n">none_of</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">first</span><span class="o">+</span><span class="n">n</span><span class="p">,</span> <span class="n">ispositive</span><span class="p">());</span> <span class="c1">//false</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>使用新的<code>copy_n()</code>算法，你可以很方便地拷贝数组。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="kt">int</span> <span class="n">source</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">34</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">80</span><span class="p">};</span>
+</span><span class="line"><span class="kt">int</span> <span class="n">target</span><span class="p">[</span><span class="mi">5</span><span class="p">];</span>
+</span><span class="line"><span class="n">copy_n</span><span class="p">(</span><span class="n">source</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="n">target</span><span class="p">);</span> <span class="c1">//copy 5 elements from source to target</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>使用 <code>iota()</code> 可以用来创建递增的数列。如下例所示：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="kt">int</span> <span class="n">a</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+</span><span class="line"><span class="kt">char</span> <span class="n">c</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+</span><span class="line"><span class="n">iota</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="o">+</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span> <span class="c1">//changes a to {10,11,12,13,14}</span>
+</span><span class="line"><span class="n">iota</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="o">+</span><span class="mi">3</span><span class="p">,</span> <span class="sc">&#39;a&#39;</span><span class="p">);</span> <span class="c1">//{&#39;a&#39;,&#39;b&#39;,&#39;c&#39;}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[C++ Template]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/04/23/Template-in-C%2B%2B/"/>
+    <link href="http://billowkiller.github.io/blog/2014/04/23/Template/"/>
     <updated>2014-04-23T02:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/04/23/Template-in-C++</id>
+    <id>http://billowkiller.github.io/blog/2014/04/23/Template</id>
     <content type="html"><![CDATA[<p>modified from <a href="http://www.cnblogs.com/assemble8086/archive/2011/10/02/2198308.html">http://www.cnblogs.com/assemble8086/archive/2011/10/02/2198308.html</a></p>
 
 <h2 id="section">模版</h2>
@@ -2133,9 +2544,9 @@ Class Graphics&lt;hi,90&gt;{…};
   
   <entry>
     <title type="html"><![CDATA[Effective C++ Rework]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/04/17/Effective-C%2B%2B/"/>
+    <link href="http://billowkiller.github.io/blog/2014/04/17/Effective/"/>
     <updated>2014-04-17T02:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/04/17/Effective-C++</id>
+    <id>http://billowkiller.github.io/blog/2014/04/17/Effective</id>
     <content type="html"><![CDATA[<h2 id="c">让自己习惯C++</h2>
 
 <h3 id="item-01-view-c-as-a-federation-of-languages">Item 01： View C++ as a federation of languages</h3>
@@ -2846,9 +3257,9 @@ result = oneHalf * 2; // 无法通过编译，不加模板则可以
   
   <entry>
     <title type="html"><![CDATA[Inside C++ Object]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/04/12/Inside-C%2B%2B-Object/"/>
+    <link href="http://billowkiller.github.io/blog/2014/04/12/Inside-Object/"/>
     <updated>2014-04-12T02:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/04/12/Inside-C++-Object</id>
+    <id>http://billowkiller.github.io/blog/2014/04/12/Inside-Object</id>
     <content type="html"><![CDATA[<p>modified from <a href="http://blog.csdn.net/eroswang/article/details/1749609">http://blog.csdn.net/eroswang/article/details/1749609</a></p>
 
 <hr />
@@ -3530,9 +3941,9 @@ simplify_conv_op(ptype pt)
   
   <entry>
     <title type="html"><![CDATA[C++ string copy-on-write]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/03/12/c%2B%2B-string-copy-on-write/"/>
+    <link href="http://billowkiller.github.io/blog/2014/03/12/string-copy-on-write/"/>
     <updated>2014-03-12T02:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/03/12/c++-string-copy-on-write</id>
+    <id>http://billowkiller.github.io/blog/2014/03/12/string-copy-on-write</id>
     <content type="html"><![CDATA[<p>不同版本的C++ string实现时不同的，sizeof(string)得出来的结果也不尽相同，其中有种实现采用copy-on-write的方式来共享内存。</p>
 
 <p>引用计数就是string类中写时才拷贝的原理！当第一个类构造时，string的构造函数会根据 传入的参数从堆上分配内存，当有其它类需要这块内存时，这个计数为自动累加，当有类析构时，这个计数会减一，直到最后一个类析构时，此时的RefCnt为1或是0，此时，程序才会真正的Free这块从堆上分配的内存。</p>
@@ -3633,9 +4044,9 @@ char&amp; string::operator[](unsigned int idx)
   
   <entry>
     <title type="html"><![CDATA[C++ inline]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/02/16/c%2B%2B-inline/"/>
+    <link href="http://billowkiller.github.io/blog/2014/02/16/inline/"/>
     <updated>2014-02-16T09:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/02/16/c++-inline</id>
+    <id>http://billowkiller.github.io/blog/2014/02/16/inline</id>
     <content type="html"><![CDATA[<p><code>inline</code>定义的函数，比起没有<code>inline</code>的函数来说，没有执行函数调用所带来的负担，因此它是高效率的；比起宏来，它具有<strong>函数的可预期行为和参数类型检验</strong>。</p>
 
 <p><code>inline</code>对于编译器而言，意味着“在编译阶段，将调用动作以被调用函数的本体替换之”。但是它只是一种建议，编译器可以去做，也可以不去做。从逻辑上来说，编译器将函数<code>inline</code>的步骤如下：</p>
@@ -3657,371 +4068,6 @@ char&amp; string::operator[](unsigned int idx)
   <li><strong><code>inline</code>虚函数往往是无效的。</strong>虚函数往往是运行时确定的，而<code>inline</code>是在编译时进行的，所以<code>inline</code>虚函数往往无效。当然如果直接用类的对象来使用虚函数，那么对有的编译器而言，也可起到优化的作用。</li>
   <li><strong><code>inline</code>函数无法调试。</strong>原因请参见上面编译器将函数<code>inline</code>的步骤。所以请在项目后期，<strong>对程序进行profile后，再决定将那些函数<code>inline</code>化。</strong></li>
 </ol>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Large site technical architecture]]></title>
-    <link href="http://billowkiller.github.io/blog/2013/12/31/large-site-technical-architecture/"/>
-    <updated>2013-12-31T18:09:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2013/12/31/large-site-technical-architecture</id>
-    <content type="html"><![CDATA[<p>本文是李智慧的<a href="http://book.douban.com/subject/25723064/">《大型网站技术架构》</a>的读书笔记。</p>
-
-<p>何为架构，要有大局观，大局观就是提前预防掉那些通用的问题：高可用，工程化，伸缩性，扩展性。对应需要的能力：了解分布式的一些东西，了解项目的业务和流程和运维使之工程化，了解负载均衡，能够对业务的分割和代码的分层。 </p>
-
-<p><img src="http://img3.douban.com/lpic/s27040583.jpg" height="250px" /></p>
-
-<p>本书并没有什么特别的东西，且都比较泛，但是都是很实在的东西，而且能很好的组织起来，也不失为互联网架构的一张蓝图。另外本书还处处透露着一些为人处世的人生哲学，这也是我喜欢的。</p>
-
-<!--more-->
-
-<p>下面就先从目录部分总结勾勒一下蓝图，然后再摘抄一些自己喜欢的句子。</p>
-
-<h2 id="section">蓝图部分</h2>
-
-<ul>
-  <li><strong>大型网站架构演化发展历程</strong>
-    <ul>
-      <li>初始阶段的网站架构
-        <ul>
-          <li>应用程序、数据库、文件等所有资源都在一台服务器上</li>
-        </ul>
-      </li>
-      <li>应用服务和数据服务分离 </li>
-      <li>使用缓存改善网站性能</li>
-      <li>使用应用服务器集群改善网站的并发处理能力</li>
-      <li>数据库读写分离</li>
-      <li>使用反向代理和CDN加速网站响应	</li>
-      <li>使用分布式文件系统和分布式数据库系统</li>
-      <li>使用NoSQL和搜索引擎</li>
-      <li>业务拆分</li>
-      <li>分布式服务</li>
-    </ul>
-  </li>
-  <li>
-    <p><strong>网站架构模式</strong></p>
-
-    <blockquote>
-      <p>关于什么是模式，这个来自建筑学的词汇是这样定义的：“每一个模式描述了一个在我们周围不断重复发生的问题及该问题解决方案的核心。这样，你就能一次又一次地使用该方案而不必做重复工作”。模式的关键在于<strong>模式的可重复性</strong>，问题与场景的可重复性带来解决方案的可重复使用。
- - 分层
-     - 将系统在横向维度上切分成几个部分，每个部分负责一部分相对比较单一的职责，然后通过上层对下层的依赖和调用组成一个完整的系统	 
- - 分割
-     - 如果说分层是将软件在横向方面进行切分，那么分割就是在纵向方面对软件进行切分 
- - 分布式
-     - 分层和分割的一个主要目的是为了切分后的模块便于分布式部署，即将不同模块部署在不同的服务器上，通过远程调用协同工作。 
- -  集群
- - 缓存
-     - CDN、反向代理、本地缓存、分布式缓存
-     - 28原理 
- -  异步
-     - 降低软件耦合性<br />
- -  冗余，自动化，安全</p>
-    </blockquote>
-  </li>
-  <li>大型网站核心架构要素
-    <ul>
-      <li>性能，可用性，伸缩性，扩展性，安全性</li>
-    </ul>
-  </li>
-</ul>
-
-<h3 id="section-1">网站的高性能架构</h3>
-<ul>
-  <li>网站性能测试
-    <ul>
-      <li>不同视角下的网站性能</li>
-      <li>性能测试指标
-        <ul>
-          <li>响应时间、并发数、吞吐量、性能计数器（服务器或操作系统的一些数据指标）  </li>
-        </ul>
-      </li>
-      <li>性能测试方法
-        <ul>
-          <li>性能测试、负载测试、压力测试、稳定性测试 </li>
-        </ul>
-      </li>
-      <li>性能测试报告</li>
-      <li>性能优化策略</li>
-    </ul>
-  </li>
-  <li>Web前端性能优化
-    <ul>
-      <li>浏览器访问优化
-        <ul>
-          <li>减少http请求（合并请求）、使用浏览器缓存、压缩数据、CSS和JS顺序 </li>
-        </ul>
-      </li>
-      <li>CDN加速 </li>
-      <li>反向代理</li>
-    </ul>
-  </li>
-  <li>应用服务器性能优化	
-    <ul>
-      <li>分布式缓存
-        <ul>
-          <li><strong>网站性能优化第一定律：优先考虑使用缓存优化性能</strong> </li>
-          <li>缓存的本质是一个内存Hash表</li>
-          <li>合理使用缓存：数据的读写比在2:1以上；数据不一致与脏读（应用要容忍一定时间的数据不一致）；缓存雪崩；缓存预热；缓存穿透</li>
-          <li>架构方式有两种，一种是以<code>JBoss Cache</code>为代表的需要更新同步的分布式缓存，一种是以<code>Memcached</code>为代表的不互相通信的分布式缓存</li>
-        </ul>
-      </li>
-      <li>异步操作
-        <ul>
-          <li>消息队列具有很好的消峰作用</li>
-          <li>业务异步处理时候可能需要业务流程配合</li>
-          <li><strong>任何可以晚点做的事情都应该晚点再做</strong> </li>
-        </ul>
-      </li>
-      <li>使用集群</li>
-      <li>代码优化
-        <ul>
-          <li>多线程，线程安全手段：将对象设计为无状态对象；使用局部对象；并发访问使用锁</li>
-          <li>资源复用：单例模式和对象池</li>
-          <li>数据结构</li>
-          <li>垃圾回收 </li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li>存储性能优化
-    <ul>
-      <li>机械硬盘vs. 固态硬盘</li>
-      <li>B+树vs. LSM树</li>
-    </ul>
-
-    <p><img src="http://img1.tuicool.com/NbeUnm.jpg" alt="LSM树" />
-  - RAID vs. HDFS</p>
-
-    <p><img src="http://www.2cto.com/uploadfile/2013/1016/20131016045031342.jpg" alt="常用的RAID技术原理图" /></p>
-  </li>
-</ul>
-
-<h3 id="section-2">网站的高可用架构</h3>
-
-<ul>
-  <li>高可用的应用	
-    <ul>
-      <li>通过负载均衡进行无状态服务的失效转移	</li>
-      <li>应用服务器集群的Session管理	
-        <ul>
-          <li>Session复制</li>
-          <li>Session绑定</li>
-          <li>利用Cookie记录Session</li>
-          <li>Session服务器 </li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li>高可用的服务
-    <ul>
-      <li>分级管理，核心应用和服务优先使用更好的硬件</li>
-      <li>超时设置</li>
-      <li>异步调用，避免一个服务失败导致整个应用请求失败</li>
-      <li>服务降级：拒绝服务和关闭服务</li>
-      <li>幂等性设计 	</li>
-    </ul>
-  </li>
-  <li>高可用的数据	
-    <ul>
-      <li><code>CAP</code>原理
-        <ul>
-          <li>在设计和部署分布式应用的时候，存在三个核心的系统需求，这个三个需求之间存在一定的特殊关系。三个需求如下：<code>Consistency</code>所有程序都能访问得到相同的数据; <code>Availability</code>任何时候，任何应用程序都可以读写访问; <code>Partition Tolerance</code>系统可以跨网络分区线性伸缩。</li>
-          <li><code>CAP</code>理论的核心是：一个分布式系统不可能同时很好的满足一致性，可用性和分区容错性这三个需求，最多只能同时较好的满足两个。</li>
-          <li>大型网站设计中，通常选择强化分布式存储系统的可用性(A)和伸缩性(P)，而在某种程度放弃一致性(C)
-  <img src="http://hi.csdn.net/attachment/201109/6/0_1315316512jhTH.gif" alt="" /></li>
-        </ul>
-      </li>
-      <li>数据备份
-        <ul>
-          <li>异步热备：写一份，存储系统异步写其他副本。Master-Slave</li>
-          <li>同步热备：多份副本同步写入。传统的企业级关系数据库</li>
-        </ul>
-      </li>
-      <li>失效转移
-        <ul>
-          <li>失效确认、访问转移、数据恢复 	</li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li>高可用网站的软件质量保证	
-    <ul>
-      <li>网站发布	</li>
-      <li>自动化测试	</li>
-      <li>预发布验证	</li>
-      <li>代码控制
-        <ul>
-          <li>主干开发、分支发布</li>
-          <li>分支开发、主干发布 	</li>
-        </ul>
-      </li>
-      <li>自动化发布	</li>
-      <li>灰度发布	</li>
-    </ul>
-  </li>
-  <li>网站运行监控	
-    <ul>
-      <li>监控数据采集
-        <ul>
-          <li>用户行为日志收集，服务器端和客户端</li>
-          <li>服务器性能监控</li>
-          <li>运行数据报告，缓冲命中、平均响应延迟时间、每分钟发送邮件数目… </li>
-        </ul>
-      </li>
-      <li>监控管理
-        <ul>
-          <li>系统报警，失效转移，自动降级 </li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-</ul>
-
-<h3 id="section-3">网站的伸缩性架构</h3>
-
-<blockquote>
-  <p>所谓<strong>网站的伸缩性</strong>是指不需要改变网站的软硬件设计，仅仅通过改变部署的服务器数量就可以扩大或缩小网站的服务处理能力。</p>
-</blockquote>
-
-<ul>
-  <li>网站架构的伸缩性设计
-    <ul>
-      <li>不同功能进行物理分离实现伸缩
-        <ul>
-          <li>纵向分离（分层后分离）：将业务处理流程上的不同部分分离部署，实现系统伸缩性。</li>
-          <li>横向分离（业务分割后分离）：将不同的业务模块分离部署，实现系统伸缩性。 </li>
-        </ul>
-      </li>
-      <li>单一功能通过集群规模实现伸缩
-        <ul>
-          <li>应用服务器集群伸缩性、数据服务器集群伸缩性 </li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li>应用服务器集群的伸缩性设计
-    <ul>
-      <li>HTTP重定向负载均衡</li>
-      <li>DNS域名解析负载均衡	</li>
-      <li>反向代理负载均衡</li>
-      <li>IP负载均衡	</li>
-      <li>数据链路层负载均衡
-        <ul>
-          <li>虚拟IP、LVS </li>
-        </ul>
-      </li>
-      <li>负载均衡算法
-        <ul>
-          <li>轮询、加权轮询、随机、最少连接、源地址散列 </li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li>分布式缓存集群的伸缩性设计
-    <ul>
-      <li>Memcached分布式缓存集群的访问模型
-  <img src="http://blog.chinaunix.net/attachment/201211/20/27767798_1353432372hzgp.png" alt="" /> 
-  Memcached依赖于libevent，网络模型是典型的reactor模式，主线程通过自己的<code>event_base</code>绑定端口监听网络中的连接。每个worker线程的初始任务就是轮询管道上的<code>notify_receive_fd</code>的读事件，如果有连接，主线程往相应的worker线程的管道的输入端<code>notify_send_fd</code>写入关键字‘c’，代表着网络上有新的连接要派发给worker线程，这样worker进程直接accept就能得到连接的fd了，同时把这个fd的读事件放到每个worker进程的<code>event_base</code>中，如图，每个worker的进程同时监听<code>notify_receive_fd</code>和外部连接的fd上的事件。每个worker都应该为连接上的fd分配一个conn结构体，这个结构体记录了这个连接全部的信息，如连接的fd，读写buf，操作的item，当前connection的状态等等。</li>
-      <li>Memcached分布式缓存集群的伸缩性挑战
-        <ul>
-          <li>数据库的负载能力是以有缓存的前提而设计的，当大部分被缓存的数据因为服务器扩容而不能正确读取时，这些数据访问的压力就落到数据库身上，超过数据库负载能力，造成数据库宕机。</li>
-        </ul>
-      </li>
-      <li>分布式缓存的一致性Hash算法</li>
-    </ul>
-  </li>
-  <li>数据存储服务器集群的伸缩性设计
-    <ul>
-      <li>关系数据库集群的伸缩性设计</li>
-      <li>NoSQL数据库的伸缩性设计</li>
-    </ul>
-  </li>
-</ul>
-
-<h3 id="section-4">网站的可扩展架构</h3>
-
-<ul>
-  <li>构建可扩展的网站架构
-    <ul>
-      <li>扩展性是对功能而言，应用之间较少依赖和耦合，对需求可以敏捷响应。</li>
-      <li>伸缩性是以资源的规模换取处理事务的能力，更多表现在服务器数量，事务吞吐能力。</li>
-      <li>设计网站可扩展性的核心是<strong>模块化</strong>，并在此基础上，减低模块间的耦合性，提高模块的复用性。	 </li>
-    </ul>
-  </li>
-  <li>利用分布式消息队列降低系统耦合性
-    <ul>
-      <li>事件驱动架构</li>
-      <li>分布式消息队列</li>
-    </ul>
-  </li>
-  <li>利用分布式服务打造可复用的业务平台
-    <ul>
-      <li>Web Service与企业级分布式服务</li>
-      <li>大型网站分布式服务的需求与特点
-        <ul>
-          <li>负载均衡、失效转移、高效的远程通信、整合异构系统、对应用最少侵入、版本管理、实时监控 </li>
-        </ul>
-      </li>
-      <li>分布式服务框架设计</li>
-    </ul>
-  </li>
-  <li>可扩展的数据结构</li>
-  <li>利用开放平台建设网站生态圈</li>
-</ul>
-
-<h2 id="section-5">摘抄与处事哲学</h2>
-
-<p>创新的业务发展模式对网站架构逐步提出更高要求，才使得创新的网站架构得以发展成熟。是业务成就了技术，是事业成就了人，而不是相反。所以网站架构师应该对成就自己技术成绩的网站事业心存感恩，并努力提高技术回馈业务，才能在快速发展的胡两位领域保持持续进步。</p>
-
-<p>网站架构的几个设计误区</p>
-
-<ul>
-  <li>以为追随大公司的解决方案</li>
-  <li>为了技术而技术</li>
-  <li>企图用技术解决所有问题</li>
-</ul>
-
-<p>前沿技术总是出现在前沿业务领域。近几年，以Google为首的互联网企业领跑IT前沿技术潮流，是因为互联网企业的业务发展远超传统IT企业领域，面了更多挑战，对IT系统提出了更高的要求；新技术的出现又会驱动企业开展新的业务。亚马逊等互联网公司利用自己的技术优势进军企业级市场，以技术驱动业务，开展云计算、SaaS等新兴IT业务，逐步蚕食IBM、HP、Oracle、微软等传统软件巨头的市场。</p>
-
-<p>好的设计绝对不是模仿、不是生搬硬套某个模式，而是在对问题深刻理解之上的创造与创新，即使是‘微创新’，也是让人耳目一新的似曾相识。山寨与创新的最大区别不在于是否抄袭、是否模仿，而在于对问题和需求是否真正理解与把握。</p>
-
-<p>一个具有良好伸缩性架构设计的网站，其设计总是走在业务发展的前面，在业务需要处理更多访问和服务之前，就做好充足准备，当业务需要是时候，只需要购买或租用服务器简单部署实施就可以了，技术团队亦可以高枕无忧。反之，设计和技术走在业务的后面，采购来的机器根本就没有方法加入集群，勉强加了进去，却发现瓶颈不在这里，系统整体处理能力依然上不去。技术团队每天加班，却总是托公司发展的后退。架构师对网站伸缩性的把握，一线之间，天堂与地狱。</p>
-
-<p>高手定律：这个世界只有遇不到的问题，没有解决不了的问题，高手之所以成为高手，是因为他们遇到了常人很难遇到的问题，并解决了。所以百度有很多广告搜索高手，淘宝有很多海量数据高手，腾讯有很多高并发业务的高手。</p>
-
-<p>WikiPedia如果Master数据库宕机，立即将应用切换到Salve数据库，同时关闭数据写服务，意味着词条编辑功能关闭。WidiPedia通过约束业务获得更大的技术方案选择余地，很多时候业务后退一小步，技术就可以前进一大步。这个也是他们能够那么省钱的原因啊。</p>
-
-<p>秒杀从根本上来讲并不是很难，首先是页面的静态化，开始秒杀的按钮通过js来实现，js不缓存，js尽量小。开始秒杀的时候使用可以秒杀的js。秒杀很少能达数据层，因为就那么几个能成功。主要的压力在应用服务器，但是用一个记数服务器，收到请求更新这个数字，大于数字的直接返回秒杀失败。所以大部分都会进入失败的逻辑，整个也很简单。只要业务服务器能抗住这些访问压力就基本ok了，如果业务服务器不够，可以直接在负载均衡那边随机失败一部分。 </p>
-
-<hr />
-
-<p>是事情成就了人，而不是人成就了事。</p>
-
-<p>要想成就自己，就必须首先成就他人。我们工作不只是生成产品，还要成就人，并最终成就我们自己。关注人而不是产品。</p>
-
-<p>学会妥协。很多时候，对架构和技术方案的反对意见，其实意味着架构和技术方案被关注、被试图理解和接受。架构师不应该对意见过于敏感，这时架构师应该做的事坦率地分享自己的设计思路，让别人理解自己的想法并努力理解别人的想法，求同存异。</p>
-
-<p>新员工Tips</p>
-
-<ul>
-  <li>刚开始加入的时候不要急于证明自己，要先融入</li>
-</ul>
-
-<p>提出问题Tips</p>
-
-<ul>
-  <li>把“我的问题”表述成“我们的问题”</li>
-  <li>给上司提出封闭式问题，给下属提出开放式问题</li>
-  <li>指出问题而不是批评人，所谓直言有讳是指想要表达的意图要直截了当说明白，不要兜圈子，但是在表达方式上要有所避讳，照顾当事人的感受</li>
-  <li>用赞同的方式提出问题</li>
-</ul>
-
-<p>解决问题Tips</p>
-
-<ul>
-  <li>在解决我的问题之前，先解决你的问题</li>
-  <li>适当的逃避问题</li>
-</ul>
 ]]></content>
   </entry>
   
