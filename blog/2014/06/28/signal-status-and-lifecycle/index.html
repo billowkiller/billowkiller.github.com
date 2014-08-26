@@ -233,6 +233,16 @@
 <h3 id="section-2">信号引发的问题</h3>
 
 <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/signalquestion_zps080fe157.png" alt="" /></p>
+
+<p>下面的例子正确的解决了上述的三个问题，需要细细体会，主要是两个<code>while</code>和<code>waitpid</code>。
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/signalexample_zps9608d4b3.png" alt="" /></p>
+
+<p><strong>有时候需要显示的阻塞和取消阻塞信号来保证同步</strong>
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/signalexample2_zps02c2bdb6.png" alt="" />
+避免了如下的错误流程：
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/signalexample3_zps9ec9fa0b.png" alt="" />
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/signalexample4_zps33977eb9.png" alt="" /></p>
+
 </div>
 
 
