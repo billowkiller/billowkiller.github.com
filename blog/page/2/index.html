@@ -187,13 +187,13 @@
 
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-06-28T04:18:00+08:00" pubdate data-updated="true">Jun 28<span>th</span>, 2014</time>
         
-           | <a href="/blog/2014/06/28/signal-and-forkmarkdown/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/06/28/signal-and-forkmarkdown/">Comments</a>
+           | <a href="/blog/2014/06/28/signal-and-fork/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/06/28/signal-and-fork/">Comments</a>
         
       </p>
     
     
-      <h1 class="entry-title"><a href="/blog/2014/06/28/signal-and-forkmarkdown/">Signal and Fork</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/06/28/signal-and-fork/">Signal and Fork</a></h1>
     
   </header>
 
@@ -305,6 +305,15 @@
 <hr />
 
 <h3 id="section">信号状态</h3>
+
+<p>传送一个信号到目的进程是由两个不同步骤组成的：</p>
+
+<ul>
+  <li><strong>发送信号</strong>。 内核通过更新目的进程上下文中的某个状态，发送一个信号给目的进程。两原因：内核进程到一个系统事件，如除零；进程调用<code>kill</code>函数，显示要求内核发送信号。</li>
+  <li><strong>接收信号</strong>。目的进程被内核强迫以某种方式对信号的发送做出反应，目的进程就接收了信号。</li>
+</ul>
+
+<p>一个只发出但没有被接收的信号叫做<strong>待处理信号</strong>（pending signal）。在任何时候，一种类型至多只会有一个待处理信号。一个进程可以选择性地<strong>阻塞</strong>接收某种信号。当一个信号被阻塞时，它仍可以被发送，但是尝试的待处理信号不会被接收，知道进程取消对这种信号的阻塞。</p>
 
 <p>信号的”未决“是一种状态，指的是从信号的产生到信号被处理前的这一段时间；信号的”阻塞“是一个开关动作，指的是阻止信号被处理，但不是阻止信号产生。 </p>
 

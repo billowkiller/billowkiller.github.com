@@ -4,7 +4,7 @@
   <title><![CDATA[tags: linux | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/linux/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-08-23T15:46:39+08:00</updated>
+  <updated>2014-08-26T17:00:29+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -256,6 +256,12 @@
 <p><strong>在信号处理程序中即使调用可重入函数也有问题要注意</strong>。作为一个通用的规则，当在信号处理程序中调用可重入函数时，应当在其前保存<code>errno</code>，并在其后恢复<code>errno</code>。（<strong>因为每个线程只有一个errno变量，信号处理函数可能会修改其值，要了解经常被捕捉到的信号是SIGCHLD，其信号处理程序通常要调用一种wait函数，而各种wait函数都能改变errno。</strong>）</p>
 
 <p>如果一个函数对多个线程来说是可重入的，则说这个函数是<strong>线程安全的</strong>。但这并不能说明对信号处理程序来说该函数也是可重入的。如果函数对异步信号处理程序的重入是安全的，那么就可以说函数式<strong>异步-信号安全的</strong>。</p>
+
+<p>一下是来自<em>《深入理解计算机系统》</em>的摘抄：</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/threadsafe1_zps14eaee56.png" alt="" />
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/threadsafe2_zpsb753bebc.png" alt="" />
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/threadsafe3_zps6a9ec8f8.png" alt="" /></p>
 ]]></content>
   </entry>
   
@@ -435,9 +441,9 @@ if (conn_sock == -1) {
   
   <entry>
     <title type="html"><![CDATA[Signal and fork]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/06/28/signal-and-forkmarkdown/"/>
+    <link href="http://billowkiller.github.io/blog/2014/06/28/signal-and-fork/"/>
     <updated>2014-06-28T04:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/06/28/signal-and-forkmarkdown</id>
+    <id>http://billowkiller.github.io/blog/2014/06/28/signal-and-fork</id>
     <content type="html"><![CDATA[<p>当线程调用fork时，就为子进程创建了整个进程地址空间的副本。子进程与父进程是完全不同的进程，只要两者都没有对内存作出改动，父进程和子进程之间还可以共享内存副本。注意一下几个情况：</p>
 
 <ol>

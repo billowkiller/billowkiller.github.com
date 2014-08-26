@@ -4,7 +4,7 @@
   <title><![CDATA[tags: process | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/process/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-08-23T15:46:39+08:00</updated>
+  <updated>2014-08-26T17:00:29+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Signal and fork]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/06/28/signal-and-forkmarkdown/"/>
+    <link href="http://billowkiller.github.io/blog/2014/06/28/signal-and-fork/"/>
     <updated>2014-06-28T04:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/06/28/signal-and-forkmarkdown</id>
+    <id>http://billowkiller.github.io/blog/2014/06/28/signal-and-fork</id>
     <content type="html"><![CDATA[<p>当线程调用fork时，就为子进程创建了整个进程地址空间的副本。子进程与父进程是完全不同的进程，只要两者都没有对内存作出改动，父进程和子进程之间还可以共享内存副本。注意一下几个情况：</p>
 
 <ol>

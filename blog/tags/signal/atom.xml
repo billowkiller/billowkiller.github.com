@@ -4,7 +4,7 @@
   <title><![CDATA[tags: signal | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/signal/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-08-23T15:46:39+08:00</updated>
+  <updated>2014-08-26T17:00:29+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Signal and fork]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/06/28/signal-and-forkmarkdown/"/>
+    <link href="http://billowkiller.github.io/blog/2014/06/28/signal-and-fork/"/>
     <updated>2014-06-28T04:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/06/28/signal-and-forkmarkdown</id>
+    <id>http://billowkiller.github.io/blog/2014/06/28/signal-and-fork</id>
     <content type="html"><![CDATA[<p>当线程调用fork时，就为子进程创建了整个进程地址空间的副本。子进程与父进程是完全不同的进程，只要两者都没有对内存作出改动，父进程和子进程之间还可以共享内存副本。注意一下几个情况：</p>
 
 <ol>
@@ -97,6 +97,15 @@
 
 <h3 id="section">信号状态</h3>
 
+<p>传送一个信号到目的进程是由两个不同步骤组成的：</p>
+
+<ul>
+  <li><strong>发送信号</strong>。 内核通过更新目的进程上下文中的某个状态，发送一个信号给目的进程。两原因：内核进程到一个系统事件，如除零；进程调用<code>kill</code>函数，显示要求内核发送信号。</li>
+  <li><strong>接收信号</strong>。目的进程被内核强迫以某种方式对信号的发送做出反应，目的进程就接收了信号。</li>
+</ul>
+
+<p>一个只发出但没有被接收的信号叫做<strong>待处理信号</strong>（pending signal）。在任何时候，一种类型至多只会有一个待处理信号。一个进程可以选择性地<strong>阻塞</strong>接收某种信号。当一个信号被阻塞时，它仍可以被发送，但是尝试的待处理信号不会被接收，知道进程取消对这种信号的阻塞。</p>
+
 <p>信号的”未决“是一种状态，指的是从信号的产生到信号被处理前的这一段时间；信号的”阻塞“是一个开关动作，指的是阻止信号被处理，但不是阻止信号产生。 </p>
 
 <p>每个进程都有一个信号屏蔽字，它规定了当前要阻塞地送到该进程的信号集，对于每种可能的信号，该屏蔽字中都有一位与之对应。对于某种信号，若其对应为已设定，则它当前是被阻塞的。进程可以调用<code>sigprocmask</code>来检测和更改当前信号屏蔽字。</p>
@@ -149,7 +158,7 @@
   <li>
     <p>信号在进程中的注销。</p>
 
-    <p>在目标进程执行过程中，会检测是否有信号等待处理（每次从系统空间返回到用户空间时都做这样的检查）。如果存在未决信号等待处理且该信号没有被进程阻塞，则在运行相应的信号处理函数前，进程会把信号在未决信号链中占有的结构卸掉。是否将信号从进程未决信号集中删除对于实时与非实时信号是不同的。对于非实时信号来说，由于在未决信号信息链中最多只占用一个sigqueue结构，因此该结构被释放后，应该把信号在进程未决信号集中删除（信号注销完毕）；而对于实时信号来说，可能在未决信号信息链中占用多个sigqueue结构，因此应该针对占用gqueue结构的数目区别对待：如果只占用一个sigqueue结构（进程只收到该信号一次），则应该把信号在进程的未决信号集中删除（信号注销完毕）。否则，不在进程的未决信号集中删除该信号（信号注销完毕）。进程在执行信号相应处理函数之前，首先要把信号在进程中注销。 </p>
+    <p>在目标进程执行过程中，会检测是否有信号等待处理（每次从系统空间返回到用户空间时都做这样的检查）。<strong>如果存在未决信号等待处理且该信号没有被进程阻塞，则在运行相应的信号处理函数前，进程会把信号在未决信号链中占有的结构卸掉。</strong>是否将信号从进程未决信号集中删除对于实时与非实时信号是不同的。对于非实时信号来说，由于在未决信号信息链中最多只占用一个sigqueue结构，因此该结构被释放后，应该把信号在进程未决信号集中删除（信号注销完毕）；而对于实时信号来说，可能在未决信号信息链中占用多个sigqueue结构，因此应该针对占用gqueue结构的数目区别对待：如果只占用一个sigqueue结构（进程只收到该信号一次），则应该把信号在进程的未决信号集中删除（信号注销完毕）。否则，不在进程的未决信号集中删除该信号（信号注销完毕）。进程在执行信号相应处理函数之前，首先要把信号在进程中注销。 </p>
   </li>
   <li>
     <p>信号生命终止。</p>
@@ -161,6 +170,10 @@
 <p><strong>注：</strong> 
 1）信号注册与否，与发送信号的函数（如kill()或sigqueue()等）以及信号安装函数（signal()及sigaction()）无关，只与信号值有关（信号值小于SIGRTMIN的信号最多只注册一次，信号值在SIGRTMIN及SIGRTMAX之间的信号，只要被进程接收到就被注册）。 
 2）在信号被注销到相应的信号处理函数执行完毕这段时间内，如果进程又收到同一信号多次，则对实时信号来说，每一次都会在进程中注册；而对于非实时信号来说，无论收到多少次信号，都会视为只收到一个信号，只在进程中注册一次。</p>
+
+<h3 id="section-2">信号引发的问题</h3>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/signalquestion_zps080fe157.png" alt="" /></p>
 ]]></content>
   </entry>
   
