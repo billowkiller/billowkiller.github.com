@@ -27,3 +27,9 @@ tags: [linux, epoll]
 
 
 如果一个函数对多个线程来说是可重入的，则说这个函数是**线程安全的**。但这并不能说明对信号处理程序来说该函数也是可重入的。如果函数对异步信号处理程序的重入是安全的，那么就可以说函数式**异步-信号安全的**。
+
+一下是来自*《深入理解计算机系统》*的摘抄：
+
+![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/threadsafe1_zps14eaee56.png)
+![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/threadsafe2_zpsb753bebc.png)
+![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/threadsafe3_zps6a9ec8f8.png)
