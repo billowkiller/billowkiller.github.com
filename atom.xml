@@ -4,7 +4,7 @@
   <title><![CDATA[Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-08-26T17:17:41+08:00</updated>
+  <updated>2014-09-03T20:42:50+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -829,7 +829,41 @@ reactor部分是单线程的异步的。</p>
     <link href="http://billowkiller.github.io/blog/2014/08/02/probability-problem/"/>
     <updated>2014-08-02T02:18:00+08:00</updated>
     <id>http://billowkiller.github.io/blog/2014/08/02/probability-problem</id>
-    <content type="html"><![CDATA[<h2 id="section">一、抛硬币问题</h2>
+    <content type="html"><![CDATA[<p><strong>概念：贝叶斯公式</strong></p>
+
+<p>贝叶斯定理是关于随机事件$A$和$B$的条件概率（或边缘概率）的一则定理。</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>$P(A</td>
+      <td>B) = \frac{P(B</td>
+      <td>A)\, P(A)}{P(B)}$</td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <tbody>
+    <tr>
+      <td>其中$P(A</td>
+      <td>B)$是在$B$发生的情况下$A$发生的可能性。</td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <tbody>
+    <tr>
+      <td>$P(A_i</td>
+      <td>B) = \frac{P(B</td>
+      <td>A_i)\, P(A_i)}{\sum_j P(B</td>
+      <td>A_j)\,P(A_j)} , !$</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="section">一、抛硬币问题</h2>
 
 <p><strong>问题1 有一苹果，两个人抛硬币来决定谁吃这个苹果，先抛到正面者吃。问先抛这吃到苹果的概率是多少？</strong></p>
 
@@ -933,7 +967,50 @@ L12 = 7， L13 = 13/2， L23 = 19/56
 L123 = 219/30 = 7.3
 </code></pre>
 
-<h2 id="section-2">其他</h2>
+<h3 id="section-2">扑克牌问题</h3>
+
+<p><strong>数学证明的随机洗牌算法</strong></p>
+
+<pre><code>for (i = 0; i &lt; N; ++i){
+	k = rand() % ( i + 1)
+	if (i != k)
+		switch(Poker[k], Poker[i]);
+}
+</code></pre>
+
+<p>分析：</p>
+
+<p>第一次取第一张牌(i=0)保持位置不变。第二次取第二张牌(i=1)，随机生成0-1的随机数k，如果随机生成数不为1，则交换下标为k和i的牌，否则不进行交换。</p>
+
+<p>假设现在取第Z张牌(i = Z - 1)， k= rand()%Z, 如果k!=i则交换下标为k和i的两张牌。</p>
+
+<p>这个算法粗看起来有点像蓄水池抽样的操作方法。这样我们来看一下每张牌出现位置的概率。</p>
+
+<p>第一次计算时第一张牌(i=0)出现在第一个位置的概率为1。</p>
+
+<p>第二次计算时第二张牌(i=1)很明显出现在两个位置中的概率都是1/2。</p>
+
+<p>我们就是要证明第Z（Z&lt;=N)次计算时每张牌出位位置的概率为1/Z。</p>
+
+<p>下面采用归纳法来证明。</p>
+
+<ol>
+  <li>
+    <p>很明显Z=1时结论成立。</p>
+  </li>
+  <li>
+    <p>假设当Z = K时结论也成立。</p>
+
+    <p>当Z=K+1时，易知第Z张牌出现在任意位置的概率为1/Z。</p>
+
+    <p>前K个数能够保留当前位置的概率为（1 - 1/(K+1)), 那么任意一张牌出现在任意位置的概率为(1/K) *（1 - 1/(K+1)) = 1/(K+1)。</p>
+  </li>
+  <li>
+    <p>同样当Z=N时该算法也成立。</p>
+  </li>
+</ol>
+
+<h2 id="section-3">其他</h2>
 
 <p><strong>从n个数中生成m个不重复的随机数</strong></p>
 
