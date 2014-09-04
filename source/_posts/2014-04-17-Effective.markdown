@@ -611,6 +611,50 @@ template &lt;T*>可以改为`tempalte<void*>`减少代码膨胀。
 
 当对象oneHalf被声明为一个Rational<int>, 模板被具现化出来，而作为过程的一部分friend函数（接受Rational<int> 参数）也就自动声明出来，后者作为一个函数而非函数模板，因此编译器可以在调用它时使用隐式转换函数。
 
+###Item 47: Use traits classes for information about types
+
+``` c++
+//define traits' type
+struct bidirectional_iterator_tag: public forward_iterator_tag { };
+
+//functional class, contain iterator
+template<...>
+class list {
+public:
+    class iterator {
+        typedef bidirectional_iterator_tag iterator_category;
+    };
+};
+
+//partial template specialization
+template<typename IterT>
+struct iterator_traits {
+    typedef IterT::iterator_category iterator_category;
+};
+
+template<typename IterT*>
+struct iterator_traits {
+    typedef IterT::iterator_category iterator_category;
+};
+
+//overloading to do compiling verdict
+template<typename IterT, typename DistT>
+doAdvance(IterT &iter, DistT d, std::bidirectional_iterator_tag) {
+    ...
+}
+
+template<typename IterT, typename DistT>
+doAdvance(IterT &iter, DistT d, std::forward_iterator_tag) {
+    ...
+}
+
+//specific function for iterator, advance
+//judge the types for information
+template<typename IterT, typename DistT>
+void advance(IterT &iter, DistT d) {
+    doAdvance(iter, d, typename iterator_traits<IterT>::iterator_category());
+}
+```
 
 ##定制new和delete
 ###Item 49: Understand the behavior of the new-handler.
