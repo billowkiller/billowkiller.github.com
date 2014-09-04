@@ -4,7 +4,7 @@
   <title><![CDATA[tags: insight | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/insight/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-09-03T20:42:50+08:00</updated>
+  <updated>2014-09-04T17:21:32+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -815,6 +815,51 @@ result = oneHalf * 2; // 无法通过编译，不加模板则可以
 </code></pre>
 
 <p>当对象oneHalf被声明为一个Rational<int>, 模板被具现化出来，而作为过程的一部分friend函数（接受Rational<int> 参数）也就自动声明出来，后者作为一个函数而非函数模板，因此编译器可以在调用它时使用隐式转换函数。</int></int></p>
+
+<h3 id="item-47-use-traits-classes-for-information-about-types">Item 47: Use traits classes for information about types</h3>
+
+<p>``` c++
+//define traits’ type
+struct bidirectional_iterator_tag: public forward_iterator_tag { };</p>
+
+<p>//functional class, contain iterator
+template&lt;…&gt;
+class list {
+public:
+    class iterator {
+        typedef bidirectional_iterator_tag iterator_category;
+    };
+};</p>
+
+<p>//partial template specialization
+template<typename itert="">
+struct iterator_traits {
+    typedef IterT::iterator_category iterator_category;
+};</typename></p>
+
+<p>template&lt;typename IterT*&gt;
+struct iterator_traits {
+    typedef IterT::iterator_category iterator_category;
+};</p>
+
+<p>//overloading to do compiling verdict
+template&lt;typename IterT, typename DistT&gt;
+doAdvance(IterT &amp;iter, DistT d, std::bidirectional_iterator_tag) {
+    …
+}</p>
+
+<p>template&lt;typename IterT, typename DistT&gt;
+doAdvance(IterT &amp;iter, DistT d, std::forward_iterator_tag) {
+    …
+}</p>
+
+<p>//specific function for iterator, advance
+//judge the types for information
+template&lt;typename IterT, typename DistT&gt;
+void advance(IterT &amp;iter, DistT d) {
+    doAdvance(iter, d, typename iterator_traits<itert>::iterator_category());
+}
+```</itert></p>
 
 <h2 id="newdelete">定制new和delete</h2>
 <p>###Item 49: Understand the behavior of the new-handler.</p>
