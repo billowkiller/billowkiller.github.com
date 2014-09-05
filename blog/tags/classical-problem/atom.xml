@@ -4,7 +4,7 @@
   <title><![CDATA[tags: classical problem | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/classical-problem/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-09-05T15:55:08+08:00</updated>
+  <updated>2014-09-05T16:07:55+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -22,11 +22,9 @@
 
 <hr />
 
-<h1 id="section">多线程同步经典问题</h1>
+<h2 id="section">生产者、消费者</h2>
 
-<h2 id="section-1">生产者、消费者</h2>
-
-<h3 id="section-2">多个生产者，单个消费者</h3>
+<h3 id="section-1">多个生产者，单个消费者</h3>
 
 <!--more-->
 
@@ -44,7 +42,7 @@
 
 <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc5_zpsc1ce838d.png" alt="" /></p>
 
-<h3 id="section-3">多个生产者，多个消费者</h3>
+<h3 id="section-2">多个生产者，多个消费者</h3>
 
 <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc6_zps5fd624fc.png" alt="" /></p>
 
@@ -54,7 +52,7 @@
 
 <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc9_zps88ec073a.png" alt="" /></p>
 
-<h2 id="section-4">多个缓冲区读写</h2>
+<h2 id="section-3">多个缓冲区读写</h2>
 
 <p>最简单的双缓冲区示意图</p>
 

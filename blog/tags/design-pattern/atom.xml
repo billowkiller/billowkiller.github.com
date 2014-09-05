@@ -4,7 +4,7 @@
   <title><![CDATA[tags: design pattern | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/design-pattern/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-09-05T15:55:08+08:00</updated>
+  <updated>2014-09-05T16:07:55+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -15,24 +15,20 @@
   
   <entry>
     <title type="html"><![CDATA[Design Pattern Abstraction]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/08/12/design-pattern/"/>
-    <updated>2014-08-12T02:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/08/12/design-pattern</id>
+    <link href="http://billowkiller.github.io/blog/2014/08/22/design-pattern/"/>
+    <updated>2014-08-22T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/08/22/design-pattern</id>
     <content type="html"><![CDATA[<p>本文是对设计模式的一个备忘录，仅是做了些摘要，具体的设计模式学习还得看GOF。</p>
+
+<p>这儿也有一个还不错的博客<a href="http://blog.csdn.net/zhengzhb/article/category/926691">http://blog.csdn.net/zhengzhb/article/category/926691</a>。</p>
 
 <hr />
 
 <p>面向对象设计（OOD）核心原则是<strong>高内聚低耦合</strong>。</p>
 
 <ul>
-  <li>
-    <u>高内聚</u>
-    <p>是指某个特定模块（程序，类型）都应完成一系列相关功能，描述了不同程序，类型中方法，方法中不同操作描述的逻辑之间的距离相近。高内聚意味可维护性，可重新性，因为模块对外部的依赖少（功能的完备性）。</p>
-  </li>
-  <li>
-    <u>耦合</u>
-    <p>是描述模块之间的依赖程度。低耦合是我们的设计目的，但不是不存在耦合不存依赖，依赖是必须的，因为模块之间必须通信交互，不过应该设计依赖于不变或者不易变的接口，无需了解模块的具体实现（OO封装性）。</p>
-  </li>
+  <li><em>高内聚</em>是指某个特定模块（程序，类型）都应完成一系列相关功能，描述了不同程序，类型中方法，方法中不同操作描述的逻辑之间的距离相近。高内聚意味可维护性，可重新性，因为模块对外部的依赖少（功能的完备性）。</li>
+  <li><em>耦合</em>是描述模块之间的依赖程度。低耦合是我们的设计目的，但不是不存在耦合不存依赖，依赖是必须的，因为模块之间必须通信交互，不过应该设计依赖于不变或者不易变的接口，无需了解模块的具体实现（OO封装性）。</li>
 </ul>
 
 <p>使用<strong>设计模式</strong>是为了提高代码的工程化，提供更加高内聚、低耦合的代码。同时可重用代码、让代码更容易被他人理解、保证代码可靠性。套用一句话就是：</p>
