@@ -3,7 +3,7 @@ layout: post
 title: "几个linux命令"
 date: 2013-05-14 01:09
 comments: true
-categories: linux
+categories: tools
 tags: [linux, command]
 ---
 

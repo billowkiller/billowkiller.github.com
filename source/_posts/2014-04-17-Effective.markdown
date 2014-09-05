@@ -657,6 +657,7 @@ void advance(IterT &iter, DistT d) {
 ```
 
 ##定制new和delete
+
 ###Item 49: Understand the behavior of the new-handler.
 
 set_new_handler允许客户指定一个函数，在内存分配无法获得满足时候被调用。

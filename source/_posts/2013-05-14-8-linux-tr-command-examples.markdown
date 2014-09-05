@@ -3,7 +3,7 @@ layout: post
 title: "8 Linux TR Command Examples"
 date: 2013-05-14 01:09
 comments: true
-categories: linux
+categories: tools
 tags: [linux,tr,command]
 ---
 

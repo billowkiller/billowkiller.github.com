@@ -3,7 +3,7 @@ layout: post
 title: "grep example"
 date: 2013-05-14 01:09
 comments: true
-categories: linux
+categories: tools
 tags: [grep,linux,command]
 ---
 

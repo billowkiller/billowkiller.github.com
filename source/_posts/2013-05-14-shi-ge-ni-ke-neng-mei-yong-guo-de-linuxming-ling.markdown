@@ -3,15 +3,13 @@ layout: post
 title: "十个你可能没用过的Linux命令"
 date: 2013-05-14 01:09
 comments: true
-categories: linux
+categories: tools
 tags: [linux, command]
 ---
 
 ***excerpted** from [图灵社区](http://www.ituring.com.cn/article/1782)*
 
 * * * * *
-
- 
 
 如果你是一个硬件系统管理员或者Linux工程师，你可能会记得大多数Linux命令行技巧。下面的这些Linux命令行技巧通常不被Linux用户所使用。
 
