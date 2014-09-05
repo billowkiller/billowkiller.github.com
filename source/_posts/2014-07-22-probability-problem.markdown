@@ -11,11 +11,9 @@ tags: [algorithm, probability]
 
 贝叶斯定理是关于随机事件$A$和$B$的条件概率（或边缘概率）的一则定理。
 
-$P(A|B) = \frac{P(B | A)\, P(A)}{P(B)}$
+![](http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/e824b899a9014c086ec5068f097b02087bf4f419_zps22b92ed4.gif)
 
 其中$P(A|B)$是在$B$发生的情况下$A$发生的可能性。
-
-$P(A_i|B) = \frac{P(B | A_i)\, P(A_i)}{\sum_j P(B|A_j)\,P(A_j)} , \!$
 
 ##一、抛硬币问题
 

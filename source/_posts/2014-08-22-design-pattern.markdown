@@ -45,7 +45,7 @@ tags: [design pattern]
 - 当一个类希望由它的子类来指定它所创建的对象的时候。
 - 当类将创建对象的职责委托给多个帮助子类中的某一个，并且你希望将哪一个帮助子类是代理者这一信息局部化的时候。
 
-![](http://c.hiphotos.baidu.com/baike/c0%3Dbaike72%2C5%2C5%2C72%2C24%3Bt%3Dgif/sign=7da8a89acafcc3cea0cdc161f32cbded/8644ebf81a4c510fe341c6a26259252dd52aa584.jpg)
+![](http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/factory_zpsc31117cb.gif)
 
 ### 抽象工厂模式（Abstract Factory） ###
 
@@ -58,7 +58,7 @@ tags: [design pattern]
 - 当你要强调一系列相关的产品对象的设计以便进行联合使用时。
 - 当你提供一个产品类库，而只想显示它们的接口而不是实现时。
  
-![](http://b.hiphotos.baidu.com/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26%3Bt%3Dgif/sign=45a33c55a1cc7cd9ee203c8b58684a5a/0b55b319ebc4b745aaa590aecdfc1e178a821550.jpg)
+![](http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/abstractfactory_zpsf3be4cdd.gif)
 
 ### 建造者模式（Builder） ###
 
@@ -69,7 +69,7 @@ tags: [design pattern]
 - 当创建复杂对象的算法应该独立于该对象的组成部分以及它们的装配方式时。
 - 当构造过程必须允许被构造的对象有不同的表示时。
 
-![](http://d.hiphotos.baidu.com/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26%3Bt%3Dgif/sign=8fd08166f21f3a294ec5dd9cf84cd754/9f2f070828381f30eaa0ad11ab014c086f06f0c8.jpg)
+![](http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/builder_zps7d31e2f5.gif)
 
 ### 原型模式（Prototype） ###
 
@@ -81,7 +81,7 @@ tags: [design pattern]
 - 为了避免创建一个与产品类层次平行的工厂类层次时；或者
 - 当一个类的实例只能有几个不同状态组合中的一种时。建立相应数目的原型并克隆它们可能比每次用合适的状态手工实例化该类更方便一些。
 
-![](http://c.hiphotos.baidu.com/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26%3Bt%3Dgif/sign=f914d675fe039245b5b8e95de6fdcfa7/d8f9d72a6059252deef03dbc369b033b5ab5b9a6.jpg)
+![](http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/prototype_zpsb4a5c2aa.gif)
 
 ## 结构型模式 ##
 
@@ -95,7 +95,7 @@ tags: [design pattern]
 - 你想创建一个可以复用的类，该类可以与其他不相关的类或不可预见的类（即那些接口可能不一定兼容的类）协同工作。
 - （仅适用于对象Adapter）你想使用一些已经存在的子类，但是不可能对每一个都进行子类化以匹配它们的接口。对象适配器可以适配它的父类接口。
 
-![](http://f.hiphotos.baidu.com/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26%3Bt%3Dgif/sign=ecfacc71d52a6059461de948495d5ffe/a5c27d1ed21b0ef4a620b8e6dfc451da80cb3eb9.jpg)
+![](http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/adapter_zps1800d0cc.gif)
 
 ### 装饰模式（Decorator） ###
 
@@ -107,7 +107,7 @@ tags: [design pattern]
 - 处理那些可以撤消的职责。
 - 当不能采用生成子类的方法进行扩充时。一种情况是，可能有大量独立的扩展，为支持每一种组合将产生大量的子类，使得子类数目呈爆炸性增长。另一种情况可能是因为类定义被隐藏，或类定义不能用于生成子类。
 
-![](http://e.hiphotos.baidu.com/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26%3Bt%3Dgif/sign=4b1bdfb572cf3bc7fc0dc5beb069d1c4/d6ca7bcb0a46f21f921b7debf4246b600c33ae5e.jpg)
+![](http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/Decorator_zpse3f223d4.gif)
 
 ## 行为型模式 ##
 
@@ -121,7 +121,7 @@ tags: [design pattern]
 - 当对一个对象的改变需要同时改变其它对象, 而不知道具体有多少对象有待改变。
 - 当一个对象必须通知其它对象，而它又不能假定其它对象是谁。换言之，你不希望这些对象是紧密耦合的。
 
-![](http://g.hiphotos.baidu.com/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26%3Bt%3Dgif/sign=3ef11e72533d26973ade000f3492d99e/fc1f4134970a304ebb028342d3c8a786c9175c61.jpg)
+![](http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/observer_zps892df2a6.gif)
 
 ### 状态模式（State） ###
 
@@ -132,7 +132,7 @@ tags: [design pattern]
 - 一个对象的行为取决于它的状态, 并且它必须在运行时刻根据状态改变它的行为。
 - 一个操作中含有庞大的多分支的条件语句，且这些分支依赖于该对象的状态。这个状态通常用一个或多个枚举常量表示。通常, 有多个操作包含这一相同的条件结构。State模式将每一个条件分支放入一个独立的类中。这使得你可以根据对象自身的情况将对象的状态作为一个对象，这一对象可以不依赖于其他对象而独立变化。
 
-![](http://b.hiphotos.baidu.com/baike/c0%3Dbaike72%2C5%2C5%2C72%2C24%3Bt%3Dgif/sign=c80d5c18f403738dca470470d272db34/d4628535e5dde711e1e3604ea5efce1b9d166150.jpg)
+![](http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/state_zps349fba82.gif)
 
 ### 策略模式（Strategy） ###
 
@@ -145,4 +145,4 @@ tags: [design pattern]
 - 算法使用客户不应该知道的数据。可使用策略模式以避免暴露复杂的、与算法相关的数据结构。
 - 一个类定义了多种行为, 并且这些行为在这个类的操作中以多个条件语句的形式出现。将相关的条件分支移入它们各自的Strategy类中以代替这些条件语句。
 
-![](http://g.hiphotos.baidu.com/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26%3Bt%3Dgif/sign=e54681a3d60735fa85fd46ebff3864d6/faf2b2119313b07e84de73b00ed7912397dd8c22.jpg)
+![](http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/strategy_zpsc3f3c44b.gif)
