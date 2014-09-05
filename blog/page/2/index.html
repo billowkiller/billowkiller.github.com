@@ -504,6 +504,72 @@
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-05-01T03:18:00+08:00" pubdate data-updated="true">May 1<span>st</span>, 2014</time>
+        
+           | <a href="/blog/2014/05/01/code-snippet/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/05/01/code-snippet/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/01/code-snippet/">Some Code Snippets</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><ol>
+  <li>
+    <p><strong>在一个二叉树中查找值为x的结点，并打印该结点所有祖先结点的算法，也就是根节点到x的路径。</strong></p>
+
+    <p>思路1： 利用<strong>后序遍历</strong>的非递归算法，在访问结点时增加一个判断，若该结点的值等于x，则打印栈中保持的路径，再中断算法。</p>
+
+    <p>思路2： 采用<strong>前序遍历</strong>的递归算法，在典型的便利算法的参数表中增加了x、path[n]等参数。</p>
+
+    <pre><code> template&lt;class T&gt;
+ int Find_Print(BinTreeNode&lt;T*&amp; BT, T x, T path[], int level, int &amp;count) {
+     if(BT != NULL) {
+         level++;
+         path[level] = BT-&gt;data;
+         if (BT-&gt;data==x) { count=level; return 1; }
+         if( Find_Print(BT-&gt;left, x, path, level, count) ) return 1;
+         return Find_Print(BT-&gt;right, x, path, level, count);
+     } else 
+         return 0;
+ }
+</code></pre>
+  </li>
+</ol>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/05/01/code-snippet/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-27T02:18:00+08:00" pubdate data-updated="true">Apr 27<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/04/27/New-features-in/#disqus_thread"
@@ -646,66 +712,6 @@
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-17T02:18:00+08:00" pubdate data-updated="true">Apr 17<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/04/17/Effective/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/04/17/Effective/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/17/Effective/">Effective C++ Rework</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><h2 id="c">让自己习惯C++</h2>
-
-<h3 id="item-01-view-c-as-a-federation-of-languages">Item 01： View C++ as a federation of languages</h3>
-
-<p>C++同时支持过程形式、面对对象形式、函数形式、泛型形式、元编程形式。</p>
-
-<p>次语言有</p>
-
-<ul>
-  <li>C</li>
-  <li>Object-Oriented C++</li>
-  <li>Template C++</li>
-  <li>STL</li>
-</ul>
-
-<p>C++高效编程守则视状况而变化，取决于你使用C++的那一部分。</p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/04/17/Effective/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -791,7 +797,7 @@
     
     
     <a class="list-group-item " href="/blog/categories/algorithm/index.html">
-        <span class="badge">5</span>
+        <span class="badge">6</span>
         algorithm
       </a>
     
