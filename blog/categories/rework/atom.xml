@@ -4,7 +4,7 @@
   <title><![CDATA[Category: rework | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/rework/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-09-04T17:21:32+08:00</updated>
+  <updated>2014-09-05T15:55:08+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,235 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Classical Sync Problem]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/08/23/classical-sync-problem/"/>
+    <updated>2014-08-23T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/08/23/classical-sync-problem</id>
+    <content type="html"><![CDATA[<p>简单的记录下，后期再整理吧。</p>
+
+<hr />
+
+<h1 id="section">多线程同步经典问题</h1>
+
+<h2 id="section-1">生产者、消费者</h2>
+
+<h3 id="section-2">多个生产者，单个消费者</h3>
+
+<!--more-->
+
+<p><strong>1. 使用互斥锁 &amp;&amp; 条件变量</strong></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc1_zps5e6026ee.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc2_zps96f163b4.png" alt="" /></p>
+
+<p><strong>2. 使用信号量</strong></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc3_zps90f678c0.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc4_zpsff637264.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc5_zpsc1ce838d.png" alt="" /></p>
+
+<h3 id="section-3">多个生产者，多个消费者</h3>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc6_zps5fd624fc.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc7_zps77aab9e4.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc8_zps7ec189ae.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc9_zps88ec073a.png" alt="" /></p>
+
+<h2 id="section-4">多个缓冲区读写</h2>
+
+<p>最简单的双缓冲区示意图</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/db1_zps098b0d0f.png" alt="" /></p>
+
+<p><strong>多缓冲区生产者消费者代码</strong></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/db2_zps9fda343a.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/db3_zps03dac974.png" alt="" /></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Design Pattern Abstraction]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/08/12/design-pattern/"/>
+    <updated>2014-08-12T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/08/12/design-pattern</id>
+    <content type="html"><![CDATA[<p>本文是对设计模式的一个备忘录，仅是做了些摘要，具体的设计模式学习还得看GOF。</p>
+
+<hr />
+
+<p>面向对象设计（OOD）核心原则是<strong>高内聚低耦合</strong>。</p>
+
+<ul>
+  <li>
+    <u>高内聚</u>
+    <p>是指某个特定模块（程序，类型）都应完成一系列相关功能，描述了不同程序，类型中方法，方法中不同操作描述的逻辑之间的距离相近。高内聚意味可维护性，可重新性，因为模块对外部的依赖少（功能的完备性）。</p>
+  </li>
+  <li>
+    <u>耦合</u>
+    <p>是描述模块之间的依赖程度。低耦合是我们的设计目的，但不是不存在耦合不存依赖，依赖是必须的，因为模块之间必须通信交互，不过应该设计依赖于不变或者不易变的接口，无需了解模块的具体实现（OO封装性）。</p>
+  </li>
+</ul>
+
+<p>使用<strong>设计模式</strong>是为了提高代码的工程化，提供更加高内聚、低耦合的代码。同时可重用代码、让代码更容易被他人理解、保证代码可靠性。套用一句话就是：</p>
+
+<blockquote>
+  <p>每个模式描述了一个在我们周围不断重复发生的问题，已经该问题的解决方案的核心。这样我们就能一次又一次地使用该方案而不必做重复劳动。</p>
+</blockquote>
+
+<p>设计模式分为三种类型，共23种。</p>
+
+<ul>
+  <li><strong>创建型模式：</strong>单例模式、抽象工厂模式、建造者模式、工厂模式、原型模式。</li>
+  <li><strong>结构型模式：</strong>适配器模式、桥接模式、装饰模式、组合模式、外观模式、享元模式、代理模式。</li>
+  <li><strong>行为型模式：</strong>模版方法模式、命令模式、迭代器模式、观察者模式、中介者模式、备忘录模式、解释器模式、状态模式、策略模式、职责链模式、访问者模式。</li>
+</ul>
+
+<!--more-->
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/dp1_zps74894e4d.png" alt="" /></p>
+
+<h2 id="section">创建型模式</h2>
+
+<h3 id="factory">工厂模式（Factory）</h3>
+
+<p>定义一个用于创建对象的接口，让子类决定实例化哪一个类。Factory Method 使一个类的实例化延迟到其子类。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>当一个类不知道它所必须创建的对象的类的时候。</li>
+  <li>当一个类希望由它的子类来指定它所创建的对象的时候。</li>
+  <li>当类将创建对象的职责委托给多个帮助子类中的某一个，并且你希望将哪一个帮助子类是代理者这一信息局部化的时候。</li>
+</ul>
+
+<p><img src="http://c.hiphotos.baidu.com/baike/c0%3Dbaike72%2C5%2C5%2C72%2C24%3Bt%3Dgif/sign=7da8a89acafcc3cea0cdc161f32cbded/8644ebf81a4c510fe341c6a26259252dd52aa584.jpg" alt="" /></p>
+
+<h3 id="abstract-factory">抽象工厂模式（Abstract Factory）</h3>
+
+<p>提供一个创建一系列相关或相互依赖对象的接口，而无需指定它们具体的类。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>一个系统要独立于它的产品的创建、组合和表示时。</li>
+  <li>一个系统要由多个产品系列中的一个来配置时。</li>
+  <li>当你要强调一系列相关的产品对象的设计以便进行联合使用时。</li>
+  <li>当你提供一个产品类库，而只想显示它们的接口而不是实现时。</li>
+</ul>
+
+<p><img src="http://b.hiphotos.baidu.com/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26%3Bt%3Dgif/sign=45a33c55a1cc7cd9ee203c8b58684a5a/0b55b319ebc4b745aaa590aecdfc1e178a821550.jpg" alt="" /></p>
+
+<h3 id="builder">建造者模式（Builder）</h3>
+
+<p>将一个复杂对象的构建与它的表示分离，使得同样的构建过程可以创建不同的表示。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>当创建复杂对象的算法应该独立于该对象的组成部分以及它们的装配方式时。</li>
+  <li>当构造过程必须允许被构造的对象有不同的表示时。</li>
+</ul>
+
+<p><img src="http://d.hiphotos.baidu.com/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26%3Bt%3Dgif/sign=8fd08166f21f3a294ec5dd9cf84cd754/9f2f070828381f30eaa0ad11ab014c086f06f0c8.jpg" alt="" /></p>
+
+<h3 id="prototype">原型模式（Prototype）</h3>
+
+<p>用原型实例指定创建对象的种类，并且通过拷贝这些原型创建新的对象。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>当要实例化的类是在运行时刻指定时，例如，通过动态装载；或者</li>
+  <li>为了避免创建一个与产品类层次平行的工厂类层次时；或者</li>
+  <li>当一个类的实例只能有几个不同状态组合中的一种时。建立相应数目的原型并克隆它们可能比每次用合适的状态手工实例化该类更方便一些。</li>
+</ul>
+
+<p><img src="http://c.hiphotos.baidu.com/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26%3Bt%3Dgif/sign=f914d675fe039245b5b8e95de6fdcfa7/d8f9d72a6059252deef03dbc369b033b5ab5b9a6.jpg" alt="" /></p>
+
+<h2 id="section-1">结构型模式</h2>
+
+<h3 id="adapter">适配器模式（Adapter）</h3>
+
+<p>将一个类的接口转换成另外一个客户希望的接口。Adapter模式使得原本由于接口不兼容而不能一起工作的那些类可以一起工作。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>你想使用一个已经存在的类，而它的接口不符合你的需求。</li>
+  <li>你想创建一个可以复用的类，该类可以与其他不相关的类或不可预见的类（即那些接口可能不一定兼容的类）协同工作。</li>
+  <li>（仅适用于对象Adapter）你想使用一些已经存在的子类，但是不可能对每一个都进行子类化以匹配它们的接口。对象适配器可以适配它的父类接口。</li>
+</ul>
+
+<p><img src="http://f.hiphotos.baidu.com/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26%3Bt%3Dgif/sign=ecfacc71d52a6059461de948495d5ffe/a5c27d1ed21b0ef4a620b8e6dfc451da80cb3eb9.jpg" alt="" /></p>
+
+<h3 id="decorator">装饰模式（Decorator）</h3>
+
+<p>动态地给一个对象添加一些额外的职责。就增加功能来说，Decorator模式相比生成子类更为灵活。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>在不影响其他对象的情况下，以动态、透明的方式给单个对象添加职责。</li>
+  <li>处理那些可以撤消的职责。</li>
+  <li>当不能采用生成子类的方法进行扩充时。一种情况是，可能有大量独立的扩展，为支持每一种组合将产生大量的子类，使得子类数目呈爆炸性增长。另一种情况可能是因为类定义被隐藏，或类定义不能用于生成子类。</li>
+</ul>
+
+<p><img src="http://e.hiphotos.baidu.com/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26%3Bt%3Dgif/sign=4b1bdfb572cf3bc7fc0dc5beb069d1c4/d6ca7bcb0a46f21f921b7debf4246b600c33ae5e.jpg" alt="" /></p>
+
+<h2 id="section-2">行为型模式</h2>
+
+<h3 id="observer">观察者模式（Observer）</h3>
+
+<p>定义对象间的一种一对多的依赖关系,当一个对象的状态发生改变时, 所有依赖于它的对象都得到通知并被自动更新。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>当一个抽象模型有两个方面, 其中一个方面依赖于另一方面。将这二者封装在独立的对象中以使它们可以各自独立地改变和复用。</li>
+  <li>当对一个对象的改变需要同时改变其它对象, 而不知道具体有多少对象有待改变。</li>
+  <li>当一个对象必须通知其它对象，而它又不能假定其它对象是谁。换言之，你不希望这些对象是紧密耦合的。</li>
+</ul>
+
+<p><img src="http://g.hiphotos.baidu.com/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26%3Bt%3Dgif/sign=3ef11e72533d26973ade000f3492d99e/fc1f4134970a304ebb028342d3c8a786c9175c61.jpg" alt="" /></p>
+
+<h3 id="state">状态模式（State）</h3>
+
+<p>允许一个对象在其内部状态改变时改变它的行为。对象看起来似乎修改了它的类。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>一个对象的行为取决于它的状态, 并且它必须在运行时刻根据状态改变它的行为。</li>
+  <li>一个操作中含有庞大的多分支的条件语句，且这些分支依赖于该对象的状态。这个状态通常用一个或多个枚举常量表示。通常, 有多个操作包含这一相同的条件结构。State模式将每一个条件分支放入一个独立的类中。这使得你可以根据对象自身的情况将对象的状态作为一个对象，这一对象可以不依赖于其他对象而独立变化。</li>
+</ul>
+
+<p><img src="http://b.hiphotos.baidu.com/baike/c0%3Dbaike72%2C5%2C5%2C72%2C24%3Bt%3Dgif/sign=c80d5c18f403738dca470470d272db34/d4628535e5dde711e1e3604ea5efce1b9d166150.jpg" alt="" /></p>
+
+<h3 id="strategy">策略模式（Strategy）</h3>
+
+<p>定义一系列的算法,把它们一个个封装起来, 并且使它们可相互替换。本模式使得算法可独立于使用它的客户而变化。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>许多相关的类仅仅是行为有异。“策略”提供了一种用多个行为中的一个行为来配置一个类的方法。</li>
+  <li>需要使用一个算法的不同变体。例如，你可能会定义一些反映不同的空间/时间权衡的算法。当这些变体实现为一个算法的类层次时，可以使用策略模式。</li>
+  <li>算法使用客户不应该知道的数据。可使用策略模式以避免暴露复杂的、与算法相关的数据结构。</li>
+  <li>一个类定义了多种行为, 并且这些行为在这个类的操作中以多个条件语句的形式出现。将相关的条件分支移入它们各自的Strategy类中以代替这些条件语句。</li>
+</ul>
+
+<p><img src="http://g.hiphotos.baidu.com/baike/c0%3Dbaike80%2C5%2C5%2C80%2C26%3Bt%3Dgif/sign=e54681a3d60735fa85fd46ebff3864d6/faf2b2119313b07e84de73b00ed7912397dd8c22.jpg" alt="" /></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Modules in Network Programming]]></title>
@@ -538,401 +767,6 @@ log：日志信息
 <p>需要说明的是，内存池中并没有真正意义调用malloc等函数申请内存，而是移动指针标记而已，所以<code>内存对齐</code>的活，C编译器帮不了你了，得自己动手。并且不同的操作系统对齐方式不同。</p>
 
 <p>这几个函数具体的功能可以见<a href="http://www.cnblogs.com/xiekeli/archive/2012/10/17/2727432.html">http://www.cnblogs.com/xiekeli/archive/2012/10/17/2727432.html</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Nginx architecture(2)--Event Driven]]></title>
-    <link href="http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-2-event-driven/"/>
-    <updated>2013-11-14T00:16:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-2-event-driven</id>
-    <content type="html"><![CDATA[<p>Nginx是一个事件驱动架构的Web服务器。在Linux中，<code>epoll</code>是目前最强大的事件管理机制(I/O多路复用)，定时器事件也是由<code>epoll</code>等事件模块触发的，它是由红黑树实现的。并且Nginx很好的解决多个<code>worker</code>子进程监听同一个端口引起的惊群问题，以及对<code>worker</code>进行负载平衡。最后会讨论下linux内核中的文件异步I/O。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx-logo_zpsabde8e46.png" /></p>
-
-<!--more-->
-
-<h2 id="section">1. 框架概述</h2>
-
-<p>关于事件驱动模型的介绍已经在上篇介绍过了，这里再做一些补充说明。</p>
-
-<p>事件处理框架所要解决的问题是如何收集、管理、分发事件。对于一个基本的web服务器来说，事件通常有三种类型，<strong>网络事件</strong>、<strong>信号</strong>、<strong>定时器</strong>。这里的事件主要是指<code>网络事件</code>（TCP事件）和<code>定时器事件</code>。</p>
-
-<p>网络事件与网卡中断处理程序、内核提供的系统调用密切相关，所以网络事件的驱动受制于不用的操作系统平台，在同一个操作系统中也受制于不同的操作系统内核版本。例如在<code>kernel2.6</code>之前的版本或者大部分类UNIX系统都可以使用<code>poll</code>或<code>select</code>，而2.6后使用<code>epoll</code>。</p>
-
-<p>对比与传统的过程驱动方法(Process-driven method)来说，事件驱动模型可以用更少的线程处理更多的客户请求。</p>
-
-<h3 id="section-1">1.1 事件定义与事件模块</h3>
-
-<p>事件代表过去发生的事件，事件既是技术架构概念，也是业务概念。以事件为驱动的编程模型称为事件驱动架构EDA。</p>
-
-<p>一个事件代表某个发生的事情，在计算机系统中，事件是由一个对象表达，其包含有关事件的数据，比如发生的时间，地点等等。这个事件对象可以存在在一个消息或数据库记录或其他组件的形式中，这样一个对象称为”一个事件”，事件这个概念有两个含义，既代表已经发生的某个事情，也可以表达一个正在发生的对象。至于事件到底是这两个含义中哪一个，取决于事件发生的场景(上下文)。</p>
-
-<p>事件在技术架构上应用能提供无堵塞的高并发性能，如Nginx和<code>Node.js</code>。</p>
-
-<p>所谓事件驱动，简单地说就是你点什么按钮（即产生什么事件），电脑执行什么操作（即调用什么函数）.当然事件不仅限于用户的操作. 事件驱动的核心自然是事件。从事件角度说，事件驱动程序的基本结构是由一个事件收集器、一个事件发送器和一个事件处理器组成。事件收集器专门负责收集所有事件，包括来自用户的（如鼠标、键盘事件等）、来自硬件的（如时钟事件等）和来自软件的（如操作系统、应用程序本身等）。事件发送器负责将收集器收集到的事件分发到目标对象中。事件处理器做具体的事件响应工作，它往往要到实现阶段才完全确定，因而需要运用虚函数机制（函数名往往取为类似于HandleMsg的一个名字）。对于框架的使用者来说，他们唯一能够看到的是事件处理器。这也是他们所关心的内容。</p>
-
-<p>视图（即我们通常所说的“窗口”）是“事件驱动”应用程序的另一个要元。它是我们所说的事件发送器的目标对象。视图接受事件并能够对其进行处理。当我们将事件发送到具体的视图时，实际上我们完成了一个根本性的变化：从传统的流线型程序结构到事件触发方式的转变。这样应用程序具备相当的柔性，可以应付种种离散的、随机的事件。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/ev-server_zps36dcc97a.png" /></p>
-
-<p>在Nginx中，事件都是由<code>ngx_event_t</code>结构体来表示，这个结构体包含了事件的几个要素，方法、状态、参数以及前后事件的链表。</p>
-
-<p>事件模块是一种新的模块类型，<code>ngx_module_t</code>表示Nginx模块的基本接口，而针对每一种不同类型的模块，都有一个结构体来描述这一类模块的通用接口，这个接口保存在<code>ngx_module_t</code>结构体中的<code>ctx</code>成员中。也就是说，不同模块类型的区别就是<code>ctx</code>成员保存内容的区别，而模块还是在一个统一的结构体中表示。事件模块的通用接口则<code>ngx_event_module_t</code>结构体，它里面定义了模块名称、配置项参数的回调函数以及每个事件模块需要实现的10个抽象方法，如初始化添加删除事件等。</p>
-
-<h3 id="nginx">1.2 Nginx事件驱动机制</h3>
-
-<p>在上一篇中提到，Nginx将HTTP请求分为多个阶段进行处理</p>
-
-<table>
-  <tbody>
-    <tr>
-      <td> </td>
-      <td><strong>阶段意义</strong></td>
-      <td> </td>
-      <td><strong>触发条件</strong></td>
-      <td> </td>
-    </tr>
-    <tr>
-      <td> </td>
-      <td>建立TCP连接</td>
-      <td> </td>
-      <td>接收到TCP中的SYN包</td>
-      <td> </td>
-    </tr>
-    <tr>
-      <td> </td>
-      <td>开始接受用户请求</td>
-      <td> </td>
-      <td>接收到TCP中的ACK表示连接建立成功</td>
-      <td> </td>
-    </tr>
-    <tr>
-      <td> </td>
-      <td>接收到用户请求并分析已接收的请求是否完整</td>
-      <td> </td>
-      <td>接收到用户的数据包</td>
-      <td> </td>
-    </tr>
-    <tr>
-      <td> </td>
-      <td>接收到完整的用户请求后开始处理用户请求</td>
-      <td> </td>
-      <td>接收到用户的数据包</td>
-      <td> </td>
-    </tr>
-    <tr>
-      <td> </td>
-      <td>…</td>
-      <td> </td>
-      <td>…</td>
-      <td> </td>
-    </tr>
-  </tbody>
-</table>
-
-<p>而异步处理是与多阶段相辅相成的，当事件发生时，由<code>epoll</code>等事件分发器收到通知，调用事件消费者处理请求，在每个阶段中，事件消费者都不清楚本次完整的操作纠结什么时候会完成，只能异步被动地等待下一次时间的通知。</p>
-
-<p>这种设计配合事件驱动架构，将会极大地提高网络性能，同时使得进程不会或很少出现休眠现象。因为一旦出现进程休眠，必然减少并发处理事件的数目，一定会降低网络性能，同时会增加请求处理时间的平均时延！这时，如果网络新能无法满足业务需求将智能增加进程数目，进程数目过多就会增加操作系统内核的额外操作：进程间切换，频繁地进行进程切换仍会消耗CPU等资源，从而减低网络性能。同时，休眠的进程会使进程占用的内存得不到有效是否，这最终比如会导致系统可用内存的下降，从而影响系统能够处理的最大并发连接数。</p>
-
-<p>另外，异步非阻塞的事件处理机制与多线程相比，是有很大的优势的，不需要创建线程，每个请求占用的内存也很少，没有上下文切换，事件处理非常的轻量级。并发数再多也不会导致无谓的资源浪费（上下文切换）。更多的并发数，只是会占用更多的内存而已。 我之前有对连接数进行过测试，在24G内存的机器上，处理的并发请求数达到过200万。现在的网络服务器基本都采用这种方式，这也是Nginx性能高效的主要原因。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mighttpd_e02gif_zpse3ff26a7.gif" /></p>
-
-<h2 id="linuxepoll">2. Linux事件驱动机制——<code>epoll</code></h2>
-
-<p>事件驱动机制也被称为I/O多路复用，其实也就是非阻塞的I/O。<code>poll</code>、<code>select</code>和<code>epoll</code>的功能在本质上是一样的：都允许进程决定是否可以对一个和多个打开文件做非阻塞操作的读取和写入。这些调用也会阻塞进程，直到给定的文件描述符集合中的任何一个可读取或写入。因此，它们常常用于那些要使用多个输入和输出流而又不会阻塞阻于其中任何一个流的应用程序程序中。同一功能之所以要多个独立函数提供，是因为其中两个几乎是同时由两个不同的unix团体分别实现的：<code>select</code>在<code>BSD unix</code>中引入，而<code>poll</code>由<code>System V</code>引入。<code>epoll</code>系统调用，它用于将poll函数的扩展到能个处理数千个文件描述符。对上述系统调用的支持需要来自设备的驱动程序的相应支持。所有三个系统均通过驱动程序的<code>poll</code>方法提供。</p>
-
-<p><code>select</code>和<code>poll</code>在处理事件的时候会造成用户态到内核态内存的大量复制，这是极大的资源浪费。实际上，它会将所有连接的套接字传给操作系统，如果有100万个连接，在某一个时刻，进程收集事件连接的时候，虽然这100万连接中大部分是没有发生的，但<code>select</code>和<code>poll</code>还是会将这100万连接的套接字传给操作系统，而由操作系统内核寻找这些连接上有没有未处理的时间，这是极大的资源浪费，所以它们最多只能处理几千个并发连接。</p>
-
-<p>而<code>epoll</code>不这么做，它在内核中申请了一个简易的文件系统，把原先的一个select或poll调用分成了3个部分：调用<code>epoll_create</code>,建立1个<code>epoll</code>对象（在<code>epoll</code>文件系统中给这个句柄分配资源）、调用<code>epoll_ctl</code>向<code>epoll</code>对象中添加这100万个连接的套接字、调用<code>epoll_wait</code>收集发生事件的连接。这样，只需要在进程启动时建立1个<code>epoll</code>对象，并在需要的时候向它添加或删除连接就可以了。那么再来看看<code>epoll</code>是如何高效的处理事件的。</p>
-
-<p>当某一个进程调用<code>epoll_create</code>方法时，Linux内核会创建一个<code>eventpoll</code>结构体，这个结构体有一棵红黑树（存储所有添加到<code>epoll</code>中过的事件），还有一个双向链表（保持将要通过<code>epoll_wait</code>返回给用户的、满足条件的事件）。所有添加到<code>epoll</code>中的事件都会与设备驱动程序建立回调关系，这个回调方法会把这样的事件放到上面的双向链表中。当调用<code>epoll_wait</code>检测是否有发生事件的连接时，只是检查<code>eventpoll</code>对象中的双向链表是否有元素而已，如果不为空，则把这里的事件复制到用户内存中，同时将时间数量返回给用户。</p>
-
-<p>所以在<code>epoll</code>中，<code>epoll_ctl</code>向<code>epoll</code>对象中添加、修改、删除事件时，从红黑树中查找事件非常快，同时<code>epoll_wait</code>检查事件的效率也是非常的高。可以处理百万级别的并发事件。</p>
-
-<h2 id="section-2">3. 定时器事件</h2>
-
-<p>要弄清Nginx的定时器事件处理，那么需要搞清楚几个问题：</p>
-
-<ol>
-  <li>定时器事件是如何组织起来的</li>
-  <li>事件超时后又是如何触发的</li>
-  <li>时间又是如何更新的</li>
-</ol>
-
-<p>出于性能原因，Nginx的时间是缓存在内存中，不是每次都通过<code>gettimeofday</code>这个系统函数来实现。在Nginx中，只有在初始化和更新这个缓存时间的时候才会调用<code>gettimeofday</code>。在内存中可以通过各种已经定制好的格式化方法格式化需要转换的时间。</p>
-
-<p>所有的定时器事件是通过红黑树组织起来的。红黑树用事件的超时时间作为关键字，并且以这个关键字组成二叉排序树。这样需要找出最有可能的超时事件，那么只要将最左边的节点取出来即可，可以判断这个时间是否超时或者还需要多久才会超时。红黑树定时器处理添加删除外，还提供了一些方法可以遍历所有的事件，触发事件的<code>handler</code>回调方法。那么何时调用这些方法呢？</p>
-
-<p>首先在程序开始的时候会检测配置选项中是否有<code>timer_resolution</code>这一项内容即用户希望服务器时间精确度是多少毫秒，如果有则采用这个设置项作为阈值时间<code>timer</code>；如果没有设置这一选项，则在红黑树中寻找最近可能发生事件的时间差，以这个时间作为<code>timer</code>。<code>timer</code>也就是用来收集<code>epoll</code>监控事件是否发生的阈值时间，即如果<code>epoll</code>中没有任何一个事件发生，则最多等待<code>timer</code>毫秒后返回。也就是说如果是通过红黑树中找到的<code>timer</code>则肯定会有事件发生，如果是通过<code>timer_resolution</code>赋值的则不一定。</p>
-
-<p>收集来的事件放在队列中按<code>FIFO</code>顺序处理。而如果收集事件消耗的时间大于0，也就是有等待事件发生，那么这时有可能有新的定时器事件被触发，也就需要遍历所有的时间，触发事件的<code>handler</code>回调方法。</p>
-
-<h2 id="section-3">4. 惊群问题</h2>
-
-<p>惊群问题（Thundering Herd）是指多个进程监听同一个事件，操作系统无法判断由谁来负责这个事件，就会索性唤醒所有进程，但最终只有一个进程成功执行，其他进程失败，造成严重的资源浪费。</p>
-
-<p>Nginx的解决思路：<strong>避免惊群</strong>。具体措施有使用全局互斥锁，每个子进程在<code>epoll_wait()</code>之前先去申请锁，申请到则继续处理，获取不到则等待，并设置了一个负载均衡的算法（当某一个子进程的任务量达到总设置量的7/8时，则不会再尝试去申请锁）来均衡各个进程的任务量。</p>
-
-<p>原因和解决方法对比参见<a href="http://blog.163.com/pandalove@126/blog/static/9800324520122633515612/">这篇博客</a>。</p>
-
-<p><a href="http://blog.csdn.net/randyleonard/article/details/9058567">这篇也很精彩</a>。</p>
-
-<h2 id="io">5. 文件异步I/O</h2>
-
-<p>要使用文件异步I/O，则Linux内核必须要支持。这里的异步I/O不同于<code>glibc</code>提供的文件异步I/O库，它是基于多线程实现的，并不是真正意义上的异步I/O。把读取文件的操作异步地提交给内核后，内核会通知I/O设备独立地执行操作，这样，CPU可以得到充分的利用。而且，当大量读事件发生时候，将会发挥出内核读硬盘中“电梯算法”的优势，从而降低随机读取硬盘扇区的成本。</p>
-
-<p>需要注意的是Linux内核级别的文件异步I/O是不支持缓存操作的，所以说文件异步I/O的使用要看场景，并不是所有情况都可以使用，如果用户请求对文件的操作大部分都会落到文件缓存上，那么就不要使用异步I/O，反之则可以试着使用文件异步I/O，看一下是否会为服务器带来并发能力上的提升。</p>
-
-<p>这个文件异步I/O在linux中的称呼是<code>sendfile</code>，那么<code>sendfile</code>的原理是什么呢？</p>
-
-<p>在传统的文件传输里面（read/write方式），在实现上其实是比较复杂的，需要经过多次上下文的切换，我们看一下如下两行代码：</p>
-
-<p>read(file, tmp_buf, len);     <br />
-write(socket, tmp_buf, len);  </p>
-
-<p>以上两行代码是传统的read/write方式进行文件到socket的传输。</p>
-
-<p>当需要对一个文件进行传输的时候，其具体流程细节如下：</p>
-
-<p>1、调用read函数，文件数据被copy到内核缓冲区</p>
-
-<p>2、read函数返回，文件数据从内核缓冲区copy到用户缓冲区</p>
-
-<p>3、write函数调用，将文件数据从用户缓冲区copy到内核与socket相关的缓冲区。</p>
-
-<p>4、数据从socket缓冲区copy到相关协议引擎。</p>
-
-<p>以上细节是传统read/write方式进行网络文件传输的方式，我们可以看到，在这个过程当中，文件数据实际上是经过了四次copy操作：</p>
-
-<p>硬盘—&gt;内核buf—&gt;用户buf—&gt;socket相关缓冲区—&gt;协议引擎</p>
-
-<p>而sendfile系统调用则提供了一种减少以上多次copy，提升文件传输性能的方法。Sendfile系统调用是在2.1版本内核时引进的：</p>
-
-<p>sendfile(socket, file, len);   </p>
-
-<p>运行流程如下：</p>
-
-<p>1、<code>sendfile</code>系统调用，文件数据被copy至内核缓冲区</p>
-
-<p>2、再从内核缓冲区copy至内核中socket相关的缓冲区</p>
-
-<p>3、最后再socket相关的缓冲区copy到协议引擎</p>
-
-<p>相较传统read/write方式，2.1版本内核引进的<code>sendfile</code>已经减少了内核缓冲区到user缓冲区，再由user缓冲区到socket相关缓冲区的文件copy，而在内核版本2.4之后，文件描述符结果被改变，<code>sendfile</code>实现了更简单的方式，系统调用方式仍然一样，细节与2.1版本的 不同之处在于，当文件数据被复制到内核缓冲区时，不再将所有数据copy到socket相关的缓冲区，而是仅仅将记录数据位置和长度相关的数据保存到 socket相关的缓存，而实际数据将由DMA模块直接发送到协议引擎，再次减少了一次copy操作。</p>
-
-<p>目前，Nginx仅支持在读取文件时使用异步I/O，因为正常写入文件时往往是写入内存中就立即返回，效率很高，而使用异步I/O写入时速度会明显的下降。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Nginx architecture(1)--Overview]]></title>
-    <link href="http://billowkiller.github.io/blog/2013/10/13/nginx-architecture-1-overview/"/>
-    <updated>2013-10-13T00:28:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2013/10/13/nginx-architecture-1-overview</id>
-    <content type="html"><![CDATA[<p>从04年发布以来，Nginx已经成为多个国内外互联网具体首选的高性能Web服务器。其特点是占有内存少，并发能力强，并且由于Nginx使用基于事件驱动的架构能够最有效的利用多核CPU的处理能力，进程可以无阻塞的运行。</p>
-
-<p>特别是Nginx可以利用当前操作系统特有的一些高校API来提高自己的性能，例如Linux上的<code>epoll</code>、Solaris上的event ports和Free BSD上的kqueue。又如对于Linux，Nginx支持其独有的sendfile系统调用，可以高效的讲硬盘中的数据发送到网络上（无需将硬盘数据先复制到用户态内存中）。</p>
-
-<p>所以通过分析Nginx的架构设计，可以怎样充分利用服务器上的硬件资源，以及学习到更为先进的理念。下面就来分析和学习Nginx的架构设计。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx_zps7d735b88.jpg" alt="Nginx logo" /></p>
-
-<!--more-->
-
-<h2 id="section">1. 基础架构</h2>
-
-<p>Nginx是模块化的，事件驱动，异步，单线程的，非无阻塞架构的。</p>
-
-<p><img src="http://www.aosabook.org/images/nginx/architecture.png" width="650px" alt="Diagram of Nginx's architecture" /></p>
-
-<h3 id="nginx">1.1 Nginx配置</h3>
-
-<p><strong>内核参数优化</strong></p>
-
-<p>Nginx需要可以对linux内核参数进行修改，来实现对内核参数的优化，以达到硬件资源的最大化利用。</p>
-
-<p>默认的linux内核参数考虑的是最通用的场景，而高并发访问的Web服务器需要根据具体的业务特点来调整内核参数。Nginx作为静态Web内容服务器、反向代理服务器或是提供内容压缩功能的服务器时，内核参数的调整都是不同的。</p>
-
-<p>具体的文件修改是在<code>/etc/sysctl.conf</code>下。举例来说，滑动窗口的大小与套接字缓存区会在一定程度上影响并发连接的数目。每个TCP连接都会为维护TCP滑动窗口而消耗额昵称，这个窗口会更具服务器的处理速度收缩或扩张。</p>
-
-<p><strong>Nginx配置文件</strong></p>
-
-<p>而Nginx的配置文件则规定了程序运行时几个核心模块的基本配置。具体分为4类：</p>
-
-<ul>
-  <li>用于调试、定位问题的配置项</li>
-  <li>正常运行的必备配置项</li>
-  <li>优化性能的配置项</li>
-  <li>事件类配置项</li>
-</ul>
-
-<p>其他配置项是针对具体模块的，例如对于一个为完整的静态Web服务器提供了8类配置信息（功能）：</p>
-
-<ul>
-  <li>虚拟主机与请求的分发
-    <ul>
-      <li>对特定的Host域名的请求提供不同的服务，以此实现虚拟主机功能</li>
-    </ul>
-  </li>
-  <li>文件路径的定义</li>
-  <li>内存及磁盘资源的分配</li>
-  <li>网络连接的设置</li>
-  <li>MIME类型的设置</li>
-  <li>对客户端请求的限制</li>
-  <li>文件操作的优化
-    <ul>
-      <li>sendfile系统条用</li>
-      <li>aio系统调用</li>
-    </ul>
-  </li>
-  <li>对客户端请求的特殊处理
-    <ul>
-      <li>DNS</li>
-      <li>忽略不合法HTTP头部</li>
-    </ul>
-  </li>
-</ul>
-
-<p><strong>配置文件读取</strong></p>
-
-<p>Nginx启动的时候读取配置文件过程：</p>
-
-<ol>
-  <li>更具命令行得到配置文件路径</li>
-  <li>调用所有核心模块的<code>create_conf</code>方法生成存放配置项的结构体</li>
-  <li>针对所有核心模块解析<code>Nginx.conf</code>配置文件</li>
-  <li>调用所有核心模块的<code>init_conf</code>方法</li>
-</ol>
-
-<h3 id="section-1">1.2. 事件驱动架构</h3>
-
-<p>事件驱动模型就是事件发生源来产生事件，由一个或者多个事件收集器来收集、分发事件，然后许多事件处理器会注册自己感兴趣的事件，同时会消费这些事件。</p>
-
-<p>对于Nginx来说，事件模块将负责事件的收集、分发操作，而所有的模块都可能是事件消费者，首先需要向事件模块注册感兴趣的事件类型，当有事件产生时，事件模块会把事件分发到相应的模块中进行处理。</p>
-
-<p>Nginx完全采用事件驱动架构处理事务，与其他Web服务器不同。传统的Web服务器采用的事件驱动往往局限在TCP连接建立、关闭事件上，连接建立后将这个会话加入队列排队让事件消费者进行消费。在连接建立与关闭之间会退化为按序执行的批处理模式，通常采用线程或进程执行的处理方式。这样的处理会在连接建立后始终占据系统资源，因为这段时间从1毫秒到1分钟都有可能，并且进程线程之间的切换也会有性能损失，这样影响了系统可以处理的并发连接数。</p>
-
-<p>Nginx中只有事件模块才有资格占用进程资源，它们在分发某个事件时调用事件消费模块使用当前占用的进程资源。这种设计使得网络性能、用户感知的请求时延都得到提升，整个服务器的网络吞吐量都会由于事件的及时响应而增加。但是，每个事件消费者都不能有阻塞行为，否则会长时间占用事件分发进程而导致其他事件得不到及时响应。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/_zpscc820489.jpg" width="600px" alt="Nginx事件驱动" /></p>
-
-<h3 id="section-2">1.3 多模块设计</h3>
-
-<p><strong>Nginx的模块</strong></p>
-
-<p>要知道Nginx有哪些模块，一个快速的方法就是编译Nginx。编译之后，会在源代码根目录下生成objs目录，该目录中包含有ngx_auto_config.h和ngx_auto_headers.h，以及ngx_modules.c文件，当然，还有Makefile文件等。</p>
-
-<p>其中，生成的<code>ngx_modules.c</code>文件中，重新集中申明(使用extern关键字)了Nginx配置的所有模块，这些模块可通过编译前的configure命令进行配置，即设置哪些模块需要编译，哪些不被编译。</p>
-
-<p>Nginx的模块化架构最基本的数据结构为<code>ngx_module_t</code>。整个数据结构规定了：</p>
-
-<ol>
-  <li>该模块的上下文，每个种类的模块有不同的上下文，用void *ctx表示。</li>
-  <li>一些callback函数
-    <ul>
-      <li><code>master</code>初始化和退出</li>
-      <li>模块初始化</li>
-      <li>工作进程初始化和退出</li>
-      <li>线程初始化和退出</li>
-    </ul>
-  </li>
-  <li>模块的命令集，指向一个<code>ngx_command_t</code>结构数组</li>
-  <li>模块的类型，运行定义模块类型这个概念，允许专注于不同领域的模块按照类型来区别。</li>
-</ol>
-
-<p>具体的模块解释可以参考[http://www.linuxidc.com/Linux/2011-08/40949.htm]http://www.linuxidc.com/Linux/2011-08/40949.htm</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx_zps3788eefc.jpg" alt="Nginx模块设计" width="650px" /></p>
-
-<p><strong>模块化设计的优点</strong></p>
-
-<p>高度模块化的设计是Nginx的架构基础。在Nginx中，除了少量的核心代码，其他一切皆为模块。这种模块化设计同时具有以下几个特点：</p>
-
-<ol>
-  <li>
-    <p>高度抽象的模块接口</p>
-
-    <p>所有的模块都遵循同样的<code>ngx_module_t</code>(后面有说明)接口设计规范，这减少整个系统中的变数，这种方式带来良好的简单性、静态可扩展性、可重用性。</p>
-  </li>
-  <li>
-    <p>模块接口非常简单，具有很高的灵活性</p>
-
-    <p>模块的基本接口<code>ngx_module_t</code>足够坚定，只涉及模块的初始化、退出以及对配置项的处理，这同时也带来了足够的灵活性，是的Nginx比较简单地实现了动态可修改性(通过HUP信号在服务正常运行时使用新的配置文件生效，以及通过USR2信号实现平滑升级)。</p>
-  </li>
-  <li>
-    <p>定义基础类型的模块：核心模块。</p>
-
-    <p>这样可以简化Nginx的设计，使得非模块化框架代码只关注于如何调用核心模块(6个)。
-核心模块将ctx上下文进一步实例化为<code>ngx_core_module_t</code>结构体，它是以配置项的解析作为基础的，提供了create_conf回调方法来创建存储配置项的数据结构，在读取Nginx.conf文件时，会更具模块中的ngx_command_t解析出的配置项存放在这个数据结构中；还提供init_conf回调方法，用于在解析配置文件后，使用解析出的配置项初始化核心模块功能。</p>
-  </li>
-  <li>
-    <p>多层次、多类别的模块设计</p>
-
-    <p>所有的模块间是分层次和类别的，官方Nginx共有五大类型的模块：核心模块、配置模块、事件模块、HTTP模块、mail模块。核心模块和配置模块是由Nginx的框架代码所定义的。其他三种模块都不会与框架产生直接关系，实际上核心模块各有这三种模块的一个agent，并在同类模块中有一个作为和核心业务与管理功能的模块。</p>
-  </li>
-</ol>
-
-<h2 id="section-3">2. 请求的多阶段异步处理</h2>
-
-<p>请求的多阶段异步处理是把一个请求的处理过程按照事件的触发方式划分为多个阶段，每个阶段都可以有事件收集、分发来触发。也就是说请求的多阶段异步处理只能基于事件驱动架构实现。</p>
-
-<p>异步处理和多阶段是相辅相成的。只有多阶段了才能进行异步处理，异步处理使得阶段的划分才有意义。那么是什么原则来划分请求阶段呢？一般是找到请求处理流程中的阻塞方法（或造成阻塞的代码段）在阻塞代码段上按照下面4中方式来划分阶段：</p>
-
-<ol>
-  <li>将阻塞进程的方法按照相关的触发事件分解为两个阶段
-    <ul>
-      <li>阻塞方法改为非阻塞，调用这个方法</li>
-      <li>处理非阻塞方法结果返回事件</li>
-    </ul>
-  </li>
-  <li>将阻塞方法调用按照事件分解为多个阶段的方法调用
-    <ul>
-      <li>例如将读取10MB文件(非异步)，这些文件在磁盘中的块未必是联系的，即10MB文件内容不再操作系统的缓存中，可能需要多次驱动硬盘寻址，导致进程休眠或等待。这样可以把文件分为1000份，每份10KB，这样读取的时间就是可控的，系统可以及时地处理其他请求。</li>
-    </ul>
-  </li>
-  <li>等待系统的响应从而导致进程空转时，使用定时器划分阶段</li>
-  <li>如果阻塞方法完全无法继续划分，则必须使用独立的进程执行这个阻塞方法</li>
-</ol>
-
-<h2 id="section-4">3. 进程管理</h2>
-
-<p>Nginx采用一个<code>master</code>管理进程，多个<code>worker</code>工作进程的设计方式，还包括一个可选的<code>cache manager</code>进程以及<code>cache loader</code>进程。</p>
-
-<p>Nginx的<code>worker</code>代码包括核心和功能模块，Nginx的核心是负责维持一个紧凑的运行循环(tight run-loop)，并执行相应的部分模块的代码、每个请求处理阶段。模块包括Nginx在表现层和业务层的功能。模块读取和写入到网络和硬盘，修改内容，出站(outbound)过滤，应用服务器(apply server-side)包括动作，传递请求给上游代理服务器。</p>
-
-<p>Nginx并没有为每个<code>worker</code>分配连接，这个工作是由操作系统内核做的。启动后，<code>worker</code>创建一组初始的监听套接字 ，然后不断接受，读取和写入到sockets，同时处理HTTP请求和响应。</p>
-
-<p>由于Nginx会产生多个<code>worker</code>，所以它在多核的架构中扩展的很好。每个核一个<code>worker</code>可以充分地利用多核的优势，防止颠簸和锁，并且在单线程的的<code>worker</code>进程中没有资源匮乏和资源控制机制。该模型还允许扩展更多的跨物理存储设备，有利于更大的磁盘利用率，避免磁盘I/O阻塞。</p>
-
-<p>根据磁盘的利用和CPU的负载类型，Nginx的<code>worker</code>数量可以调整。一般来说，如果负载模式是CPU密集型处理，例如，TCP/IP的很多，做的SSL或压缩时，<code>worker</code>的数量应该和核的数目相同；如果负载大多数是在磁盘上，如在磁盘上做不同的内容服务或代理，那么<code>worker</code>的数量应该是核的1.5到2倍。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/3_zpsbb4840cf.png" alt="1 process per core" /></p>
-
-<p>Nginx所有的进程使用的是内存共享的通信机制。<code>master</code>运行作为root用户，<code>cache manager</code>，<code>cache loader</code>和<code>worker</code>作为非特权用户运行。<code>master</code>的功能如下：</p>
-
-<ul>
-  <li>读取和验证配置</li>
-  <li>创建，绑定和关闭socket</li>
-  <li>启动，终止和维护配置数量的<code>worker</code>进程</li>
-  <li>在不中断服务的情况下重新配置</li>
-  <li>无需停止的系统升级 (启动新的进程，如果有必要则回滚)</li>
-  <li>编译嵌入式Perl脚本</li>
-  <li>日志文件</li>
-</ul>
-
-<p><code>cache loader</code>是负责检查磁盘上的缓存项和填充缓存元数据到Nginx的in-memory数据库。 从本质上讲，<code>cache loader</code>准备Nginx的实例用来在工作在一个专门分配的目录结构存储的磁盘文件上。它遍历目录，检查缓存内容元数据、更新共享内存中的相关条目，然后退出时准备给下次使用。</p>
-
-<p>缓存管理器主要是负责缓存过期和失效。 在Nginx的正常运行时，它驻留在内存中；在失败的情况下，它由主进程重新启动。</p>
-
-<h2 id="section-5">4. 跨平台实现</h2>
-
-<p>Nginx有两个特点：跨平台、使用C语言实现。这两个特点导致Nginx不宜使用一些第三方中间件提供的容器和算法，并且C语言与每一个操作系统都是强相关的，且C库对操作系统的某些系统调用封装的方法并不是跨平台的。</p>
-
-<p>对于这种情况，Nginx的解决方法很简单，在这些必须特殊化处理的地方，对每个操作系统都给一份特意化的实现。而对于基础的数据结构和算法，Nginx则完全从头实现了一遍，如动态数组、链表、二叉排序树、散列表等等。</p>
-
-<p>要学习这些数据结构和算法的实现时可以看看Nginx源码，有些设计思路还是非常值得借鉴的，例如双向链表并不存储元素，只是存储指针，而且提供了简单的插入排序法。</p>
 ]]></content>
   </entry>
   

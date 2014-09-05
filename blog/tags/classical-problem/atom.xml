@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: classical problem | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/classical-problem/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2014-09-05T15:55:08+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Classical Sync Problem]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/08/23/classical-sync-problem/"/>
+    <updated>2014-08-23T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/08/23/classical-sync-problem</id>
+    <content type="html"><![CDATA[<p>简单的记录下，后期再整理吧。</p>
+
+<hr />
+
+<h1 id="section">多线程同步经典问题</h1>
+
+<h2 id="section-1">生产者、消费者</h2>
+
+<h3 id="section-2">多个生产者，单个消费者</h3>
+
+<!--more-->
+
+<p><strong>1. 使用互斥锁 &amp;&amp; 条件变量</strong></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc1_zps5e6026ee.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc2_zps96f163b4.png" alt="" /></p>
+
+<p><strong>2. 使用信号量</strong></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc3_zps90f678c0.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc4_zpsff637264.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc5_zpsc1ce838d.png" alt="" /></p>
+
+<h3 id="section-3">多个生产者，多个消费者</h3>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc6_zps5fd624fc.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc7_zps77aab9e4.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc8_zps7ec189ae.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc9_zps88ec073a.png" alt="" /></p>
+
+<h2 id="section-4">多个缓冲区读写</h2>
+
+<p>最简单的双缓冲区示意图</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/db1_zps098b0d0f.png" alt="" /></p>
+
+<p><strong>多缓冲区生产者消费者代码</strong></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/db2_zps9fda343a.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/db3_zps03dac974.png" alt="" /></p>
+]]></content>
+  </entry>
+  
+</feed>
