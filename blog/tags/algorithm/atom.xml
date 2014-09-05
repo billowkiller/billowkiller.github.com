@@ -4,7 +4,7 @@
   <title><![CDATA[tags: algorithm | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/algorithm/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-09-05T16:19:22+08:00</updated>
+  <updated>2014-09-05T16:51:22+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -325,32 +325,13 @@ void phi_table(int n, int* phi) {
 
 <p>贝叶斯定理是关于随机事件$A$和$B$的条件概率（或边缘概率）的一则定理。</p>
 
-<table>
-  <tbody>
-    <tr>
-      <td>$P(A</td>
-      <td>B) = \frac{P(B</td>
-      <td>A)\, P(A)}{P(B)}$</td>
-    </tr>
-  </tbody>
-</table>
+<p><img src="http://a.hiphotos.baidu.com/baike/c0%3Dbaike72%2C5%2C5%2C72%2C24%3Bt%3Dgif/sign=e03d823fbf315c60579863bdecd8a076/e824b899a9014c086ec5068f097b02087bf4f419.jpg" alt="" /></p>
 
 <table>
   <tbody>
     <tr>
       <td>其中$P(A</td>
       <td>B)$是在$B$发生的情况下$A$发生的可能性。</td>
-    </tr>
-  </tbody>
-</table>
-
-<table>
-  <tbody>
-    <tr>
-      <td>$P(A_i</td>
-      <td>B) = \frac{P(B</td>
-      <td>A_i)\, P(A_i)}{\sum_j P(B</td>
-      <td>A_j)\,P(A_j)} , !$</td>
     </tr>
   </tbody>
 </table>
