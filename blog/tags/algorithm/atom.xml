@@ -4,7 +4,7 @@
   <title><![CDATA[tags: algorithm | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/algorithm/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-09-05T19:38:11+08:00</updated>
+  <updated>2014-09-08T10:16:10+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -37,10 +37,10 @@ int partition (int arr[], int l, int h) {
 <pre><code>for (int j = l; j &lt;= h- 1; j++) {
     if (arr[j] &lt;= x) {
         i++;
-        swap (&amp;arr[i], &amp;arr[j]);
+        swap (arr[i], arr[j]);
     }
 }
-swap (&amp;arr[i + 1], &amp;arr[h]);
+swap (arr[i + 1], arr[h]);
 return (i + 1); }
 </code></pre>
 
@@ -138,24 +138,23 @@ struct node *partition(struct node *head, struct node *end,<br />
        {
            if(prev)
                prev-&gt;next = cur-&gt;next;
-           structnode <em>tmp = cur-&gt;next;
+           struct node <em>tmp = cur-&gt;next;
            cur-&gt;next = NULL;
            tail-&gt;next = cur;
            tail = cur;
            cur = tmp;
        }
    }
-   if((</em>newHead) == NULL)
-       (<em>newHead) = pivot;
+   if((</em>newHead) == NULL) (<em>newHead) = pivot;
    (</em>newEnd) = tail;
-  return pivot;
+   return pivot;
 }
 struct node <em>quickSortRecur(struct node *head, struct node *end)
 {
    if(!head || head == end)
        return head;
-   node *newHead = NULL, *newEnd = NULL;
-  struct node *pivot = partition(head, end, &amp;newHead, &amp;newEnd);
+   struct node *newHead = NULL, *newEnd = NULL;
+   struct node *pivot = partition(head, end, &amp;newHead, &amp;newEnd);
    if(newHead != pivot)
    {
       struct node *tmp = newHead;

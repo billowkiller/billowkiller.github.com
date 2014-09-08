@@ -4,7 +4,7 @@
   <title><![CDATA[Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-09-05T19:38:11+08:00</updated>
+  <updated>2014-09-08T10:16:10+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -317,7 +317,7 @@
 
 <p>下图反映了进程地址空间的管理模型：</p>
 
-<p><img src="http://www.kerneltravel.net/journal/v/mem.files/image004.gif" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/tu1_zps5b8ee942.jpg" alt="" /></p>
 
 <p><strong>进程的地址空间对应的描述结构是“内存描述符结构”,它表示进程的全部地址空间，——包含了和进程地址空间有关的全部信息，其中当然包含进程的内存区域。</strong></p>
 
@@ -359,7 +359,7 @@
 
 <p>另外,需要提及的是，物理页在系统中由页结构<code>struct page</code>描述，系统中所有的页面都存储在数组<code>mem_map[]</code>中，可以通过该数组找到系统中的每一页（空闲或非空闲）。而其中的空闲页面则可由上述提到的以伙伴关系组织的空闲页链表（<code>free_area[MAX_ORDER]</code>）来索引。</p>
 
-<p><img src="http://www.kerneltravel.net/journal/v/mem.files/image006.gif" alt="" /></p>
+<p><img src="http://p.blog.csdn.net/images/p_blog_csdn_net/kanghua/systemcall.bmp" alt="" /></p>
 
 <h3 id="section-10">内核内存使用</h3>
 
@@ -387,11 +387,11 @@
 
 <p>与用户进程相似,内核也有一个名为<code>init_mm</code>的<code>mm_strcut</code>结构来描述内核地址空间，其中页表项<code>pdg=swapper_pg_dir</code>包含了系统内核空间（3G-4G）的映射关系。因此<code>vmalloc</code>分配内核虚拟地址必须更新内核页表，而<code>kmalloc</code>或<code>get_free_page</code>由于分配的连续内存，所以不需要更新内核页表。</p>
 
-<p><img src="http://www.kerneltravel.net/journal/v/mem.files/image015.gif" alt="" /></p>
+<p><img src="http://p.blog.csdn.net/images/p_blog_csdn_net/kanghua/systemcall2.bmp" alt="" /></p>
 
 <p><code>vmalloc</code>分配的内核虚拟内存与<code>kmalloc/get_free_page</code>分配的内核虚拟内存位于不同的区间，不会重叠。因为内核虚拟空间被分区管理，各司其职。进程空间地址分布从０到３G(其实是到<code>PAGE_OFFSET</code>, 在0x86中它等于0xC0000000)，从3G到<code>vmalloc_start</code>这段地址是物理内存映射区域（该区域中包含了内核镜像、物理页面表<code>mem_map</code>等等）比如我使用的系统内存是64M(可以用free看到)，那么(3G——3G+64M)这片内存就应该映射到物理内存，而<code>vmalloc_start</code>位置应在3G+64M附近（说”附近”因为是在物理内存映射区与<code>vmalloc_start</code>期间还会存在一个8M大小的gap来防止跃界）,<code>vmalloc_end</code>的位置接近4G(说”接近”是因为最后位置系统会保留一片128k大小的区域用于专用页面映射，还有可能会有高端内存映射区，这些都是细节，这里我们不做纠缠)。</p>
 
-<p><img src="http://www.kerneltravel.net/journal/v/mem.files/image011.gif" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/tu2_zpsfa7ec115.jpg" alt="" /></p>
 
 <p>由<code>get_free_page</code>或<code>Kmalloc</code>函数所分配的连续内存都陷于物理映射区域，所以它们返回的内核虚拟地址和实际物理地址仅仅是相差一个偏移量（<code>PAGE_OFFSET</code>），你可以很方便的将其转化为物理内存地址，同时内核也提供了<code>virt_to_phys（）</code>函数将内核虚拟空间中的物理映射区地址转化为物理地址。要知道，物理内存映射区中的地址与内核页表是有序对应的，系统中的每个物理页面都可以找到它对应的内核虚拟地址（在物理内存映射区中的）。</p>
 
@@ -449,10 +449,10 @@
 </span><span class="line">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">l</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;=</span> <span class="n">h</span><span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
 </span><span class="line">        <span class="k">if</span> <span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
 </span><span class="line">            <span class="n">i</span><span class="o">++</span><span class="p">;</span>
-</span><span class="line">            <span class="n">swap</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">arr</span><span class="p">[</span><span class="n">j</span><span class="p">]);</span>
+</span><span class="line">            <span class="n">swap</span> <span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="n">j</span><span class="p">]);</span>
 </span><span class="line">        <span class="p">}</span>
 </span><span class="line">    <span class="p">}</span>
-</span><span class="line">    <span class="n">swap</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">arr</span><span class="p">[</span><span class="n">h</span><span class="p">]);</span>
+</span><span class="line">    <span class="n">swap</span> <span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="n">h</span><span class="p">]);</span>
 </span><span class="line">    <span class="k">return</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
 </span><span class="line"><span class="p">}</span>
 </span><span class="line">
@@ -621,7 +621,6 @@
 <span class="line-number">52</span>
 <span class="line-number">53</span>
 <span class="line-number">54</span>
-<span class="line-number">55</span>
 </pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">partition</span><span class="p">(</span><span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">head</span><span class="p">,</span> <span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">end</span><span class="p">,</span>
 </span><span class="line">                      <span class="k">struct</span> <span class="n">node</span> <span class="o">**</span><span class="n">newHead</span><span class="p">,</span> <span class="k">struct</span> <span class="n">node</span> <span class="o">**</span><span class="n">newEnd</span><span class="p">)</span>
 </span><span class="line"><span class="p">{</span>
@@ -641,24 +640,23 @@
 </span><span class="line">       <span class="p">{</span>
 </span><span class="line">           <span class="k">if</span><span class="p">(</span><span class="n">prev</span><span class="p">)</span>
 </span><span class="line">               <span class="n">prev</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">cur</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
-</span><span class="line">           <span class="n">structnode</span> <span class="o">*</span><span class="n">tmp</span> <span class="o">=</span> <span class="n">cur</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+</span><span class="line">           <span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">tmp</span> <span class="o">=</span> <span class="n">cur</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
 </span><span class="line">           <span class="n">cur</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
 </span><span class="line">           <span class="n">tail</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">cur</span><span class="p">;</span>
 </span><span class="line">           <span class="n">tail</span> <span class="o">=</span> <span class="n">cur</span><span class="p">;</span>
 </span><span class="line">           <span class="n">cur</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">;</span>
 </span><span class="line">       <span class="p">}</span>
 </span><span class="line">   <span class="p">}</span>
-</span><span class="line">   <span class="k">if</span><span class="p">((</span><span class="o">*</span><span class="n">newHead</span><span class="p">)</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
-</span><span class="line">       <span class="p">(</span><span class="o">*</span><span class="n">newHead</span><span class="p">)</span> <span class="o">=</span> <span class="n">pivot</span><span class="p">;</span>
+</span><span class="line">   <span class="k">if</span><span class="p">((</span><span class="o">*</span><span class="n">newHead</span><span class="p">)</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="n">newHead</span><span class="p">)</span> <span class="o">=</span> <span class="n">pivot</span><span class="p">;</span>
 </span><span class="line">   <span class="p">(</span><span class="o">*</span><span class="n">newEnd</span><span class="p">)</span> <span class="o">=</span> <span class="n">tail</span><span class="p">;</span>
-</span><span class="line">  <span class="k">return</span> <span class="n">pivot</span><span class="p">;</span>
+</span><span class="line">   <span class="k">return</span> <span class="n">pivot</span><span class="p">;</span>
 </span><span class="line"><span class="p">}</span>
 </span><span class="line"><span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">quickSortRecur</span><span class="p">(</span><span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">head</span><span class="p">,</span> <span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">end</span><span class="p">)</span>
 </span><span class="line"><span class="p">{</span>
 </span><span class="line">   <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">head</span> <span class="o">||</span> <span class="n">head</span> <span class="o">==</span> <span class="n">end</span><span class="p">)</span>
 </span><span class="line">       <span class="k">return</span> <span class="n">head</span><span class="p">;</span>
-</span><span class="line">   <span class="n">node</span> <span class="o">*</span><span class="n">newHead</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">*</span><span class="n">newEnd</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-</span><span class="line">  <span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">pivot</span> <span class="o">=</span> <span class="n">partition</span><span class="p">(</span><span class="n">head</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">newHead</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">newEnd</span><span class="p">);</span>
+</span><span class="line">   <span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">newHead</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">*</span><span class="n">newEnd</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class="line">   <span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">pivot</span> <span class="o">=</span> <span class="n">partition</span><span class="p">(</span><span class="n">head</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">newHead</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">newEnd</span><span class="p">);</span>
 </span><span class="line">   <span class="k">if</span><span class="p">(</span><span class="n">newHead</span> <span class="o">!=</span> <span class="n">pivot</span><span class="p">)</span>
 </span><span class="line">   <span class="p">{</span>
 </span><span class="line">      <span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">tmp</span> <span class="o">=</span> <span class="n">newHead</span><span class="p">;</span>
@@ -869,7 +867,7 @@
 
 <h3 id="section">阻塞模型</h3>
 
-<p><img src="http://www.masterraghu.com/subjects/np/introduction/unix_network_programming_v1.3/files/06fig01.gif" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig01_zpsae5d27ed.gif" alt="" /></p>
 
 <p>在这个模型中，用户空间的应用程序执行一个系统调用，这会导致应用程序阻塞。这意味着应用程序会一直阻塞，直到系统调用完成为止（数据传输完成或发生错误）。调用应用程序处于一种不再消费 CPU 而只是简单等待响应的状态，因此从处理的角度来看，这是非常有效的。</p>
 
@@ -879,7 +877,7 @@
 
 <h3 id="section-1">非阻塞模型</h3>
 
-<p><img src="http://www.masterraghu.com/subjects/np/introduction/unix_network_programming_v1.3/files/06fig02.gif" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig02_zps85e3fe38.gif" alt="" /></p>
 
 <p>非阻塞的实现是I/O命令可能并不会立即满足，需要应用程序调用许多次来等待操作完成。这可能效率不高，因为在很多情况下，当内核执行这个命令时，应用程序必须要进行忙碌等待，直到数据可用为止，或者试图执行其他工作。这个方法可以引入I/O操作的延时，因为数据在内核中变为可用到用户调用 read 返回数据之间存在一定的间隔，这会导致整体数据吞吐量的降低。</p>
 
@@ -887,19 +885,19 @@
 
 <h3 id="io-1">I/O复用模型</h3>
 
-<p><img src="http://www.masterraghu.com/subjects/np/introduction/unix_network_programming_v1.3/files/06fig03.gif" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig03_zps1ba406e3.gif" alt="" /></p>
 
 <p>I/O复用模型会用到select或者poll函数，这两个函数也会使进程阻塞，但是和阻塞I/O所不同的是，这两个函数可以同时阻塞多个I/O操作。而且可以同时对多个读操作，多个写操作的I/O函数进行检测，直到有数据可读或可写时，才真正调用I/O操作函数。</p>
 
 <h3 id="io-2">信号驱动I/O模型</h3>
 
-<p><img src="http://www.masterraghu.com/subjects/np/introduction/unix_network_programming_v1.3/files/06fig04.gif" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig04_zpsb2f0f6ff.gif" alt="" /></p>
 
 <p>首先我们允许套接口进行信号驱动I/O,并安装一个信号处理函数，进程继续运行并不阻塞。当数据准备好时，进程会收到一个SIGIO信号，可以在信号处理函数中调用I/O操作函数处理数据。</p>
 
 <h3 id="io-3">异步I/O模型</h3>
 
-<p><img src="http://www.masterraghu.com/subjects/np/introduction/unix_network_programming_v1.3/files/06fig05.gif" alt="" /></p>
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig05_zps636d96a6.gif" alt="" /></p>
 
 <p>调用<code>aio_read</code>函数，告诉内核描述字，缓冲区指针，缓冲区大小，文件偏移以及通知的方式，然后立即返回。当内核将数据拷贝到缓冲区后，再通知应用程序。</p>
 
