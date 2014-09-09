@@ -27,7 +27,7 @@ I/O模型包括**阻塞模型、非阻塞模型、信号量驱动模型、多路
 
 ### 阻塞模型
 
-![](http://www.masterraghu.com/subjects/np/introduction/unix_network_programming_v1.3/files/06fig01.gif)
+![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig01_zpsae5d27ed.gif)
 
 在这个模型中，用户空间的应用程序执行一个系统调用，这会导致应用程序阻塞。这意味着应用程序会一直阻塞，直到系统调用完成为止（数据传输完成或发生错误）。调用应用程序处于一种不再消费 CPU 而只是简单等待响应的状态，因此从处理的角度来看，这是非常有效的。
 
@@ -37,7 +37,7 @@ I/O模型包括**阻塞模型、非阻塞模型、信号量驱动模型、多路
 
 ### 非阻塞模型
 
-![](http://www.masterraghu.com/subjects/np/introduction/unix_network_programming_v1.3/files/06fig02.gif)
+![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig02_zps85e3fe38.gif)
 
 非阻塞的实现是I/O命令可能并不会立即满足，需要应用程序调用许多次来等待操作完成。这可能效率不高，因为在很多情况下，当内核执行这个命令时，应用程序必须要进行忙碌等待，直到数据可用为止，或者试图执行其他工作。这个方法可以引入I/O操作的延时，因为数据在内核中变为可用到用户调用 read 返回数据之间存在一定的间隔，这会导致整体数据吞吐量的降低。
 
@@ -45,19 +45,19 @@ I/O模型包括**阻塞模型、非阻塞模型、信号量驱动模型、多路
 
 ### I/O复用模型
 
-![](http://www.masterraghu.com/subjects/np/introduction/unix_network_programming_v1.3/files/06fig03.gif)
+![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig03_zps1ba406e3.gif)
 
 I/O复用模型会用到select或者poll函数，这两个函数也会使进程阻塞，但是和阻塞I/O所不同的是，这两个函数可以同时阻塞多个I/O操作。而且可以同时对多个读操作，多个写操作的I/O函数进行检测，直到有数据可读或可写时，才真正调用I/O操作函数。
 
 ### 信号驱动I/O模型
 
-![](http://www.masterraghu.com/subjects/np/introduction/unix_network_programming_v1.3/files/06fig04.gif)
+![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig04_zpsb2f0f6ff.gif)
 
 首先我们允许套接口进行信号驱动I/O,并安装一个信号处理函数，进程继续运行并不阻塞。当数据准备好时，进程会收到一个SIGIO信号，可以在信号处理函数中调用I/O操作函数处理数据。
 
 ### 异步I/O模型
 
-![](http://www.masterraghu.com/subjects/np/introduction/unix_network_programming_v1.3/files/06fig05.gif)
+![](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig05_zps636d96a6.gif)
 
 调用`aio_read`函数，告诉内核描述字，缓冲区指针，缓冲区大小，文件偏移以及通知的方式，然后立即返回。当内核将数据拷贝到缓冲区后，再通知应用程序。
 

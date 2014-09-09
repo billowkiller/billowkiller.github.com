@@ -79,7 +79,7 @@ vm_area_strcut结构比较复杂，关于它的详细结构请参阅相关资料
 
 下图反映了进程地址空间的管理模型：
 
-![](http://www.kerneltravel.net/journal/v/mem.files/image004.gif)
+![](http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/tu1_zps5b8ee942.jpg)
 
 **进程的地址空间对应的描述结构是“内存描述符结构”,它表示进程的全部地址空间，——包含了和进程地址空间有关的全部信息，其中当然包含进程的内存区域。**
 
@@ -121,7 +121,7 @@ Linux内核管理物理内存是通过分页机制实现的，它将整个内存
 
 另外,需要提及的是，物理页在系统中由页结构`struct page`描述，系统中所有的页面都存储在数组`mem_map[]`中，可以通过该数组找到系统中的每一页（空闲或非空闲）。而其中的空闲页面则可由上述提到的以伙伴关系组织的空闲页链表（`free_area[MAX_ORDER]`）来索引。
 
-![](http://www.kerneltravel.net/journal/v/mem.files/image006.gif)
+![](http://p.blog.csdn.net/images/p_blog_csdn_net/kanghua/systemcall.bmp)
 
 ### 内核内存使用 ###
 
@@ -149,11 +149,11 @@ Slab分配器不仅仅只用来存放内核专用的结构体，它还被用来�
 
 与用户进程相似,内核也有一个名为`init_mm`的`mm_strcut`结构来描述内核地址空间，其中页表项`pdg=swapper_pg_dir`包含了系统内核空间（3G-4G）的映射关系。因此`vmalloc`分配内核虚拟地址必须更新内核页表，而`kmalloc`或`get_free_page`由于分配的连续内存，所以不需要更新内核页表。
 
-![](http://www.kerneltravel.net/journal/v/mem.files/image015.gif)
+![](http://p.blog.csdn.net/images/p_blog_csdn_net/kanghua/systemcall2.bmp)
 
 `vmalloc`分配的内核虚拟内存与`kmalloc/get_free_page`分配的内核虚拟内存位于不同的区间，不会重叠。因为内核虚拟空间被分区管理，各司其职。进程空间地址分布从０到３G(其实是到`PAGE_OFFSET`, 在0x86中它等于0xC0000000)，从3G到`vmalloc_start`这段地址是物理内存映射区域（该区域中包含了内核镜像、物理页面表`mem_map`等等）比如我使用的系统内存是64M(可以用free看到)，那么(3G——3G+64M)这片内存就应该映射到物理内存，而`vmalloc_start`位置应在3G+64M附近（说"附近"因为是在物理内存映射区与`vmalloc_start`期间还会存在一个8M大小的gap来防止跃界）,`vmalloc_end`的位置接近4G(说"接近"是因为最后位置系统会保留一片128k大小的区域用于专用页面映射，还有可能会有高端内存映射区，这些都是细节，这里我们不做纠缠)。
 
-![](http://www.kerneltravel.net/journal/v/mem.files/image011.gif)
+![](http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/tu2_zpsfa7ec115.jpg)
 
 由`get_free_page`或`Kmalloc`函数所分配的连续内存都陷于物理映射区域，所以它们返回的内核虚拟地址和实际物理地址仅仅是相差一个偏移量（`PAGE_OFFSET`），你可以很方便的将其转化为物理内存地址，同时内核也提供了`virt_to_phys（）`函数将内核虚拟空间中的物理映射区地址转化为物理地址。要知道，物理内存映射区中的地址与内核页表是有序对应的，系统中的每个物理页面都可以找到它对应的内核虚拟地址（在物理内存映射区中的）。
 

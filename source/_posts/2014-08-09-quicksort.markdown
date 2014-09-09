@@ -26,10 +26,10 @@ int partition (int arr[], int l, int h) {
     for (int j = l; j <= h- 1; j++) {
         if (arr[j] <= x) {
             i++;
-            swap (&arr[i], &arr[j]);
+            swap (arr[i], arr[j]);
         }
     }
-    swap (&arr[i + 1], &arr[h]);
+    swap (arr[i + 1], arr[h]);
     return (i + 1);
 }
  
@@ -127,24 +127,23 @@ struct node *partition(struct node *head, struct node *end,
        {
            if(prev)
                prev->next = cur->next;
-           structnode *tmp = cur->next;
+           struct node *tmp = cur->next;
            cur->next = NULL;
            tail->next = cur;
            tail = cur;
            cur = tmp;
        }
    }
-   if((*newHead) == NULL)
-       (*newHead) = pivot;
+   if((*newHead) == NULL) (*newHead) = pivot;
    (*newEnd) = tail;
-  return pivot;
+   return pivot;
 }
 struct node *quickSortRecur(struct node *head, struct node *end)
 {
    if(!head || head == end)
        return head;
-   node *newHead = NULL, *newEnd = NULL;
-  struct node *pivot = partition(head, end, &newHead, &newEnd);
+   struct node *newHead = NULL, *newEnd = NULL;
+   struct node *pivot = partition(head, end, &newHead, &newEnd);
    if(newHead != pivot)
    {
       struct node *tmp = newHead;
