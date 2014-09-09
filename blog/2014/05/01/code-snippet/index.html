@@ -513,6 +513,65 @@ int getUglyNumber(int index) {
 
     <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/empty_string_zps15c77190.png" alt="" /></p>
   </li>
+  <li>
+    <p>有序链表转为BST</p>
+
+    <pre><code>BinaryTree* sortedListToBST(ListNode *&amp; list, int start, int end) {
+  if (start &gt; end) return NULL;
+  // same as (start+end)/2, avoids overflow
+  int mid = start + (end - start) / 2;
+  BinaryTree *leftChild = sortedListToBST(list, start, mid-1);
+  BinaryTree *parent = new BinaryTree(list-&gt;data);
+  parent-&gt;left = leftChild;
+  list = list-&gt;next;
+  parent-&gt;right = sortedListToBST(list, mid+1, end);
+  return parent;
+}
+	 
+BinaryTree* sortedListToBST(ListNode *head, int n) {
+  return sortedListToBST(head, 0, n-1);
+}
+</code></pre>
+  </li>
+  <li>
+    <p>Convert Binary Search Tree (BST) to Sorted Doubly-Linked List</p>
+
+    <pre><code>// This is a modified in-order traversal adapted to this problem.
+// prev (init to NULL) is used to keep track of previously traversed node.
+// head pointer is updated with the list's head as recursion ends.
+void treeToDoublyList(Node *p, Node *&amp; prev, Node *&amp; head) {
+  if (!p) return;
+  treeToDoublyList(p-&gt;left, prev, head);
+  // current node's left points to previous node
+  p-&gt;left = prev;
+  if (prev)
+    prev-&gt;right = p;  // previous node's right points to current node
+  else
+    head = p; // current node (smallest element) is head of
+              // the list if previous node is not available
+  // as soon as the recursion ends, the head's left pointer 
+  // points to the last node, and the last node's right pointer
+  // points to the head pointer.
+  Node *right = p-&gt;right;
+  head-&gt;left = p;
+  p-&gt;right = head;
+  // updates previous node
+  prev = p;
+  treeToDoublyList(right, prev, head);
+}
+	 
+// Given an ordered binary tree, returns a sorted circular
+// doubly-linked list. The conversion is done in-place.
+Node* treeToDoublyList(Node *root) {
+  Node *prev = NULL;
+  Node *head = NULL;
+  treeToDoublyList(root, prev, head);
+  return head;
+}
+</code></pre>
+
+    <p>divide and conquer method <a href="http://cslibrary.stanford.edu/109/TreeListRecursion.html">http://cslibrary.stanford.edu/109/TreeListRecursion.html</a></p>
+  </li>
 </ol>
 </div>
 

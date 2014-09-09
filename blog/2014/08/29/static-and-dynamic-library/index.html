@@ -353,6 +353,8 @@
 <p>对C++来说，情况稍微复杂。显式加载一个C++动态库的困难一部分是因为C++的name mangling；另一部分是因为没有提供一个合适的API来装载类，在C++中，您可能要用到库中的一个类，而这需要创建该类的一个实例，这不容易做到。</p>
 
 <p>name mangling可以通过<code>extern "C"</code>解决。C++有个特定的关键字用来声明采用C binding的函数：<code>extern "C"</code> 。用 <code>extern "C"</code>声明的函数将使用函数名作符号名，就像C函数一样。因此，只有非成员函数才能被声明为<code>extern "C"</code>，并且不能被重载。尽管限制多多，<code>extern "C"</code>函数还是非常有用，因为它们可以象C函数一样被<code>dlopen</code>动态加载。冠以<code>extern "C"</code>限定符后，并不意味着函数中无法使用C++代码了，相反，它仍然是一个完全的C++函数，可以使用任何C++特性和各种类型的参数。</p>
+
+<p><a href="http://www.searchtb.com/2014/05/c%E6%8F%92%E4%BB%B6%E4%B8%AD%E4%BD%BF%E7%94%A8%E9%9D%99%E6%80%81%E6%8C%87%E9%92%88%E5%8F%98%E9%87%8F%E5%BC%95%E8%B5%B7%E7%9A%84%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2%E9%97%AE%E9%A2%98.html">http://www.searchtb.com/2014/05/c%E6%8F%92%E4%BB%B6%E4%B8%AD%E4%BD%BF%E7%94%A8%E9%9D%99%E6%80%81%E6%8C%87%E9%92%88%E5%8F%98%E9%87%8F%E5%BC%95%E8%B5%B7%E7%9A%84%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2%E9%97%AE%E9%A2%98.html</a>这篇文章说的是静态指针变量引起的内存泄露问题，但里面倒是有个C++编译成so的例子，可以参考。</p>
 </div>
 
 
