@@ -4,7 +4,7 @@
   <title><![CDATA[tags: thundering herd | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/thundering-herd/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-09-09T20:21:05+08:00</updated>
+  <updated>2014-09-11T15:03:16+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -25,6 +25,8 @@
 <h2 id="section">惊群现象</h2>
 
 <p>什么是“惊群”？简单说来，多线程/多进程（linux下线程进程也没多大区别）等待同一个socket事件，当这个事件发生时，这些线程/进程被同时唤醒，就是惊群。可以想见，效率很低下，许多进程被内核重新调度唤醒，同时去响应这一个事件，当然只有一个进程能处理事件成功，其他的进程在处理该事件失败后重新休眠（也有其他选择）。这种性能浪费现象就是惊群。</p>
+
+<!--more-->
 
 <p>惊群通常发生在server 上，当父进程绑定一个端口监听socket，然后fork出多个子进程，子进程们开始循环处理（比如accept）这个socket。每当用户发起一个TCP连接时，多个子进程同时被唤醒，然后其中一个子进程accept新连接成功，余者皆失败，重新休眠。</p>
 
