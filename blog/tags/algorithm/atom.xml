@@ -4,7 +4,7 @@
   <title><![CDATA[tags: algorithm | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/algorithm/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-09-11T15:03:16+08:00</updated>
+  <updated>2014-09-14T20:05:38+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -1072,7 +1072,27 @@ Node* treeToDoublyList(Node *root) {
 
     <p>divide and conquer method <a href="http://cslibrary.stanford.edu/109/TreeListRecursion.html">http://cslibrary.stanford.edu/109/TreeListRecursion.html</a></p>
   </li>
+  <li>
+    <p>search in rotated sorted array(allow duplicated num)</p>
+  </li>
 </ol>
+
+<p>``` c++
+bool search(int A[], int n, int target) {</p>
+
+<pre><code>int l=0, r=n-1;
+while(l&lt;=r) {
+    int m = l+(r-l)/2;
+    if(A[m]==target) return true;
+	if(A[l] &lt; A[m]) { //left half is sorted
+        if(A[m]&gt;target &amp;&amp; target&gt;=A[l]) r=m-1; else l=m+1;
+    } else if(A[l] &gt; A[m]){ //right half is sorted
+        if(target&gt;A[m] &amp;&amp; target&lt;=A[r]) l=m+1;
+        else r = m-1;
+    } else l++;
+}
+return false; } ```
+</code></pre>
 ]]></content>
   </entry>
   
