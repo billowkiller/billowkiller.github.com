@@ -4,7 +4,7 @@
   <title><![CDATA[tags: algorithm | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/algorithm/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-09-15T11:09:06+08:00</updated>
+  <updated>2014-09-15T12:37:27+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -221,7 +221,7 @@ slow-&gt;next = NULL; }
 
 FrontBackSplit(head, &amp;a, &amp;b);
 merge(&amp;a); merge(&amp;b);
-*node = merge_sort(a, b);  }
+*node = merge_sort(a, b);  } ```
 </code></pre>
 ]]></content>
   </entry>
