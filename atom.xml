@@ -4,7 +4,7 @@
   <title><![CDATA[Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-09-14T20:05:38+08:00</updated>
+  <updated>2014-09-15T11:09:06+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -894,9 +894,8 @@
 
 <h3 id="section-3">链表的归并排序方法</h3>
 
-<p>&#8220;` c++ 链表的归并排序</p>
-
-<p>void FrontBackSplit(ListNode *source, ListNode** front, ListNode** back) {
+<p>&#8220;` c++ 链表的归并排序
+void FrontBackSplit(ListNode *source, ListNode** front, ListNode** back) {
     ListNode *fast, *slow;
     if(source == NULL || source-&gt;next == NULL) {
         *front = source; *back = NULL;

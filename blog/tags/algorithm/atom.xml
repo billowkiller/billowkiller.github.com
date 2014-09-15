@@ -4,7 +4,7 @@
   <title><![CDATA[tags: algorithm | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/algorithm/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2014-09-14T20:05:38+08:00</updated>
+  <updated>2014-09-15T11:09:06+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -177,9 +177,8 @@ void quickSort(struct node **headRef)
 
 <h3 id="section-3">链表的归并排序方法</h3>
 
-<p>``` c++ 链表的归并排序</p>
-
-<p>void FrontBackSplit(ListNode *source, ListNode** front, ListNode** back) {
+<p>``` c++ 链表的归并排序
+void FrontBackSplit(ListNode *source, ListNode** front, ListNode** back) {
     ListNode *fast, *slow;
     if(source == NULL || source-&gt;next == NULL) {
         *front = source; *back = NULL;

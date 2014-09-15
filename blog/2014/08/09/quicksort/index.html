@@ -421,9 +421,8 @@
 
 <h3 id="section-3">链表的归并排序方法</h3>
 
-<p>&#8220;` c++ 链表的归并排序</p>
-
-<p>void FrontBackSplit(ListNode *source, ListNode** front, ListNode** back) {
+<p>&#8220;` c++ 链表的归并排序
+void FrontBackSplit(ListNode *source, ListNode** front, ListNode** back) {
     ListNode *fast, *slow;
     if(source == NULL || source-&gt;next == NULL) {
         *front = source; *back = NULL;
