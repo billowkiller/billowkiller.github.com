@@ -136,6 +136,72 @@
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-05-01T03:18:00+08:00" pubdate data-updated="true">May 1<span>st</span>, 2014</time>
+        
+           | <a href="/blog/2014/05/01/code-snippet/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/05/01/code-snippet/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/01/code-snippet/">Some Code Snippets</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><ol>
+  <li>
+    <p><strong>在一个二叉树中查找值为x的结点，并打印该结点所有祖先结点的算法，也就是根节点到x的路径。</strong></p>
+
+    <p>思路1： 利用<strong>后序遍历</strong>的非递归算法，在访问结点时增加一个判断，若该结点的值等于x，则打印栈中保持的路径，再中断算法。</p>
+
+    <p>思路2： 采用<strong>前序遍历</strong>的递归算法，在典型的便利算法的参数表中增加了x、path[n]等参数。</p>
+
+    <pre><code> template&lt;class T&gt;
+ int Find_Print(BinTreeNode&lt;T*&amp; BT, T x, T path[], int level, int &amp;count) {
+     if(BT != NULL) {
+         level++;
+         path[level] = BT-&gt;data;
+         if (BT-&gt;data==x) { count=level; return 1; }
+         if( Find_Print(BT-&gt;left, x, path, level, count) ) return 1;
+         return Find_Print(BT-&gt;right, x, path, level, count);
+     } else 
+         return 0;
+ }
+</code></pre>
+  </li>
+</ol>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/05/01/code-snippet/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-27T02:18:00+08:00" pubdate data-updated="true">Apr 27<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/04/27/New-features-in/#disqus_thread"
@@ -609,55 +675,6 @@
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-11-26T16:52:00+08:00" pubdate data-updated="true">Nov 26<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/11/26/nginx-architecture-4-modularity/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/11/26/nginx-architecture-4-modularity/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/11/26/nginx-architecture-4-modularity/">Nginx architecture(4)&#8211;Modularity</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><h2 id="section">1. 概述</h2>
-
-<p>这章的题目说的有些不对，nginx的模块化只是模块化编程的一个案例，我用它来分析所谓的模块化编程，接下来在其他的例子中也有体现模块化，但是为了形成nginx架构这一系列文章，我还是把它命名为nginx架构——模块化。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx-logo_zpsabde8e46.png" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/11/26/nginx-architecture-4-modularity/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -681,6 +698,8 @@
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2015/07/26/mapreduce-framework/">Mapreduce Framework</a>
+    
     <a class="list-group-item " href="/blog/2015/07/26/pid-file-analysis/">PID File Analysis</a>
     
     <a class="list-group-item " href="/blog/2015/07/26/java-log4j/">Java Log4j</a>
@@ -688,8 +707,6 @@
     <a class="list-group-item " href="/blog/2014/08/29/static-and-dynamic-library/">Static and Dynamic Library</a>
     
     <a class="list-group-item " href="/blog/2014/08/23/classical-sync-problem/">Classical Sync Problem</a>
-    
-    <a class="list-group-item " href="/blog/2014/08/22/design-pattern/">Design Pattern Abstraction</a>
     
   </div>
 </section>
@@ -745,6 +762,18 @@
     <a class="list-group-item " href="/blog/categories/algorithm/index.html">
         <span class="badge">6</span>
         algorithm
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/big/index.html">
+        <span class="badge">1</span>
+        big
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/data/index.html">
+        <span class="badge">1</span>
+        data
       </a>
     
   </div>

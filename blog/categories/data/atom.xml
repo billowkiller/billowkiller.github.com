@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: data | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/categories/data/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2015-07-26T17:28:19+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[mapreduce framework]]></title>
+    <link href="http://billowkiller.github.io/blog/2015/07/26/mapreduce-framework/"/>
+    <updated>2015-07-26T17:23:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/07/26/mapreduce-framework</id>
+    <content type="html"><![CDATA[<h2 id="mapreduce">MapReduce框架</h2>
+
+<p>mapReduce 的输入是hdfs上存储的一系列文件集。在hadoop中，这些文件被一种定义了如何分割一个文件成分片的input format来分割，一个分片是一个文件基于字节的可以被一个map任务加载的一个块。</p>
+
+<p>每个map任务被分为以下阶段：<code>record reader</code>，<code>mapper</code>，<code>combiner</code>，<code>partitioner</code>。Map任务的输出叫中间数据，包括keys和values，发送到reduce端。Reduce任务分为以下阶段：<code>shuffle</code>，<code>sort</code>，<code>reduce</code>，<code>output format</code>。运行map任务的节点会尽量选择数据所在的节点。这种情况下，不会出现网络传输，在本地节点就可以完成计算。</p>
+
+<!--more-->
+
+<h3 id="record-reader">Record reader</h3>
+
+<p>Record reader会把根据input fromat生成输入分片翻译成records。Record reader的目的是把数据解析成记录，而不是解析数据本身。它把数据以键值对的形式传递给mapper。通常情况下键是偏移量，值是这条记录的整个字节块。自定义record reader 超出本书的范围。我们假设你有了处理数据适合的record reader。</p>
+
+<h3 id="map">Map</h3>
+
+<p>Map阶段，会对每个从record reader处理完的键值对执行用户代码，这些键值对又叫中间键值对。键和值的选择不是任意的，并且对MapReduce job的成功非常重要。键会用来分组，值是reducer端用来分析的数据。这本书会在设计模式方面提供大量的细节去解释键值对的选择。设计模式之间一个主要的区别是键值对的语义。</p>
+
+<h3 id="combiner">Combiner</h3>
+<p>Combiner 是一个map阶段分组数据，可选的，局部reducer。它根据用户提供的方法在一个mapper范围内根据中间键去聚合值。例如：数的总和是各个部分数量的和，你可以先计算中间的数目，最后再把所有中间数目加起来。很多情况下，这样能减少数据的网络传输量。发送（hello world，1）三次很显然要比发送（hello world，3）需要更多的网络传输字节量。Combiners可以被广泛的模式替换。很多hadoop开发者忽视combiner，但能获得更好的性能。我们需要指出的是哪一种模式用combiner有好处，哪一种不能用combiner。Combiner不会保证总会执行，所以它是一个整体逻辑。</p>
+
+<h3 id="partitioner">Partitioner</h3>
+
+<p>Partitioner会获取从mapper（或combiner）来的键值对，并分割成分片，每个reducer一个分片。默认用哈希值，典型使用md5sum。然后partitioner根据reduce的个数执行取余运算：key.hashCode() % (number of reducers)。这样能随即均匀的根据key分发数据到reduce，但仍然要保证不同mapper的相同key要到同一个reduce。Partitioner也可以自定义，使用更高级的样式，例如排序。然而，更改partitioner很少用。Partitioner的每个map的数据会写到本地磁盘，并等待对应的reducer检测，拿走数据。</p>
+
+<h3 id="shuffle-and-sort">Shuffle and sort</h3>
+<p>Reduce任务开始于shuffle和sort阶段。这一阶段获取partitioner的输出文件，并下载到reduce运行的本地机器。这些分片数据会根据key合并，排序成一个大的数据文件。排序的目的是让相同的key相邻，方便在reduce阶段值得迭代处理。这一阶段不能自定义，由框架自动处理。需要做的只是key的选择和可以自定义个用于分组的比较器。</p>
+
+<h3 id="reduce">Reduce</h3>
+<p>Reduce 任务会把分组的数据作为输入并对每个key组执行reduce方法代码。方法会传递key和可以相关的所有值得迭代集合。很多的处理会在这个方法里执行，也就会有很多的模式。一旦reduce方法完成，会发送0或多个键值对到output format。跟map一样，不同的reduce依据不同的逻辑情形而不同。</p>
+
+<h3 id="output-format">Output format</h3>
+<p>Output format会把reduce阶段的输出键值对根据record writer写到文件里。默认用tab分割键值对，用换行分割不同行。这里也可以自定义为更丰富的输出格式，最后，数据被写到hdfs。</p>
+]]></content>
+  </entry>
+  
+</feed>
