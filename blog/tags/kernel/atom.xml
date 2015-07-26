@@ -4,7 +4,7 @@
   <title><![CDATA[tags: kernel | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/kernel/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2015-07-26T17:28:56+08:00</updated>
+  <updated>2015-07-26T17:29:53+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -99,27 +99,44 @@ the</p>
 <p>在switch语句中消除多级缩进的首选的方式是让“switch”和从属于它的“case”标签对齐于同</p>
 
 <p>一列，而不要“两次缩进”“case”标签。比如：
-{% codeblock lang:c %}switch (suffix) {
-case ‘G’:
-case ‘g’:
-mem «= 30;
-break;
-case ‘M’:
-case ‘m’:
-mem «= 20;
-break;
-case ‘K’:
-case ‘k’:
-mem «= 10;
-/* fall through */
- default:
-break;
-}
-{% endcodeblock %}不要把多个语句放在一行里，除非你有什么东西要隐藏：
-{% codeblock lang:c %}
-if (condition) do_this;
-     do_something_everytime;
-{% endcodeblock %}
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">switch</span> <span class="p">(</span><span class="n">suffix</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'><span class="k">case</span> <span class="err">‘</span><span class="n">G</span><span class="err">’</span>:
+</span><span class='line'><span class="k">case</span> <span class="err">‘</span><span class="n">g</span><span class="err">’</span>:
+</span><span class='line'><span class="n">mem</span> <span class="err">«</span><span class="o">=</span> <span class="mi">30</span><span class="p">;</span>
+</span><span class='line'><span class="k">break</span><span class="p">;</span>
+</span><span class='line'><span class="k">case</span> <span class="err">‘</span><span class="n">M</span><span class="err">’</span>:
+</span><span class='line'><span class="k">case</span> <span class="err">‘</span><span class="n">m</span><span class="err">’</span>:
+</span><span class='line'><span class="n">mem</span> <span class="err">«</span><span class="o">=</span> <span class="mi">20</span><span class="p">;</span>
+</span><span class='line'><span class="k">break</span><span class="p">;</span>
+</span><span class='line'><span class="k">case</span> <span class="err">‘</span><span class="n">K</span><span class="err">’</span>:
+</span><span class='line'><span class="k">case</span> <span class="err">‘</span><span class="n">k</span><span class="err">’</span>:
+</span><span class='line'><span class="n">mem</span> <span class="err">«</span><span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+</span><span class='line'><span class="cm">/* fall through */</span>
+</span><span class='line'> <span class="nl">default:</span>
+</span><span class='line'><span class="k">break</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>不要把多个语句放在一行里，除非你有什么东西要隐藏：
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">if</span> <span class="p">(</span><span class="n">condition</span><span class="p">)</span> <span class="n">do_this</span><span class="p">;</span>
+</span><span class='line'>     <span class="n">do_something_everytime</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 也不要在一行里放多个赋值语句。内核代码风格超级简单。就是避免可能导致别人误读的表</p>
 
 <p>达式。</p>
@@ -140,17 +157,25 @@ if (condition) do_this;
 
 <p>字符串。唯一的例外是超过80列可以大幅度提高可读性并且不会隐藏信息的情况。</p>
 
-<p>{% codeblock lang:c %}
-void fun(int a, int b, int c)
-{
-   if (condition)
-   printk(KERN_WARNING “Warning this is a long printk with “
-   “3 parameters a: %u b: %u “
-   “c: %u \n”, a, b, c);
-   else
-   next_statement;
-   }
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">void</span> <span class="nf">fun</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">,</span> <span class="kt">int</span> <span class="n">b</span><span class="p">,</span> <span class="kt">int</span> <span class="n">c</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>   <span class="k">if</span> <span class="p">(</span><span class="n">condition</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">printk</span><span class="p">(</span><span class="n">KERN_WARNING</span> <span class="err">“</span><span class="n">Warning</span> <span class="n">this</span> <span class="n">is</span> <span class="n">a</span> <span class="kt">long</span> <span class="n">printk</span> <span class="n">with</span> <span class="err">“</span>
+</span><span class='line'>   <span class="err">“</span><span class="mi">3</span> <span class="n">parameters</span> <span class="n">a</span><span class="o">:</span> <span class="o">%</span><span class="n">u</span> <span class="n">b</span><span class="o">:</span> <span class="o">%</span><span class="n">u</span> <span class="err">“</span>
+</span><span class='line'>   <span class="err">“</span><span class="n">c</span><span class="o">:</span> <span class="o">%</span><span class="n">u</span> <span class="err">\</span><span class="n">n</span><span class="err">”</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">);</span>
+</span><span class='line'>   <span class="k">else</span>
+</span><span class='line'>   <span class="n">next_statement</span><span class="p">;</span>
+</span><span class='line'>   <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <h2 id="section-2">第三章：大括号和空格的放置</h2>
 
@@ -160,35 +185,49 @@ void fun(int a, int b, int c)
 
 <p>把起始大括号放在行尾，而把结束大括号放在行首，所以：</p>
 
-<p>{% codeblock lang:c %}
-    if (x is true) {
-     　　we do y
-     }
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="n">is</span> <span class="nb">true</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>     <span class="err">　　</span><span class="n">we</span> <span class="k">do</span> <span class="n">y</span>
+</span><span class='line'>     <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>这适用于所有的非函数语句块（if、switch、for、while、do）。比如：</p>
 
-<p>{% codeblock lang:c %}
-switch (action) {
-case KOBJ_ADD:
-return “add”;
-      case KOBJ_REMOVE:
-      return “remove”;
-      case KOBJ_CHANGE:
-      return “change”;
-      default:
-      return NULL;
-     }
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">switch</span> <span class="p">(</span><span class="n">action</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'><span class="k">case</span> <span class="n">KOBJ_ADD</span>:
+</span><span class='line'><span class="k">return</span> <span class="err">“</span><span class="n">add</span><span class="err">”</span><span class="p">;</span>
+</span><span class='line'>      <span class="k">case</span> <span class="n">KOBJ_REMOVE</span>:
+</span><span class='line'>      <span class="k">return</span> <span class="err">“</span><span class="n">remove</span><span class="err">”</span><span class="p">;</span>
+</span><span class='line'>      <span class="k">case</span> <span class="n">KOBJ_CHANGE</span>:
+</span><span class='line'>      <span class="k">return</span> <span class="err">“</span><span class="n">change</span><span class="err">”</span><span class="p">;</span>
+</span><span class='line'>      <span class="nl">default:</span>
+</span><span class='line'>      <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class='line'>     <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>不过，有一个例外，那就是函数：函数的起始大括号放置于下一行的开头，所以：</p>
 
-<p>{% codeblock lang:c %}
-    int function(int x)
-     {
-     　　body of function
-     }
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>    <span class="kt">int</span> <span class="nf">function</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span>
+</span><span class='line'>     <span class="p">{</span>
+</span><span class='line'>     <span class="err">　　</span><span class="n">body</span> <span class="n">of</span> <span class="n">function</span>
+</span><span class='line'>     <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>全世界的异端可能会抱怨这个不一致性是……呃……不一致的，不过所有思维健全的人都知道</p>
 
@@ -201,22 +240,30 @@ return “add”;
 
 <p>“while”或者if语句中的“else”，像这样：</p>
 
-<p>{% codeblock lang:c %}
-    do {
-     　　body of do-loop
-     } while (condition);
-{% endcodeblock %}
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>    <span class="k">do</span> <span class="p">{</span>
+</span><span class='line'>     <span class="err">　　</span><span class="n">body</span> <span class="n">of</span> <span class="k">do</span><span class="o">-</span><span class="n">loop</span>
+</span><span class='line'>     <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="n">condition</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 和</p>
 
-<p>{% codeblock lang:c %}
-    if (x == y) {
-      ..
-     } else if (x &gt; y) {
-      …
-     } else {
-      ….
-     } 
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="n">y</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="p">..</span>
+</span><span class='line'>     <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">y</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="err">…</span>
+</span><span class='line'>     <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>      <span class="err">…</span><span class="p">.</span>
+</span><span class='line'>     <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>理由：K&amp;R。</p>
 
@@ -228,23 +275,29 @@ return “add”;
 
 <p>当只有一个单独的语句的时候，不用加不必要的大括号。</p>
 
-<p>{% codeblock lang:c %}
-    if (condition)
-     　　action();
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">condition</span><span class="p">)</span>
+</span><span class='line'>     <span class="err">　　</span><span class="n">action</span><span class="p">();</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>这点不适用于本身为某个条件语句的一个分支的单独语句。这时需要在两个分支里都使用大</p>
 
 <p>括号。</p>
 
-<p>{% codeblock lang:c %}
-    if (condition) {
-      do_this();
-      do_that();
-     } else {
-      otherwise();
-     }
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">condition</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">do_this</span><span class="p">();</span>
+</span><span class='line'>      <span class="n">do_that</span><span class="p">();</span>
+</span><span class='line'>     <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">otherwise</span><span class="p">();</span>
+</span><span class='line'>     <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <h3 id="section-3">3.1：空格</h3>
 
@@ -266,19 +319,21 @@ return “add”;
 
 <p>不要在小括号里的表达式两侧加空格。这是一个反例：</p>
 
-<p>{% codeblock lang:c %}
-    s = sizeof( struct file );
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>    <span class="n">s</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span> <span class="k">struct</span> <span class="n">file</span> <span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>当声明指针类型或者返回指针类型的函数时，“*”的首选使用方式是使之靠近变量名或者函</p>
 
 <p>数名，而不是靠近类型名。例子：</p>
 
-<p>{% codeblock lang:c %}
-    char *linux_banner;
-     unsigned long long memparse(char *ptr, char **retptr);
-     char *match_strdup(substring_t *s);
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>    <span class="kt">char</span> <span class="o">*</span><span class="n">linux_banner</span><span class="p">;</span>
+</span><span class='line'>     <span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="nf">memparse</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">ptr</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">retptr</span><span class="p">);</span>
+</span><span class='line'>     <span class="kt">char</span> <span class="o">*</span><span class="nf">match_strdup</span><span class="p">(</span><span class="n">substring_t</span> <span class="o">*</span><span class="n">s</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>在大多数二元和三元操作符两侧使用一个空格，例如下面所有这些操作符：</p>
 
@@ -355,17 +410,17 @@ return “add”;
 
 <p>对结构体和指针使用typedef是一个错误。当你在代码里看到：</p>
 
-<p>{% codeblock lang:c %}
-    vps_t a;
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>    <span class="n">vps_t</span> <span class="n">a</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>这代表什么意思呢？</p>
 
 <p>相反，如果是这样</p>
 
-<p>{% codeblock lang:c %}
-    struct virtual_container *a;
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>    <span class="k">struct</span> <span class="n">virtual_container</span> <span class="o">*</span><span class="n">a</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>你就知道“a”是什么了。</p>
 
@@ -388,9 +443,9 @@ return “add”;
 <p>再次注意！要这样做，必须事出有因。如果某个变量是“unsigned
 long“，那么没有必要</p>
 
-<p>{% codeblock lang:c %}
-    typedef unsigned long myflags_t;
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>    <span class="k">typedef</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">myflags_t</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>不过如果有一个明确的原因，比如它在某种情况下可能会是一个“unsigned
 int”而在</p>
@@ -457,13 +512,17 @@ int”而在</p>
 
 <p>在它的结束大括号之下。比如：</p>
 
-<p>{% codeblock lang:c %}
-    int system_is_up(void)
-     {
-     return system_state == SYSTEM_RUNNING;
-     }
-     EXPORT_SYMBOL(system_is_up);
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>    <span class="kt">int</span> <span class="nf">system_is_up</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span><span class='line'>     <span class="p">{</span>
+</span><span class='line'>     <span class="k">return</span> <span class="n">system_state</span> <span class="o">==</span> <span class="n">SYSTEM_RUNNING</span><span class="p">;</span>
+</span><span class='line'>     <span class="p">}</span>
+</span><span class='line'>     <span class="n">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">system_is_up</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>在函数原型中，包含函数名和它们的数据类型。虽然C语言里没有这样的要求，在Linux里这</p>
 
@@ -496,27 +555,47 @@ int”而在</p>
   </li>
 </ul>
 
-<p>{% codeblock lang:c %}
-     int fun(int a)
-      {
-      int result = 0;
-      char *buffer = kmalloc(SIZE);</p>
-
-<pre><code>  if (buffer == NULL)
-  return -ENOMEM;
-  
-  if (condition1) {
-  while (loop1) {
-   ...
-   }
-  result = 1;
-  goto out;
-   }
-   ...
-  out:
-   kfree(buffer);
-  return result;
-  } {% endcodeblock %}
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>     <span class="kt">int</span> <span class="nf">fun</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">)</span>
+</span><span class='line'>      <span class="p">{</span>
+</span><span class='line'>      <span class="kt">int</span> <span class="n">result</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>      <span class="kt">char</span> <span class="o">*</span><span class="n">buffer</span> <span class="o">=</span> <span class="n">kmalloc</span><span class="p">(</span><span class="n">SIZE</span><span class="p">);</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span>  <span class="k">if</span> <span class="p">(</span><span class="n">buffer</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">return</span> <span class="o">-</span><span class="n">ENOMEM</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="n">condition1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">while</span> <span class="p">(</span><span class="n">loop1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>   <span class="p">...</span>
+</span><span class='line'>   <span class="p">}</span>
+</span><span class='line'>  <span class="n">result</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">goto</span> <span class="n">out</span><span class="p">;</span>
+</span><span class='line'>   <span class="p">}</span>
+</span><span class='line'>   <span class="p">...</span>
+</span><span class='line'>  <span class="nl">out:</span>
+</span><span class='line'>   <span class="n">kfree</span><span class="p">(</span><span class="n">buffer</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 </code></pre>
 
 <p>第八章：注释</p>
@@ -543,16 +622,27 @@ int”而在</p>
 
 <p>长（多行）的首选注释风格是：</p>
 
-<p>{% codeblock lang:c %}</p>
-
-<pre><code> /*
-  * This is the preferred style for multi-line
-  * comments in the Linux kernel source code.
-  * Please use it consistently.
-  *
-  * Description: A column of asterisks on the left side,
-  * with beginning and ending almost-blank lines.
- */ {% endcodeblock %}
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span> <span class="cm">/*</span>
+</span><span class='line'><span class="cm">  * This is the preferred style for multi-line</span>
+</span><span class='line'><span class="cm">  * comments in the Linux kernel source code.</span>
+</span><span class='line'><span class="cm">  * Please use it consistently.</span>
+</span><span class='line'><span class="cm">  *</span>
+</span><span class='line'><span class="cm">  * Description: A column of asterisks on the left side,</span>
+</span><span class='line'><span class="cm">  * with beginning and ending almost-blank lines.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 </code></pre>
 
 <p>注释数据也是很重要的，不管是基本类型还是衍生类型。为了方便实现这一点，每一行应只</p>
@@ -721,25 +811,33 @@ mm_struct”：mm_users和mm_count）</p>
 
 <p>含有多个语句的宏应该被包含在一个do-while代码块里：</p>
 
-<p>{% codeblock lang:c %}
-    #define macrofun(a, b, c) 
-     do {
-     if (a == 5)
-      do_this(b, c);
-     } while (0)
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>    <span class="err">#</span><span class="n">define</span> <span class="n">macrofun</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+</span><span class='line'>     <span class="k">do</span> <span class="p">{</span>
+</span><span class='line'>     <span class="k">if</span> <span class="p">(</span><span class="n">a</span> <span class="o">==</span> <span class="mi">5</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">do_this</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">);</span>
+</span><span class='line'>     <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>使用宏的时候应避免的事情：</p>
 
 <p>​1) 影响控制流程的宏：</p>
 
-<p>{% codeblock lang:c %}
-    #define FOO(x)
-     do
-     if (blah(x) &lt; 0)
-     return -EBUGGERED;
-     } while(0)
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>    <span class="err">#</span><span class="n">define</span> <span class="n">FOO</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</span><span class='line'>     <span class="k">do</span>
+</span><span class='line'>     <span class="k">if</span> <span class="p">(</span><span class="n">blah</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>     <span class="k">return</span> <span class="o">-</span><span class="n">EBUGGERED</span><span class="p">;</span>
+</span><span class='line'>     <span class="p">}</span> <span class="k">while</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>非常不好。它看起来像一个函数，不过却能导致“调用”它的函数退出；不要打乱读者大脑里</p>
 
@@ -747,9 +845,9 @@ mm_struct”：mm_users和mm_count）</p>
 
 <p>​2) 依赖于一个固定名字的本地变量的宏：</p>
 
-<p>{% codeblock lang:c %}
-     #define FOO(val) bar(index, val)
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>     <span class="err">#</span><span class="n">define</span> <span class="n">FOO</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="n">bar</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>可能看起来像是个不错的东西，不过它非常容易把读代码的人搞糊涂，而且容易导致看起来</p>
 
@@ -765,10 +863,11 @@ y；如果有人把FOO变成一个内联函数的话，这种用</p>
 
 <p>宏也要注意此类问题。</p>
 
-<p>{% codeblock lang:c %}
-    #define CONSTANT 0x4000
-     #define CONSTEXP (CONSTANT | 3)
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>    <span class="err">#</span><span class="n">define</span> <span class="n">CONSTANT</span> <span class="mh">0x4000</span>
+</span><span class='line'>     <span class="err">#</span><span class="n">define</span> <span class="n">CONSTEXP</span> <span class="p">(</span><span class="n">CONSTANT</span> <span class="o">|</span> <span class="mi">3</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>cpp手册对宏的讲解很详细。Gcc internals手册也详细讲解了RTL（译注：register</p>
 
@@ -813,9 +912,9 @@ not”或者“don’t”。保证这些信息简单、明了、无</p>
 
 <p>传递结构体大小的首选形式是这样的：</p>
 
-<p>{% codeblock lang:c %}
-     p = kmalloc(sizeof(*p), …);
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>     <span class="n">p</span> <span class="o">=</span> <span class="n">kmalloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">p</span><span class="p">),</span> <span class="err">…</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>另外一种传递方式中，sizeof的操作数是结构体的名字，这样会降低可读性，并且可能会引</p>
 
@@ -898,15 +997,15 @@ present”是一个判断，所以pci_dev_present()函数在成功找到</p>
 
 <p>变种。比如，如果你需要计算一个数组的长度，使用这个宏</p>
 
-<p>{% codeblock lang:c %}
-     #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>     <span class="err">#</span><span class="n">define</span> <span class="n">ARRAY_SIZE</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">((</span><span class="n">x</span><span class="p">)[</span><span class="mi">0</span><span class="p">]))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>类似的，如果你要计算某结构体成员的大小，使用</p>
 
-<p>{% codeblock lang:c %}
-     #define FIELD_SIZEOF(t, f) (sizeof(((t*)0)-&gt;f))
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'>     <span class="err">#</span><span class="n">define</span> <span class="n">FIELD_SIZEOF</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">(((</span><span class="n">t</span><span class="o">*</span><span class="p">)</span><span class="mi">0</span><span class="p">)</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">f</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>还有可以做严格的类型检查的min()和max()宏，如果你需要可以使用它们。你可以自己看看</p>
 

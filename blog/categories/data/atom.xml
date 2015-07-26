@@ -4,7 +4,7 @@
   <title><![CDATA[Category: data | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/data/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2015-07-26T17:28:19+08:00</updated>
+  <updated>2015-07-26T17:29:53+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -22,7 +22,10 @@
 
 <p>mapReduce 的输入是hdfs上存储的一系列文件集。在hadoop中，这些文件被一种定义了如何分割一个文件成分片的input format来分割，一个分片是一个文件基于字节的可以被一个map任务加载的一个块。</p>
 
-<p>每个map任务被分为以下阶段：<code>record reader</code>，<code>mapper</code>，<code>combiner</code>，<code>partitioner</code>。Map任务的输出叫中间数据，包括keys和values，发送到reduce端。Reduce任务分为以下阶段：<code>shuffle</code>，<code>sort</code>，<code>reduce</code>，<code>output format</code>。运行map任务的节点会尽量选择数据所在的节点。这种情况下，不会出现网络传输，在本地节点就可以完成计算。</p>
+<ul>
+  <li>每个map任务被分为以下阶段：<code>record reader</code>，<code>mapper</code>，<code>combiner</code>，<code>partitioner</code>。Map任务的输出叫中间数据，包括keys和values，发送到reduce端。</li>
+  <li>Reduce任务分为以下阶段：<code>shuffle</code>，<code>sort</code>，<code>reduce</code>，<code>output format</code>。运行map任务的节点会尽量选择数据所在的节点。这种情况下，不会出现网络传输，在本地节点就可以完成计算。</li>
+</ul>
 
 <!--more-->
 
