@@ -4,7 +4,7 @@
   <title><![CDATA[tags: log | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/log/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2015-07-26T16:40:05+08:00</updated>
+  <updated>2015-07-26T17:21:00+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -25,6 +25,8 @@
 <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/log%20comparision_zpstrg3kc1m.png" alt="image" /></p>
 
 <p>上图中的数字是每秒的日志写入行数，<a href="https://docs.google.com/spreadsheet/ccc?key=0Alceaf46X4GPdHBoLTdYQ29nRDh6V1dRY00zT1FwWWc&amp;usp=sharing">点击更详细的信息</a>。</p>
+
+<!--more-->
 
 <h2 id="hello-word-example">Hello Word Example</h2>
 

@@ -136,6 +136,53 @@
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-07-26T16:57:00+08:00" pubdate data-updated="true">Jul 26<span>th</span>, 2015</time>
+        
+           | <a href="/blog/2015/07/26/pid-file-analysis/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2015/07/26/pid-file-analysis/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/26/pid-file-analysis/">PID File Analysis</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><h1 id="pid-">pid 文件浅析</h1>
+
+<p>在Linux系统的目录/var/run下面一般我们都会看到很多的*.pid文件。而且往往新安装的程序在运行后也会在/var/run目录下面产生自己的pid文件。那么这些pid文件有什么作用呢？它的内容又是什么呢？</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2015/07/26/pid-file-analysis/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-07-26T15:28:00+08:00" pubdate data-updated="true">Jul 26<span>th</span>, 2015</time>
         
            | <a href="/blog/2015/07/26/java-log4j/#disqus_thread"
@@ -157,157 +204,12 @@
 
 <p>上图中的数字是每秒的日志写入行数，<a href="https://docs.google.com/spreadsheet/ccc?key=0Alceaf46X4GPdHBoLTdYQ29nRDh6V1dRY00zT1FwWWc&amp;usp=sharing">点击更详细的信息</a>。</p>
 
-<h2 id="hello-word-example">Hello Word Example</h2>
-
-<p>示例是使用maven来组织的。maven用的越多，就越觉得它的方便，不用关心jar包的管理，开发、测试和发布都只需要一行命令，还能还IDE完美的融合。</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>pom.xml</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-</pre></td><td class="code"><pre><code class="xml"><span class="line"><span class="nt">&lt;dependency&gt;</span>
-</span><span class="line">    <span class="nt">&lt;groupId&gt;</span>log4j<span class="nt">&lt;/groupId&gt;</span>
-</span><span class="line">    <span class="nt">&lt;artifactId&gt;</span>log4j<span class="nt">&lt;/artifactId&gt;</span>
-</span><span class="line">    <span class="nt">&lt;version&gt;</span>1.2.17<span class="nt">&lt;/version&gt;</span>
-</span><span class="line"><span class="nt">&lt;/dependency&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>创建log4j.properties文件，放在resources文件夹下，这个文件夹的路径是src/main/resources。</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>log4j.properties</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-</pre></td><td class="code"><pre><code class="properties"><span class="line"><span class="c"># Root logger option</span>
-</span><span class="line"><span class="na">log4j.rootLogger</span><span class="o">=</span><span class="s">DEBUG, stdout, file</span>
-</span><span class="line">
-</span><span class="line"><span class="c"># Redirect log messages to console</span>
-</span><span class="line"><span class="na">log4j.appender.stdout</span><span class="o">=</span><span class="s">org.apache.log4j.ConsoleAppender</span>
-</span><span class="line"><span class="na">log4j.appender.stdout.Target</span><span class="o">=</span><span class="s">System.out</span>
-</span><span class="line"><span class="na">log4j.appender.stdout.layout</span><span class="o">=</span><span class="s">org.apache.log4j.PatternLayout</span>
-</span><span class="line"><span class="na">log4j.appender.stdout.layout.ConversionPattern</span><span class="o">=</span><span class="s">%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n</span>
-</span><span class="line">
-</span><span class="line"><span class="c"># Redirect log messages to a log file, support file rolling.</span>
-</span><span class="line"><span class="na">log4j.appender.file</span><span class="o">=</span><span class="s">org.apache.log4j.RollingFileAppender</span>
-</span><span class="line"><span class="na">log4j.appender.file.File</span><span class="o">=</span><span class="s">C:\\log4j-application.log</span>
-</span><span class="line"><span class="na">log4j.appender.file.MaxFileSize</span><span class="o">=</span><span class="s">5MB</span>
-</span><span class="line"><span class="na">log4j.appender.file.MaxBackupIndex</span><span class="o">=</span><span class="s">10</span>
-</span><span class="line"><span class="na">log4j.appender.file.layout</span><span class="o">=</span><span class="s">org.apache.log4j.PatternLayout</span>
-</span><span class="line"><span class="na">log4j.appender.file.layout.ConversionPattern</span><span class="o">=</span><span class="s">%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>说明下ConversionPattern中的符号和参数：</p>
-
-<ol>
-  <li><code>%d{yyyy-MM-dd HH:mm:ss}</code> 日期和时间</li>
-  <li><code>%-5p</code> 日志优先级, 输出DEBUG、ERROR等. <code>-5</code>是可选的, 格式化输出宽度，为了更好的输出效果.</li>
-  <li><code>%c{1}</code> 是日志名称，通过getLogger()设置, 可以参考<a href="http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html">log4j PatternLayout guide</a>.</li>
-  <li><code>%L</code> 打印日志的句子在源文件中的行数.</li>
-  <li><code>%m%n</code> 打印的日志信息和换行符.</li>
-</ol>
-
-<p>上述设置的输出效果是：</p>
-
-<pre><code>2014-07-02 20:52:39 DEBUG className:200 - This is debug message
-2014-07-02 20:52:39 DEBUG className:201 - This is debug message2
-</code></pre>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>HelloExample.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-<span class="line-number">29</span>
-<span class="line-number">30</span>
-<span class="line-number">31</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kn">import</span> <span class="nn">org.apache.log4j.Logger</span><span class="o">;</span>
-</span><span class="line">
-</span><span class="line"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloExample</span><span class="o">{</span>
-</span><span class="line">
-</span><span class="line">    <span class="kd">final</span> <span class="kd">static</span> <span class="n">Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="n">HelloExample</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
-</span><span class="line">
-</span><span class="line">    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line">
-</span><span class="line">        <span class="n">HelloExample</span> <span class="n">obj</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HelloExample</span><span class="o">();</span>
-</span><span class="line">        <span class="n">obj</span><span class="o">.</span><span class="na">runMe</span><span class="o">(</span><span class="s">&quot;billowkiller&quot;</span><span class="o">);</span>
-</span><span class="line">    <span class="o">}</span>
-</span><span class="line">
-</span><span class="line">    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">runMe</span><span class="o">(</span><span class="n">String</span> <span class="n">parameter</span><span class="o">){</span>
-</span><span class="line">
-</span><span class="line">        <span class="k">if</span><span class="o">(</span><span class="n">logger</span><span class="o">.</span><span class="na">isDebugEnabled</span><span class="o">())</span> <span class="o">{</span>
-</span><span class="line">            <span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">&quot;This is debug : &quot;</span> <span class="o">+</span> <span class="n">parameter</span><span class="o">);</span>
-</span><span class="line">        <span class="o">}</span>
-</span><span class="line">        <span class="k">if</span><span class="o">(</span><span class="n">logger</span><span class="o">.</span><span class="na">isInfoEnabled</span><span class="o">())</span> <span class="o">{</span>
-</span><span class="line">            <span class="n">logger</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">&quot;This is info : &quot;</span> <span class="o">+</span> <span class="n">parameter</span><span class="o">);</span>
-</span><span class="line">        <span class="o">}</span>
-</span><span class="line">        <span class="n">logger</span><span class="o">.</span><span class="na">warn</span><span class="o">(</span><span class="s">&quot;This is warn : &quot;</span> <span class="o">+</span> <span class="n">parameter</span><span class="o">);</span>
-</span><span class="line">        <span class="n">logger</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">&quot;This is error : &quot;</span> <span class="o">+</span> <span class="n">parameter</span><span class="o">);</span>
-</span><span class="line">        <span class="n">logger</span><span class="o">.</span><span class="na">fatal</span><span class="o">(</span><span class="s">&quot;This is fatal : &quot;</span> <span class="o">+</span> <span class="n">parameter</span><span class="o">);</span>
-</span><span class="line">
-</span><span class="line">        <span class="k">try</span><span class="o">{</span>
-</span><span class="line">            <span class="mi">1</span><span class="o">/</span><span class="mi">0</span><span class="o">;</span>
-</span><span class="line">        <span class="o">}</span><span class="k">catch</span><span class="o">(</span><span class="n">ArithmeticException</span> <span class="n">ex</span><span class="o">){</span>
-</span><span class="line">            <span class="n">logger</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">&quot;Sorry, something wrong!&quot;</span><span class="o">,</span> <span class="n">ex</span><span class="o">);</span>
-</span><span class="line">        <span class="o">}</span>
-</span><span class="line">    <span class="o">}</span>
-</span><span class="line"><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>可以调整配置文件中的<code>log4j.rootLogger</code>设置日志输出的级别和<code>appender</code>，级别从低到高有DEBUG、INFO、WARN、ERROR、FATAL，一般使用INFO和ERROR。</p>
-
-<p>顺便说一句，类似<code>logger.isDebugEnabled()</code>这种句子在源码中实在是不太美观。如果debug中间的信息不影响程序的性能还是不要使用这种句子，因为log4j自己会检查需不需要输出debug信息。</p>
-
-<h3 id="tips">Tips</h3>
-
-<ul>
-  <li>java -calsspath *.jar 加载多个jar包，而多个jar包中可能包含多个log4j.properties的时候，系统自动加载第一个，忽略后面的。也就是说将你想要使用的log4j.properties所包含的jar文件放在classpath的第一个。</li>
-  <li>mvn的package和test可以分别对应两个不同的log4j.properties中，如下：src/main/resources/log4j.properties, src/test/resources/log4j.properties。</li>
-  <li><strong>需要注意程序的输出级别，用户可以定义不同的配置文件来输出不同级别的信息</strong>。这一点尤其重要：
-    <ul>
-      <li>工具是为程序提供服务的，在开发和调试阶段，日志可以帮助我们更好更快地定位bug；在运行维护阶段，日志系统又可以帮我们记录大部分的异常信息，从而帮助我们更好的完善系统。</li>
-      <li>定义好级别和输出的日志信息，配合使用<code>grep</code>等命令行工具，可以更好的帮助我们定位错误。</li>
-      <li>在设计系统之前需要先确定好日志子系统，在什么情况下程序会发生错误，输出什么样的错误信息，在debug和正常运行的时候日志如何调整，error信息是否需要另外打印。</li>
-    </ul>
-  </li>
-</ul>
 </div>
   
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2015/07/26/java-log4j/">Read on &rarr;</a>
+    </footer>
   
 
 
@@ -772,65 +674,6 @@
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-22T09:18:00+08:00" pubdate data-updated="true">Jul 22<span>nd</span>, 2014</time>
-        
-           | <a href="/blog/2014/07/22/network-programming/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/07/22/network-programming/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/22/network-programming/">Unix Network Programming Notes</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>记录Linux网络编程中的一些知识点…</p>
-
-<hr />
-
-<h3 id="section">网络编程可能会遇到的三种情况</h3>
-
-<ol>
-  <li>当<code>fork</code>子进程时，必须捕获<code>SIGCHLD</code>信号。</li>
-  <li>当捕获信号时，必须处理被中断的系统调用；</li>
-  <li>
-    <p><code>SIGCHLD</code>的信号处理函数必须正确编写，应使用<code>waitpid</code>函数以免留下僵死进程。</p>
-
-    <p><code>waitpid</code>是可以非阻塞的等待信号终止，因此可以使用循环调用。</p>
-  </li>
-</ol>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/07/22/network-programming/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -854,6 +697,8 @@
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2015/07/26/pid-file-analysis/">PID File Analysis</a>
+    
     <a class="list-group-item " href="/blog/2015/07/26/java-log4j/">Java Log4j</a>
     
     <a class="list-group-item " href="/blog/2014/08/29/static-and-dynamic-library/">Static and Dynamic Library</a>
@@ -861,8 +706,6 @@
     <a class="list-group-item " href="/blog/2014/08/23/classical-sync-problem/">Classical Sync Problem</a>
     
     <a class="list-group-item " href="/blog/2014/08/22/design-pattern/">Design Pattern Abstraction</a>
-    
-    <a class="list-group-item " href="/blog/2014/08/14/linux-memory-management/">Linux Memory Management</a>
     
   </div>
 </section>
@@ -898,7 +741,7 @@
     
     
     <a class="list-group-item " href="/blog/categories/linux/index.html">
-        <span class="badge">13</span>
+        <span class="badge">14</span>
         linux
       </a>
     
