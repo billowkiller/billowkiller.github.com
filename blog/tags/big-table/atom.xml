@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: big table | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/big-table/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2015-07-26T16:40:30+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[google论文: big table]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-big-table/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-big-table</id>
+    <content type="html"><![CDATA[<p>论文：<a href="http://static.googleusercontent.com/external_content/untrusted_dlcp/research.google.com/en//archive/bigtable-osdi06.pdf">英文版</a>，
+<a href="http://dblab.xmu.edu.cn/sites/default/files/20120508_172346_207.pdf">中文版</a></p>
+
+<hr />
+
+<h3 id="section">1. 导论</h3>
+
+<p>BigTable is a compressed, high performance, and proprietary data storage
+system built on Google File System, Chubby Lock Service, SSTable
+(log-structured storage like LevelDB) and a few other Google
+technologies.（这句是wikipedia摘抄的定义）</p>
+
+<p>构成：</p>
+
+<ul>
+  <li>Scheduler</li>
+  <li><a href="http://www.cnblogs.com/billowkiller/archive/2013/04/10/3012085.html">GFS</a></li>
+  <li>Chubby Lock service</li>
+  <li>Sawzall</li>
+  <li><a href="http://www.cnblogs.com/billowkiller/archive/2013/04/15/3022035.html">MapReduce</a></li>
+  <li>SSTable</li>
+  <li>some compression algorithms</li>
+</ul>
+
+<p>先通俗几个名词：
+<!--more-->
+Google File System</p>
+
+<p>　　• Large-scale distributed “file system”</p>
+
+<p>　　• Master: responsible for metadata</p>
+
+<p>　　• Chunk servers: responsible for reading and writing large chunks of
+data</p>
+
+<p>　　• Chunks replicated on 3 machines, master responsible for ensuring
+replicas exist</p>
+
+<p>Chubby</p>
+
+<p>　　• {lock/file/name} service</p>
+
+<p>　　• Coarse-grained locks, can store small amount of data in a lock</p>
+
+<p>　　• 5 replicas, need a majority vote to be active</p>
+
+<p>SSTable</p>
+
+<p>　　• Immutable, sorted file of key-value pairs</p>
+
+<p>　　• Chunks of data plus an index</p>
+
+<p>　　　　– Index is of block ranges, not values</p>
+
+<p>　　　　– Index loaded into memory when SSTable is opened</p>
+
+<p>　　　　– Lookup is a single disk seek</p>
+
+<p>　　• Alternatively, client can load SSTable into mem</p>
+
+<p><img src="http://images.cnitblog.com/blog/434023/201303/30210501-5a1c2d5da5104b979ea6d2567f37edfb.png" alt="SSTable" height="150px" /></p>
+
+<p>Tablet </p>
+
+<p>　　• Contains some range of rows of the table</p>
+
+<p>　　• Unit of distribution &amp; load balance</p>
+
+<p>　　• Built out of multiple SSTables</p>
+
+<p><img src="http://images.cnitblog.com/blog/434023/201303/30210659-c4b2010c6dee47f6a8f5c2c799ed1114.png" alt="Tablet" height="200px" /></p>
+
+<p>Table</p>
+
+<p>　　• Multiple tablets make up the table</p>
+
+<p>　　• SSTables can be shared</p>
+
+<p>　　• Tablets do not overlap, SSTables can overlap</p>
+
+<p><img src="http://images.cnitblog.com/blog/434023/201303/30210828-a38c1e041a6d4add86c387cda95a24d2.png" alt="Table" height="200px" /></p>
+
+<h3 id="section-1">2. 数据模型</h3>
+
+<p>BigTable不能支持完整的关系型数据模型，只提供一个简单的数据模型，可以支持针对数据部署和格式的动态控制，允许用户区推理底层存储所展现的数据的位置属性。这句话有些玄乎，其实就是nosql的典型存储方式，不管你需要存储的数据有多大，是什么样的格式——图片，音乐或者其他，bigtable都把它们当做字符串存储在GFS中。</p>
+
+<p>这个数据模型世纪上市一个稀疏的、分布的、永久的多位排序图。采用row
+key，column key，timestamp对图进行索引。每个值都是未经解释的字节数组。</p>
+
+<p>(row:string, column string, time:int64)→string</p>
+
+<p>一个表中的行键，是任意的字符串(当前尺寸是64KB)，
+对每一个行键所包含数据的读或写都是一个原子操作，而不管这个行中所包含的的列的数量多少。在行键上根据字典顺序对数据进行维护。对一个表而言，行区间是动态划分的，因为列的大小数量不确定。每一个行区间是一个Tablet，是负载均衡和数据分发的基本单位。</p>
+
+<p>列键被分组为一个称为“Column
+family”的集合，是基本的访问控制单元。存储在一个列家族当中的所有数据通常都属于同一个数据类型。因为通常是对同一个列家族中的数据一起压缩。存储上也是面向列进行的。列键的命名方式为Column family:qualifier。Family
+is heavyweight, qualifier
+lightweight，即为，列家族很少变化，基本上是固定的，但是修饰符可以是任意字符串。</p>
+
+<p>这里给出一个实际的例子。假设我们想要拷贝一个可能被很多项目都是用的、很大的网页集合以及相关的信息，让我们把这个特定的表称为Webtable。在Webtable当中，我们使用URL作为行键，网页的不同方面作为列键，并把网页的内容存储在contents:column中，如图所示。通过对URL地址进行反转，属于同一个领域的网页都会被分组到连续的行中。例如，在键com.google.maps/index.html下面存储maps.google.com/index.html中包含的数据。把来自同一个领域的数据彼此临近存储，使得一些领域分析更加高效。</p>
+
+<p><img src="http://dblab.xmu.edu.cn/sites/default/files/images/datamodel.jpg" alt="Google Bigtable，厦门大学，厦门大学计算机系，数据库实验室，林子雨" height="200px" /></p>
+
+<ul>
+  <li>存储了网页数据的Webtable的一个片段。行名称是反转的URL，contents列家族包含了网页内容，anchor列家族包含了任何引用这个页面的anchor文本。CNN的主页被Sports
+Illustrated和MY-look主页同时引用，因此，我们的行包含了名称为”anchor:cnnsi.com”和”anchor:my.look.ca”的列。每个anchor单元格都只有一个版本，contents列有三个版本，分别对应于时间戳t3,t5和t6。</li>
+</ul>
+
+<h3 id="section-2">3. 实现</h3>
+
+<p>BigTable实现包括三个主要的功能组件：</p>
+
+<p>(1)	库函数：链接到每个客户端，</p>
+
+<p>(2)	一个主服务器，</p>
+
+<p>(3)	许多Tablet服务器。 </p>
+
+<p>主服务器负责把Tablet分配到Tablet服务器，探测Tablet服务器的增加和过期，进行Table服务器的负载均衡，以及GFS文件系统中的垃圾收集。除此以外，它还处理模式变化，比如表和列家族创建。</p>
+
+<p>每个Tablet服务器管理一个Tablet集合，通常，在每个Tablet服务器上，会放置10到1000个Tablet。Tablet服务器处理针对那些已经加载的Tablet而提出的读写请求，并且会对过大的Tablet进行划分。</p>
+
+<p>客户端并不是直接从主服务器读取数据，而是直接从Tablet服务器上读取数据。因为BigTable客户端并不依赖于主服务器来获得Tablet的位置信息，所以，大多数客户端从来不和主服务器通信。从而使得在实际应用中，主服务器负载很小。</p>
+
+<p><img src="http://images.cnitblog.com/blog/434023/201303/30212406-a7b6fa2ced51443eb5d8660694dfae2d.png" alt="big table system structure" height="400px" /></p>
+
+<h3 id="tablet">4. tablet查找</h3>
+
+<p>因为tablet是从一个服务器到另外一个服务器移动的，那么怎么找到一个特定的row在哪个服务器上存储呢？</p>
+
+<p>使用了一个类似于 B+树的三层架构，来存储Tablet位置信息。</p>
+
+<p><img src="http://dblab.xmu.edu.cn/sites/default/files/images/Fig4(1).jpg" alt="Google Bigtable，厦门大学，厦门大学计算机系，数据库实验室，林子雨" height="300px" /></p>
+
+<p>METADATA表中存储了二级信息，包括一个日志，它记载了和每个tablet有关的所有事件，比如，一个服务器什么时候开始提供这个tablet服务。这些信息对于性能分析和程序调试是非常有用的。 </p>
+
+<p>客户端函数库会缓存Tablet位置信息。如果客户端不知道一个Tablet的位置信息，或者它发现，它所缓存的Tablet位置信息部正确，那么，它就会在Tablet位置层次结构中依次向上寻找。如果客户端缓存是空的，那么定位算法就需要进行三次轮询，其中就包括一次从Chubby中读取信息。如果客户端的缓存是过期的，定位算法就要进行六次轮询，因为，只有在访问无效的时候才会发现缓存中某个entry是过期的（这里假设METADATA
+Tablets不会频繁移动）。虽然，Tablets位置信息是保存在缓存中，从而不需要访问GFS，但是，仍然通过让客户端库函数预抓取tablet位置信息，来进一步减少代价，具体方法是：每次读取METADATA表时，都要读取至少两条以上的Tablet位置信息。</p>
+
+<p>每个Tablet只能被分配到一个tablet服务器。主服务器跟踪tablet服务器的情况，掌握当前tablet被分配到tablet服务器的情况，其中包括哪个tablet还没有被分配。当一个tablet没有被分配，并且一个具有足够空间可以容纳该tablet的tablet服务器是可用时，主服务器就把当前这个tablet分配给这个tablet服务器，主服务器会向tablet服务器发送一个tablet负载请求。</p>
+
+<p>BigTable使用Chubby来跟踪tablet服务器。当一个Tablet服务器启动的时候，它创建并且获得一个独占的排他锁，这个锁会锁住一个特定的Chubby目录中的一个唯一命名的文件。主服务器监视这个目录（服务器目录），来发现tablet服务器。如果一个tablet服务器停止服务，它就会丢失这个锁，比如，由于网络故障，导致这个tablet服务器丢失了这个Chubby会话。（Chubby提供了一个完善的机制，来允许一个tablet服务器检查自己是否已经丢失了这个独占排他锁）。如果丢失了锁，那么，只要目录中的这个文件还存在，那么一个tablet服务器就会努力去获得这个锁。如果文件不再存在，那么，这个tablet服务器就不再能够对外提供服务，因此，它就自杀。一旦一个tablet服务器终止了服务（比如，簇管理系统把这个tablet服务器从簇中移除），它就会努力释放锁，这样，主服务器就可以更快地重新分配这个tablet。</p>
+
+<p>主服务器需要探测，什么时候tablet服务器不再提供tablet服务，并且要负责尽快对这些tablet进行重新分配。为了探测什么时候tablet服务器不再提供tablet服务，主服务器会周期性地询问每个tablet服务器，了解他们的锁的状态。如果一个tablet服务器报告，它已经丢失了锁；或者，在最近的几次尝试中，主服务器都无法与tablet服务器取得联系，主服务器就会努力获得一个针对这个服务器文件的独占排他锁。如果主服务器可以获得这个锁，那么，Chubby就是可用的，相应地，这个tablet服务器或者已经死亡，或者有些故障导致它无法到达Chubby。因此，主服务器就从Chubby中删除这个tablet服务器的文件，从而确保这个tablet服务器不再能够提供服务。一旦一个服务器文件被删除，主服务器就可以把所有以前分配给该服务器的tablet，都移动到“待分配”tablet集合。为了保证一个BigTable簇不会轻易受到主服务器和Chubby之间的网络故障的影响，如果一个主服务器的Chubby会话过期了，这个主服务器就会自杀。但是，正如上所述，主服务器失效，不会改变tablet到table的分配。</p>
+
+<h3 id="section-3">5. 读写方式</h3>
+
+<p><img src="http://dblab.xmu.edu.cn/sites/default/files/images/Fig5.jpg" height="300px" alt="Google Bigtable，厦门大学，厦门大学计算机系，数据库实验室，林子雨" /></p>
+
+<p>一个tablet的持久化存储是存在GFS当中，如图5所示。更新被提交到一个提交日志，日志中记录了redo记录。在这些更新当中，最近提交的更新被存放到内存当中的一个被称为memtable的排序缓冲区，比较老的更新被存储在一系列SSTable中。为了恢复一个tablet，tablet服务器从METADATA表当中读取这个tablet的元数据。这个元数据包含了SSTable列表，其中，每个SSTable都包括一个tablet和一个重做点（redo
+point）的集合，这些redo
+point是一些指针，它们指向那些可能包含tablet所需数据的重做日志。服务器把SSTable索引读入内存，并且重构memtable，方法是，执行重做点以后的所有已经提交的更新。</p>
+
+<p>当一个写操作到达tablet服务器，服务器首先检查它是否是良好定义的，并且发送者是否被授权执行该操作。执行授权检查时，会从一个Chubby文件中读取具有访问权限的写入者的列表，这个Chubby文件通常总能够在Chubby客户端缓存中找到。一个有效的变化，会被写到提交日志中。分组提交是为了改进许多小更新[13,16]操作的吞吐量。在写操作已经被提交以后，它的内容就会被插入到memtable。</p>
+
+<p>当一个读操作到达Tablet服务器，与写操作类似，服务器也会首先检查它是否是良好定义和得到授权的。一个有效地读操作是在以下二者的合并的基础上执行的，即一系列SSTable和memtable。由于SSTable和memtable是字典排序的数据结构，合并视图的执行是非常高效的。</p>
+
+<p><img src="http://images.cnitblog.com/blog/434023/201303/30213930-99817ed4d1154148869e43523bcc6f4b.png" height="300px" alt="tablet分解" />   </p>
+
+<p>当tablet发生合并或分解操作时，正在到达的读写操作仍然可以继续进行。</p>
+
+<p>###  </p>
+
+<h3 id="section-4">6. 压缩</h3>
+
+<p>压缩分为三种：</p>
+
+<p>　　•　　Minor compaction – convert a full memtable into an SSTable, and
+start a new memtable</p>
+
+<p>　　　　　　– Reduce memory usage</p>
+
+<p>　　　　　　– Reduce log traffic on restart</p>
+
+<p>　　•　　Merging compaction</p>
+
+<p>　　　　　　– Reduce number of SSTables</p>
+
+<p>　　　　　　– Good place to apply policy “keep only N versions”</p>
+
+<p>　　•　　Major compaction</p>
+
+<p>　　　　　　– Merging compaction that results in only one SSTable</p>
+
+<p>　　　　　　– No deletion records, only live data</p>
+
+<h3 id="section-5">7. 完善措施</h3>
+
+<ul>
+  <li><strong>locality group</strong></li>
+</ul>
+
+<p>　　客户端可以把多个列家族一起分组到一个locality
+group中。我们会为每个tablet中的每个locality
+group大都创建一个单独的SSTable。把那些通常不被一起访问的列家族分割到不同的locality
+group，可以实现更高效的读。</p>
+
+<p>　　除此以外，一些有用的参数，可以针对每个locality
+group来设定。例如，一个locality
+group可以设置成存放在内存中。常驻内存的locality
+group的SSTable，采用被动加载的方式被加载tablet服务器的内存，即只有应用请求SSTable中的数据，而这些数据　　　又不在内存中时，才把SSTable加载到内存。一旦加载，属于这些locality
+group的列家族，就可以被应用直接访问，而不需要读取磁盘。这个特性对于那些被频繁访问的小量数据来说是非常有用的。</p>
+
+<ul>
+  <li><strong>Compression</strong></li>
+</ul>
+
+<p>　　　客户端可以决定是否对相应于某个locality
+group的SSTable进行压缩，如果压缩，应该采用什么格式。用户自定义的压缩格式可以被应用到每个SSTable块中（块的尺寸可以采用与locality
+group相关的参数来进行控制）。虽然对每个块进行单独压缩会损失一些空间，但是，我们可以从另一个方面受益，当解压缩时，只需要对小部分数据进行解压，而不需要解压全部数据。许多客户端都使用“两段自定义压缩模式”。第一遍使用Bentley
+and
+McIlroy[6]模式，它对一个大窗口内的长公共字符串进行压缩。第二遍使用一个快速的压缩算法，这个压缩算法在一个16KB数据量的窗口内寻找重复数据。</p>
+
+<ul>
+  <li><strong>Bloom filters</strong></li>
+</ul>
+
+<p>　　一个读操作必须从构成一个tablet的当前状态的所有SSTable中读取数据。如果这些SSTable不在内存中，我们就不得不需要很多磁盘访问。我们通过下面的方式来减少磁盘访问，即允许客户端来确定，为某个特定locality
+group中的SSTable创建Bloom filter。一个Bloom
+filter允许我们询问，一个SSTabble是否包含属于指定的“行-列队”的特定的数据。对于某个特定的应用，一个用来存储Bloom
+filter的很少量的tablet服务器内存空间，都可以极大减少读操作的磁盘访问次数。我们使用Bloom
+filter也意味着，许多针对目前不存在的行或列的查询，根本就不需要访问磁盘。</p>
+
+]]></content>
+  </entry>
+  
+</feed>

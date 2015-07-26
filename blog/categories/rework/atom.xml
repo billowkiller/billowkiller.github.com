@@ -1,0 +1,772 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: rework | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/categories/rework/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2015-07-26T16:40:05+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Java Log4j]]></title>
+    <link href="http://billowkiller.github.io/blog/2015/07/26/java-log4j/"/>
+    <updated>2015-07-26T15:28:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/07/26/java-log4j</id>
+    <content type="html"><![CDATA[<h2 id="java-log4j-">Java Log4j 使用记录</h2>
+
+<p>Log4j即为Java的日志记录框架，除了Java语言外，它还支持其他的语言接口：C、C++、.Net和PL/SQL。说道日志框架，其他使用较多的日志框架还包括Logback、SLF4J Simple Logging、Java Util Logging，这些日志框架都是大同小异，目的都是用来记录程序运行的状态。它们的区别主要是在用法和性能上，由于日志通常涉及到IO读写磁盘（或者是阻塞或者是异步），这需要耗费时间，假设应用系统的日志比较庞大，对性能要求比较高，那么就需要好好斟酌下使用的框架。这里有个图可以直观感受下几个框架的区别：</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/log%20comparision_zpstrg3kc1m.png" alt="image" /></p>
+
+<p>上图中的数字是每秒的日志写入行数，<a href="https://docs.google.com/spreadsheet/ccc?key=0Alceaf46X4GPdHBoLTdYQ29nRDh6V1dRY00zT1FwWWc&amp;usp=sharing">点击更详细的信息</a>。</p>
+
+<h2 id="hello-word-example">Hello Word Example</h2>
+
+<p>示例是使用maven来组织的。maven用的越多，就越觉得它的方便，不用关心jar包的管理，开发、测试和发布都只需要一行命令，还能还IDE完美的融合。</p>
+
+<p><code>xml pom.xml
+    &lt;dependency&gt;
+        &lt;groupId&gt;log4j&lt;/groupId&gt;
+        &lt;artifactId&gt;log4j&lt;/artifactId&gt;
+        &lt;version&gt;1.2.17&lt;/version&gt;
+    &lt;/dependency&gt;
+</code></p>
+
+<p>创建log4j.properties文件，放在resources文件夹下，这个文件夹的路径是src/main/resources。</p>
+
+<p>``` properties log4j.properties
+# Root logger option
+log4j.rootLogger=DEBUG, stdout, file</p>
+
+<h1 id="redirect-log-messages-to-console">Redirect log messages to console</h1>
+<p>log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.Target=System.out
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n</p>
+
+<h1 id="redirect-log-messages-to-a-log-file-support-file-rolling">Redirect log messages to a log file, support file rolling.</h1>
+<p>log4j.appender.file=org.apache.log4j.RollingFileAppender
+log4j.appender.file.File=C:\log4j-application.log
+log4j.appender.file.MaxFileSize=5MB
+log4j.appender.file.MaxBackupIndex=10
+log4j.appender.file.layout=org.apache.log4j.PatternLayout
+log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
+```</p>
+
+<p>说明下ConversionPattern中的符号和参数：</p>
+
+<ol>
+  <li><code>%d{yyyy-MM-dd HH:mm:ss}</code> 日期和时间</li>
+  <li><code>%-5p</code> 日志优先级, 输出DEBUG、ERROR等. <code>-5</code>是可选的, 格式化输出宽度，为了更好的输出效果.</li>
+  <li><code>%c{1}</code> 是日志名称，通过getLogger()设置, 可以参考<a href="http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html">log4j PatternLayout guide</a>.</li>
+  <li><code>%L</code> 打印日志的句子在源文件中的行数.</li>
+  <li><code>%m%n</code> 打印的日志信息和换行符.</li>
+</ol>
+
+<p>上述设置的输出效果是：</p>
+
+<pre><code>2014-07-02 20:52:39 DEBUG className:200 - This is debug message
+2014-07-02 20:52:39 DEBUG className:201 - This is debug message2
+</code></pre>
+
+<p>``` java HelloExample.java</p>
+
+<p>import org.apache.log4j.Logger;</p>
+
+<p>public class HelloExample{</p>
+
+<pre><code>final static Logger logger = Logger.getLogger(HelloExample.class);
+ 
+public static void main(String[] args) {
+ 
+    HelloExample obj = new HelloExample();
+    obj.runMe("billowkiller");
+}
+ 
+private void runMe(String parameter){
+ 
+    if(logger.isDebugEnabled()) {
+        logger.debug("This is debug : " + parameter);
+    }
+    if(logger.isInfoEnabled()) {
+        logger.info("This is info : " + parameter);
+    }
+    logger.warn("This is warn : " + parameter);
+    logger.error("This is error : " + parameter);
+    logger.fatal("This is fatal : " + parameter);
+    
+    try{
+        1/0;
+    }catch(ArithmeticException ex){
+        logger.error("Sorry, something wrong!", ex);
+    }
+} } ```
+</code></pre>
+
+<p>可以调整配置文件中的<code>log4j.rootLogger</code>设置日志输出的级别和<code>appender</code>，级别从低到高有DEBUG、INFO、WARN、ERROR、FATAL，一般使用INFO和ERROR。</p>
+
+<p>顺便说一句，类似<code>logger.isDebugEnabled()</code>这种句子在源码中实在是不太美观。如果debug中间的信息不影响程序的性能还是不要使用这种句子，因为log4j自己会检查需不需要输出debug信息。</p>
+
+<h3 id="tips">Tips</h3>
+
+<ul>
+  <li>java -calsspath *.jar 加载多个jar包，而多个jar包中可能包含多个log4j.properties的时候，系统自动加载第一个，忽略后面的。也就是说将你想要使用的log4j.properties所包含的jar文件放在classpath的第一个。</li>
+  <li>mvn的package和test可以分别对应两个不同的log4j.properties中，如下：src/main/resources/log4j.properties, src/test/resources/log4j.properties。</li>
+  <li><strong>需要注意程序的输出级别，用户可以定义不同的配置文件来输出不同级别的信息</strong>。这一点尤其重要：
+    <ul>
+      <li>工具是为程序提供服务的，在开发和调试阶段，日志可以帮助我们更好更快地定位bug；在运行维护阶段，日志系统又可以帮我们记录大部分的异常信息，从而帮助我们更好的完善系统。</li>
+      <li>定义好级别和输出的日志信息，配合使用<code>grep</code>等命令行工具，可以更好的帮助我们定位错误。</li>
+      <li>在设计系统之前需要先确定好日志子系统，在什么情况下程序会发生错误，输出什么样的错误信息，在debug和正常运行的时候日志如何调整，error信息是否需要另外打印。</li>
+    </ul>
+  </li>
+</ul>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Static and Dynamic Library]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/08/29/static-and-dynamic-library/"/>
+    <updated>2014-08-29T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/08/29/static-and-dynamic-library</id>
+    <content type="html"><![CDATA[<p>库是写好的现有的，成熟的，可以复用的代码。现实中每个程序都要依赖很多基础的底层库。C默认使用的库就是<code>libc.so</code>。</p>
+
+<p>本质上来说库是一种可执行代码的二进制形式，可以被操作系统载入内存执行。库有两种：静态库（.a、.lib）和动态库（.so、.dll）。</p>
+
+<p>所谓静态、动态是指链接。</p>
+
+<!--more-->
+
+<h2 id="section">编译和链接</h2>
+
+<p>将一个程序编译成可执行程序的步骤：</p>
+
+<ol>
+  <li>
+    <p><strong>预处理：</strong>主要是处理源代码中以“#”开始的预编译指令，以及删除注释，添加行号和文件名标识。</p>
+
+    <pre><code> gcc -E hello.c -o hello.i
+</code></pre>
+  </li>
+  <li>
+    <p><strong>编译：</strong> 把预处理完的文件进行一系列<strong>词法分析</strong>、<strong>语法分析</strong>、<strong>语义分析</strong>以及<strong>优化</strong>后<strong>生成相应的汇编代码文件</strong>。</p>
+
+    <pre><code> gcc -S hello.i -o hello.s 
+</code></pre>
+  </li>
+  <li>
+    <p><strong>汇编：</strong>将汇编代码转变为机器代码。</p>
+
+    <pre><code> as hello.s -o hello.o
+ gcc -c hello.s -o hello.o
+</code></pre>
+  </li>
+  <li>
+    <p><strong>链接：</strong>链接过程主要包括了<strong>地址和空间分配</strong>、<strong>符号决议</strong>和<strong>重定位</strong>。</p>
+
+    <p>链接所要做的工作也就是打补丁，将模块中引用其他模块变量或函数的地方由0修改成其他模块中的地址。这个修正的过程叫做重定位，每个要被修正的地方叫一个重定位入口。</p>
+
+    <pre><code> ld a.o b.o -e main -o ab
+</code></pre>
+  </li>
+</ol>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/gcc_zps9691e38f.png" alt="gcc过程分解" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/compile_zps2febeeff.gif" alt="" /></p>
+
+<h2 id="section-1">静态链接</h2>
+
+<p>链接器异步都采用一种叫两步链接的方法。也就是整个链接过程分两步。</p>
+
+<ul>
+  <li>
+    <p>空间与地址分配</p>
+
+    <p>链接器获得所有输入目标文件的段长度，并且将他们合并，计算出输出文件中各个段合并后的长度和位置，并建立映射关系。</p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/compile2_zps2aaa528b.png" alt="" /></p>
+  </li>
+  <li>
+    <p>符号解析与重定位</p>
+
+    <p>通过空间与地址的分配可以得知，链接器在完成空间与地址的分配之后就可以确定所有符号的虚拟地址了，那么链接器就可以根据符号的地址对每个需要重定位的指令进行地址修正。</p>
+  </li>
+</ul>
+
+<p>在ELF文件中，有个叫做<strong>重定位表</strong>的数据结构专门用来保存这些与重定位相关的信息，它在ELF文件中往往是一个或多个段。.text和.data段各有自己的重定位表，包含信息有<strong>重定位入口</strong>以及<strong>偏移</strong>。</p>
+
+<p>重定位过程中，每个重定位的入口都是对一个符号的引用，当链接器需要对某个符号的引用进行重定位时，它就要确定这个符号的目标地址。这时候链接器就会去查找有所有输入目标文件的符号表组成的<strong>全局符号表</strong>，找到相应的符号后进行重定位。</p>
+
+<p>在链接器扫描完所有的输入目标文件之后，所有这些未定义的符号都应该能够在全局符号表中找到，否则连接器就报<strong>符号未定义</strong>错误。</p>
+
+<p><strong>静态库</strong>可以简单地看成一组目标文件的集合，即很多目标文件经过压缩打包后形成的一个文件。人们使用<code>ar</code>压缩程序将这些目标文件压缩到一起，并且对其进行编号和索引，以便于查找和检索。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/compile3_zps21c35794.png" alt="" /></p>
+
+<h2 id="section-2">可执行文件的装载</h2>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load1_zps072482ca.png" alt="" />
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load2_zpscd53f782.png" alt="" />
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load3_zpsf9324209.png" alt="" />
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load4_zpsc3f80dea.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load5_zps5d1477cf.png" alt="" /></p>
+
+<p>ELF文件中，段的权限往往只有为数不多的几种组合，基本上是三种：</p>
+
+<ul>
+  <li>以代码段为代表的权限为可读可执行的段</li>
+  <li>以数据段和.bss段为代表的可读可写段</li>
+  <li>以制度数据段为代表的权限为只读的段</li>
+</ul>
+
+<p>操作系统通过给进程空间划分出一个个VMA来管理进程的虚拟空间，基本原则是将相同权限属性的、有相同映像文件的映射成一个VMA，这样可以减少页面内部碎片，从而节省了内存空间：</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load6_zpsde691d1c.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load7_zps0008209b.png" alt="" /></p>
+
+<p>操作系统堆的最大申请空间会受到操作系统版本、程序本身大小、用到的动态/共享库数量、大小、程序栈数量、大小的等的影响。甚至有可能每次运行的结果都会不同，因为有些操作系统使用了一种叫做随机地址空间分布的技术，使得进程的堆空间变小。</p>
+
+<h3 id="section-3">程序的执行过程</h3>
+
+<p>首先在用户层面，bash进程会调用<code>fork()</code>系统调用创建一个新的进程，新的进程调用<code>execve()</code>系统调用执行指定的ELF，原先的bash进程继续返回等待刚才启动的新进程结束，然后继续等待用户输入命令。</p>
+
+<p>系统通过文件开头的魔数判断是ELF文件后调用<code>load_elf_binary()</code>;</p>
+
+<ol>
+  <li>检测ELF可执行文件格式的有效性</li>
+  <li>寻找动态链接的“.interp”段，设置动态连接器路径</li>
+  <li>根据ELF可执行文件的程序头表的描述，对ELF文件进行映射，比如代码、数据、只读数据。</li>
+  <li>初始化ELF进程环境</li>
+  <li>将系统调用的返回地址修改成ELF可执行文件的入口点，这个入口点取决于程序的连接方式，对于静态连接的ELF可执行文件，这个入口就是ELF文件的文件头中的<code>e_entry</code>所指向的地址；对于动态链接的ELF可执行文件，入口点就是动态链接器。</li>
+</ol>
+
+<p>指令寄存器设置成程序的入口点，启动程序。</p>
+
+<p><strong>系统的动态链接器会将程序所需要的所有动态链接库装载到进程的地址空间，并且将程序中所有未决议的符号绑定到相应的动态链接库中，并进行重定位工作。</strong></p>
+
+<p>我们在静态链接时提到过重定位，那时的重定位叫做<strong>链接时重定位</strong>（Link Time Relocation） ， 而现在这种情况经常被称为<strong>装载时重定位</strong>（Load Time Relocation）。</p>
+
+<p>所以说装载时重定位一个很大的缺点就是指令部分无法在多个进程之间共享，这样就失去了动态链接节省内存的一大优势。 解决方法就是把指令中那些需要被修改的部分分离出来，跟数据部分放在一起，这样指令部分就可以保持不变， 而数据部分可以在进程中拥有一个副本。这种方案被称为 <strong>地址无关代码</strong>（PIC, Position-independent Code）技术。目的是希望程序模块中共享的指令部分在装载时不需要因为装载地址的改变而改变。</p>
+
+<h2 id="section-4">动态链接</h2>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/dl1_zps2e9939ac.png" alt="" /></p>
+
+<p>为什么需要动态库，其实也是静态库的特点导致。</p>
+
+<ul>
+  <li>空间浪费是静态库的一个问题。</li>
+  <li>另一个问题是静态库对程序的更新、部署和发布页会带来麻烦。如果静态库liba.lib更新了，所以使用它的应用程序都需要重新编译、发布给用户（对于玩家来说，可能是一个很小的改动，却导致整个程序重新下载，全量更新）。</li>
+</ul>
+
+<p>动态库在程序编译时并不会被连接到目标代码中，而是等到程序要运行时才进行链接。<strong>不同的应用程序如果调用相同的库，那么在内存里只需要有一份该共享库的实例，规避了空间浪费问题</strong>。动态库在程序运行是才被载入，也解决了静态库对程序的更新、部署和发布页会带来麻烦。用户只需要更新动态库即可，<strong>增量更新</strong>。</p>
+
+<p>动态库特点总结：</p>
+
+<ul>
+  <li>动态库把对一些库函数的链接载入推迟到程序运行的时期。</li>
+  <li>动态链接的方式使得开发过程中各个模块更加独立、耦合度更小，便于不同的开发者和开发组织之间进行独立的开发和测试。</li>
+  <li>程序在运行时可以动态的选择加载各种程序模块，使得插件成为可能。</li>
+</ul>
+
+<p>动态链接过程：</p>
+
+<p><strong>链接时重定位（静态链接）；装载时重定位（动态链接）</strong></p>
+
+<p><strong>地址无关代码</strong>：PIC，Position-independent Code，把指令中那些需要修改的部分分离出来，跟数据部分放在一起，这样指令部分就可以保持不变，而数据部分可以再每个进程中拥有个副本。</p>
+
+<p>对于现代机器来说，产生地址无关的代码并不麻烦。我们首先把共享对象模块中的地址引用按照是否为跨模块分成两类： 模块内部引用和模块外部引用；按照不同的引用方式又可以分为指令引用和数据访问。 这样我们就得到了如下4种情况：</p>
+
+<ol>
+  <li>模块内部的函数调用、跳转等；</li>
+  <li>模块内部的数据访问，比如模块中定义的全局变量、静态变量；</li>
+  <li>模块外部的函数调用、跳转等；</li>
+  <li>模块外部的数据访问，比如其它模块中定义的全局变量；</li>
+</ol>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/dl2_zps9afd4901.png" alt="" /></p>
+
+<p><strong>动态链接比静态链接慢</strong>的主要原因是动态链接下对于全局静态的数据访问要进行复杂的GOT定位,然后间接寻址.</p>
+
+<p><strong>延迟绑定：</strong></p>
+
+<p>由于很多函数在程序执行过程中不一定被用到（错误处理函数，特殊功能模块），ELF采用一种叫做 <strong>延迟绑定（Lazy Binding）</strong>的做法， 基本思想就是当函数第一次被用到时才进行绑定（符号查找、重定位等），如果没有用到则不进行绑定。可以大大加快程序的启动速度。</p>
+
+<p>ELF使用PLT（Procedure Linkage Table）的方法来实现延迟绑定。PLT大致的工作原理如下：每个外部函数在PLT中都有一个相应的项，如果链接器在初始化阶段已经初始化该项，并且将函数地址填入该项，那么直接跳转到这个地址，实现函数的正确调用。否则调用_dl_runtime_resolve()函数，该函数利用重定位表完成符号解析和重定位工作。解析结束后将地址填入对应的项中。</p>
+
+<p><strong>ELF中的字段：</strong></p>
+
+<p>在动态链接的ELF可执行文件中，有一个专门的段叫做“.interp”，该段保存了需要的动态链接器需路径，一般是/lib/ld-linux.so.2。</p>
+
+<p>动态链接ELF中最重要的结构应该是“.dynamic”段，这个段里面保存了动态连接器所需要的基本信息，比如依赖哪些共享对象、动态链接符号表的位置、动态链接重定位表的位置、共享对象初始化代码的地址等。</p>
+
+<p>为了表示动态链接这些模块之间的符号导出与导入关系，ELF专门有一个叫做动态符号表的段用来保存这些信息。这个段叫做“.dynsym”。</p>
+
+<p>动态链接的文件中，也有类似静态链接的重定位表，分别叫做“.rel.dyn”和“.rel.plt”，他们分别相当于“.rel.text”和“.rel.data”。</p>
+
+<p><strong>动态链接的步骤和实现</strong>：</p>
+
+<p>动态链接的步骤基本分为三步：先启动动态连接器本身，然后装载所有需要的共享对象，最后是重定位和初始化。</p>
+
+<p>但是对于动态链接器本身来说，它的重定位工作是由谁来完成的？ 动态连接器本身通过自举（Bootstrap）来完成。完成基本自举之后，动态连接器将可执行文件和连接器本身的符号表都合并到一个符号表当中，我们可以称它为全局符号表（Global Symbol Table）。</p>
+
+<p>动态连接器按照各个模块之间的依赖关系，当有两个不同的模块定义了同一个符号时怎么办？当一个符号需要被加入全局符号表时，如果相同的符号已经存在，则后加入的符号被忽略。</p>
+
+<p><strong>显示运行时链接：</strong></p>
+
+<p>动态库的装载则是通过一些列由动态连接器提供的API，具体是4个函数：打开动态库（<code>dlopen</code>）、查找符号（<code>dlsym</code>）、错误处理（<code>dlerror</code>）、以及关闭动态库（<code>dlclose</code>）。</p>
+
+<p><code>dlopen()</code>函数用来打开动态库，并将其加载到进程的地址空间，完成初始化过程。</p>
+
+<pre><code>void  *dlopen(const char *filename, int flag);
+</code></pre>
+
+<p><code>dlsym()</code>，我们通过该函数找到所需要的符号。</p>
+
+<pre><code>dlsym(void  *handle,  char  *symbol);
+</code></pre>
+
+<h3 id="c">显式调用C++动态库注意点</h3>
+
+<p>对C++来说，情况稍微复杂。显式加载一个C++动态库的困难一部分是因为C++的name mangling；另一部分是因为没有提供一个合适的API来装载类，在C++中，您可能要用到库中的一个类，而这需要创建该类的一个实例，这不容易做到。</p>
+
+<p>name mangling可以通过<code>extern "C"</code>解决。C++有个特定的关键字用来声明采用C binding的函数：<code>extern "C"</code> 。用 <code>extern "C"</code>声明的函数将使用函数名作符号名，就像C函数一样。因此，只有非成员函数才能被声明为<code>extern "C"</code>，并且不能被重载。尽管限制多多，<code>extern "C"</code>函数还是非常有用，因为它们可以象C函数一样被<code>dlopen</code>动态加载。冠以<code>extern "C"</code>限定符后，并不意味着函数中无法使用C++代码了，相反，它仍然是一个完全的C++函数，可以使用任何C++特性和各种类型的参数。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Classical Sync Problem]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/08/23/classical-sync-problem/"/>
+    <updated>2014-08-23T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/08/23/classical-sync-problem</id>
+    <content type="html"><![CDATA[<p>简单的记录下，后期再整理吧。</p>
+
+<hr />
+
+<h2 id="section">生产者、消费者</h2>
+
+<h3 id="section-1">多个生产者，单个消费者</h3>
+
+<!--more-->
+
+<p><strong>1. 使用互斥锁 &amp;&amp; 条件变量</strong></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc1_zps5e6026ee.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc2_zps96f163b4.png" alt="" /></p>
+
+<p><strong>2. 使用信号量</strong></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc3_zps90f678c0.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc4_zpsff637264.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc5_zpsc1ce838d.png" alt="" /></p>
+
+<h3 id="section-2">多个生产者，多个消费者</h3>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc6_zps5fd624fc.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc7_zps77aab9e4.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc8_zps7ec189ae.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc9_zps88ec073a.png" alt="" /></p>
+
+<h2 id="section-3">多个缓冲区读写</h2>
+
+<p>最简单的双缓冲区示意图</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/db1_zps098b0d0f.png" alt="" /></p>
+
+<p><strong>多缓冲区生产者消费者代码</strong></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/db2_zps9fda343a.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/db3_zps03dac974.png" alt="" /></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Design Pattern Abstraction]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/08/22/design-pattern/"/>
+    <updated>2014-08-22T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/08/22/design-pattern</id>
+    <content type="html"><![CDATA[<p>本文是对设计模式的一个备忘录，仅是做了些摘要，具体的设计模式学习还得看GOF。</p>
+
+<p>这儿也有一个还不错的博客<a href="http://blog.csdn.net/zhengzhb/article/category/926691">http://blog.csdn.net/zhengzhb/article/category/926691</a>。</p>
+
+<hr />
+
+<p>面向对象设计（OOD）核心原则是<strong>高内聚低耦合</strong>。</p>
+
+<ul>
+  <li><em>高内聚</em>是指某个特定模块（程序，类型）都应完成一系列相关功能，描述了不同程序，类型中方法，方法中不同操作描述的逻辑之间的距离相近。高内聚意味可维护性，可重新性，因为模块对外部的依赖少（功能的完备性）。</li>
+  <li><em>耦合</em>是描述模块之间的依赖程度。低耦合是我们的设计目的，但不是不存在耦合不存依赖，依赖是必须的，因为模块之间必须通信交互，不过应该设计依赖于不变或者不易变的接口，无需了解模块的具体实现（OO封装性）。</li>
+</ul>
+
+<p>使用<strong>设计模式</strong>是为了提高代码的工程化，提供更加高内聚、低耦合的代码。同时可重用代码、让代码更容易被他人理解、保证代码可靠性。套用一句话就是：</p>
+
+<blockquote>
+  <p>每个模式描述了一个在我们周围不断重复发生的问题，已经该问题的解决方案的核心。这样我们就能一次又一次地使用该方案而不必做重复劳动。</p>
+</blockquote>
+
+<p>设计模式分为三种类型，共23种。</p>
+
+<ul>
+  <li><strong>创建型模式：</strong>单例模式、抽象工厂模式、建造者模式、工厂模式、原型模式。</li>
+  <li><strong>结构型模式：</strong>适配器模式、桥接模式、装饰模式、组合模式、外观模式、享元模式、代理模式。</li>
+  <li><strong>行为型模式：</strong>模版方法模式、命令模式、迭代器模式、观察者模式、中介者模式、备忘录模式、解释器模式、状态模式、策略模式、职责链模式、访问者模式。</li>
+</ul>
+
+<!--more-->
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/dp1_zps74894e4d.png" alt="" /></p>
+
+<h2 id="section">创建型模式</h2>
+
+<h3 id="factory">工厂模式（Factory）</h3>
+
+<p>定义一个用于创建对象的接口，让子类决定实例化哪一个类。Factory Method 使一个类的实例化延迟到其子类。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>当一个类不知道它所必须创建的对象的类的时候。</li>
+  <li>当一个类希望由它的子类来指定它所创建的对象的时候。</li>
+  <li>当类将创建对象的职责委托给多个帮助子类中的某一个，并且你希望将哪一个帮助子类是代理者这一信息局部化的时候。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/factory_zpsc31117cb.gif" alt="" /></p>
+
+<h3 id="abstract-factory">抽象工厂模式（Abstract Factory）</h3>
+
+<p>提供一个创建一系列相关或相互依赖对象的接口，而无需指定它们具体的类。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>一个系统要独立于它的产品的创建、组合和表示时。</li>
+  <li>一个系统要由多个产品系列中的一个来配置时。</li>
+  <li>当你要强调一系列相关的产品对象的设计以便进行联合使用时。</li>
+  <li>当你提供一个产品类库，而只想显示它们的接口而不是实现时。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/abstractfactory_zpsf3be4cdd.gif" alt="" /></p>
+
+<h3 id="builder">建造者模式（Builder）</h3>
+
+<p>将一个复杂对象的构建与它的表示分离，使得同样的构建过程可以创建不同的表示。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>当创建复杂对象的算法应该独立于该对象的组成部分以及它们的装配方式时。</li>
+  <li>当构造过程必须允许被构造的对象有不同的表示时。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/builder_zps7d31e2f5.gif" alt="" /></p>
+
+<h3 id="prototype">原型模式（Prototype）</h3>
+
+<p>用原型实例指定创建对象的种类，并且通过拷贝这些原型创建新的对象。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>当要实例化的类是在运行时刻指定时，例如，通过动态装载；或者</li>
+  <li>为了避免创建一个与产品类层次平行的工厂类层次时；或者</li>
+  <li>当一个类的实例只能有几个不同状态组合中的一种时。建立相应数目的原型并克隆它们可能比每次用合适的状态手工实例化该类更方便一些。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/prototype_zpsb4a5c2aa.gif" alt="" /></p>
+
+<h2 id="section-1">结构型模式</h2>
+
+<h3 id="adapter">适配器模式（Adapter）</h3>
+
+<p>将一个类的接口转换成另外一个客户希望的接口。Adapter模式使得原本由于接口不兼容而不能一起工作的那些类可以一起工作。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>你想使用一个已经存在的类，而它的接口不符合你的需求。</li>
+  <li>你想创建一个可以复用的类，该类可以与其他不相关的类或不可预见的类（即那些接口可能不一定兼容的类）协同工作。</li>
+  <li>（仅适用于对象Adapter）你想使用一些已经存在的子类，但是不可能对每一个都进行子类化以匹配它们的接口。对象适配器可以适配它的父类接口。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/adapter_zps1800d0cc.gif" alt="" /></p>
+
+<h3 id="decorator">装饰模式（Decorator）</h3>
+
+<p>动态地给一个对象添加一些额外的职责。就增加功能来说，Decorator模式相比生成子类更为灵活。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>在不影响其他对象的情况下，以动态、透明的方式给单个对象添加职责。</li>
+  <li>处理那些可以撤消的职责。</li>
+  <li>当不能采用生成子类的方法进行扩充时。一种情况是，可能有大量独立的扩展，为支持每一种组合将产生大量的子类，使得子类数目呈爆炸性增长。另一种情况可能是因为类定义被隐藏，或类定义不能用于生成子类。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/Decorator_zpse3f223d4.gif" alt="" /></p>
+
+<h2 id="section-2">行为型模式</h2>
+
+<h3 id="observer">观察者模式（Observer）</h3>
+
+<p>定义对象间的一种一对多的依赖关系,当一个对象的状态发生改变时, 所有依赖于它的对象都得到通知并被自动更新。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>当一个抽象模型有两个方面, 其中一个方面依赖于另一方面。将这二者封装在独立的对象中以使它们可以各自独立地改变和复用。</li>
+  <li>当对一个对象的改变需要同时改变其它对象, 而不知道具体有多少对象有待改变。</li>
+  <li>当一个对象必须通知其它对象，而它又不能假定其它对象是谁。换言之，你不希望这些对象是紧密耦合的。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/observer_zps892df2a6.gif" alt="" /></p>
+
+<h3 id="state">状态模式（State）</h3>
+
+<p>允许一个对象在其内部状态改变时改变它的行为。对象看起来似乎修改了它的类。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>一个对象的行为取决于它的状态, 并且它必须在运行时刻根据状态改变它的行为。</li>
+  <li>一个操作中含有庞大的多分支的条件语句，且这些分支依赖于该对象的状态。这个状态通常用一个或多个枚举常量表示。通常, 有多个操作包含这一相同的条件结构。State模式将每一个条件分支放入一个独立的类中。这使得你可以根据对象自身的情况将对象的状态作为一个对象，这一对象可以不依赖于其他对象而独立变化。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/state_zps349fba82.gif" alt="" /></p>
+
+<h3 id="strategy">策略模式（Strategy）</h3>
+
+<p>定义一系列的算法,把它们一个个封装起来, 并且使它们可相互替换。本模式使得算法可独立于使用它的客户而变化。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>许多相关的类仅仅是行为有异。“策略”提供了一种用多个行为中的一个行为来配置一个类的方法。</li>
+  <li>需要使用一个算法的不同变体。例如，你可能会定义一些反映不同的空间/时间权衡的算法。当这些变体实现为一个算法的类层次时，可以使用策略模式。</li>
+  <li>算法使用客户不应该知道的数据。可使用策略模式以避免暴露复杂的、与算法相关的数据结构。</li>
+  <li>一个类定义了多种行为, 并且这些行为在这个类的操作中以多个条件语句的形式出现。将相关的条件分支移入它们各自的Strategy类中以代替这些条件语句。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/strategy_zpsc3f3c44b.gif" alt="" /></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Modules in Network Programming]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/08/04/modules-in-network-programming/"/>
+    <updated>2014-08-04T09:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/08/04/modules-in-network-programming</id>
+    <content type="html"><![CDATA[<p>发现自己总喜欢把各种东西混合在一块，所以这又是一篇长文…</p>
+
+<p>本文将会介绍网络编程中的几种模型，包括<strong>I/O模型、服务器编程模型、事件模型、并发模型</strong>。</p>
+
+<hr />
+
+<h2 id="io">I/O模型</h2>
+
+<p>I/O模型包括<strong>阻塞模型、非阻塞模型、信号量驱动模型、多路复用模型、异步模型</strong>。</p>
+
+<p>总体来说包括两大类：</p>
+
+<ol>
+  <li><strong>同步I/O，向程序通知的是I/O就绪事件</strong>，由程序完成读写。包括前四类I/O模型。</li>
+  <li><strong>异步I/O，向程序通知的是I/O完成事件</strong>，读写操作由内核完成。</li>
+</ol>
+
+<!--more-->
+
+<h3 id="section">阻塞模型</h3>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig01_zpsae5d27ed.gif" alt="" /></p>
+
+<p>在这个模型中，用户空间的应用程序执行一个系统调用，这会导致应用程序阻塞。这意味着应用程序会一直阻塞，直到系统调用完成为止（数据传输完成或发生错误）。调用应用程序处于一种不再消费 CPU 而只是简单等待响应的状态，因此从处理的角度来看，这是非常有效的。</p>
+
+<p>其行为非常容易理解，其用法对于典型的应用程序来说都非常有效。在调用 read 系统调用时，应用程序会阻塞并对内核进行上下文切换。然后会触发读操作，当响应返回时（从我们正在从中读取的设备中返回），数据就被移动到用户空间的缓冲区中。然后应用程序就会解除阻塞（read 调用返回）。</p>
+
+<p><strong>阻塞模型在阻塞的时候可能会被信号量中断！！</strong></p>
+
+<h3 id="section-1">非阻塞模型</h3>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig02_zps85e3fe38.gif" alt="" /></p>
+
+<p>非阻塞的实现是I/O命令可能并不会立即满足，需要应用程序调用许多次来等待操作完成。这可能效率不高，因为在很多情况下，当内核执行这个命令时，应用程序必须要进行忙碌等待，直到数据可用为止，或者试图执行其他工作。这个方法可以引入I/O操作的延时，因为数据在内核中变为可用到用户调用 read 返回数据之间存在一定的间隔，这会导致整体数据吞吐量的降低。</p>
+
+<p>当一个应用程序在一个非阻塞的描述符上反复的调用system call的时候，我们称之为<strong>轮询（polling）</strong>。</p>
+
+<h3 id="io-1">I/O复用模型</h3>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig03_zps1ba406e3.gif" alt="" /></p>
+
+<p>I/O复用模型会用到select或者poll函数，这两个函数也会使进程阻塞，但是和阻塞I/O所不同的是，这两个函数可以同时阻塞多个I/O操作。而且可以同时对多个读操作，多个写操作的I/O函数进行检测，直到有数据可读或可写时，才真正调用I/O操作函数。</p>
+
+<h3 id="io-2">信号驱动I/O模型</h3>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig04_zpsb2f0f6ff.gif" alt="" /></p>
+
+<p>首先我们允许套接口进行信号驱动I/O,并安装一个信号处理函数，进程继续运行并不阻塞。当数据准备好时，进程会收到一个SIGIO信号，可以在信号处理函数中调用I/O操作函数处理数据。</p>
+
+<h3 id="io-3">异步I/O模型</h3>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig05_zps636d96a6.gif" alt="" /></p>
+
+<p>调用<code>aio_read</code>函数，告诉内核描述字，缓冲区指针，缓冲区大小，文件偏移以及通知的方式，然后立即返回。当内核将数据拷贝到缓冲区后，再通知应用程序。</p>
+
+<p>这个操作和信号驱动的区别就是：<strong>异步模式等操作完毕后才通知用户程序而信号驱动模式在数据到来时就通知用户程序。</strong></p>
+
+<h3 id="io-4">几种I/O模型的比较</h3>
+
+<p><img src="http://www.blogjava.net/images/blogjava_net/lihao336/o_untitled6_thumb.png" alt="" /></p>
+
+<h2 id="section-2">服务器编程模型</h2>
+
+<p>有个简单的总结<a href="http://www.cnblogs.com/hnrainll/archive/2011/10/13/2210481.html">http://www.cnblogs.com/hnrainll/archive/2011/10/13/2210481.html</a></p>
+
+<h3 id="section-3">多进程服务器模型</h3>
+
+<p>服务器进程接受连接，fork一个子进程为客户服务，然后等待下一个连接。
+多进程模型<strong>适用于单个客户服务需要消耗较多的CPU资源</strong>，例如需要进行大规模或长时间的数据运算或文件访问。多进程模型具有<strong>较好的安全性</strong>。</p>
+
+<pre><code>pid_t pid;
+int listenfd, connfd;
+
+listenfd = Socket( ... );
+Bind(listenfd, ...);
+Listen(listenfd, LISTENQ)
+
+while(1) {
+	connfd = Accept(listenfd, ...); /* probably blocks */
+	if( (pid = Fork()) == 0 ) {
+		Close(listenfd); /* child closes listenning socket */
+		process(connfd); /* process the request */
+		Close(connfd);   /* done with this client */
+		exit(0);		 /* terminate */
+	}
+	Close(connfd);       /* parent closes connected socket */
+}
+</code></pre>
+
+<p>需要仔细体会下，为什么父进程要加最后一个<code>Close</code>。</p>
+
+<h3 id="section-4">单线程模型</h3>
+
+<p>具体实现方式在UNP3e第30章中。</p>
+
+<p>在高性能的网络程序中，使用得最为广泛的恐怕要数“non-blocking IO + IO multiplexing”这种模型，即 Reactor 模式。</p>
+
+<p>在“non-blocking IO + IO multiplexing”这种模型下，程序的基本结构是一个事件循环 (event loop)。它的优点很明显，编程简单，效率也不错。不仅网络读写可以用，连接的建立（connect/accept）甚至 DNS 解析都可以用非阻塞方式进行，以提高并发度和吞吐量 (throughput)。<strong>对于 IO 密集的应用是个不错的</strong>。</p>
+
+<h3 id="section-5">多线程模型</h3>
+
+<p>和多进程模型类似，服务器进程接受连接，新建一个线程为客户服务，然后等待下一个连接。和多进程相比，由于进程消耗的资源比线程大的多，因此，<strong>在需要为较多客户端服务的时候，优先使用多线程</strong>。</p>
+
+<p>具体大概有这么几种做法：</p>
+
+<ol>
+  <li>每个请求创建一个线程，使用阻塞式 IO 操作。在 Java 1.4 引入 NIO 之前，这是 Java 网络编程的推荐做法。可惜伸缩性不佳。</li>
+  <li>使用线程池，同样使用阻塞式 IO 操作。与 1 相比，这是提高性能的措施。</li>
+  <li>使用 non-blocking IO + IO multiplexing。即 Java NIO 的方式。non-blocking IO + one loop per thread 模式。</li>
+  <li>Leader/Follower 等高级模式</li>
+</ol>
+
+<h2 id="section-6">事件处理模型</h2>
+
+<p>一般地,I/O多路复用机制都依赖于一个<strong>事件多路分离器</strong>(Event Demultiplexer)。<u>分离器对象可将来自事件源的I/O事件分离出来，并分发到对应的read/write事件处理器(Event Handler)</u>。开发人员预先注册需要处理的事件及其<strong>事件处理器</strong>（或回调函数）；事件分离器负责将请求事件传递给事件处理器。两个与事件分离器有关的模式是Reactor和Proactor。Reactor模式采用同步IO，而Proactor采用异步IO。</p>
+
+<p><strong>Reactor框架中用户定义的操作是在实际操作之前调用的</strong>。比如你定义了操作是要向一个SOCKET写数据，那么当该SOCKET可以接收数据的时候，你的操作就会被调用；而<strong>Proactor框架中用户定义的操作是在实际操作之后调用的</strong>。比如你定义了一个操作要显示从SOCKET中读入的数据，那么当读操作完成以后，你的操作才会被调用。</p>
+
+<h3 id="reactor">Reactor</h3>
+
+<p>在Reactor中，事件分离器负责等待文件描述符或socket为读写操作准备就绪，然后将就绪事件传递给对应的处理器，最后由处理器负责完成实际的读写工作。</p>
+
+<p><strong>以读操作为例：</strong></p>
+
+<ul>
+  <li>注册读就绪事件和相应的事件处理器</li>
+  <li>事件分离器等待事件</li>
+  <li>事件到来，激活分离器，分离器调用事件对应的处理器。</li>
+  <li>事件处理器完成实际的读操作，处理读到的数据，注册新的事件，然后返还控制权。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/reactor_zpsc844d1e5.png" alt="" /></p>
+
+<h3 id="proactor">Proactor</h3>
+
+<p>在Proactor模式中，处理器–或者兼任处理器的事件分离器，只负责发起异步读写操作。IO操作本身由操作系统来完成。传递给操作系统的参数需要包括用户定义的数据缓冲区地址和数据大小，操作系统才能从中得到写出操作所需数据，或写入从socket读到的数据。事件分离器捕获IO操作完成事件，然后将事件传递给对应处理器。比如，在windows上，处理器发起一个异步IO操作，再由事件分离器等待IOCompletion事件。典型的异步模式实现，都建立在操作系统支持异步API的基础之上，我们将这种实现称为“系统级”异步或“真”异步，因为应用程序完全依赖操作系统执行真正的IO工作。</p>
+
+<p><strong>以读操作为例：</strong></p>
+
+<ul>
+  <li>处理器发起异步读操作（注意：操作系统必须支持异步IO）。在这种情况下，处理器无视IO就绪事件，它关注的是完成事件。</li>
+  <li>事件分离器等待操作完成事件</li>
+  <li>在分离器等待过程中，操作系统利用并行的内核线程执行实际的读操作，并将结果数据存入用户自定义缓冲区，最后通知事件分离器读操作完成。</li>
+  <li>事件分离器呼唤处理器。</li>
+  <li>事件处理器处理用户自定义缓冲区中的数据，然后启动一个新的异步操作，并将控制权返回事件分离器。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/proactor_zpsc40c6bf2.png" alt="" /></p>
+
+<h3 id="section-7">总结</h3>
+
+<p>可以看出，两个模式的相同点，都是对某个IO事件的事件通知(即告诉某个模块，这个IO操作可以进行或已经完成)。在结构上，两者也有相同点：demultiplexor负责提交IO操作(异步)、查询设备是否可操作(同步)，然后当条件满足时，就回调handler；不同点在于，异步情况下(Proactor)，当回调handler时，表示IO操作已经完成；同步情况下(Reactor)，回调handler时，表示IO设备可以进行某个操作(can read or can write)。</p>
+
+<h3 id="ioproactor">同步I/O模拟Proactor</h3>
+
+<p>原理：主线程执行数据读写操作，读写完成后，主线程向工作线程通知这一“完成事件”。那么从工作线程的角度来看，它们就直接获得了数据读写的结果，接下来要做的知识对读写的结果进行逻辑处理。</p>
+
+<p>使用同步I/O模拟出的Proactor模式的工作流程如下：</p>
+
+<ol>
+  <li>主线程往epoll内核事件表中注册socket上的读就绪事件。</li>
+  <li>主线程调用<code>epoll_wait</code>等待socket上有数据可读。</li>
+  <li>当socket上有数据可读时，<code>epoll_wait</code>通知主线程。主线程从socket循环读取数据，知道没有更多数据可读，然后将读取到的数据封装成一个请求对象并插入请求队列。</li>
+  <li>水木在请求队列上的某个工作线程被唤醒，它获得请求对象并处理客户请求，然后往epoll内核事件表中注册socket上的写就绪事件。</li>
+  <li>主线程调用<code>epoll_wait</code>等待socket可写。</li>
+  <li>当socket可写时，<code>epoll_wait</code>通知主线程，主线程往socket上写入服务器处理客户请求结果。</li>
+</ol>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/aproactor_zps46fafc76.png" alt="" /></p>
+
+<h2 id="section-8">并发模型</h2>
+
+<h3 id="section-9">半异步、半同步</h3>
+
+<p>半异步、半同步模式是reactor模式的一个进化，非完全异步，而是通过队列把reactor分成了2个部分：同步部分，异步部分。</p>
+
+<p>同步，是因为队列是block的，这部分采用多线程，提高吞吐量
+reactor部分是单线程的异步的。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/hahs_zps02b41fb9.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/hahs1_zpsb6c7b413.png" alt="" /></p>
+
+<h3 id="leaderfollower">Leader/Follower</h3>
+
+<p>多线程网络服务最简单的方式就是一个连接一个线程，这种模型当客户端连接数快速增长是就会出现性能瓶颈。当然，这时候，我们理所当然会考虑使用线程池，而任何池的使用，都会带来一个管理和切换的问题。 在java 1.4中引入了NIO编程模型，它采用了Reactor模式，或者说观察者模式，由于它的读写操作都是无阻塞的，使得我们能够只用一个线程处理所有的IO事件，这种处理方式是同步的。为了提高性能，当一个线程收到事件后，会考虑启动一个新的线程去处理，而自己继续等待下一个请求。这里可能会有性能问题，就是把工作交给别一个线程的时候的上下文切换，包括数据拷贝。Leader-Follower模型可以用来解决这个问题。</p>
+
+<p><img src="http://my.csdn.net/uploads/201206/30/1341045549_7751.jpg" alt="" /></p>
+
+<p>所有线程会有三种身份中的一种：leader和follower，以及一个干活中的状态：proccesser。它的基本原则就是，永远最多只有一个leader。而所有follower都在等待成为leader。线程池启动时会自动产生一个Leader负责等待网络IO事件，当有一个事件产生时，Leader线程首先通知一个Follower线程将其提拔为新的Leader，然后自己就去干活了，去处理这个网络事件，处理完毕后加入Follower线程等待队列，等待下次成为Leader。这种方法可以增强CPU高速缓存相似性，及消除动态内存分配和线程间的数据交换。</p>
+
+<p>显然地，通过预先分配一个线程池，Leader/Follower设计避免了动态线程创建和销毁的额外开销。将线程放在一个自组织的池中，而且无需交换数据，这种方式将上下文切换、同步、数据移动和动态内存管理的开销都降到了最低。</p>
+
+<p>不过，这种模式在处理短暂的、原子的、反复的和基于事件的动作上可以取得明显的性能提升，比如接收和分发网络事件或者向数据库存储大量数据记录。事件处理程序所提供的服务越多，其体积也就越大，而处理一个请求所需的时间越长，池中的线程占用的资源也就越多，同时也需要更多的线程。相应的，应用程序中其它功能可用的资源也就越少，从而影响到应用程序的总体性能、吞吐量、可扩展性和可用性。</p>
+
+<p>在大多数LEADER/FOLLOWERS设计中共享的事件源封装在一个分配器组件中。如果在一个设计中联合使用了LEADER/FOLLOWERS和REACTOR事件处理基础设施，由reactor组件进行分发。封装事件源将事件分离和分派机制与事件处理程序隔离开来。每个线程有两个方法：一个是join方法，使用这个方法可以把新初始化的线程加入到池中。新加入的线程将自己的执行挂起到线程池监听者条件(monitor condition)上，并开始等待被提升为新的Leader。在它变成一个Leader之后，它便可以访问共享的事件源，等待执行下一个到来的事件。另一个是promote_new_leader方法，当前的Leader线程使用这个方法可以提升新的Leader，其做法是通过线程池监听者条件通知休眠的Follower。收到通知的Follower继续执行(resume)线程池的join方法，访问共享事件源，并等待下一个事件的到来。</p>
+]]></content>
+  </entry>
+  
+</feed>

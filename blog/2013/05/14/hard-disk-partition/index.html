@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Hard Disk Partition - Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2013/05/14/hard-disk-partition">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        Hard Disk Partition
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><p><em>
+edited
+from <a href="http://vbird.dic.ksu.edu.tw/linux_basic/0130designlinux.php#partition_name">vbird</a> 
+	All picture
+© <a href="http://vbird.dic.ksu.edu.tw/linux_basic/0130designlinux.php#partition_name">vbird</a>
+</em>
+* * * * *</p>
+
+<p>在windows中我们可以很容易的发现磁盘盘符C，D，E等，这些盘符到底是什么呢，从磁盘管理器中又可以知道有主分区，逻辑分区，扩展分区等分区，这些东东也就是Partition了，那么他们又是一些什么东西呢，记得以前装windows用时，发现给C盘分配的盘符太小了，想要扩大一些C盘，试了好长时间，才发现要从临近的盘符，也就是D盘划分一部分给C盘，其他盘符都不行，而D盘就是所谓的逻辑分区，这个逻辑分区要先变成扩展分区，然后再又扩展分区转化为主分区，接下来这两个主分区也就是C盘和分割下来的一部分空间也就可以合并了。那么又是为什么这么麻烦呢？这就是接下来要说的了。</p>
+
+<p>在磁盘的第一分区中，装载有MBR(Master Boot
+Record)，这是可以安装启动管理程序的地方，有446 bytes；还有分割表(partition
+table)：记录整颗硬盘分割的状态，有64
+bytes。MBR是系统在启动的时候会主动去读取的内容，多系统就是靠这块来选择的；分割表就是系统用来确定分区的，也就是分区地址的索引，它将硬盘进行逻辑上的切割，然后用分割表来记录所包含的逻辑地址。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/partition-1.png" alt="磁盘分区" /></p>
+
+<p>假设上面的硬盘装置档名为/dev/hda时，那么这四个分割槽在Linux系统中的装置档名如下所示:</p>
+
+<ul>
+  <li>P1:/dev/hda1</li>
+  <li>P1:/dev/hda2</li>
+  <li>P1:/dev/hda3</li>
+  <li>
+    <p>P1:/dev/hda4
+<!--more-->
+由于分割表就只有64 bytes而已，最多只能容纳四笔分割的记录，
+这四个分割的记录被称为主要(Primary)或延伸(Extended)分割槽。你的系统程序也就存储在Primary
+Partition中，那么为什么要进行分割呢？我想是有以下两点好处的：</p>
+  </li>
+  <li><strong>数据的安全性</strong></li>
+  <li><strong>系统的效能考量</strong></li>
+</ul>
+
+<p>而实际上我们所看到的却往往不止是4个分区，那么这又是为什么呢？这就要透过刚刚谈到的扩展分配(Extended)的方式来处理。扩展分配的想法是：
+既然第一个磁区所在的分割表只能记录四笔数据，
+那就利用额外的磁区来记录更多的分割。具体的做法如下：</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/partition-2.png" alt="更多分区" /></p>
+
+<p>在上图当中，我们知道硬盘的四个分割记录区仅使用到两个，P1为主要分割，而P2则为扩展分配。请注意，
+扩展分配的目的是使用额外的磁区来记录分割，扩展分配本身并不能被拿来格式化。
+然后我们可以透过扩展分配所指向的那个区块继续作分割的记录。</p>
+
+<p>如上图右下方那个区块有继续分割出五个分区，
+这五个由扩展分配继续切出来的分割槽，就被称为逻辑分区(logical partition)。
+同时注意一下，由於逻辑分区是由扩展分配继续分割出来的，所以他可以使用的磁柱范围就是扩展分配所配置的范围，
+也就是图中的101\~400。同样文档名应为</p>
+
+<ul>
+  <li>P1:/dev/hda1</li>
+  <li>P2:/dev/hda2</li>
+  <li>L1:/dev/hda5</li>
+  <li>L2:/dev/hda6</li>
+  <li>L3:/dev/hda7</li>
+  <li>L4:/dev/hda8</li>
+  <li>L5:/dev/hda9</li>
+</ul>
+
+<p>的装置名称由于前面四个号码都是保留给Primary或Extended，所以逻辑分区号码就由5号开始</p>
+
+<p>下面要提到系统的启动，整个启动流程到操作系统之前的动作应该是</p>
+
+<ol>
+  <li><strong>BIOS：启动主动运行的韧体，会认识第一个可启动的装置；</strong></li>
+  <li><strong>MBR：第一个可启动装置的第一个磁区内的主要启动记录区块，内含启动管理程序；</strong></li>
+  <li><strong>启动管理程序(boot loader)：一支可读取核心文件来运行的软件；</strong></li>
+  <li><strong>核心文件：开始操作系统的功能…</strong></li>
+</ol>
+
+<p>BIOS与MBR都是硬件本身会支持的功能，至于Boot
+loader则是操作系统安装在MBR上面的一套软件。由于MBR仅有446
+bytes而已，因此这个启动管理程序非常小而美。 这个boot
+loader的主要任务有底下这些项目：</p>
+
+<ul>
+  <li><strong>提供菜单</strong>：使用者可以选择不同的启动项目，这也是多重启动的重要功能！</li>
+  <li><strong>加载核心文件</strong>：直接指向可启动的程序区段来开始操作系统；</li>
+  <li><strong>转交其他loader</strong>：将启动管理功能转交给其他loader负责。</li>
+</ul>
+
+<p>这也告诉我们，如果<strong>安装linux时有/boot独立分区时，
+务必让该分区在整颗硬盘的最前面部分</strong>，以便加载启动项。以上是单系统的启动模式，那么多系统呢，原来启动管理程序除了可以安装在MBR之外，
+还可以安装在每个分割槽的启动磁区(boot sector)。</p>
+
+<p>我们举一个例子来说，假设你的个人计算机只有一个硬盘，里面切成四个分割槽，其中第一、二分割槽分别安装了Windows及Linux，
+你要如何在启动的时候选择用Windows还是Linux启动呢？假设MBR内安装的是可同时认识Windows/Linux操作系统的启动管理程序，
+那么整个流程可以图示如下：</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/loader.gif" alt="系统启动" /></p>
+
+<p><strong>但是如果要安装多重启动， 最好先安装Windows再安装Linux。</strong></p>
+
+<p>这是由于Linux在安装的时候，你可以选择将启动管理程序安装在MBR或各别分区的启动磁区，
+而且Linux的loader可以手动配置菜单(就是上图的M1,
+M2…)，所以你可以在Linux的boot
+loader里面加入Windows启动的选项；Windows在安装的时候，他的安装程序会主动的覆盖掉MBR以及自己所在分区的启动磁区，你没有选择的机会，
+而且他没有让我们自己选择菜单的功能。</p>
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/linux/'>linux</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2013/05/14/hard-disk-partition/" data-via="" data-counturl="http://billowkiller.github.io/blog/2013/05/14/hard-disk-partition/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2013/05/14/grep-example/" title="Previous Post: grep example">&laquo; grep example</a></li>
+            
+            
+            <li class="next"><a href="/blog/2013/05/14/hu-lian-wang-fa-zhan-fang-xiang-si-kao/" title="Next Post: 互联网发展方向思考">互联网发展方向思考 &raquo;</a></li>
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item " href="/blog/2015/07/26/java-log4j/">Java Log4j</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/29/static-and-dynamic-library/">Static and Dynamic Library</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/23/classical-sync-problem/">Classical Sync Problem</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/22/design-pattern/">Design Pattern Abstraction</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/14/linux-memory-management/">Linux Memory Management</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">8</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">10</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">8</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">13</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">13</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">6</span>
+        algorithm
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2015 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/05/14/hard-disk-partition/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/05/14/hard-disk-partition/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>

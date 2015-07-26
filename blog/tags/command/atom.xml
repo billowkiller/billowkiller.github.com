@@ -1,0 +1,654 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: command | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/command/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2015-07-26T16:40:30+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[十个你可能没用过的Linux命令]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/shi-ge-ni-ke-neng-mei-yong-guo-de-linuxming-ling/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/shi-ge-ni-ke-neng-mei-yong-guo-de-linuxming-ling</id>
+    <content type="html"><![CDATA[<p><em><strong>excerpted</strong> from <a href="http://www.ituring.com.cn/article/1782">图灵社区</a></em></p>
+
+<hr />
+
+<p>如果你是一个硬件系统管理员或者Linux工程师，你可能会记得大多数Linux命令行技巧。下面的这些Linux命令行技巧通常不被Linux用户所使用。</p>
+
+<p><strong>1.使用<em>pgrep</em>快速查找一个PID</strong></p>
+
+<p><strong><em>pgrep</em></strong>遍历目前正在运行的进程然后列出符合查找规则的进程ID（PID）。</p>
+
+<pre><code>pgrep ssh</code></pre>
+
+<p>这条命令会列出所有与ssh有关的进程。</p>
+
+<p><strong>2.执行上次执行过的命令</strong></p>
+
+<p>这个标题有些绕口，但是它是名副其实的。</p>
+
+<pre><code>!!</code></pre>
+<!--more-->
+<p>这会执行你上一次在命令行中执行过的命令。</p>
+
+<p><strong>3.执行最近一次以XX开头的命令</strong></p>
+
+<p>如果你想要从命令行历史中执行一个s开头的命令时，你可以使用如下命令：</p>
+
+<pre><code>!s</code></pre>
+
+<p>它会执行最近一次在命令行中执行且以字母s开头的命令。</p>
+
+<p><strong>4.反复执行一个命令并在屏幕上输出</strong></p>
+
+<p><strong><em>watch</em></strong>会反复运行一个命令，并在屏幕上打印输出。它可以让你实时的观察程序的输出变化。默认情况下，程序每2秒运行一次。<strong><em>watch</em></strong>命令与<strong><em>tail</em></strong>命令很相似。</p>
+
+<pre><code>watch -d ls -l</code></pre>
+
+<p>这条命令会监视当前目录的所有文件，并且高亮文件所发生的改变。</p>
+
+<p><strong>5.在VI/VIM中快速保存</strong></p>
+
+<p>如果你很匆忙，你可以通过<strong><em>【SHIFT + zz】</em></strong> 快速从vi的插入模式中退出。</p>
+
+<p><strong>6.快速登出终端</strong> 你可以快速使用<strong><em>【CTRL+D】</em></strong>快速登出终端。</p>
+
+<p><strong>7.返回你上一个所在目录</strong></p>
+
+<p>你可以使用如下命令返回你上一次所在的目录：</p>
+
+<pre><code>cd -</code></pre>
+
+<p><strong>8.聪明地创建父目录</strong></p>
+
+<p>如下命令可以帮助你创建所有你需要的目录，即便是他们还不存在。为什么要浪费时间做一些愚蠢的事情比如：<strong><em>mkdir
+make ; cd make ; mkdir all ; cd all ; mkdir of ; cd of
+…</em></strong> 你说到点子上了，使用<strong><em>mkdir -p</em></strong>！</p>
+
+<pre><code>mkdir -p /home/adam/make/all/of/these/directories/</code></pre>
+
+<p><strong>9.删除一整行</strong></p>
+
+<p>如果你已经输入一长串的命令，但是你又不在需要他们了，那么你可以使用如下命令直接删除一整行：</p>
+
+<pre><code>CTRL+U</code></pre>
+
+<p><strong>10.设置文件的时间戳</strong></p>
+
+<p>下面这条命令会把文件的时间戳设置成2008-01-01
+8:00。日期格式是(YYMMDDhhmm)</p>
+
+<pre><code>touch -c -t 0801010800 filename.c</code></pre>
+
+<p>你还能想到哪些为大多数人所指的Linux命令？</p>
+
+<p><strong>【摘自回复】</strong></p>
+
+<p><strong>访问上一个命令的最后一个参数</strong> 如果你之前执行了这样一条命令 cp
+assignment.htm /home/phill/reports/2008/
+然后你可以冲 <strong>_$</strong> 访问刚才那条命令最后一个参数”<em>/home/phill/reports/2008/</em>“，例如：</p>
+
+<pre><code>cd $_</code></pre>
+
+<p><strong>清除光标右边的内容</strong> 上文有一个小错误，<strong><em>【Ctrl +
+U】</em></strong>并不是删除一整行，而是删除光标左边的内容，如果光标停留在行首，那么<strong><em>【Ctrl
++ U】</em></strong>将无任何作用，这个时候，需要删除光标右边内容：</p>
+
+<pre><code>ctrl-k</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[pandoc example]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/pandoc-example/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/pandoc-example</id>
+    <content type="html"><![CDATA[<p>from <a href="http://johnmacfarlane.net/pandoc/demos.html">pondoc </a></p>
+
+<hr />
+
+<p>To see the output created by each of the commands below, click on the
+name of the output file:</p>
+
+<ol>
+  <li>
+    <p>HTML fragment:</p>
+
+    <pre><code>pandoc README -o example1.html
+</code></pre>
+  </li>
+  <li>
+    <p>Standalone HTML file:</p>
+
+    <pre><code>pandoc -s README -o example2.html
+</code></pre>
+  </li>
+  <li>
+    <p>HTML with smart quotes, table of contents, CSS, and custom footer:</p>
+
+    <pre><code>pandoc -s -S --toc -c pandoc.css -A footer.html README -o example3.html
+</code></pre>
+  </li>
+  <li>
+    <p>LaTeX:</p>
+
+    <pre><code>pandoc -s README -o example4.tex
+</code></pre>
+  </li>
+  <li>
+    <p>From LaTeX to markdown:</p>
+
+    <pre><code>pandoc -s example4.tex -o example5.text
+</code></pre>
+  </li>
+  <li>
+    <p>reStructuredText:<!--more--></p>
+
+    <pre><code>pandoc -s -w rst --toc README -o example6.text
+</code></pre>
+  </li>
+  <li>
+    <p>Rich text format (RTF):</p>
+
+    <pre><code>pandoc -s README -o example7.rtf
+</code></pre>
+  </li>
+  <li>
+    <p>Beamer slide show:</p>
+
+    <pre><code>pandoc -t beamer SLIDES -o example8.pdf
+</code></pre>
+  </li>
+  <li>
+    <p>DocBook XML:</p>
+
+    <pre><code>pandoc -s -S -w docbook README -o example9.db
+</code></pre>
+
+    <p>Chunked XHTML via DocBook
+and <a href="http://cyberelk.net/tim/xmlto/">xmlto</a>:</p>
+
+    <pre><code>xmlto xhtml -m config.xsl example9.db -o example9/
+</code></pre>
+  </li>
+  <li>
+    <p>Man page:</p>
+
+    <pre><code>pandoc -s -w man pandoc.1.md -o example10.1
+</code></pre>
+  </li>
+  <li>
+    <p>ConTeXt:</p>
+
+    <pre><code>pandoc -s -w context README -o example11.tex
+</code></pre>
+
+    <p>PDF via pandoc and ConTeXt’s <code>texexec</code>:</p>
+
+    <pre><code>texexec --pdf example11.tex # produces example11.pdf
+</code></pre>
+  </li>
+  <li>
+    <p>Converting a web page to markdown:</p>
+
+    <pre><code>pandoc -s -r html http://www.gnu.org/software/make/ -o example12.text
+</code></pre>
+  </li>
+  <li>
+    <p>From markdown to PDF:</p>
+
+    <pre><code>pandoc README -o example13.pdf
+</code></pre>
+  </li>
+  <li>
+    <p>PDF with numbered sections and a custom LaTeX header:</p>
+
+    <pre><code>pandoc -N --template=mytemplate.tex --variable mainfont=Georgia --variable sansfont=Arial --variable monofont="Bitstream Vera Sans Mono" --variable fontsize=12pt --variable version=1.9 README --latex-engine=xelatex --toc -o example14.pdf
+</code></pre>
+  </li>
+  <li>
+    <p>A wiki program using <a href="http://happstack.com/">Happstack</a> and
+pandoc: <a href="http://gitit.net/">gitit</a></p>
+  </li>
+  <li>
+    <p>HTML slide shows:</p>
+
+    <pre><code>pandoc -s --mathml -i -t dzslides SLIDES -o example16a.html
+
+pandoc -s --webtex -i -t slidy SLIDES -o example16b.html
+
+pandoc -s --self-contained --webtex -i -t s5 SLIDES -o example16c.html
+
+pandoc -s --mathjax -i -t slideous SLIDES -o example16d.html
+</code></pre>
+  </li>
+  <li>
+    <p>TeX math in HTML:</p>
+
+    <pre><code>pandoc math.text -s -o mathDefault.html
+
+pandoc math.text -s --mathml -o mathMathML.html
+
+pandoc math.text -s --webtex -o mathWebTeX.html
+
+pandoc math.text -s --mathjax -o mathMathJax.html
+
+pandoc math.text -s --latexmathml -o mathLaTeXMathML.html
+</code></pre>
+  </li>
+  <li>
+    <p>Syntax highlighting of delimited code blocks:</p>
+
+    <pre><code>pandoc code.text -s --highlight-style pygments -o example18a.html
+
+pandoc code.text -s --highlight-style kate -o example18b.html
+
+pandoc code.text -s --highlight-style monochrome -o example18c.html
+
+pandoc code.text -s --highlight-style espresso -o example18d.html
+
+pandoc code.text -s --highlight-style haddock -o example18e.html
+
+pandoc code.text -s --highlight-style tango -o example18f.html
+
+pandoc code.text -s --highlight-style zenburn -o example18g.html
+</code></pre>
+  </li>
+  <li>
+    <p>GNU Texinfo, converted to info, HTML, and PDF formats:</p>
+
+    <pre><code>pandoc README -s -o example19.texi
+
+makeinfo example19.texi -o example19.info
+
+makeinfo example19.texi --html -o example19
+
+texi2pdf example19.texi # produces example19.pdf
+</code></pre>
+  </li>
+  <li>
+    <p>OpenDocument XML:</p>
+
+    <pre><code>pandoc README -s -w opendocument -o example20.xml
+</code></pre>
+  </li>
+  <li>
+    <p>ODT (OpenDocument Text, readable by OpenOffice):</p>
+
+    <pre><code>pandoc README -o example21.odt
+</code></pre>
+  </li>
+  <li>
+    <p>MediaWiki markup:</p>
+
+    <pre><code>pandoc -s -S -w mediawiki --toc README -o example22.wiki
+</code></pre>
+  </li>
+  <li>
+    <p>EPUB ebook:</p>
+
+    <pre><code>pandoc -S README -o README.epub
+</code></pre>
+  </li>
+  <li>
+    <p>Markdown citations:</p>
+
+    <pre><code>pandoc -s -S --biblio biblio.bib --csl chicago-author-date.csl CITATIONS -o example24a.html
+
+pandoc -s -S --biblio biblio.bib --csl mhra.csl CITATIONS -o example24b.html
+
+pandoc -s -S --biblio biblio.bib --csl ieee.csl CITATIONS -t man -o example24c.1
+</code></pre>
+  </li>
+  <li>
+    <p>Textile writer:</p>
+
+    <pre><code>pandoc -s -S README -t textile -o example25.textile
+</code></pre>
+  </li>
+  <li>
+    <p>Textile reader:</p>
+
+    <pre><code>pandoc -s -S example25.textile -f textile -t html -o example26.html
+</code></pre>
+  </li>
+  <li>
+    <p>Org-mode:</p>
+
+    <pre><code>pandoc -s -S README -o example27.org
+</code></pre>
+  </li>
+  <li>
+    <p>AsciiDoc:</p>
+
+    <pre><code>pandoc -s -S README -t asciidoc -o example28.txt
+</code></pre>
+  </li>
+  <li>
+    <p>Word docx:</p>
+
+    <pre><code>pandoc -s -S README -o example29.docx
+</code></pre>
+  </li>
+  <li>
+    <p>LaTeX math to docx:</p>
+
+    <pre><code>pandoc -s math.tex -o example30.docx
+</code></pre>
+  </li>
+  <li>
+    <p>DocBook to markdown:</p>
+
+    <pre><code>pandoc -f docbook -t markdown -s howto.xml -o example31.text
+</code></pre>
+  </li>
+</ol>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[几个linux命令]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/ji-ge-linuxming-ling/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/ji-ge-linuxming-ling</id>
+    <content type="html"><![CDATA[<p>转换文件到pdf </p>
+
+<pre><code>unoconv -f pdf mydocument.odt
+</code></pre>
+
+<p>zip乱码解压 </p>
+
+<pre><code>unzip -O CP936 xx.zip
+</code></pre>
+
+<p>mp3 乱码 </p>
+
+<pre><code>mid3iconv -e gbk \*.mp3 //当前目录下的mp3文件
+</code></pre>
+
+<p>视频转码 </p>
+
+<pre><code>mencoder \*.rmvb -o output.avi -oac mp3lame -lameopts cbr:br=32 -ovc x264 -x264encopts bitrate=440 -vf scale=320:-3
+</code></pre>
+
+<p>linux 声音调节  alsamixer</p>
+
+<p>gedit 乱码：</p>
+
+<pre><code>gsettings set org.gnome.gedit.preferences.encodings auto-detected "['UTF-8','CURRENT','GB18030','ISO-8859-15','UTF-16']"
+</code></pre>
+
+<p>SSH 远程登录：</p>
+
+<pre><code>ssh -l root 192.168.0.150
+</code></pre>
+
+<p>vim 中文乱码：</p>
+
+<p>let &amp;termencoding=&amp;encoding\
+set fileencodings=utf-8,gbk</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[grep example]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/grep-example/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/grep-example</id>
+    <content type="html"><![CDATA[<p><strong><em>from <a href="http://blog.csdn.net/pan_tian/article/details/7685815">http://blog.csdn.net/pan_tian/article/details/7685815</a></em></strong></p>
+
+<hr />
+
+<h2 id="grephttpwwwlinuxsocomcommandgrephtml-"><a href="http://www.linuxso.com/command/grep.html">grep</a> 语法</h2>
+
+<ul>
+  <li>
+    <p>grep ‘word’ filename</p>
+  </li>
+  <li>
+    <p>grep ‘string1 string2’ filename</p>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>cat otherfile</td>
+          <td>grep ‘something’</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>command</td>
+          <td>grep ‘something’</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>command option1</td>
+          <td>grep ‘data’</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>grep –color ‘data’ fileName</li>
+</ul>
+
+<h2 id="section">基本的用法</h2>
+
+<p>在某个文件里搜索error字符串</p>
+
+<p><code>$ grep "error" log.txt</code>
+<!--more-->
+忽略大小写搜索(-i)
+——————</p>
+
+<p><code>$ grep -i "ErroR" log.txt</code></p>
+
+<h2 id="r">所有子目录下的搜索(-r)</h2>
+
+<p><code>$ grep -r "exception" log.txt</code></p>
+
+<h2 id="w">全字匹配搜索(-w)</h2>
+
+<p>如果你搜索boo，查询结果可能包含fooboo，boo123,
+booooom,等等，可以使用-w来限定全字匹配</p>
+
+<p><code>$ grep -w "boo" /path/to/file</code></p>
+
+<h2 id="section-1">全字匹配搜索两个不同单词</h2>
+
+<p><code>$ grep -w 'word1|word2' /path/to/file</code> </p>
+
+<h2 id="c">统计字符串出现的次数(-c)</h2>
+
+<p><code>$ grep -c 'word' /path/to/file</code></p>
+
+<p>另外加-n的话， 会在结果中，列出匹配字符串的序列号，并且会列出内容</p>
+
+<p><code>$ grep -n 'word' /path/to/file</code> </p>
+
+<h2 id="v">列出“不”包含字符串的行(-v)</h2>
+
+<p><code>$ grep -v bar /path/to/file</code></p>
+
+<h2 id="l">只列出文件名(-l)</h2>
+
+<p><code>$ grep -l 'main' *.pls</code></p>
+
+<h2 id="color">高亮显示(–color)</h2>
+
+<p><code>$ </code>grep –color oracle
+/etc/<a href="http://www.linuxso.com/command/passwd.html">passwd</a></p>
+
+<p><img src="http://www.linuxso.com/uploads/allimg/120628/0043022131-1.jpg" alt="grep highlight" /></p>
+
+<h2 id="unix--linux-pipes--grep">UNIX / Linux pipes + grep</h2>
+
+<p><code>ls -l | grep -i xyz</code></p>
+
+<p><code>ls 列出当前目录下的文件和文件夹,| 是管道传递给后面的一个程序,grep再是进行模式匹配</code></p>
+
+<p><code>例如：ls *.pls | grep -i --color "MM"</code></p>
+
+<p><code>========EOF=========</code></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[8 Linux TR Command Examples]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/8-linux-tr-command-examples/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/8-linux-tr-command-examples</id>
+    <content type="html"><![CDATA[<p><strong><em>from
+<a href="http://www.thegeekstuff.com/2012/12/linux-tr-command/?utm_source=feedburner&amp;utm_medium=email&amp;utm_campaign=Feed%3A+TheGeekStuff+%28The+Geek+Stuff%29">TheGeekStuff</a></em></strong></p>
+
+<hr />
+
+<p>tr is an UNIX utility for translating, or deleting, or squeezing
+repeated characters. It will read from STDIN and write to STDOUT.</p>
+
+<p>tr stands for translate.</p>
+
+<h3 id="syntax">Syntax</h3>
+
+<p>The syntax of tr command is:</p>
+
+<pre><code>$ tr [OPTION] SET1 [SET2]
+</code></pre>
+
+<h3 id="translation">Translation</h3>
+
+<p>If both the SET1 and SET2 are specified and ‘-d’ OPTION is not
+specified, then tr command will replace each characters in SET1 with
+each character in same position in SET2.
+<!--more--></p>
+
+<h3 id="convert-lower-case-to-upper-case">1. Convert lower case to upper case</h3>
+
+<p>The following tr command is used to convert the lower case to upper case</p>
+
+<pre><code>$ tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ
+ thegeekstuff
+ THEGEEKSTUFF
+</code></pre>
+
+<p>The following command will also convert lower case to upper case</p>
+
+<pre><code>$ tr [:lower:] [:upper:]
+ thegeekstuff
+ THEGEEKSTUFF
+</code></pre>
+
+<p>You can also use ranges in tr. The following command uses ranges to
+convert lower to upper case.</p>
+
+<pre><code>$ tr a-z A-Z
+ thegeekstuff
+ THEGEEKSTUFF
+</code></pre>
+
+<h3 id="translate-braces-into-parenthesis">2. Translate braces into parenthesis</h3>
+
+<p>You can also translate from and to a file. In this example we will
+translate braces in a file with parenthesis.</p>
+
+<pre><code>$ tr '{}' '()' &lt; inputfile &gt; outputfile
+</code></pre>
+
+<p>The above command will read each character from “inputfile”, translate
+if it is a brace, and write the output in “outputfile”.</p>
+
+<h3 id="translate-white-space-to-tabs">3. Translate white-space to tabs</h3>
+
+<p>The following command will translate all the white-space to tabs</p>
+
+<pre><code>$ echo "This is for testing" | tr [:space:] '\t'
+ This   is  for testing
+</code></pre>
+
+<h3 id="squeeze-repetition-of-characters-using--s">4. Squeeze repetition of characters using -s</h3>
+
+<p>In Example 3, we see how to translate space with tabs. But if there are
+two are more spaces present continuously, then the previous command will
+translate each spaces to a tab as follows.</p>
+
+<pre><code>$ echo "This is for testing" | tr [:space:] '\t'
+ This    is  for    testing
+</code></pre>
+
+<p>We can use -s option to squeeze the repetition of characters.</p>
+
+<pre><code>$ echo "This is for testing" | tr -s [:space:] '\t'
+ This   is  for testing
+</code></pre>
+
+<p>Similarly you can convert multiple continuous spaces with a single space</p>
+
+<pre><code>$ echo "This is for testing" | tr -s [:space:] ' '
+ This is for testing
+</code></pre>
+
+<h3 id="delete-specified-characters-using--d-option">5. Delete specified characters using -d option</h3>
+
+<p>tr can also be used to remove particular characters using -d option.</p>
+
+<pre><code>$ echo "the geek stuff" | tr -d 't'
+ he geek suff
+</code></pre>
+
+<p>To remove all the digits from the string, use</p>
+
+<pre><code>$ echo "my username is 432234" | tr -d [:digit:]
+ my username is
+</code></pre>
+
+<p>Also, if you like to delete lines from file, you can use <a href="http://www.thegeekstuff.com/2009/09/unix-sed-tutorial-delete-file-lines-using-address-and-patterns/">sed d
+command</a>.</p>
+
+<h3 id="complement-the-sets-using--c-option">6. Complement the sets using -c option</h3>
+
+<p>You can complement the SET1 using -c option. For example, to remove all
+characters except digits, you can use the following.</p>
+
+<pre><code>$ echo "my username is 432234" | tr -cd [:digit:]
+ 432234
+</code></pre>
+
+<h3 id="remove-all-non-printable-character-from-a-file">7. Remove all non-printable character from a file</h3>
+
+<p>The following command can be used to remove all non-printable characters
+from a file.</p>
+
+<pre><code>$ tr -cd [:print:] &lt; file.txt
+</code></pre>
+
+<h3 id="join-all-the-lines-in-a-file-into-a-single-line">8. Join all the lines in a file into a single line</h3>
+
+<p>The below command will translate all newlines into spaces and make the
+result as a single line.</p>
+
+<pre><code>$ tr -s '\n' ' ' &lt; file.txt
+</code></pre>
+
+]]></content>
+  </entry>
+  
+</feed>

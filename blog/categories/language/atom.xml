@@ -1,0 +1,759 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: language | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/categories/language/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2015-07-26T16:40:05+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[New features in C++11]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/04/27/New-features-in/"/>
+    <updated>2014-04-27T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/04/27/New-features-in</id>
+    <content type="html"><![CDATA[<p>modified from <a href="http://coolshell.cn/articles/5265.html">http://coolshell.cn/articles/5265.html</a></p>
+
+<hr />
+
+<p>C++11在2011年8月通过ISO用来替换C++03。是对目前C++语言的扩展和修正，C++11不仅包含核心语言的新机能，而且扩展了C++的标准程序库（STL），并入了大部分的C++ Technical Report 1（TR1）程序库(数学的特殊函数除外)。</p>
+
+<p>C++11包括大量的新特性：包括lambda表达式，类型推导关键字auto、decltype，和模板的大量改进。下面就来介绍下这些新特性。</p>
+
+<!--more-->
+<hr />
+
+<h2 id="lambda-">Lambda 表达式</h2>
+
+<p>Lambda表达式来源于函数式编程，说白就了就是在使用的地方定义函数，有的语言叫“闭包”。表达式的简单语法如下，</p>
+
+<pre><code>[capture](parameters)-&gt;return_type {body}
+</code></pre>
+
+<p>来看个计数某个字符序列中有几个大写字母的例子：</p>
+
+<p><code>c++
+int main()
+{
+   char s[]="Hello World!";
+   int Uppercase = 0; //modified by the lambda
+   for_each(s, s+sizeof(s), [&amp;Uppercase] (char c) {
+      if (isupper(c)) Uppercase++; });
+   cout&lt;&lt; Uppercase&lt;&lt;" uppercase letters in: "&lt;&lt; s&lt;&lt;endl;
+}
+</code></p>
+
+<p>其中 <code>[&amp;Uppercase]</code> 中的 <code>&amp;</code> 的意义是 lambda 函数体要获取一个 <code>Uppercase</code> 引用，以便能够改变它的值，如果没有 <code>&amp;</code>，那就 <code>Uppercase</code> 将以传值的形式传递过去。</p>
+
+<p>C++引入Lambda的最主要原因就是1）可以定义匿名函数，2）编译器会把其转成函数对象**。这种函数限制了别人的访问，更私有。也可以认为是一次性的方法。Lambda表达式应该是简洁的，极私有的，为了更易的代码和更方便的编程。</p>
+
+<h2 id="auto-decltype">自动类型推导 auto decltype</h2>
+
+<h3 id="auto">auto</h3>
+
+<p>在 C++03 中，声明对象的同时必须指明其类型，其实大多数情况下，声明对象的同时也会包括一个初始值，C++11 在这种情况下就能够让你声明对象时不再指定类型了：</p>
+
+<p><code>c++
+auto x=0; //0 是 int 类型，所以 x 也是 int 类型
+auto c='a'; //char
+auto d=0.5; //double
+auto national_debt=14400000000000LL;//long long
+</code></p>
+
+<p>这个特性在对象的类型很大很长的时候很有用，特别是迭代器类型。但是，我们不应该把其滥用。</p>
+
+<p><code>c++
+auto obj = ProcessData(someVariables);
+</code></p>
+
+<p>我们完全不知道ProcessData返回什么，这种代码的可读性就降低很多了，但是下面程序就没有问题，因为pObject的型别在后面的new中有了。</p>
+
+<p><code>c++
+auto pObject = new SomeType&lt;OtherType&gt;::SomeOtherType();
+</code></p>
+
+<h3 id="decltype">decltype</h3>
+
+<p>关于 decltype 是一个操作符，其可以评估括号内表达式的类型，其规则如下：</p>
+
+<ol>
+  <li>如果表达式e是一个变量，那么就是这个变量的类型。</li>
+  <li>如果表达式e是一个函数，那么就是这个函数返回值的类型。</li>
+  <li>如果不符合1和2，如果e是左值，类型为T，那么decltype(e)是T&amp;；如果是右值，则是T。</li>
+</ol>
+
+<p><code>c++
+const vector&lt;int&gt; vi;
+typedef decltype (vi.begin()) CIT;
+CIT another_const_iterator;
+</code></p>
+
+<p>还有一个适合的用法是用来typedef函数指针，也会省很多事。比如：</p>
+
+<p><code>c++
+decltype(&amp;myfunc) pfunc = 0;
+typedef decltype(&amp;A::func1) type;
+</code></p>
+
+<h3 id="auto--decltype-">auto 和 decltype 的差别和关系</h3>
+
+<p>Wikipedia 上是这么说的（关于decltype的规则见上）</p>
+
+<p><code>c++
+int main()
+{
+    const std::vector&lt;int&gt; v(1);
+    auto a = v[0];        // a 的类型是 int
+    decltype(v[0]) b = 1; // b 的类型是 const int&amp;, 因为函数的返回类型是
+                          // std::vector&lt;int&gt;::operator[](size_type) const
+    auto c = 0;           // c 的类型是 int
+    auto d = c;           // d 的类型是 int
+    decltype(c) e;        // e 的类型是 int, 因为 c 的类型是int
+    decltype((c)) f = c;  // f 的类型是 int&amp;, 因为 (c) 是左值
+    decltype(0) g;        // g 的类型是 int, 因为 0 是右值
+}
+</code></p>
+
+<p>如果auto 和 decltype 在一起使用会是什么样子？能看下面的示例，下面这个示例也是引入decltype的一个原因——让C++有能力写一个 “ forwarding function 模板”，</p>
+
+<p><code>c++
+template&lt; typename LHS, typename RHS&gt;
+  auto AddingFunc(const LHS &amp;lhs, const RHS &amp;rhs) -&gt; decltype(lhs+rhs)
+{return lhs + rhs;}
+</code></p>
+
+<p>这个函数模板看起来相当费解，其用到了auto 和 decltype 来扩展了已有的模板技术的不足。怎么个不足呢？在上例中，我不知道AddingFunc会接收什么样类型的对象，这两个对象的 + 操作符返回的类型也不知道，老的模板函数无法定义AddingFunc返回值和这两个对象相加后的返回值匹配，所以，你可以使用上述的这种定义。</p>
+
+<h2 id="section">统一的初始化语法</h2>
+
+<p>C/C++的初始化的方法比较，C++ 11 用大括号统一了这些初始化的方法。</p>
+
+<p>``` c++
+C c {0,0}; //C++11 only. 相当于: C c(0,0);
+int* a = new int[3] { 1, 2, 0 }; //C++11 only
+class X {
+    int a[4];
+    public:
+        X() : a{1,2,3,4} {} //C++11, member array initializer
+};</p>
+
+<p>// C++11 container initializer
+vector<string> vs={ "first", "second", "third"};
+map singers =
+{ {"Lady Gaga", "+1 (212) 555-7890"},
+{"Beyonce Knowles", "+1 (212) 555-0987"}};</string></p>
+
+<p>//class member initializer
+class C
+{
+   int a=7; //C++11 only
+   public: C();
+};
+```</p>
+
+<h2 id="delete--default-">Delete 和 Default 函数</h2>
+
+<p>我们知道C++的编译器在你没有定义某些成员函数的时候会给你的类自动生成这些函数，比如，构造函数，拷贝构造，析构函数，赋值函数。有些时候，我们不想要这些函数，比如，构造函数，因为我们想做实现单例模式。传统的做法是将其声明成private类型。</p>
+
+<p>在新的C++中引入了两个指示符，delete意为告诉编译器不自动产生这个函数，default告诉编译器产生一个默认的。下面两个例子：</p>
+
+<p><code>c++
+struct A
+{
+    A()=default; //C++11
+    virtual ~A()=default; //C++11
+};
+</code></p>
+
+<p>再如delete</p>
+
+<p><code>c++
+struct NoCopy
+{
+    NoCopy &amp; operator =( const NoCopy &amp; ) = delete;
+    NoCopy ( const NoCopy &amp; ) = delete;
+};
+NoCopy a;
+NoCopy b(a); //compilation error, copy ctor is deleted
+</code></p>
+
+<p>这里，我想说一下，为什么我们需要default？我什么都不写不就是default吗？不全然是，比如构造函数，因为只要你定义了一个构造函数，编译器就不会给你生成一个默认的了。所以，为了要让默认的和自定义的共存，才引入这个参数，如下例所示：</p>
+
+<p><code>c++
+struct SomeType
+{
+ SomeType() = default; // 使用编译器生成的默认构造函数
+ SomeType(OtherType value);
+};
+</code></p>
+
+<p>关于delete还有两个有用的地方是</p>
+
+<ol>
+  <li>
+    <p>让你的对象只能生成在栈内存上：</p>
+
+    <pre><code> struct NonNewable {
+     void *operator new(std::size_t) = delete;
+ };
+</code></pre>
+  </li>
+  <li>
+    <p>阻止函数的其形参的类型调用：（若尝试以 double 的形参调用 f()，将会引发编译期错误， 编译器不会自动将 double 形参转型为 int 再调用f()，如果传入的参数是double，则会出现编译错误）</p>
+
+    <pre><code> void f(int i);
+ void f(double) = delete;
+</code></pre>
+  </li>
+</ol>
+
+<h2 id="nullptr">nullptr</h2>
+
+<p>nullptr 是一个新的 C++ 关键字，它是空指针常量，它是用来替代高风险的 NULL 宏和 0 字面量的。nullptr 是强类型的：</p>
+
+<p><code>c++
+void f(int); //#1
+void f(char *);//#2
+//C++03
+f(0); //调用的是哪个 f?
+//C++11
+f(nullptr) //毫无疑问，调用的是 #2
+</code></p>
+
+<p>所有跟指针有关的地方都可以用 nullptr，包括函数指针和成员指针：</p>
+
+<p><code>c++
+const char *pc=str.c_str(); //data pointers
+if (pc!=nullptr)
+  cout&lt;&lt;pc&lt;&lt;endl;
+int (A::*pmf)()=nullptr; //指向成员函数的指针
+void (*pmf)()=nullptr; //指向函数的指针
+</code></p>
+
+<h2 id="section-1">委托构造</h2>
+
+<p>C++11 中构造函数可以调用同一个类的另一个构造函数：</p>
+
+<p><code>c++
+class M //C++11 delegating constructors
+{
+	int x, y;
+	char *p;
+public:
+	M(int v) : x(v), y(0),  p(new char [MAX])  {} //#1 target
+	M(): M(0) {cout&lt;&lt;"delegating ctor"&lt;&lt;end;} //#2 delegating
+</code></p>
+
+<p>但是，为了方便并不足让“委托构造”这个事出现，最主要的问题是，基类的构造不能直接成为派生类的构造，就算是基类的构造函数够了，派生类还要自己写自己的构造函数：</p>
+
+<p>``` c++
+class BaseClass
+{
+public:
+  BaseClass(int iValue);
+};</p>
+
+<p>class DerivedClass : public BaseClass
+{
+public:
+  using BaseClass::BaseClass;
+};
+```</p>
+
+<p>上例中，派生类手动继承基类的构造函数， 编译器可以使用基类的构造函数完成派生类的构造。 而将基类的构造函数带入派生类的动作 无法选择性地部分带入， 所以，要不就是继承基类全部的构造函数，要不就是一个都不继承(不手动带入)。 此外，若牵涉到多重继承，从多个基类继承而来的构造函数不可以有相同的函数签名(signature)。 而派生类的新加入的构造函数也不可以和继承而来的基类构造函数有相同的函数签名，因为这相当于重复声明。（所谓函数签名就是函数的参数类型和顺序不）</p>
+
+<h2 id="move">右值引用和move语义</h2>
+
+<p><strong>左值和右值</strong>概念的本质区别就是，左值是用户显示声明或分配内存的变量，能够直接用变量名访问，而右值主要是临时变量。</p>
+
+<p><strong>std::move</strong>是一个用于提示优化的函数，过去的c++98中，由于无法将作为右值的临时变量从左值当中区别出来，所以程序运行时有大量临时变量白白的创建后又立刻销毁，其中又尤其是返回字符串std::string的函数存在最大的浪费。因为并不是所有情况下，C++编译器都能进行返回值优化，所以在C++11中，编码者可以主动提示编译器，返回的对象是临时的，可以被挪作他用. </p>
+
+<p><code>c++
+std::string fileContent = “oldContent”;
+s = std::move(readFileContent(fileName));
+</code></p>
+
+<p>对象s在被赋值的时候，方法std::string::operator =(std::string&amp;&amp;)会被调用，符号&amp;&amp;告诉std::string类的编写者，传入的参数是一个临时对象，可以挪用其数据，于是std::string::operator =(std::string&amp;&amp;)的实现代码中，会置空形参，同时将原本保存在中形参中的数据移动到自身。</p>
+
+<p><strong>std::forward</strong>是用于模板编程中的.当一个临时变量传入形参为T&amp;&amp; t的模板函数时，T被推演为U，参数t所引用的临时变量因为开始能够被据名访问了，所以它变成了左值。这也就是std::forward存在的原因！当你以为实参是右值所以t也应该是右值时，它跟你开了个玩笑，它是左值！如果你要进一步调用的函数会根据左右值引用性来进行不同操作，那么你在将t传给其他函数时，应该先用std::forward恢复t的本来引用性，恢复的依据是模板参数T的推演结果。虽然t的右值引用行会退化，变成左值引用，但根据实参的左右引用性不同，T会被分别推演为U&amp;和U.</p>
+
+<p>使用std::forward的原因：<strong>由于声明为f(T&amp;&amp; t)的模板函数的形参t会失去右值引用性质，所以在将t传给更深层函数前，可能会需要回复t的正确引用行</strong>，当然，修改t的引用性办不到，但根据t返回另一个引用还是可以的。</p>
+
+<h2 id="c-11-stl-">C++ 11 STL 标准库</h2>
+
+<p>C++ STL库在2003年经历了很大的整容手术 Library Technical Report 1 (TR1)。 TR1 中出现了很多新的容器类 (<code>unordered_set</code>, <code>unordered_map</code>, <code>unordered_multiset</code>, 和 <code>unordered_multimap</code>) 以及一些新的库支持诸如：正则表达式， <code>tuples</code>，函数对象包装，等等。 C++11 批准了 TR1 成为正式的C++标准，还有一些TR1 后新加的一些库，从而成为了新的C++ 11 STL标准库。这个库主要包含下面的功能：</p>
+
+<h3 id="section-2">线程库</h3>
+
+<p>这就不多说了，以前的STL饱受线程安全的批评。现在好 了。C++ 11 支持线程类了。这将涉及两个部分：第一、设计一个可以使多个线程在一个进程中共存的内存模型；第二、为线程之间的交互提供支持。第二部分将由程序库提供支持。大家可以看看<a href="http://en.wikipedia.org/wiki/Futures_and_promises">promises and futures</a>，其用于对象的同步。 <a href="http://www.stdthread.co.uk/doc/headers/future/async.html">async()</a> 函数模板用于发起并发任务，而 <a href="http://www.devx.com/cplus/10MinuteSolution/37436">thread_local</a> 为线程内的数据指定存储类型。更多的东西，可以查看 Anthony Williams的 <a href="http://www.devx.com/SpecialReports/Article/38883">Simpler Multithreading in C++0x</a>.</p>
+
+<h3 id="section-3">新型智能指针</h3>
+
+<p>C++98 的智能指针是 <code>auto_ptr</code>， 在C++ 11中被废弃了。C++11  引入了两个指针类： <code>shared_ptr</code> 和 <code>unique_ptr</code>。 <code>shared_ptr</code>只是单纯的引用计数指针，<code>unique_ptr</code> 是用来取代<code>auto_ptr</code>。 <code>unique_ptr</code> 提供 <code>auto_ptr</code> 大部份特性，唯一的例外是 <code>auto_ptr</code> 的不安全、隐性的左值搬移。不像 <code>auto_ptr</code>，<code>unique_ptr</code> 可以存放在 C++0x 提出的那些能察觉搬移动作的容器之中。</p>
+
+<h3 id="section-4">新的算法</h3>
+
+<p>定义了一些新的算法： <code>all_of()</code>, <code>any_of()</code> 和 <code>none_of()</code>。</p>
+
+<p><code>c++
+//are all of the elements positive?
+all_of(first, first+n, ispositive()); //false
+//is there at least one positive element?
+any_of(first, first+n, ispositive());//true
+// are none of the elements positive?
+none_of(first, first+n, ispositive()); //false
+</code></p>
+
+<p>使用新的<code>copy_n()</code>算法，你可以很方便地拷贝数组。</p>
+
+<p><code>c++
+int source[5]={0,12,34,50,80};
+int target[5];
+copy_n(source,5,target); //copy 5 elements from source to target
+</code></p>
+
+<p>使用 <code>iota()</code> 可以用来创建递增的数列。如下例所示：</p>
+
+<p><code>c++
+int a[5]={0};
+char c[3]={0};
+iota(a, a+5, 10); //changes a to {10,11,12,13,14}
+iota(c, c+3, 'a'); //{'a','b','c'}
+</code></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[C++ Template]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/04/23/Template/"/>
+    <updated>2014-04-23T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/04/23/Template</id>
+    <content type="html"><![CDATA[<p>modified from <a href="http://www.cnblogs.com/assemble8086/archive/2011/10/02/2198308.html">http://www.cnblogs.com/assemble8086/archive/2011/10/02/2198308.html</a></p>
+
+<h2 id="section">模版</h2>
+
+<p><code>template</code> 是声明类模板的关键字，表示声明一个模板，模板参数可以是一个，也可以是多个，可以是<strong>类型参数</strong> ，也可以是<strong>非类型参数</strong>。类型参数由关键字<code>class</code>或<code>typename</code>及其后面的标识符构成。非类型参数由一个普通参数构成，代表模板定义中的一个常量。</p>
+
+<p><strong>类模板什么时候会被实例化呢？</strong></p>
+
+<ol>
+  <li>当使用了类模板实例的名字，并且上下文环境要求存在类的定义时。</li>
+  <li>对象类型是一个类模板实例，当对象被定义时。此点被称作类的实例化点。</li>
+  <li>一个指针或引用指向一个类模板实例，当检查这个指针或引用所指的对象时。</li>
+</ol>
+
+<!--more-->
+
+<p><strong>非类型参数的模板实参</strong></p>
+
+<ol>
+  <li>绑定给非类型参数的表达式必须是一个常量表达式。</li>
+  <li>从模板实参到非类型模板参数的类型之间允许进行一些转换。包括左值转换、限定修饰转换、提升、整值转换。</li>
+  <li>
+    <p>可以被用于非类型模板参数的模板实参的种类有一些限制。</p>
+
+    <pre><code> Template&lt;int* ptr&gt; class Graphics{…….};
+	
+ Template&lt;class Type,int size&gt; class Rect{……..};
+	
+ const int size=1024;
+	
+ Graphics&lt;&amp;size&gt; bp1;//错误:从const int*－&gt;int*是错误的。
+	
+ Graphics&lt;0&gt; bp2;//错误不能通过隐式转换把０转换成指针值
+	
+ const double db=3.1415;
+	
+ Rect&lt;double,db&gt; fa1;//错误：不能将const double转换成int.
+	
+ unsigned int fasize=255;
+	
+ Rect&lt;String, fasize&gt; fa2;//错误：非类型参数的实参必须是常量表达式，将unsigned改为const就正确。
+	
+ Int arr[10];
+	
+ Graphics&lt;arr&gt; gp;//正确
+</code></pre>
+  </li>
+</ol>
+
+<p><strong>类模板的成员函数</strong></p>
+
+<ol>
+  <li>类模板的成员函数可以在类模板的定义中定义(<code>inline</code>函数)，也可以在类模板定义之外定义(此时成员函数定义前面必须加上<code>template</code>及模板参数)。</li>
+  <li>
+    <p>类模板成员函数本身也是一个模板，类模板被实例化时它并不自动被实例化，只有当它被调用或取地址，才被实例化。</p>
+
+    <pre><code> template&lt;class type&gt;
+ Class Graphics{
+     Graphics(){…}//成员函数定义在类模板的定义中
+     void out();
+ };
+	
+ template&lt;class type&gt;//成员函数定义在类模板定义之外
+ void Graphics&lt;type&gt;::out(){…}
+</code></pre>
+  </li>
+</ol>
+
+<p><strong>类模板的友元声明</strong></p>
+
+<ol>
+  <li>非模板友元类或友元函数</li>
+  <li>
+    <p>绑定的友元类模板或函数模板。</p>
+
+    <pre><code> template&lt;class type&gt;
+ void create(Graphics&lt;type&gt;);
+	
+ template&lt;class type&gt;
+ class Graphics{
+     friend void create&lt;type&gt;(Graphics&lt;type&gt;);
+ };
+</code></pre>
+  </li>
+  <li>
+    <p>非绑定的友元模板</p>
+
+    <pre><code> template&lt;class type&gt;
+ class Graphics{
+     template&lt;class T&gt;
+     friend void create(Graphics&lt;T&gt;);
+ };
+</code></pre>
+  </li>
+</ol>
+
+<p><strong>注意：</strong>当把非模板类或函数声明为类模板友元时，它们不必在全局域中被声明或定义，但将一个类的成员声明为类模板友元，该类必须已经被定义，另外在声明绑定的友元类模板或函数模板时，该模板也必须先声明。</p>
+
+<p><strong>类模板的静态数据成员</strong></p>
+
+<ol>
+  <li>静态数据成员的模板定义必须出现在类模板定义之外。</li>
+  <li>类模板静态数据成员本身就是一个模板，它的定义不会引起内存被分配，只有对其实例化才会分配内存。</li>
+  <li>当程序使用静态数据成员时，它被实例化，每个静态成员实例都与一个类模板实例相对应，静态成员的实例引用要通过一个类模板实例。</li>
+</ol>
+
+<p><strong>成员模板</strong></p>
+
+<ol>
+  <li>在一个类模板中定义一个成员模板,意味着该类模板的一个实例包含了可能无限多个嵌套类和无限多个成员函数．</li>
+  <li>只有当成员模板被使用时，它才被实例化.</li>
+  <li>成员模板可以定义在其外围类或类模板定义之外．</li>
+</ol>
+
+<p><strong>类模板的编译模式</strong></p>
+
+<ol>
+  <li>
+    <p>包含编译模式</p>
+
+    <p>这种编译模式下，类模板的成员函数和静态成员的定义必须被包含在“要将它们实例化”的所有文件中，如果一个成员函数被定义在类模板定义之外，那么这些定义应该被放在含有该类模板定义的头文件中。</p>
+  </li>
+  <li>
+    <p>分离编译模式</p>
+
+    <p>这种模式下，类模板定义和其inline成员函数定义被放在头文件中，而非inline成员函数和静态数据成员被放在程序文本文件中。</p>
+
+    <pre><code> //------Graphics.h---------
+	
+ export template&lt;class type&gt;
+ Class Graphics
+ {void Setup(const type &amp;);};
+	
+ //-------Graphics.c------------
+	
+ #include “Graphics.h”
+ Template &lt;class type&gt;
+ Void Graphics&lt;type&gt;::Setup(const type &amp;){…}
+	
+ //------user.c-----
+	
+ #include “Graphics.h”
+ Void main(){
+     Graphics&lt;int&gt; *pg=new Graphics&lt;int&gt;;
+     Int ival=1;
+     //Graphics&lt;int&gt;::Setup(const int &amp;)的实例（下有注解）
+     Pg-&gt;Setup(ival);
+ }
+</code></pre>
+
+    <p>Setup的成员定义在User.c中不可见,但在这个文件中仍可调用模板实例Graphics<int>::Setup(const int &amp;)。为实现这一点，须将类模声明为可导出的：**当它的成员函数实例或静态数据成员实例被使用时，编译器只要求模板的定义，它的声明方式是在关键字template前加关键字export**</int></p>
+  </li>
+  <li>
+    <p>显式实例声明</p>
+
+    <p>当使用包含编译模式时，类模板成员的定义被包含在使用其实例的所有程序文本文件中，何时何地编译器实例化类模板成员的定义，我们并不能精确地知晓，为解决这个问题，标准C++提供了显式实例声明：关键字template后面跟着关键字class以及类模板实例的名字。<strong>显式实例化类模板时，它的所有成员也被显式实例化</strong>。</p>
+
+    <pre><code> #include “Graphics.h”
+ Template class Graphics&lt;int&gt;;//显式实例声明
+</code></pre>
+  </li>
+</ol>
+
+<p><strong>类模板的特化</strong></p>
+
+<p><code>template&lt;&gt;</code>成员函数特化定义</p>
+
+<ol>
+  <li>只有当通用类模板被声明后，它的显式特化才可以被定义。</li>
+  <li>若定义了一个类模板特化，则必须定义与这个特化相关的所有成员函数或静态数据成员，此时类模板特化的成员定义不能以符号<code>template&lt;&gt;</code>作为打头。(<code>template&lt;&gt;</code>被省略)</li>
+  <li>类模板不能够在某些文件中根据通用模板定义被实例化，而在其他文件中却针对同一组模板实参被特化。</li>
+</ol>
+
+<p><strong>类模板部分特化</strong></p>
+
+<p>如果模板有一个以上的模板参数，则有些人就可能希望为一个特定的模板实参或者一组模板实参特化类模板，而不是为所有的模板参数特化该类模板。即，希望提供这样一个模板：它仍然是一个通用的模板，只不过某些模板参数已经被实际的类型或值取代。通过使用类模板部分特化，可以实现这一点。</p>
+
+<pre><code>template&lt;int hi,int wid&gt;
+Class Graphics{…};
+
+Template&lt;int hi&gt;//类模板的部分特化
+Class Graphics&lt;hi,90&gt;{…};
+</code></pre>
+
+<ol>
+  <li>部分特化的模板参数表只列出模板实参仍然未知的那些参数。</li>
+  <li>类模板部分特化是被隐式实例化的。编译器选择“针对该实例而言最为特化的模板定义”进行实例化，当没有特化可被使用时，才使用通用模板定义。</li>
+  <li>类模板部分特化必须有它自己对成员函数、静态数据成员和嵌套类的定义。</li>
+</ol>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[C/C++ Byte Alignment]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/04/22/byte-alignment/"/>
+    <updated>2014-04-22T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/04/22/byte-alignment</id>
+    <content type="html"><![CDATA[<p><strong>字节对齐的细节和编译器实现相关，但一般而言，满足三个准则</strong>：</p>
+
+<ol>
+  <li>结构体变量的首地址能够被其<strong>最宽基本类型</strong>成员的大小所整除；</li>
+  <li>结构体每个成员相对于结构体首地址的偏移量（offset）都是<strong>成员大小的整数倍</strong>，如有需要编译器会在成员之间加上填充字节（internal adding）；</li>
+  <li>结构体的总大小为结构体最宽基本类型成员大小的整数倍，如有需要编译器会在最末一个成员之后加上填充字节（trailing padding）。</li>
+</ol>
+
+<p>需要仔细体会上面的三个准则。</p>
+
+<!--more-->
+
+<ul>
+  <li>
+    <p>结构体某个成员相对于结构体首地址的偏移量可以通过宏offsetof()来获得，这个宏也在stddef.h中定义，如下：</p>
+
+    <pre><code>  #define offsetof(s,m) (size_t)&amp;(((s *)0)-&gt;m)
+</code></pre>
+  </li>
+  <li>
+    <p>基本类型是指前面提到的像char、short、int、float、double这样的内置数据类型。这里所说的“数据宽度”就是指其sizeof的大小。由于结构体的成员可以是复合类型，比如另外一个结构体，所以在寻找最宽基本类型成员时，应当包括复合类型成员的子成员，而不是把复合成员看成是一个整体。但在确定复合类型成员的偏移位置时则是将复合类型作为整体看待。</p>
+
+    <pre><code>  struct S1
+  {
+      char c;
+      int i;
+  };
+
+  struct S3
+  {
+      char c1;
+      S1 s;
+      char c2;
+  };
+</code></pre>
+
+    <p>S1的最宽简单成员的类型为int，S3在考虑最宽简单类型成员时是将S1“打散”看的，所以S3的最宽简单类型为int。这样，通过S3定义的变量，其存储空间首地址需要被4整除，整个sizeof(S3)的值也应该被4整除。</p>
+
+    <p>c1的偏移量为0，s的偏移量呢？这时s是一个整体，它作为结构体变量也满足前面三个准则，所以其大小为8，偏移量为4，c1与s之间便需要3个填充字节，而c2与s之间就不需要了，所以c2的偏移量为12，算上c2的大小为13，13是不能被4整除的，这样末尾还得补上3个填充字节。最后得到sizeof(S3)的值为16。</p>
+  </li>
+</ul>
+
+<h2 id="pragma-pack"><code> #pragma pack</code></h2>
+
+<p><code>#pragma pack</code>规定的对齐长度，实际使用的规则是：</p>
+
+<p>结构，联合，或者类的数据成员，第一个放在偏移为0的地方，以后每个数据成员的对齐，按照<code>#pragma pack</code>指定的数值和这个数据成员自身长度中，比较小的那个进行。也就是说，当<code>#pragma pack</code>的值等于或超过所有数据成员长度的时候，这个值的大小将不产生任何效果。而结构整体的对齐，则按照结构体中最大的数据成员和<code>#pragma pack</code>指定值之间，较小的那个进行。</p>
+
+<pre><code>   #pragma pack(4)
+　　class TestB
+　　{
+　　public:
+　　　　int aa; //第一个成员，放在[0,3]偏移的位置，
+　　　　char a; //第二个成员，自身长为1，#pragma pack(4),取小值，也就是1，所以
+这个成员按一字节对齐，放在偏移[4]的位置。
+　　　　short b; //第三个成员，自身长2，#pragma pack(4)，取2，按2字节对齐，所以
+放在偏移[6,7]的位置。
+　　　　char c; //第四个，自身长为1，放在[8]的位置。
+　　};
+</code></pre>
+
+<p>这个类实际占据的内存空间是9字节类之间的对齐，是按照类内部最大的成员的长度，和<code>#pragma pack</code>规定的值之中较小的一个对齐的。所以这个例子中，类之间对齐的长度是<code>min(sizeof(int),4)</code>，也就是4。9按照4字节圆整的结果是12，所以<code>sizeof(TestB)</code>是12。</p>
+
+<pre><code>	#pragma pack(2)
+    class TestB
+　　{
+　　public:
+　　　　int aa; //第一个成员，放在[0,3]偏移的位置，
+　　　　char a; //第二个成员，自身长为1，#pragma pack(4),取小值，也就是1，所以
+这个成员按一字节对齐，放在偏移[4]的位置。
+　　　　short b; //第三个成员，自身长2，#pragma pack(4)，取2，按2字节对齐，所以
+放在偏移[6,7]的位置。
+　　　　char c; //第四个，自身长为1，放在[8]的位置。
+　　};
+</code></pre>
+
+<p>可以看出，上面的位置完全没有变化，只是类之间改为按2字节对齐，9按2圆整的结果是10。所以<code>sizeof(TestB)</code>是10。</p>
+
+<pre><code>	#pragma pack(4)
+　　class TestC
+　　{
+　　public:
+　　　　char a;//第一个成员，放在[0]偏移的位置，
+　　　　short b;//第二个成员，自身长2，#pragma pack(4)，取2，按2字节对齐，所以
+放在偏移[2,3]的位置。
+　　　　char c;//第三个，自身长为1，放在[4]的位置。
+　　};
+</code></pre>
+
+<p>整个类的大小是5字节，按照<code>min(sizeof(short),4)</code>字节对齐，也就是2字节对齐，结果是6</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[C++ string copy-on-write]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/03/12/string-copy-on-write/"/>
+    <updated>2014-03-12T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/03/12/string-copy-on-write</id>
+    <content type="html"><![CDATA[<p>不同版本的C++ string实现时不同的，sizeof(string)得出来的结果也不尽相同，其中有种实现采用copy-on-write的方式来共享内存。</p>
+
+<p>引用计数就是string类中写时才拷贝的原理！当第一个类构造时，string的构造函数会根据 传入的参数从堆上分配内存，当有其它类需要这块内存时，这个计数为自动累加，当有类析构时，这个计数会减一，直到最后一个类析构时，此时的RefCnt为1或是0，此时，程序才会真正的Free这块从堆上分配的内存。</p>
+
+<p>string类的内存是在堆上动态分配的，共享内存的各个类指向的是同一个内存区。这块内存区域还包括引用计数，其位于字符串内存区域的上方，通过<code>_Ptr[-1]</code>来访问。这样所有共享这块内存的类都可以访问到引用计数，也就知道这块内存的引用者有多少了。</p>
+
+<p>于是，有了这样一个机制，每当我们为string分配内存时，我们总是要多分配一个空间用来存放这个引用计数的值，只要发生拷贝构造可是赋值时，这个内存的值就会加一。而在内容修改时，string类为查看这个引用计数是否为0，如果不为零，表示有人在共享这块内存，那么自己需要先做一份拷贝，然后把引用计数减去一，再把数据拷贝过来。</p>
+
+<!--more-->
+<p>具体做法如下：</p>
+
+<pre><code>//构造函数（分存内存）
+string::string(const char* tmp)
+{
+	_Len = strlen(tmp);
+	_Ptr = new char[_Len+1+1];
+	strcpy( _Ptr, tmp );
+	_Ptr[-1]=0;  // 设置引用计数  
+}
+
+//拷贝构造（共享内存）
+string::string(const string&amp; str)
+{
+	if (*this != str){
+	this-&gt;_Ptr = str.c_str();   //共享内存
+	this-&gt;_Len = str.szie();
+	this-&gt;_Ptr[-1] ++;  //引用计数加一
+}
+
+//写时才拷贝Copy-On-Write
+char&amp; string::operator[](unsigned int idx)
+{
+	if (idx &gt; _Len || _Ptr == 0 ) {
+		static char nullchar = 0;
+		return nullchar;
+	}
+
+	_Ptr[-1]--;   //引用计数减一
+	char* tmp = new char[_Len+1+1];
+	strncpy( tmp, _Ptr, _Len+1);
+	_Ptr = tmp;
+	_Ptr[-1]=0; // 设置新的共享内存的引用计数
+	
+	return _Ptr[idx];
+}
+
+
+//析构函数的一些处理
+~string()
+{ 
+	_Ptr[_Len+1]--;   //引用计数减一
+	// 引用计数为0时，释放内存
+	if (_Ptr[_Len+1]==0) {
+		delete[] _Ptr;
+	}
+}
+</code></pre>
+
+<p>但这样的方式也会造成一些麻烦。容易造成内存访问异常。
+<strong>两个例子：</strong></p>
+
+<h3 id="section">动态库</h3>
+<p>动态链接库中有一个函数返回string类：</p>
+
+<pre><code>string GetIPAddress(string hostname)
+{
+	static string ip;
+	……
+	return ip;
+}
+</code></pre>
+
+<p>主程序中动态地载入这个动态链接库，并调用其中的这个函数：</p>
+
+<pre><code>main()
+{
+	//载入动态链接库中的函数
+	void(*pTest)();
+	void*pdlHandle = dlopen("libtest.so", RTLD_LAZY);   
+	pTest = dlsym(pdlHandle, "GetIPAddress");
+	//调用动态链接库中的函数
+	string ip = (*pTest)(“host1”);
+	……
+	//释放动态链接库
+	 dlclose(pdlHandle);
+	……
+	cout &lt;&lt; ip &lt;&lt; endl;
+}
+</code></pre>
+
+<p>当主程序释放了动态链接库后，那个共享的内存区也随之释放。所以，以后对ip的访问，必然做造成内存地址访问非法，造成程序crash。即使你在以后没有使用到ip这个变量，那么在主程序退出时也会发生内存访问异常，因为程序退出时，ip会析构，在析构时就会发生内存访问异常。</p>
+
+<h3 id="section-1">多线程</h3>
+
+<p>在多线程中，对于多线程来说，引用计数就是一个全局变量。指向同一个buffer的多个string的引用计数有可能变得混乱，从而导致delete异常。尤其是在.h中定义const string A = “XXXX”， 如果多个对象都引用了A，则可能在多线程中出现问题。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[C++ inline]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/02/16/inline/"/>
+    <updated>2014-02-16T09:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/02/16/inline</id>
+    <content type="html"><![CDATA[<p><code>inline</code>定义的函数，比起没有<code>inline</code>的函数来说，没有执行函数调用所带来的负担，因此它是高效率的；比起宏来，它具有<strong>函数的可预期行为和参数类型检验</strong>。</p>
+
+<p><code>inline</code>对于编译器而言，意味着“在编译阶段，将调用动作以被调用函数的本体替换之”。但是它只是一种建议，编译器可以去做，也可以不去做。从逻辑上来说，编译器将函数<code>inline</code>的步骤如下：</p>
+
+<ol>
+  <li>将<code>inline</code>函数体复制到<code>inline</code>函数调用点处；</li>
+  <li>为所用<code>inline</code>函数中的局部变量分配内存；</li>
+  <li>将<code>inline</code>函数的的输入参数和返回值映射到调用方法的局部变量空间中；</li>
+  <li>如果<code>inline</code>函数有多个返回点，将其转变为<code>inline</code>函数代码块末尾的分支（使用GOTO）。</li>
+</ol>
+
+<p><code>inline</code>函数的缺点有哪些呢？</p>
+
+<ol>
+  <li><strong>代码膨胀。</strong>如果<code>inline</code>函数体过大且编译器还让它<code>inline</code>成功，那么你最终的程序会代码膨胀，从而造成设备缓冲命中率低，引起较多的页面错误，读写硬盘的次数增多，这样程序的性能就下降了！建议：<strong><code>inline</code>函数体一般不要超过5行，不包括循环，不包括递归调用。</strong></li>
+  <li><strong><code>inline</code>函数内部不要有static变量。</strong><code>inline</code>函数的定义几乎总是放在头文件（.h）里，这允许多个实现文件（.cpp）得以引用。我们知道编译器是分别编译的，所以这个时候，在多个实现文件里就会有多个<code>inline</code>函数的展开，也就是说有个多个static变量，这恐怕不是我们期望的！</li>
+  <li><strong><code>inline</code>函数无法随着函数库升级而升级。</strong>如果f是函数库中的一个<code>inline</code>函数，使用它的用户会将f函数实体编译到他们的程序中。一旦函数库实现者改变f，所有用到f的程序都必须重新编译。如果f是non-<code>inline</code>的，用户程序只需重新连接即可。如果函数库采用的是动态连接，那这一升级的f函数可以不知不觉的被程序使用。</li>
+  <li><strong>不要获取<code>inline</code>函数的地址。</strong>如果要取得一个<code>inline</code>函数的地址，编译器就必须为此函数产生一个函数实体，无论如何，编译器无法交出一个“不存在函数”的指针。注意，有些编译器可能会使用类的constructors和destructors的函数指针，用以构造和析构一个class对象的数组。另外类的constructors和destructors可能简单，但是其父类的类的constructors和destructors可能是复杂的，所以<strong>类的constructors和destructors往往不是<code>inline</code>函数的最佳选择</strong>！</li>
+  <li><strong><code>inline</code>虚函数往往是无效的。</strong>虚函数往往是运行时确定的，而<code>inline</code>是在编译时进行的，所以<code>inline</code>虚函数往往无效。当然如果直接用类的对象来使用虚函数，那么对有的编译器而言，也可起到优化的作用。</li>
+  <li><strong><code>inline</code>函数无法调试。</strong>原因请参见上面编译器将函数<code>inline</code>的步骤。所以请在项目后期，<strong>对程序进行profile后，再决定将那些函数<code>inline</code>化。</strong></li>
+</ol>
+]]></content>
+  </entry>
+  
+</feed>

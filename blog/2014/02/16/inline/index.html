@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>C++ inline - Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2014/02/16/inline">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-02-16T09:18:00+08:00" pubdate data-updated="true">Feb 16<span>th</span>, 2014</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        C++ Inline
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><p><code>inline</code>定义的函数，比起没有<code>inline</code>的函数来说，没有执行函数调用所带来的负担，因此它是高效率的；比起宏来，它具有<strong>函数的可预期行为和参数类型检验</strong>。</p>
+
+<p><code>inline</code>对于编译器而言，意味着“在编译阶段，将调用动作以被调用函数的本体替换之”。但是它只是一种建议，编译器可以去做，也可以不去做。从逻辑上来说，编译器将函数<code>inline</code>的步骤如下：</p>
+
+<ol>
+  <li>将<code>inline</code>函数体复制到<code>inline</code>函数调用点处；</li>
+  <li>为所用<code>inline</code>函数中的局部变量分配内存；</li>
+  <li>将<code>inline</code>函数的的输入参数和返回值映射到调用方法的局部变量空间中；</li>
+  <li>如果<code>inline</code>函数有多个返回点，将其转变为<code>inline</code>函数代码块末尾的分支（使用GOTO）。</li>
+</ol>
+
+<p><code>inline</code>函数的缺点有哪些呢？</p>
+
+<ol>
+  <li><strong>代码膨胀。</strong>如果<code>inline</code>函数体过大且编译器还让它<code>inline</code>成功，那么你最终的程序会代码膨胀，从而造成设备缓冲命中率低，引起较多的页面错误，读写硬盘的次数增多，这样程序的性能就下降了！建议：<strong><code>inline</code>函数体一般不要超过5行，不包括循环，不包括递归调用。</strong></li>
+  <li><strong><code>inline</code>函数内部不要有static变量。</strong><code>inline</code>函数的定义几乎总是放在头文件（.h）里，这允许多个实现文件（.cpp）得以引用。我们知道编译器是分别编译的，所以这个时候，在多个实现文件里就会有多个<code>inline</code>函数的展开，也就是说有个多个static变量，这恐怕不是我们期望的！</li>
+  <li><strong><code>inline</code>函数无法随着函数库升级而升级。</strong>如果f是函数库中的一个<code>inline</code>函数，使用它的用户会将f函数实体编译到他们的程序中。一旦函数库实现者改变f，所有用到f的程序都必须重新编译。如果f是non-<code>inline</code>的，用户程序只需重新连接即可。如果函数库采用的是动态连接，那这一升级的f函数可以不知不觉的被程序使用。</li>
+  <li><strong>不要获取<code>inline</code>函数的地址。</strong>如果要取得一个<code>inline</code>函数的地址，编译器就必须为此函数产生一个函数实体，无论如何，编译器无法交出一个“不存在函数”的指针。注意，有些编译器可能会使用类的constructors和destructors的函数指针，用以构造和析构一个class对象的数组。另外类的constructors和destructors可能简单，但是其父类的类的constructors和destructors可能是复杂的，所以<strong>类的constructors和destructors往往不是<code>inline</code>函数的最佳选择</strong>！</li>
+  <li><strong><code>inline</code>虚函数往往是无效的。</strong>虚函数往往是运行时确定的，而<code>inline</code>是在编译时进行的，所以<code>inline</code>虚函数往往无效。当然如果直接用类的对象来使用虚函数，那么对有的编译器而言，也可起到优化的作用。</li>
+  <li><strong><code>inline</code>函数无法调试。</strong>原因请参见上面编译器将函数<code>inline</code>的步骤。所以请在项目后期，<strong>对程序进行profile后，再决定将那些函数<code>inline</code>化。</strong></li>
+</ol>
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-02-16T09:18:00+08:00" pubdate data-updated="true">Feb 16<span>th</span>, 2014</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/language/'>language</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2014/02/16/inline/" data-via="" data-counturl="http://billowkiller.github.io/blog/2014/02/16/inline/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2013/12/31/large-site-technical-architecture/" title="Previous Post: Large site technical architecture">&laquo; Large site technical architecture</a></li>
+            
+            
+            <li class="next"><a href="/blog/2014/03/12/string-copy-on-write/" title="Next Post: C++ string copy-on-write">C++ string copy-on-write &raquo;</a></li>
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item " href="/blog/2015/07/26/java-log4j/">Java Log4j</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/29/static-and-dynamic-library/">Static and Dynamic Library</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/23/classical-sync-problem/">Classical Sync Problem</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/22/design-pattern/">Design Pattern Abstraction</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/14/linux-memory-management/">Linux Memory Management</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">8</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">10</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">8</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">13</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">13</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">6</span>
+        algorithm
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2015 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2014/02/16/inline/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2014/02/16/inline/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>

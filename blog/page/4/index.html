@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/page/4">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <div class="blog-index">
+      
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-11-14T00:16:00+08:00" pubdate data-updated="true">Nov 14<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/11/14/nginx-architecture-2-event-driven/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-2-event-driven/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/14/nginx-architecture-2-event-driven/">Nginx architecture(2)&#8211;Event Driven</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>Nginx是一个事件驱动架构的Web服务器。在Linux中，<code>epoll</code>是目前最强大的事件管理机制(I/O多路复用)，定时器事件也是由<code>epoll</code>等事件模块触发的，它是由红黑树实现的。并且Nginx很好的解决多个<code>worker</code>子进程监听同一个端口引起的惊群问题，以及对<code>worker</code>进行负载平衡。最后会讨论下linux内核中的文件异步I/O。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx-logo_zpsabde8e46.png" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/11/14/nginx-architecture-2-event-driven/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-10-13T00:28:00+08:00" pubdate data-updated="true">Oct 13<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/10/13/nginx-architecture-1-overview/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/10/13/nginx-architecture-1-overview/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/10/13/nginx-architecture-1-overview/">Nginx architecture(1)&#8211;Overview</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>从04年发布以来，Nginx已经成为多个国内外互联网具体首选的高性能Web服务器。其特点是占有内存少，并发能力强，并且由于Nginx使用基于事件驱动的架构能够最有效的利用多核CPU的处理能力，进程可以无阻塞的运行。</p>
+
+<p>特别是Nginx可以利用当前操作系统特有的一些高校API来提高自己的性能，例如Linux上的<code>epoll</code>、Solaris上的event ports和Free BSD上的kqueue。又如对于Linux，Nginx支持其独有的sendfile系统调用，可以高效的讲硬盘中的数据发送到网络上（无需将硬盘数据先复制到用户态内存中）。</p>
+
+<p>所以通过分析Nginx的架构设计，可以怎样充分利用服务器上的硬件资源，以及学习到更为先进的理念。下面就来分析和学习Nginx的架构设计。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx_zps7d735b88.jpg" alt="Nginx logo" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/10/13/nginx-architecture-1-overview/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-10-12T16:12:00+08:00" pubdate data-updated="true">Oct 12<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/10/12/deep-c-and-c-plus-plus/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/10/12/deep-c-and-c-plus-plus/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/10/12/deep-c-and-c-plus-plus/">Deep C and C++</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>摘自<a href="http://share.csdn.net/#/detail/1050">CSDN Share</a></p>
+
+<p>花了一个上午的时间看了下这个PPT，觉得收获颇多。
+特别是这个PPT的组织方式，采用两个程序员面试对比的方式，非常的实用，也很有触动和感悟。已经很久没见到这样精彩的PPT了。</p>
+
+<p>本PPT介绍了作为普通的程序员和高级的程序员如何看待C与C++，从编译、链接、运行的角度来介绍，有非常多的干货，也许不是很系统，但确实是非常的实用；特别是在回答面试官的提问上，需要认真思考，从<code>不同的角度</code>、<code>深层次</code>地回答技术官的问话。也许两个程序员的功力差不多，但是在回答技术问题的方法上也许对面试官有很大的影响，最终也就是面试是否成功的关键。</p>
+
+<p><img src="http://www.atmel.com/zh/cn/Images/compiler.jpg" alt="" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/10/12/deep-c-and-c-plus-plus/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-06-02T13:49:00+08:00" pubdate data-updated="true">Jun 2<span>nd</span>, 2013</time>
+        
+           | <a href="/blog/2013/06/02/probabilistic-graphical-models/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/06/02/probabilistic-graphical-models/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/06/02/probabilistic-graphical-models/">Probabilistic Graphical Models</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><h3 id="pgm">1. PGM介绍</h3>
+
+<p>GM(graphical model)，图模型首先它是一个概率模型，用的是图的数据结构，用来表示随机变量之间的以来关系。
+因为是涉及到变量之间的关系，于是在概率理论特别是统计部分得到很长远的应用，另外还包括机器学习。</p>
+
+<p><img src="http://www.stanford.edu/~montanar/TEACHING/Stat375/graph.jpg" width="400px" /></p>
+
+<p>可以看的出来，概率图模型是综合了统计和计算机技术：</p>
+
+<ul>
+  <li>统计方面提供了概率基础，包括概率分布的分析，不确定性的处理，决策判定等等。</li>
+  <li>计算机方面可以将概率中的条件概率置于高维空间中，用图来表示它们的数据结构，并使用高效的算法计算。</li>
+</ul>
+
+<p>使用现实中得到的知识数据来表述图模型，作为declarative representation，它与我们所要使用的算法是
+松耦合的，可以将不同的算法应用到图模型上，在图模型中可以加入专家知识，和从其他数据中学习到的知识。
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/06/02/probabilistic-graphical-models/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/05/14/zui-xiao-sheng-cheng-shu/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/zui-xiao-sheng-cheng-shu/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/zui-xiao-sheng-cheng-shu/">最小生成树</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>算法使用的是二叉堆，时间为O(ElgV)。如果V小于E的话，使用Prim更好。</p>
+
+<p>Kruskal算法：</p>
+
+<p>O(ElgE): E&lt;V<sup>2&nbsp;</sup>,所以有 lgE=O(lgV)</p>
+
+<p>集合A是一个森林，加入集合A中的安全边总是图中连接两个不同连通分支的最小权边。</p>
+
+<p>使用不相交集合数据结构。</p>
+
+<p>测试边时，即测试两端点是否在同一棵树上。</p>
+
+<p>若不在则可以对集合进行合并。</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/zui-xiao-sheng-cheng-shu/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/05/14/zui-duan-lu-jing-suan-fa/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/zui-duan-lu-jing-suan-fa/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/zui-duan-lu-jing-suan-fa/">最短路径算法</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p><strong>单源最短路径</strong></p>
+
+<p>​1. Dijkstra</p>
+
+<p>Dijkstra算法解决有向图上带权的单源最短路径问题，要求所有边的权值非负。</p>
+
+<p>用到了顶点的最小优先队列，排序关键字为顶点的d值。即开始出了根为0，其他</p>
+
+<p>顶点为正无穷，后来d值根据松弛算法变化。</p>
+
+<p>总计运行时间为O((V+E)lgV)，如果所有顶点都可达的话，则为O(ElgV)。</p>
+
+<p>​2. Bellman-ford</p>
+
+<p>算法用来解决一般，即边的权值可以为负的单源最短路径问题。算法同时也可以检查</p>
+
+<p>是否有从源点可达的负权回路。</p>
+
+<p>算法的运行时间为O(VE)。</p>
+
+<p></div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/zui-duan-lu-jing-suan-fa/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue/">Zip文件乱码解决</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>在windows上压缩的文件，是以系统默认编码中文来压缩文件。由于zip文件中没有声明其编码，所以linux上的unzip一般以默认编码解压，中文文件名会出现乱码。</p>
+
+<p>虽然2005年就有人把这报告为bug,
+但是info-zip的官方网站没有把自动识别编码列入计划，可能他们不认为这是个问题。Sun对java中存在N年的zip编码问题，采用了同样的处理方式。</p>
+
+<p>1.1 </p>
+
+<p>通过unzip行命令解压，指定字符集</p>
+
+<pre><code>unzip -O CP936 xxx.zip (用GBK, GB18030也可以)
+</code></pre>
+
+<p>有趣的是unzip的manual中并无这个选项的说明, unzip
+–help对这个参数有一行简单的说明。</p>
+
+<p>1.2 </p>
+
+<p>在环境变量中，指定unzip参数，总是以指定的字符集显示和解压文件</p>
+
+<p>解决办法：</p>
+
+<p>引用</p>
+
+<pre><code>vi /etc/environment
+</code></pre>
+
+<p>再最后加入后面的代码即可</p>
+
+<p>UNZIP=”-O CP936”</p>
+
+<p>ZIPINFO=”-O CP936”</p>
+</div>
+  
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/05/14/xiao-yan-zhong-de-scrumhe-xp/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/xiao-yan-zhong-de-scrumhe-xp/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/xiao-yan-zhong-de-scrumhe-xp/">硝烟中的Scrum和XP</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p><strong>refine from</strong> <em>硝烟中的Scrum和XP–我们如何实施Scrum</em></p>
+
+<hr />
+
+<p>产品的backlog时Scrum的核心，也是一切的起源，从根本上说，它就是一个需求或故事特性等组成的列表，按照重要性的级别进行排序。它里面包含的是客户想要的东西，并用客户的术语加一描述。</p>
+
+<p>backlog的另外一个名称是故事。包括以下字段：</p>
+
+<ul>
+  <li>ID</li>
+  <li>Name：一个简短的描述</li>
+  <li>Importance：100以内打分，分数越高越重要</li>
+  <li>Initial estimate：最小单位为stroy
+point，即为人天。估值无需准确，但是要保证相对的正确性。</li>
+  <li>How to demo：简短的测试规范，先做啥，然后做啥，最后做啥，得到什么结果。</li>
+  <li>Notes：相关信息，解释说明，对其他资料的引用等等，简短。</li>
+</ul>
+
+<p>额外的字段，根据需要：</p>
+
+<ul>
+  <li>Track：当前故事的大致分类（后台系统，优化…）</li>
+  <li>Components：再多个Scrum团队协作的时候很有用，包括数据库，服务器，客户端等组件</li>
+  <li>Requestor：哪个客户活相关人员最先提出的需求，再后续的开发过程中向他反馈</li>
+  <li>Bug tracking ID</li>
+</ul>
+
+<p>产品的backlog应该停留再业务层次上，例如给Events表添加索引，潜在的目标是“提高再后台系统中搜索事件表单的相应速度”，这时需要改写，原先的目标作为一个注释存在。
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/xiao-yan-zhong-de-scrumhe-xp/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/05/14/ubuntuliang-du-diao-jie/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/ubuntuliang-du-diao-jie/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/ubuntuliang-du-diao-jie/">Ubuntu亮度调节</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>1.
+sudo gedit /etc/X11/xorg.conf 把
+<br /></p>
+
+<p>Section “Device”<br />
+Identifier “Device0” <br />
+Driver “nvidia” 　　　<br />
+VendorName “NVIDIA Corporation” EndSection <br /></p>
+
+<p>改成</p>
+
+<p>Section “Device”<br />
+Identifier “Device0”<br />
+Driver “nvidia”<br />
+VendorName “NVIDIA Corporation” 　<br />
+Option “RegistryDwords” “<br /> EnableBrightnessControl=1”<br />
+EndSection</p>
+
+<p>然后保存，退出，重启之后，你 就会发现可以调节屏幕背光亮度了</p>
+
+<p>2.
+网上有很多在Ubuntu
+Linux下调节笔记本屏幕亮度的方法，有的调的是亮度但不是背光亮度，有的调背光亮度的方法在我的电脑上不好使……找了半天发现这个方法，适用范围应该比较广（起码在我这里好用）。</p>
+
+<p>首先，进入终端，输入lspci命令，列出各种设备的地址
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/ubuntuliang-du-diao-jie/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/05/14/the-film-mona-lisa-smile/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/the-film-mona-lisa-smile/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/the-film-mona-lisa-smile/">The film-Mona Lisa Smile</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>看了电影《Mona Lisa
+Smile》，这是一部小成本电影。整部影片从头到尾没有任何异样的高潮，没有扣人心弦的打斗或者其他对抗场面，同样也没有任何妙手回春的拍摄手法，但是这部两个小时的电影却牢牢牵住了我的心，时光在刹那间浓缩了电影中的那一年。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/5485107143.jpg" alt="The Mona Lisa Smail" height="450px" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/the-film-mona-lisa-smile/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+    </div>
+
+    <ul class="pager">
+      
+        <li class="previous"><a href="/blog/page/5/">&larr;&nbsp;Older</a></li>
+      
+      <li><a href="/blog/archives">Blog Archives</a></li>
+      
+        <li class="next"><a href="/blog/page/3/">Newer&nbsp;&rarr;</a></li>
+      
+    </ul>
+  </div>
+
+  
+    <aside class="sidebar col-md-3">
+      
+        <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item " href="/blog/2015/07/26/java-log4j/">Java Log4j</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/29/static-and-dynamic-library/">Static and Dynamic Library</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/23/classical-sync-problem/">Classical Sync Problem</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/22/design-pattern/">Design Pattern Abstraction</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/14/linux-memory-management/">Linux Memory Management</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">8</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">10</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">8</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">13</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">13</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">6</span>
+        algorithm
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+      
+    </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2015 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>

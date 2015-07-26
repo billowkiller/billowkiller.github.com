@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>grep example - Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2013/05/14/grep-example">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        Grep Example
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><p><strong><em>from <a href="http://blog.csdn.net/pan_tian/article/details/7685815">http://blog.csdn.net/pan_tian/article/details/7685815</a></em></strong></p>
+
+<hr />
+
+<h2 id="grephttpwwwlinuxsocomcommandgrephtml-"><a href="http://www.linuxso.com/command/grep.html">grep</a> 语法</h2>
+
+<ul>
+  <li>
+    <p>grep ‘word’ filename</p>
+  </li>
+  <li>
+    <p>grep ‘string1 string2’ filename</p>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>cat otherfile</td>
+          <td>grep ‘something’</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>command</td>
+          <td>grep ‘something’</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>command option1</td>
+          <td>grep ‘data’</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>grep –color ‘data’ fileName</li>
+</ul>
+
+<h2 id="section">基本的用法</h2>
+
+<p>在某个文件里搜索error字符串</p>
+
+<p><code>$ grep "error" log.txt</code>
+<!--more-->
+忽略大小写搜索(-i)
+——————</p>
+
+<p><code>$ grep -i "ErroR" log.txt</code></p>
+
+<h2 id="r">所有子目录下的搜索(-r)</h2>
+
+<p><code>$ grep -r "exception" log.txt</code></p>
+
+<h2 id="w">全字匹配搜索(-w)</h2>
+
+<p>如果你搜索boo，查询结果可能包含fooboo，boo123,
+booooom,等等，可以使用-w来限定全字匹配</p>
+
+<p><code>$ grep -w "boo" /path/to/file</code></p>
+
+<h2 id="section-1">全字匹配搜索两个不同单词</h2>
+
+<p><code>$ grep -w 'word1|word2' /path/to/file</code> </p>
+
+<h2 id="c">统计字符串出现的次数(-c)</h2>
+
+<p><code>$ grep -c 'word' /path/to/file</code></p>
+
+<p>另外加-n的话， 会在结果中，列出匹配字符串的序列号，并且会列出内容</p>
+
+<p><code>$ grep -n 'word' /path/to/file</code> </p>
+
+<h2 id="v">列出“不”包含字符串的行(-v)</h2>
+
+<p><code>$ grep -v bar /path/to/file</code></p>
+
+<h2 id="l">只列出文件名(-l)</h2>
+
+<p><code>$ grep -l 'main' *.pls</code></p>
+
+<h2 id="color">高亮显示(–color)</h2>
+
+<p><code>$ </code>grep –color oracle
+/etc/<a href="http://www.linuxso.com/command/passwd.html">passwd</a></p>
+
+<p><img src="http://www.linuxso.com/uploads/allimg/120628/0043022131-1.jpg" alt="grep highlight" /></p>
+
+<h2 id="unix--linux-pipes--grep">UNIX / Linux pipes + grep</h2>
+
+<p><code>ls -l | grep -i xyz</code></p>
+
+<p><code>ls 列出当前目录下的文件和文件夹,| 是管道传递给后面的一个程序,grep再是进行模式匹配</code></p>
+
+<p><code>例如：ls *.pls | grep -i --color "MM"</code></p>
+
+<p><code>========EOF=========</code></p>
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/tools/'>tools</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2013/05/14/grep-example/" data-via="" data-counturl="http://billowkiller.github.io/blog/2013/05/14/grep-example/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2013/05/14/googlelun-wen-mapreduce/" title="Previous Post: google论文：MapReduce">&laquo; google论文：MapReduce</a></li>
+            
+            
+            <li class="next"><a href="/blog/2013/05/14/hard-disk-partition/" title="Next Post: Hard Disk Partition">Hard Disk Partition &raquo;</a></li>
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item " href="/blog/2015/07/26/java-log4j/">Java Log4j</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/29/static-and-dynamic-library/">Static and Dynamic Library</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/23/classical-sync-problem/">Classical Sync Problem</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/22/design-pattern/">Design Pattern Abstraction</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/14/linux-memory-management/">Linux Memory Management</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">8</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">10</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">8</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">13</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">13</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">6</span>
+        algorithm
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2015 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/05/14/grep-example/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/05/14/grep-example/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>

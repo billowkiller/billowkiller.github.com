@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: shortest path | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/shortest-path/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2015-07-26T16:40:30+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[最短路径算法]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/zui-duan-lu-jing-suan-fa/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/zui-duan-lu-jing-suan-fa</id>
+    <content type="html"><![CDATA[<p><strong>单源最短路径</strong></p>
+
+<p>​1. Dijkstra</p>
+
+<p>Dijkstra算法解决有向图上带权的单源最短路径问题，要求所有边的权值非负。</p>
+
+<p>用到了顶点的最小优先队列，排序关键字为顶点的d值。即开始出了根为0，其他</p>
+
+<p>顶点为正无穷，后来d值根据松弛算法变化。</p>
+
+<p>总计运行时间为O((V+E)lgV)，如果所有顶点都可达的话，则为O(ElgV)。</p>
+
+<p>​2. Bellman-ford</p>
+
+<p>算法用来解决一般，即边的权值可以为负的单源最短路径问题。算法同时也可以检查</p>
+
+<p>是否有从源点可达的负权回路。</p>
+
+<p>算法的运行时间为O(VE)。</p>
+
+<p><!--more--></p>
+
+<p>在Dijkstra算法以及关于有向无回路图的最短路径算法中，对每条边执行一次松弛操作。</p>
+
+<p>在Bellman-Ford算法中，对每条边要执行多次松弛操作。</p>
+
+<p><strong>每对顶点间的最短路径</strong></p>
+
+<p>​1. Floyd-Wallshall</p>
+
+<p>属于动态规划方案，允许存在权值为负的边，但不存在权值为负的回路。</p>
+
+<p>算法考虑最短路径上的中间顶点，自底向上利用中间顶点K值递增的顺序计算权值</p>
+
+<p>利用的递归式为</p>
+
+<p><span style="font-family: 'comic sans ms', sans-serif;"><em>D<sub>i,j,k</sub>&nbsp;= min(D<sub>i,k,k&nbsp;&minus; 1</sub>&nbsp;+&nbsp;D<sub>k,j,k&nbsp;&minus; 1</sub>,D<sub>i,j,k&nbsp;&minus; 1</sub>)　　K &gt;= 1</em></span></p>
+<p><span style="font-family: 'comic sans ms', sans-serif;"><em>　　　= W<sub>i,j</sub>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;　　　　 &nbsp;K = 0</em></span></p>
+<p><span style="font-family: 'comic sans ms', sans-serif;"><em><br /></em>算法运行时间为&Phi;(n<sup>3</sup>)。</span></p>
+
+<p>利用Floyd算法可以计算出有向图的传递闭包，即确定对所有顶点对，图中是否都存在一条</p>
+
+<p>从 i 到 j 的路径。</p>
+
+<p>用相应的逻辑运算或和并来替换 min 和 + 用以增加运算速度。</p>
+
+<p>​2. 稀疏图上的Johnson算法</p>
+
+<p>对于稀疏图改算法在渐进意义上要好于矩阵的重复平方或Floyd-Wallshall算法。</p>
+
+<p>Johnson算法吧Dijkstra算法和Bellman-Ford算法作为其的子程序。</p>
+
+<p>通过重新赋权值保持最短路径和产生非负的权。</p>
+
+<p>若采用斐波那契堆来实现Dijkstra算法的最小优先队列则运算时间是</p>
+
+<p><span>O(V<sup>2</sup>lgV + VE</span>)。更简单的二叉堆实现，则可以得到O(VElgV)的运行时间。</p>
+]]></content>
+  </entry>
+  
+</feed>

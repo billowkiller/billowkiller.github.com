@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: grep | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/grep/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2015-07-26T16:40:30+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[grep example]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/grep-example/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/grep-example</id>
+    <content type="html"><![CDATA[<p><strong><em>from <a href="http://blog.csdn.net/pan_tian/article/details/7685815">http://blog.csdn.net/pan_tian/article/details/7685815</a></em></strong></p>
+
+<hr />
+
+<h2 id="grephttpwwwlinuxsocomcommandgrephtml-"><a href="http://www.linuxso.com/command/grep.html">grep</a> 语法</h2>
+
+<ul>
+  <li>
+    <p>grep ‘word’ filename</p>
+  </li>
+  <li>
+    <p>grep ‘string1 string2’ filename</p>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>cat otherfile</td>
+          <td>grep ‘something’</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>command</td>
+          <td>grep ‘something’</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>command option1</td>
+          <td>grep ‘data’</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>grep –color ‘data’ fileName</li>
+</ul>
+
+<h2 id="section">基本的用法</h2>
+
+<p>在某个文件里搜索error字符串</p>
+
+<p><code>$ grep "error" log.txt</code>
+<!--more-->
+忽略大小写搜索(-i)
+——————</p>
+
+<p><code>$ grep -i "ErroR" log.txt</code></p>
+
+<h2 id="r">所有子目录下的搜索(-r)</h2>
+
+<p><code>$ grep -r "exception" log.txt</code></p>
+
+<h2 id="w">全字匹配搜索(-w)</h2>
+
+<p>如果你搜索boo，查询结果可能包含fooboo，boo123,
+booooom,等等，可以使用-w来限定全字匹配</p>
+
+<p><code>$ grep -w "boo" /path/to/file</code></p>
+
+<h2 id="section-1">全字匹配搜索两个不同单词</h2>
+
+<p><code>$ grep -w 'word1|word2' /path/to/file</code> </p>
+
+<h2 id="c">统计字符串出现的次数(-c)</h2>
+
+<p><code>$ grep -c 'word' /path/to/file</code></p>
+
+<p>另外加-n的话， 会在结果中，列出匹配字符串的序列号，并且会列出内容</p>
+
+<p><code>$ grep -n 'word' /path/to/file</code> </p>
+
+<h2 id="v">列出“不”包含字符串的行(-v)</h2>
+
+<p><code>$ grep -v bar /path/to/file</code></p>
+
+<h2 id="l">只列出文件名(-l)</h2>
+
+<p><code>$ grep -l 'main' *.pls</code></p>
+
+<h2 id="color">高亮显示(–color)</h2>
+
+<p><code>$ </code>grep –color oracle
+/etc/<a href="http://www.linuxso.com/command/passwd.html">passwd</a></p>
+
+<p><img src="http://www.linuxso.com/uploads/allimg/120628/0043022131-1.jpg" alt="grep highlight" /></p>
+
+<h2 id="unix--linux-pipes--grep">UNIX / Linux pipes + grep</h2>
+
+<p><code>ls -l | grep -i xyz</code></p>
+
+<p><code>ls 列出当前目录下的文件和文件夹,| 是管道传递给后面的一个程序,grep再是进行模式匹配</code></p>
+
+<p><code>例如：ls *.pls | grep -i --color "MM"</code></p>
+
+<p><code>========EOF=========</code></p>
+]]></content>
+  </entry>
+  
+</feed>
