@@ -1,0 +1,110 @@
+---
+layout: post
+title: "Java Log4j"
+date: 2015-07-26 15:28
+comments: true
+categories: rework
+tags: [log4j, java, log]
+---
+
+##Java Log4j 使用记录
+
+Log4j即为Java的日志记录框架，除了Java语言外，它还支持其他的语言接口：C、C++、.Net和PL/SQL。说道日志框架，其他使用较多的日志框架还包括Logback、SLF4J Simple Logging、Java Util Logging，这些日志框架都是大同小异，目的都是用来记录程序运行的状态。它们的区别主要是在用法和性能上，由于日志通常涉及到IO读写磁盘（或者是阻塞或者是异步），这需要耗费时间，假设应用系统的日志比较庞大，对性能要求比较高，那么就需要好好斟酌下使用的框架。这里有个图可以直观感受下几个框架的区别：
+
+![image](http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/log%20comparision_zpstrg3kc1m.png)
+
+上图中的数字是每秒的日志写入行数，[点击更详细的信息](https://docs.google.com/spreadsheet/ccc?key=0Alceaf46X4GPdHBoLTdYQ29nRDh6V1dRY00zT1FwWWc&usp=sharing)。
+
+## Hello Word Example
+
+示例是使用maven来组织的。maven用的越多，就越觉得它的方便，不用关心jar包的管理，开发、测试和发布都只需要一行命令，还能还IDE完美的融合。
+
+```xml pom.xml
+    <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>1.2.17</version>
+    </dependency>
+```
+
+创建log4j.properties文件，放在resources文件夹下，这个文件夹的路径是src/main/resources。
+
+``` properties log4j.properties
+# Root logger option
+log4j.rootLogger=DEBUG, stdout, file
+ 
+# Redirect log messages to console
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.Target=System.out
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
+ 
+# Redirect log messages to a log file, support file rolling.
+log4j.appender.file=org.apache.log4j.RollingFileAppender
+log4j.appender.file.File=C:\\log4j-application.log
+log4j.appender.file.MaxFileSize=5MB
+log4j.appender.file.MaxBackupIndex=10
+log4j.appender.file.layout=org.apache.log4j.PatternLayout
+log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
+```
+
+说明下ConversionPattern中的符号和参数：
+
+1. `%d{yyyy-MM-dd HH:mm:ss}` 日期和时间
+2. `%-5p` 日志优先级, 输出DEBUG、ERROR等. `-5`是可选的, 格式化输出宽度，为了更好的输出效果.
+3. `%c{1}` 是日志名称，通过getLogger()设置, 可以参考[log4j PatternLayout guide](http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html).
+4. `%L` 打印日志的句子在源文件中的行数.
+5. `%m%n` 打印的日志信息和换行符.
+
+上述设置的输出效果是：
+
+    2014-07-02 20:52:39 DEBUG className:200 - This is debug message
+    2014-07-02 20:52:39 DEBUG className:201 - This is debug message2
+
+``` java HelloExample.java
+
+import org.apache.log4j.Logger;
+ 
+public class HelloExample{
+ 
+    final static Logger logger = Logger.getLogger(HelloExample.class);
+ 
+    public static void main(String[] args) {
+ 
+        HelloExample obj = new HelloExample();
+        obj.runMe("billowkiller");
+    }
+ 
+    private void runMe(String parameter){
+ 
+        if(logger.isDebugEnabled()) {
+            logger.debug("This is debug : " + parameter);
+        }
+        if(logger.isInfoEnabled()) {
+            logger.info("This is info : " + parameter);
+        }
+        logger.warn("This is warn : " + parameter);
+        logger.error("This is error : " + parameter);
+        logger.fatal("This is fatal : " + parameter);
+        
+        try{
+            1/0;
+        }catch(ArithmeticException ex){
+            logger.error("Sorry, something wrong!", ex);
+        }
+    }
+}
+```
+
+可以调整配置文件中的`log4j.rootLogger`设置日志输出的级别和`appender`，级别从低到高有DEBUG、INFO、WARN、ERROR、FATAL，一般使用INFO和ERROR。
+
+顺便说一句，类似`logger.isDebugEnabled()`这种句子在源码中实在是不太美观。如果debug中间的信息不影响程序的性能还是不要使用这种句子，因为log4j自己会检查需不需要输出debug信息。
+
+### Tips
+
+* java -calsspath *.jar 加载多个jar包，而多个jar包中可能包含多个log4j.properties的时候，系统自动加载第一个，忽略后面的。也就是说将你想要使用的log4j.properties所包含的jar文件放在classpath的第一个。
+* mvn的package和test可以分别对应两个不同的log4j.properties中，如下：src/main/resources/log4j.properties, src/test/resources/log4j.properties。
+* **需要注意程序的输出级别，用户可以定义不同的配置文件来输出不同级别的信息**。这一点尤其重要：
+    * 工具是为程序提供服务的，在开发和调试阶段，日志可以帮助我们更好更快地定位bug；在运行维护阶段，日志系统又可以帮我们记录大部分的异常信息，从而帮助我们更好的完善系统。
+    * 定义好级别和输出的日志信息，配合使用`grep`等命令行工具，可以更好的帮助我们定位错误。
+    * 在设计系统之前需要先确定好日志子系统，在什么情况下程序会发生错误，输出什么样的错误信息，在debug和正常运行的时候日志如何调整，error信息是否需要另外打印。
