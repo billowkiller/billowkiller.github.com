@@ -15,6 +15,8 @@ Log4j即为Java的日志记录框架，除了Java语言外，它还支持其他�
 
 上图中的数字是每秒的日志写入行数，[点击更详细的信息](https://docs.google.com/spreadsheet/ccc?key=0Alceaf46X4GPdHBoLTdYQ29nRDh6V1dRY00zT1FwWWc&usp=sharing)。
 
+<!--more-->
+
 ## Hello Word Example
 
 示例是使用maven来组织的。maven用的越多，就越觉得它的方便，不用关心jar包的管理，开发、测试和发布都只需要一行命令，还能还IDE完美的融合。
