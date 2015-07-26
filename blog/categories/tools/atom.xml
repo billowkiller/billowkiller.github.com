@@ -1,0 +1,1045 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: tools | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/categories/tools/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2014-09-15T12:37:27+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[gcc summary]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/12/31/gcc-summary/"/>
+    <updated>2013-12-31T18:07:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/12/31/gcc-summary</id>
+    <content type="html"><![CDATA[<p>本文介绍在Linux平台下应用程序的编译过程，以及编译程序<a href="http://gcc.gnu.org/">GCC</a>在编译应用程序的过程的具体用法，同时详细说明了GCC的常用选项、模式和警告选项。</p>
+
+<p><img src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcQkcpI6uyaKSbXltFKcLfpuPyMjC8aw-VZH7x9uUt8bFQMTpsczYg" alt="gcc" /></p>
+
+<!--more-->
+
+<h3 id="compile-process">Compile Process</h3>
+
+<h4 id="four-steps">Four Steps</h4>
+
+<p>对于GUN编译器来说，程序的编译要经历预处理、编译、汇编、连接四个阶段.</p>
+
+<center>![四个阶段](http://new.51cto.com/files/uploadimg/20060926/1714230.jpg)</center>
+
+<p>从功能上分，预处理、编译、汇编是三个不同的阶段，但<code>gcc</code>的实际操作上，它可以把这三个步骤合并为一个步骤来执行。下面我们以C语言为例来谈一下不同阶段的输入和输出情况。</p>
+
+<p>在预处理阶段，输入的是C语言的源文件，通常为<code>*.c</code>。它们通常带有<code>.h</code>之类头文件的包含文件。这个阶段主要处理源文件中的<code>#ifdef</code>、 <code>#include</code>和<code>#define</code>命令。该阶段会生成一个中间文件<code>*.i</code>，但实际工作中通常不用专门生成这种文件，因为基本上用不到；若非要生成这种文件不可，可以利用下面的示例命令：</p>
+
+<pre><code>gcc -E  test.c -o test.i
+</code></pre>
+
+<p>在编译阶段，输入的是中间文件<code>*.i</code>，编译后生成汇编语言文件<code>*.s</code> 。这个阶段对应的<code>gcc</code>命令如下所示：</p>
+
+<pre><code>gcc -S test.i -o test.s 
+</code></pre>
+
+<p>在汇编阶段，将输入的汇编文件<code>*.s</code>转换成机器语言<code>*.o</code>。这个阶段对应的<code>gcc</code>命令如下所示：</p>
+
+<pre><code>gcc -c test.s -o test.o 
+</code></pre>
+
+<p>最后，在连接阶段将输入的机器代码文件<code>*.s</code>（与其它的机器代码文件和库文件）汇集成一个可执行的二进制代码文件。这一步骤，可以利用下面的示例命令完成：</p>
+
+<pre><code>gcc test.o -o test 
+</code></pre>
+
+<h4 id="two-modes">Two Modes</h4>
+
+<p>gcc常用的两种模式：编译模式和编译连接模式。下面以一个例子来说明各种模式的使用方法。为简单起见，假设我们全部的源代码都在一个文件<code>test.c</code>中，要想把这个源文件直接编译成可执行程序，可以使用以下命令：</p>
+
+<pre><code>gcc test.c -o test
+</code></pre>
+
+<p>这里<code>test.c</code>是源文件，生成的可执行代码存放在一个名为<code>test</code>的文件中（该文件是机器代码并且可执行）。<code>-o</code>是生成可执行文件的输出选项。如果我们只想让源文件生成目标文件（给文件虽然也是机器代码但不可执行），可以使用标记<code>-c</code>，详细命令如下所示：</p>
+
+<pre><code>gcc -c test.c
+</code></pre>
+
+<p>默认情况下，生成的目标文件被命名为<code>test.o</code>，但我们也可以为输出文件指定名称，如下所示：</p>
+
+<pre><code>gcc -c test.c -o mytest.o
+</code></pre>
+
+<p>上面这条命令将编译后的目标文件命名为<code>mytest.o</code>，而不是默认的<code>test.o</code>。</p>
+
+<p>迄今为止，我们谈论的程序仅涉及到一个源文件；现实中，一个程序的源代码通常包含在多个源文件之中，这该怎么办？没关系，即使这样，用gcc处理起来也并不复杂，见下例：</p>
+
+<pre><code>gcc -o test  first.c second.c third.c
+</code></pre>
+
+<p>该命令将同时编译三个源文件，即<code>first.c</code>、<code>second.c</code>和 <code>third.c</code>，然后将它们连接成一个可执行程序，名为<code>test</code>。</p>
+
+<h3 id="compile-option">Compile Option</h3>
+
+<h4 id="debug">Debug</h4>
+<p>在<code>gcc</code>编译源代码时指定<code>-g</code>选项可以产生带有调试信息的目标代码,<code>gcc</code>可以为多个不同平台上帝不同调试器提供调试信息,默认<code>gcc</code>产生的调试信息是为<code>gdb</code>使用的,可以使用<code>-gformat</code>指定要生成的调试信息的格式以提供给其他平台的其他调试器使用.</p>
+
+<p>常用的格式有 </p>
+
+<ul>
+  <li>-ggdb:生成gdb专 用的调试信息,使用最适合的格式(DWARF 2,stabs等)会有一些gdb专用的扩展,可能造成其他调试器无法运行. </li>
+  <li>-gstabs:使用 stabs格式,不包含gdb扩展,stabs常用于BSD系统的DBX调试器. </li>
+  <li>-gcoff:产生COFF格式的调试信息,常用于System V下的SDB调试器; </li>
+  <li>-gxcoff:产生XCOFF格式的调试信息,用于IBM的RS/6000下的DBX调试器; </li>
+  <li>-gdwarf-2:产生DWARF version2 的格式的调试信息,常用于IRIXX6上的DBX调试器.<code>gcc</code>会使用DWARF version3的一些特性. </li>
+</ul>
+
+<h4 id="common-option">Common Option</h4>
+
+<p>–help&lt;/br&gt;
+–target-help &lt;/br&gt;
+显示 <code>gcc</code> 帮助说明。‘target-help’是显示目标机器特定的命令行选项。</p>
+
+<p>–version &lt;/br&gt;
+显示 <code>gcc</code> 版本号和版权信息 。</p>
+
+<p>-o outfile &lt;/br&gt;
+输出到指定的文件。</p>
+
+<p>-x language &lt;/br&gt;
+指明使用的编程语言。允许的语言包括：c c++ assembler none 。 ‘none’意味着恢复默认行为，即根据文件的扩展名猜测源文件的语言。</p>
+
+<p>-v &lt;/br&gt;
+打印较多信息，显示编译器调用的程序。</p>
+
+<p>-### &lt;/br&gt;
+与 -v 类似，但选项被引号括住，并且不执行命令。</p>
+
+<p><strong>-E</strong>&lt;/br&gt;
+仅作预处理，不进行编译、汇编和链接。如上图所示。</p>
+
+<p>-S &lt;/br&gt;
+仅编译到汇编语言，不进行汇编和链接。如上图所示。</p>
+
+<p><strong>-c</strong> &lt;/br&gt;
+编译、汇编到目标代码，不进行链接。如上图所示。</p>
+
+<p>-pipe &lt;/br&gt;
+使用管道代替临时文件。</p>
+
+<p>-combine &lt;/br&gt;
+将多个源文件一次性传递给汇编器。</p>
+
+<h4 id="other-option">Other Option</h4>
+
+<p>更多有用的<code>gcc</code>选项：</p>
+
+<p>-l library&lt;/br&gt;
+-llibrary &lt;/br&gt;
+进行链接时搜索名为library的库。 &lt;/br&gt;
+例子： $ <code>gcc</code> test.c -lm -o test</p>
+
+<p>-Idir &lt;/br&gt;
+把dir 加入到搜索头文件的路径列表中。 &lt;/br&gt;
+例子： $ <code>gcc</code> test.c -I../inc -o test</p>
+
+<p>-Ldir &lt;/br&gt;
+把dir 加入到搜索库文件的路径列表中。 &lt;/br&gt;
+例子： $ <code>gcc</code> -I/home/foo -L/home/foo -ltest test.c -o test</p>
+
+<p>-Dname &lt;/br&gt;
+预定义一个名为name 的宏，值为1。 &lt;/br&gt;
+例子： $ <code>gcc</code> -DTEST_CONFIG test.c -o test</p>
+
+<p>-Dname =definition &lt;/br&gt;
+预定义名为name ，值为definition 的宏。</p>
+
+<p>-ggdb &lt;/br&gt;
+-ggdblevel &lt;/br&gt;
+为调试器 gdb 生成调试信息。level 可以为1，2，3，默认值为2。</p>
+
+<p>-g &lt;/br&gt;
+-glevel &lt;/br&gt;
+生成操作系统本地格式的调试信息。-g 和 -ggdb 并不太相同， -g 会生成 gdb 之外的信息。level 取值同上。</p>
+
+<p>-s &lt;/br&gt;
+去除可执行文件中的符号表和重定位信息。用于减小可执行文件的大小。</p>
+
+<p>-M &lt;/br&gt;
+告诉预处理器输出一个适合make的规则，用于描述各目标文件的依赖关系。对于每个 源文件，预处理器输出 一个make规则，该规则的目标项(target)是源文件对应的目标文件名，依赖项(dependency)是源文件中<code>#include</code>引用的所有文件。生成的规则可以是单行，但如果太长，就用<code>\</code>-换行符续成多行。规则 显示在标准输出，不产生预处理过的C程序。</p>
+
+<p>-C &lt;/br&gt;
+告诉预处理器不要丢弃注释。配合`-E’选项使用。</p>
+
+<p>-P &lt;/br&gt;
+告诉预处理器不要产生<code>#line</code>命令。配合<code>-E</code>选项使用。</p>
+
+<p>-static &lt;/br&gt;
+在支持动态链接的系统上，阻止连接共享库。该选项在其它系统上无效。</p>
+
+<p>-nostdlib&lt;/br&gt; 
+不连接系统标准启动文件和标准库文件，只把指定的文件传递给连接器。</p>
+
+<h4 id="warnings-option">Warnings Option</h4>
+
+<p>-Wall &lt;/br&gt;
+会打开一些很有用的警告选项，建议编译时加此选项。</p>
+
+<p>-W &lt;/br&gt;
+-Wextra&lt;/br&gt; 
+打印一些额外的警告信息。</p>
+
+<p>-w &lt;/br&gt;
+禁止显示所有警告信息。</p>
+
+<p>-Wshadow &lt;/br&gt;
+当一个局部变量遮盖住了另一个局部变量，或者全局变量时，给出警告。很有用的选项，建议打开。 -Wall 并不会打开此项。</p>
+
+<p>-Wpointer-arith &lt;/br&gt;
+对函数指针或者void *类型的指针进行算术操作时给出警告。也很有用。 -Wall 并不会打开此项。</p>
+
+<p>-Wcast-qual &lt;/br&gt;
+当强制转化丢掉了类型修饰符时给出警告。 -Wall 并不会打开此项。</p>
+
+<p>-Waggregate-return &lt;/br&gt;
+如果定义或调用了返回结构体或联合体的函数，编译器就发出警告。</p>
+
+<p>-Winline &lt;/br&gt;
+无论是声明为 inline 或者是指定了-finline-functions 选项，如果某函数不能内联，编译器都将发出警告。如果你的代码含有很多 inline 函数的话，这是很有用的选项。</p>
+
+<p>-Werror &lt;/br&gt;
+把警告当作错误。出现任何警告就放弃编译。</p>
+
+<p>-Wunreachable-code&lt;/br&gt; 
+如果编译器探测到永远不会执行到的代码，就给出警告。也是比较有用的选项。</p>
+
+<p>-Wcast-align&lt;/br&gt; 
+一旦某个指针类型强制转换导致目标所需的地址对齐增加时，编译器就发出警告。</p>
+
+<p>-Wundef&lt;/br&gt;
+当一个没有定义的符号出现在 #if 中时，给出警告。</p>
+
+<p>-Wredundant-decls&lt;/br&gt; 
+如果在同一个可见域内某定义多次声明，编译器就发出警告，即使这些重复声明有效并且毫无差别。</p>
+
+<h4 id="standard">Standard</h4>
+
+<p>-ansi &lt;/br&gt;
+支持符合ANSI标准的C程序。这样就会关闭GNU C中某些不兼容ANSI C的特性。</p>
+
+<p>-std=c89 &lt;/br&gt;
+-iso9899:1990 &lt;/br&gt;
+指明使用标准 ISO C90 作为标准来编译程序。</p>
+
+<p>-std=c99 &lt;/br&gt;
+-std=iso9899:1999 &lt;/br&gt;
+指明使用标准 ISO C99 作为标准来编译程序。</p>
+
+<p>-std=c++98 &lt;/br&gt;
+指明使用标准 C++98 作为标准来编译程序。</p>
+
+<p>-std=gnu9x &lt;/br&gt;
+-std=gnu99 &lt;/br&gt;
+使用 ISO C99 再加上 GNU 的一些扩展。</p>
+
+<p>-fno-asm &lt;/br&gt;
+不把asm, inline或typeof当作关键字，因此这些词可以用做标识符。用 <strong>asm</strong>， __inline__和__typeof__能够替代它们。 <code>-ansi</code> 隐含声明了<code>-fno-asm</code>。</p>
+
+<p>-fgnu89-inline &lt;/br&gt;
+告诉编译器在 C99 模式下看到 inline 函数时使用传统的 GNU 句法。</p>
+
+<h4 id="c-options">C options</h4>
+
+<p>-fsigned-char &lt;/br&gt;
+-funsigned-char &lt;/br&gt;
+把char定义为有/无符号类型，如同signed char/unsigned char。</p>
+
+<p>-traditional &lt;/br&gt;
+尝试支持传统C编译器的某些方面。详见GNU C手册。</p>
+
+<p>-fno-builtin &lt;/br&gt;
+-fno-builtin-function &lt;/br&gt;
+不接受没有 <em>_builtin</em> 前缀的函数作为内建函数。</p>
+
+<p>-trigraphs &lt;/br&gt;
+支持ANSI C的三联符（ trigraphs）。`-ansi’选项隐含声明了此选项。</p>
+
+<p>-fsigned-bitfields &lt;/br&gt;
+-funsigned-bitfields &lt;/br&gt;
+如果没有明确声明<code>signed</code>或<code>unsigned</code>修饰符，这些选项用来定义有符号位域或无符号位域。缺省情况下，位域是有符号的，因为它们继承的基本整数类型，如<code>int</code>，是有符号数。</p>
+
+<p>-Wstrict-prototypes &lt;/br&gt;
+如果函数的声明或定义没有指出参数类型，编译器就发出警告。很有用的警告。</p>
+
+<p>-Wmissing-prototypes &lt;/br&gt;
+如果没有预先声明就定义了全局函数，编译器就发出警告。即使函数定义自身提供了函数原形也会产生这个警告。这个选项 的目的是检查没有在头文件中声明的全局函数。</p>
+
+<p>-Wnested-externs &lt;/br&gt;
+如果某<code>extern</code>声明出现在函数内部，编译器就发出警告。</p>
+
+<h4 id="c-options-1">C++ options</h4>
+
+<p>-ffor-scope &lt;/br&gt;
+从头开始执行程序，也允许进行重定向。</p>
+
+<p>-fno-rtti &lt;/br&gt;
+关闭对 dynamic_cast 和 typeid 的支持。如果你不需要这些功能，关闭它会节省一些空间。</p>
+
+<p>-Wctor-dtor-privacy &lt;/br&gt;
+当一个类没有用时给出警告。因为构造函数和析构函数会被当作私有的。</p>
+
+<p>-Wnon-virtual-dtor &lt;/br&gt;
+当一个类有多态性，而又没有虚析构函数时，发出警告。-Wall会开启这个选项。</p>
+
+<p>-Wreorder &lt;/br&gt;
+如果代码中的成员变量的初始化顺序和它们实际执行时初始化顺序不一致，给出警告。</p>
+
+<p>-Wno-deprecated &lt;/br&gt;
+使用过时的特性时不要给出警告。</p>
+
+<p>-Woverloaded-virtual &lt;/br&gt;
+如果函数的声明隐藏住了基类的虚函数，就给出警告。</p>
+
+<p>Machine Dependent Options (Intel)&lt;/br&gt;</p>
+
+<p>-mtune=cpu-type &lt;/br&gt;
+为指定类型的 CPU 生成代码。cpu-type 可以是：i386，i486，i586，pentium，i686，pentium4 等等。</p>
+
+<p>-msse &lt;/br&gt;
+-msse2 &lt;/br&gt;
+-mmmx &lt;/br&gt;
+-mno-sse &lt;/br&gt;
+-mno-sse2 &lt;/br&gt;
+-mno-mmx &lt;/br&gt;
+使用或者不使用MMX，SSE，SSE2指令。</p>
+
+<p>-m32 &lt;/br&gt;
+-m64 &lt;/br&gt;
+生成32位/64位机器上的代码。</p>
+
+<p>-mpush-args &lt;/br&gt;
+-mno-push-args &lt;/br&gt;
+（不）使用 push 指令来进行存储参数。默认是使用。</p>
+
+<p>-mregparm=num &lt;/br&gt;
+当传递整数参数时，控制所使用寄存器的个数。</p>
+
+<h4 id="optimization-option">Optimization Option</h4>
+
+<p>-O0 &lt;/br&gt;
+禁止编译器进行优化。默认为此项。</p>
+
+<p>-O&lt;/br&gt;
+-O1&lt;/br&gt;
+尝试优化编译时间和可执行文件大小。</p>
+
+<p>-O2 &lt;/br&gt;
+更多的优化，会尝试几乎全部的优化功能，但不会进行“空间换时间”的优化方法。</p>
+
+<p>-O3 &lt;/br&gt;
+在 -O2 的基础上再打开一些优化选项：-finline-functions， -funswitch-loops 和 -fgcse-after-reload 。</p>
+
+<p>-Os &lt;/br&gt;
+对生成文件大小进行优化。它会打开 -O2 开的全部选项，除了会那些增加文件大小的。</p>
+
+<p>-finline-functions &lt;/br&gt;
+把所有简单的函数内联进调用者。编译器会探索式地决定哪些函数足够简单，值得做这种内联。</p>
+
+<p>-fstrict-aliasing &lt;/br&gt;
+施加最强的别名规则（aliasing rules）。</p>
+
+<p><code>gcc</code>默认提供了5级优化选项的集合: </p>
+
+<ul>
+  <li>-O0:无优化(默认)</li>
+  <li>-O和-O1:使用能减少目标文件大小以及执行时间并且不会使编译时间明显增加的优化.在编译大型程序的时候会显著增加编译时内存的使用. </li>
+  <li>-O2: 包含-O1的优化并增加了不需要在目标文件大小和执行速度上进行折衷的优化.编译器不执行循环展开以及函数内联.此选项将增加编译时间和目标文件的执行性 能. </li>
+  <li>-Os:专门优化目标文件大小,执行所有的不增加目标文件大小的-O2优化选项.并且执行专门减小目标文件大小的优化选项. </li>
+  <li>-O3: 打开所有-O2的优化选项并且增加 -finline-functions, -funswitch-loops,-fpredictive-commoning, -fgcse-after-reload and -ftree-vectorize优化选项. </li>
+</ul>
+
+<pre>
+-O1包含的选项-O1通常可以安全的和调试的选项一起使用:
+           -fauto-inc-dec -fcprop-registers -fdce -fdefer-pop -fdelayed-branch 
+           -fdse -fguess-branch-probability -fif-conversion2 -fif-conversion 
+           -finline-small-functions -fipa-pure-const -fipa-reference 
+           -fmerge-constants -fsplit-wide-types -ftree-ccp -ftree-ch 
+           -ftree-copyrename -ftree-dce -ftree-dominator-opts -ftree-dse 
+           -ftree-fre -ftree-sra -ftree-ter -funit-at-a-time 
+</pre>
+
+<p>以下所有的优化选项需要在名字前加上-f,如果不需要此选项可以使用-fno-前缀 </p>
+
+<ul>
+  <li>defer-pop:延迟到只在必要时从函数参数栈中pop参数; </li>
+  <li>thread-jumps:使用跳转线程优化,避免跳转到另一个跳转; </li>
+  <li>branch-probabilities:分支优化; </li>
+  <li>cprop-registers:使用寄存器之间copy-propagation传值; </li>
+  <li>guess-branch-probability:分支预测; </li>
+  <li>omit-frame-pointer:可能的情况下不产生栈帧; </li>
+</ul>
+
+<pre>
+-O2:以下是-O2在-O1基础上增加的优化选项: 
+           -falign-functions  -falign-jumps -falign-loops  -falign-labels 
+           -fcaller-saves -fcrossjumping -fcse-follow-jumps  -fcse-skip-blocks 
+           -fdelete-null-pointer-checks -fexpensive-optimizations -fgcse 
+           -fgcse-lm -foptimize-sibling-calls -fpeephole2 -fregmove 
+           -freorder-blocks  -freorder-functions -frerun-cse-after-loop 
+           -fsched-interblock  -fsched-spec -fschedule-insns 
+           -fschedule-insns2 -fstrict-aliasing -fstrict-overflow -ftree-pre 
+           -ftree-vrp
+</pre>
+
+<p>cpu架构的优化选项,通常是-mcpu(将被取消);-march,-mtune </p>
+
+<h3 id="warning-interpretation">Warning Interpretation</h3>
+
+<ul>
+  <li>unused-function:警告声明但是没有定义的static函数; </li>
+  <li>unusedlabel:声明但是未使用的标签; </li>
+  <li>unused-parameter:警告未使用的函数参数; </li>
+  <li>unused-variable:声明但是未使用的本地变量; </li>
+  <li>unused-value:计算了但是未使用的值; </li>
+  <li>format:printf和scanf这样的函数中的格式字符串的使用不当; </li>
+  <li>implicit-int:未指定类型; </li>
+  <li>implicit-function:函数在声明前使用; </li>
+  <li>charsubscripts:使用char类作为数组下标(因为char可能是有符号数); </li>
+  <li>missingbraces:大括号不匹配; </li>
+  <li>parentheses: 圆括号不匹配; </li>
+  <li>return-type:函数有无返回值以及返回值类型不匹配; </li>
+  <li>sequence-point:违反顺序点的代码,比如 a[i] = c[i++]; </li>
+  <li>switch:switch语句缺少default或者switch使用枚举变量为索引时缺少某个变量的case; </li>
+  <li>strictaliasing=n:使用n设置对指针变量指向的对象类型产生警告的限制程度,默认n=3;只有在-fstrict-aliasing设置的情况下有效; </li>
+  <li>unknow-pragmas:使用未知的#pragma指令; </li>
+  <li>uninitialized:使用的变量为初始化,只在-O2时有效; </li>
+  <li>以下是在-Wall中不会激活的警告选项: </li>
+  <li>cast-align:当指针进行类型转换后有内存对齐要求更严格时发出警告; </li>
+  <li>signcompare:当使用signed和unsigned类型比较时; </li>
+  <li>missing-prototypes:当函数在使用前没有函数原型时; </li>
+  <li>packed:packed 是<code>gcc</code>的一个扩展,是使结构体各成员之间不留内存对齐所需的空间 ,有时候会造成内存对齐的问题; </li>
+  <li>padded:也是<code>gcc</code>的扩展,使结构体成员之间进行内存对齐的填充,会 造成结构体体积增大. </li>
+  <li>unreachable-code:有不会执行的代码时. </li>
+  <li>inline:当inline函数不再保持inline时 (比如对inline函数取地址); </li>
+  <li>disable-optimization:当不能执行指定的优化时.(需要太多时间或系统资源). </li>
+  <li>可以使用 -Werror时所有的警告都变成错误,使出现警告时也停止编译.需要和指定警告的参数一起使用. </li>
+</ul>
+
+<h4 id="warning-multi-character-character-constant">1. Warning: multi-character character constant</h4>
+
+<p>Could be suppressed by -Wno-multichar</p>
+
+<p>There’re three kinds of character constants: Normal character constants, Multicharacter constants and Wide-character constants.</p>
+
+<pre><code>char ch = 'a';
+int mbch = '1234';
+wchar_t wcch = L'ab';
+</code></pre>
+
+<p>Mbch is of type int(signed), has 4 meaningful characters.</p>
+
+<p><code>gcc</code> compiler evaluates a multi-character character constant a character at a time, shifting the previous value left by the number of bits per target character, and then or-ing in the bit-pattern of the new character truncated to the width of a target character.</p>
+
+<p>‘ab’ for a target with an 8-bit char would be interpreted as:</p>
+
+<p>(int) ((unsigned char) ‘a’ * 256 + (unsigned char) ‘b’) = 97*256+98</p>
+
+<p>‘1’,x          0x31
+‘12’,x        0x3132
+‘123’,x      0x313233
+‘1234’,x    0x31323334</p>
+
+<p>判断系统是big endian还是little endian的方法：</p>
+
+<pre><code>if (('1234' &gt;&gt; 24) == '1')
+{
+    //Little endian
+}
+else if (('4321' &gt;&gt; 24) == '1')
+{
+    //Big endian
+}
+</code></pre>
+
+<h4 id="warning-operation-on-xx-may-be-undefined">2. Warning: operation on xx may be undefined</h4>
+
+<p>序列点问题。为什么 a[i] = i++; 不能正常工作？子表达式 i++ 有一个副作用，它会改变 i 的值。由于 i 在同一表达式的其它地方被引用，这会导致无定义的结果，无从判断该引用(左边的 a[i] 中)是旧值还是新值。(尽管 在 K&amp;R 中建议这类表达式的行为不确定，但 C 标准却强烈声明它是无定义的），具体实现取决于编译器。</p>
+
+<h4 id="warning-conversion-to-xxx-from-yyy-may-alter-its-value">3.  Warning: conversion to xxx from yyy may alter its value</h4>
+
+<p><code>gcc</code> promotes unsigned char/uint16_t/uint8_t  to type int for for all arithmetic. Need to apply static_cast&lt;&gt;.</p>
+
+<h4 id="warning-function-might-be-possible-candidate-for-attribute-noreturn">4.  Warning: function might be possible candidate for attribute ‘noreturn’</h4>
+
+<p>打开了 -Wmissing-noreturn。A few standard library functions, such as abort and exit, cannot return. <code>gcc</code> knows this automatically. With noreturn attribute it can then optimize without regard to what would happen if function ever did return. This makes slightly better code. More importantly, it helps avoid spurious warnings of uninitialized variables. The noreturn keyword does not affect the exceptional path. 给函数加上 <strong>attribute</strong>((noreturn)) 即可消除这个warning。</p>
+
+<h4 id="warning-deprecated-conversion-from-string-constant-to-char-">5. Warning: deprecated conversion from string constant to “char *”</h4>
+
+<p>void SomeFunc (char* str)
+{
+}</p>
+
+<p>int _tmain(int argc, _TCHAR* argv[])
+{
+    SomeFunc(“Hello!”);
+    return 0;
+}</p>
+
+<p>SomeFunc() 的输入时char<em>，含义是：给我个字符串，我要修改它。而传给它的字面常量是没办法修改的，将char</em> 改成 const char*，消除这个warning.</p>
+
+<h4 id="warning-implicit-declaration-of-function-mallocfree-incompatible-implicit-declaration-of-built-in-function-mallocfree">6.  Warning: implicit declaration of function ‘malloc’/’free’, incompatible implicit declaration of built-in function ‘malloc’/’free’</h4>
+
+<p>要显示的#include <stdlib.h></stdlib.h></p>
+
+<h4 id="warning-dereferencing-type-punned-pointer-will-break-strict-aliasing-rules">7.  Warning: Dereferencing type-punned pointer will break strict-aliasing rules</h4>
+
+<p>打开了-fstrict-aliasing and -Wstrict-aliasing. Suppress with -fno-strict-aliasing</p>
+
+<p>Strict-aliasing rule: An object of one type is assumed never to reside at the same address as an object of a different type, unless the types are almost the same. 编译器希望不同类型的对象不会指向同一个地址。</p>
+
+<h4 id="warning-inlining-failed-in-call-to-xxx-call-is-unlikely-and-code-size-would-grow">8.  Warning: inlining failed in call to xxx: call is unlikely and code size would grow</h4>
+
+<p>打开了-Winline: Warn if a function can not be inlined and it was declared as inline. Even with this option, the compiler will not warn about failures to inline functions declared in system headers.</p>
+
+<p>相关选项：</p>
+
+<p>-fno-inline: Don’t compile statement functions inline. Might reduce the size of a program unit–which might be at expense of some speed (though it should compile faster). Note that if you are not optimizing, no functions can be expanded inline.</p>
+
+<p>-finline-functions: Interprocedural optimizations occur. However, if you specify -O0, the default is OFF. Enables function inlining for single file compilation.</p>
+
+<h4 id="warning-cannot-optimize-loop-the-loop-counter-may-overflow">9.  Warning: cannot optimize loop, the loop counter may overflow</h4>
+
+<p>打开了-Wunsafe-loop-optimizations: Warn if the loop cannot be optimized because the compiler could not assume anything on the bounds of the loop indices. With -funsafe-loop-optimizations warn if the compiler made such assumptions.</p>
+
+<p>相关选项：</p>
+
+<p>-funsafe-loop-optimizations: Enable unsafe loop optimizations, e.g. assume loop indices never overflow, etc</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[十个你可能没用过的Linux命令]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/shi-ge-ni-ke-neng-mei-yong-guo-de-linuxming-ling/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/shi-ge-ni-ke-neng-mei-yong-guo-de-linuxming-ling</id>
+    <content type="html"><![CDATA[<p><em><strong>excerpted</strong> from <a href="http://www.ituring.com.cn/article/1782">图灵社区</a></em></p>
+
+<hr />
+
+<p>如果你是一个硬件系统管理员或者Linux工程师，你可能会记得大多数Linux命令行技巧。下面的这些Linux命令行技巧通常不被Linux用户所使用。</p>
+
+<p><strong>1.使用<em>pgrep</em>快速查找一个PID</strong></p>
+
+<p><strong><em>pgrep</em></strong>遍历目前正在运行的进程然后列出符合查找规则的进程ID（PID）。</p>
+
+<pre><code>pgrep ssh</code></pre>
+
+<p>这条命令会列出所有与ssh有关的进程。</p>
+
+<p><strong>2.执行上次执行过的命令</strong></p>
+
+<p>这个标题有些绕口，但是它是名副其实的。</p>
+
+<pre><code>!!</code></pre>
+<!--more-->
+<p>这会执行你上一次在命令行中执行过的命令。</p>
+
+<p><strong>3.执行最近一次以XX开头的命令</strong></p>
+
+<p>如果你想要从命令行历史中执行一个s开头的命令时，你可以使用如下命令：</p>
+
+<pre><code>!s</code></pre>
+
+<p>它会执行最近一次在命令行中执行且以字母s开头的命令。</p>
+
+<p><strong>4.反复执行一个命令并在屏幕上输出</strong></p>
+
+<p><strong><em>watch</em></strong>会反复运行一个命令，并在屏幕上打印输出。它可以让你实时的观察程序的输出变化。默认情况下，程序每2秒运行一次。<strong><em>watch</em></strong>命令与<strong><em>tail</em></strong>命令很相似。</p>
+
+<pre><code>watch -d ls -l</code></pre>
+
+<p>这条命令会监视当前目录的所有文件，并且高亮文件所发生的改变。</p>
+
+<p><strong>5.在VI/VIM中快速保存</strong></p>
+
+<p>如果你很匆忙，你可以通过<strong><em>【SHIFT + zz】</em></strong> 快速从vi的插入模式中退出。</p>
+
+<p><strong>6.快速登出终端</strong> 你可以快速使用<strong><em>【CTRL+D】</em></strong>快速登出终端。</p>
+
+<p><strong>7.返回你上一个所在目录</strong></p>
+
+<p>你可以使用如下命令返回你上一次所在的目录：</p>
+
+<pre><code>cd -</code></pre>
+
+<p><strong>8.聪明地创建父目录</strong></p>
+
+<p>如下命令可以帮助你创建所有你需要的目录，即便是他们还不存在。为什么要浪费时间做一些愚蠢的事情比如：<strong><em>mkdir
+make ; cd make ; mkdir all ; cd all ; mkdir of ; cd of
+…</em></strong> 你说到点子上了，使用<strong><em>mkdir -p</em></strong>！</p>
+
+<pre><code>mkdir -p /home/adam/make/all/of/these/directories/</code></pre>
+
+<p><strong>9.删除一整行</strong></p>
+
+<p>如果你已经输入一长串的命令，但是你又不在需要他们了，那么你可以使用如下命令直接删除一整行：</p>
+
+<pre><code>CTRL+U</code></pre>
+
+<p><strong>10.设置文件的时间戳</strong></p>
+
+<p>下面这条命令会把文件的时间戳设置成2008-01-01
+8:00。日期格式是(YYMMDDhhmm)</p>
+
+<pre><code>touch -c -t 0801010800 filename.c</code></pre>
+
+<p>你还能想到哪些为大多数人所指的Linux命令？</p>
+
+<p><strong>【摘自回复】</strong></p>
+
+<p><strong>访问上一个命令的最后一个参数</strong> 如果你之前执行了这样一条命令 cp
+assignment.htm /home/phill/reports/2008/
+然后你可以冲 <strong>_$</strong> 访问刚才那条命令最后一个参数”<em>/home/phill/reports/2008/</em>“，例如：</p>
+
+<pre><code>cd $_</code></pre>
+
+<p><strong>清除光标右边的内容</strong> 上文有一个小错误，<strong><em>【Ctrl +
+U】</em></strong>并不是删除一整行，而是删除光标左边的内容，如果光标停留在行首，那么<strong><em>【Ctrl
++ U】</em></strong>将无任何作用，这个时候，需要删除光标右边内容：</p>
+
+<pre><code>ctrl-k</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[pandoc example]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/pandoc-example/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/pandoc-example</id>
+    <content type="html"><![CDATA[<p>from <a href="http://johnmacfarlane.net/pandoc/demos.html">pondoc </a></p>
+
+<hr />
+
+<p>To see the output created by each of the commands below, click on the
+name of the output file:</p>
+
+<ol>
+  <li>
+    <p>HTML fragment:</p>
+
+    <pre><code>pandoc README -o example1.html
+</code></pre>
+  </li>
+  <li>
+    <p>Standalone HTML file:</p>
+
+    <pre><code>pandoc -s README -o example2.html
+</code></pre>
+  </li>
+  <li>
+    <p>HTML with smart quotes, table of contents, CSS, and custom footer:</p>
+
+    <pre><code>pandoc -s -S --toc -c pandoc.css -A footer.html README -o example3.html
+</code></pre>
+  </li>
+  <li>
+    <p>LaTeX:</p>
+
+    <pre><code>pandoc -s README -o example4.tex
+</code></pre>
+  </li>
+  <li>
+    <p>From LaTeX to markdown:</p>
+
+    <pre><code>pandoc -s example4.tex -o example5.text
+</code></pre>
+  </li>
+  <li>
+    <p>reStructuredText:<!--more--></p>
+
+    <pre><code>pandoc -s -w rst --toc README -o example6.text
+</code></pre>
+  </li>
+  <li>
+    <p>Rich text format (RTF):</p>
+
+    <pre><code>pandoc -s README -o example7.rtf
+</code></pre>
+  </li>
+  <li>
+    <p>Beamer slide show:</p>
+
+    <pre><code>pandoc -t beamer SLIDES -o example8.pdf
+</code></pre>
+  </li>
+  <li>
+    <p>DocBook XML:</p>
+
+    <pre><code>pandoc -s -S -w docbook README -o example9.db
+</code></pre>
+
+    <p>Chunked XHTML via DocBook
+and <a href="http://cyberelk.net/tim/xmlto/">xmlto</a>:</p>
+
+    <pre><code>xmlto xhtml -m config.xsl example9.db -o example9/
+</code></pre>
+  </li>
+  <li>
+    <p>Man page:</p>
+
+    <pre><code>pandoc -s -w man pandoc.1.md -o example10.1
+</code></pre>
+  </li>
+  <li>
+    <p>ConTeXt:</p>
+
+    <pre><code>pandoc -s -w context README -o example11.tex
+</code></pre>
+
+    <p>PDF via pandoc and ConTeXt’s <code>texexec</code>:</p>
+
+    <pre><code>texexec --pdf example11.tex # produces example11.pdf
+</code></pre>
+  </li>
+  <li>
+    <p>Converting a web page to markdown:</p>
+
+    <pre><code>pandoc -s -r html http://www.gnu.org/software/make/ -o example12.text
+</code></pre>
+  </li>
+  <li>
+    <p>From markdown to PDF:</p>
+
+    <pre><code>pandoc README -o example13.pdf
+</code></pre>
+  </li>
+  <li>
+    <p>PDF with numbered sections and a custom LaTeX header:</p>
+
+    <pre><code>pandoc -N --template=mytemplate.tex --variable mainfont=Georgia --variable sansfont=Arial --variable monofont="Bitstream Vera Sans Mono" --variable fontsize=12pt --variable version=1.9 README --latex-engine=xelatex --toc -o example14.pdf
+</code></pre>
+  </li>
+  <li>
+    <p>A wiki program using <a href="http://happstack.com/">Happstack</a> and
+pandoc: <a href="http://gitit.net/">gitit</a></p>
+  </li>
+  <li>
+    <p>HTML slide shows:</p>
+
+    <pre><code>pandoc -s --mathml -i -t dzslides SLIDES -o example16a.html
+
+pandoc -s --webtex -i -t slidy SLIDES -o example16b.html
+
+pandoc -s --self-contained --webtex -i -t s5 SLIDES -o example16c.html
+
+pandoc -s --mathjax -i -t slideous SLIDES -o example16d.html
+</code></pre>
+  </li>
+  <li>
+    <p>TeX math in HTML:</p>
+
+    <pre><code>pandoc math.text -s -o mathDefault.html
+
+pandoc math.text -s --mathml -o mathMathML.html
+
+pandoc math.text -s --webtex -o mathWebTeX.html
+
+pandoc math.text -s --mathjax -o mathMathJax.html
+
+pandoc math.text -s --latexmathml -o mathLaTeXMathML.html
+</code></pre>
+  </li>
+  <li>
+    <p>Syntax highlighting of delimited code blocks:</p>
+
+    <pre><code>pandoc code.text -s --highlight-style pygments -o example18a.html
+
+pandoc code.text -s --highlight-style kate -o example18b.html
+
+pandoc code.text -s --highlight-style monochrome -o example18c.html
+
+pandoc code.text -s --highlight-style espresso -o example18d.html
+
+pandoc code.text -s --highlight-style haddock -o example18e.html
+
+pandoc code.text -s --highlight-style tango -o example18f.html
+
+pandoc code.text -s --highlight-style zenburn -o example18g.html
+</code></pre>
+  </li>
+  <li>
+    <p>GNU Texinfo, converted to info, HTML, and PDF formats:</p>
+
+    <pre><code>pandoc README -s -o example19.texi
+
+makeinfo example19.texi -o example19.info
+
+makeinfo example19.texi --html -o example19
+
+texi2pdf example19.texi # produces example19.pdf
+</code></pre>
+  </li>
+  <li>
+    <p>OpenDocument XML:</p>
+
+    <pre><code>pandoc README -s -w opendocument -o example20.xml
+</code></pre>
+  </li>
+  <li>
+    <p>ODT (OpenDocument Text, readable by OpenOffice):</p>
+
+    <pre><code>pandoc README -o example21.odt
+</code></pre>
+  </li>
+  <li>
+    <p>MediaWiki markup:</p>
+
+    <pre><code>pandoc -s -S -w mediawiki --toc README -o example22.wiki
+</code></pre>
+  </li>
+  <li>
+    <p>EPUB ebook:</p>
+
+    <pre><code>pandoc -S README -o README.epub
+</code></pre>
+  </li>
+  <li>
+    <p>Markdown citations:</p>
+
+    <pre><code>pandoc -s -S --biblio biblio.bib --csl chicago-author-date.csl CITATIONS -o example24a.html
+
+pandoc -s -S --biblio biblio.bib --csl mhra.csl CITATIONS -o example24b.html
+
+pandoc -s -S --biblio biblio.bib --csl ieee.csl CITATIONS -t man -o example24c.1
+</code></pre>
+  </li>
+  <li>
+    <p>Textile writer:</p>
+
+    <pre><code>pandoc -s -S README -t textile -o example25.textile
+</code></pre>
+  </li>
+  <li>
+    <p>Textile reader:</p>
+
+    <pre><code>pandoc -s -S example25.textile -f textile -t html -o example26.html
+</code></pre>
+  </li>
+  <li>
+    <p>Org-mode:</p>
+
+    <pre><code>pandoc -s -S README -o example27.org
+</code></pre>
+  </li>
+  <li>
+    <p>AsciiDoc:</p>
+
+    <pre><code>pandoc -s -S README -t asciidoc -o example28.txt
+</code></pre>
+  </li>
+  <li>
+    <p>Word docx:</p>
+
+    <pre><code>pandoc -s -S README -o example29.docx
+</code></pre>
+  </li>
+  <li>
+    <p>LaTeX math to docx:</p>
+
+    <pre><code>pandoc -s math.tex -o example30.docx
+</code></pre>
+  </li>
+  <li>
+    <p>DocBook to markdown:</p>
+
+    <pre><code>pandoc -f docbook -t markdown -s howto.xml -o example31.text
+</code></pre>
+  </li>
+</ol>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[linux下双网卡配置]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/linuxxia-shuang-wang-qia-pei-zhi/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/linuxxia-shuang-wang-qia-pei-zhi</id>
+    <content type="html"><![CDATA[<p><strong>需求</strong>： 一台PC1拥有双网卡，另外一台PC2需要通过这台pc上网。</p>
+
+<p><img src="http://images.cnblogs.com/cnblogs_com/billowkiller/447098/r_ac345982b2b7d0a207325429cbef76094a369a8e.jpg" alt="网络拓扑图" /></p>
+
+<p><strong>配置过程</strong>：</p>
+
+<p>首先需要配置pc1的两个网卡信息以及pc2的网卡信息。这个比较简单，接下里需要配置pc1中的静态路由。</p>
+
+<p>文件ipt.save表示静态路由表的修改文件。</p>
+
+<pre><code># Generated by iptables-save v1.4.2 on Wed Nov 16 15:04:23 2011
+ *filter
+ :INPUT ACCEPT [203:29797]
+ :FORWARD ACCEPT [0:0]
+ :OUTPUT ACCEPT [83:10885]
+ COMMIT
+ # Completed on Wed Nov 16 15:04:23 2011
+ # Generated by iptables-save v1.4.2 on Wed Nov 16 15:04:23 2011
+ *nat
+ :PREROUTING ACCEPT [82:12935]
+ :POSTROUTING ACCEPT [25:1724]
+ :OUTPUT ACCEPT [25:1724]
+ -A POSTROUTING -s 10.0.0.0/8 ! -d 10.0.0.0/8 -j MASQUERADE 
+ COMMIT
+ # s-&gt;source !d-&gt;not distination-&gt;not in the same subset
+ # Completed on Wed Nov 16 15:04:23 2011
+</code></pre>
+
+<p>进入root权限后，执行命令</p>
+
+<pre><code>iptables-restore /home/angel/net_scripts/ipt.save
+</code></pre>
+
+<p>这样就是修改了静态路由表，但还需要将转发开关打开，需要命令如下</p>
+
+<pre><code>echo '1' &gt; /proc/sys/net/ipv4/ip_forward
+</code></pre>
+
+<p>这样修改之后pc2就可以通过pc1上网了。
+<!--more-->
+但是重启后发现<strong>两个问题</strong>：</p>
+
+<ul>
+  <li>linux下如果有两个网卡eth0和eth1，系统启动时候会先启动eth0，后启动eth1，这样造成eth0的信息被eth1覆盖。</li>
+  <li>以上的两个命令并不是永久的，重启后失效。</li>
+</ul>
+
+<p>第一个问题的解决方案是修改/etc/network/interfaces
+文件，修改网卡接口的信息，修改后的文件如下：</p>
+
+<pre><code># interfaces(5) file used by ifup(8) and ifdown(8)
+ auto lo
+ iface lo inet loopback
+ 
+ auto eth1
+ iface eth1 inet dhcp
+ 
+ auto eth0
+ iface eth0 inet static
+ address 10.0.0.1
+ netmask 255.0.0.0
+ broadcast 10.255.255.255
+</code></pre>
+
+<p>需要重启生效，也可以使用命令</p>
+
+<pre><code>sudo /etc/init.d/networking restart
+</code></pre>
+
+<p>第二个问题可以写一个简单的脚本iptable.sh来实现，每次开机启动自动执行脚本：</p>
+
+<pre><code>iptables-restore /home/angel/net_scripts/ipt.save
+ echo '1' &gt; /proc/sys/net/ipv4/ip_forward
+</code></pre>
+
+<p>将脚本放在任意的位置，如下放入home文件夹下，修改/etc/rc.local文件：</p>
+
+<pre><code>#!/bin/sh -e
+ #
+ # rc.local
+ #
+ # This script is executed at the end of each multiuser runlevel.
+ # Make sure that the script will "exit 0" on success or any other
+ # value on error.
+ #
+ # In order to enable or disable this script just change the execution
+ # bits.
+ #
+ # By default this script does nothing.
+ sh /home/bk/iptable.sh
+ exit 0
+</code></pre>
+
+<p>这样每次启动都会调用脚本，并且使用root权限。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Linux下DHCP服务器配置]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/linuxxia-dhcpfu-wu-qi-pei-zhi/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/linuxxia-dhcpfu-wu-qi-pei-zhi</id>
+    <content type="html"><![CDATA[<p>环境为Ubuntu 12.10，机器为3网卡，需要再eth2上配置一个dhcp服务。</p>
+
+<p>因为eth2后接一个交换机，交换机上的机器需要自动分配网址，并且对于某一台或多台机器需要固定网址，例如打印机。</p>
+
+<h3 id="dhcp">1.   安装DHCP服务</h3>
+
+<pre><code>sudo apt-get install dhcp3-server
+</code></pre>
+
+<p>但是安装的是
+isp-dhcp-server。可能是ubuntu进行的版本替换。但是不影响后面的操作。</p>
+
+<p>服务器上用友3块网卡，需要选择哪一块网卡用来监听DHCP服务。</p>
+
+<p>输入下面命令修改配置文件</p>
+
+<pre><code>vim /etc/default/isc-dhcp-server
+</code></pre>
+
+<p>在文件的注释部分可以看到dhcpd的配置文件在</p>
+
+<pre><code>/etc/dhcp/dhcpd.conf
+</code></pre>
+
+<p>其他注释部分为格外选项，下面要修改INTERFACES</p>
+
+<pre><code>INTERFACES=“eth2” &lt;!--more--&gt; ### 2.  配置DHCP服务
+</code></pre>
+
+<p>修改在上一步查到的dhcpd文件</p>
+
+<p>修改的部分如下：</p>
+
+<pre><code>default-lease-time 600;
+ max-lease-time 7200;
+ option subnet-mask 255.255.255.0;
+ option broadcast-address 192.168.1.255;
+ option routers 192.168.1.254;
+ option domain-name-servers 192.168.1.1, 192.168.1.2;
+ subnet 192.168.1.0 netmask 255.255.255.0 {
+ 　　range 192.168.1.10 192.168.1.200;
+ }
+</code></pre>
+
+<p>注意：不要忘了每句后面加上分号，当时我就粗心了，花了好久时间查出。</p>
+
+<p>这样修改自动分配的地址范围就在</p>
+
+<pre><code>192.168.1.10 与 192.168.1.200
+</code></pre>
+
+<p>还需要绑定MAC地址与ip地址，在添加代码</p>
+
+<pre><code>host printer1 {
+ 　　hardware ethernet 00:0a:95:f5:8f:b3;
+ 　　fixed-address 192.168.1.23;
+ }
+</code></pre>
+
+<p>重启电脑，就ok了。</p>
+
+<p>需要找到DHCP服务器的IP地址，使用下面的命令</p>
+
+<pre><code>sudo dhclient
+</code></pre>
+
+<p>或者</p>
+
+<pre><code>tail -n 15 /var/lib/dhcp3/dhclient.*.leases
+</code></pre>
+
+]]></content>
+  </entry>
+  
+</feed>

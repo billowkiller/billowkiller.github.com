@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: tr | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/tr/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2014-09-15T12:37:27+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[8 Linux TR Command Examples]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/8-linux-tr-command-examples/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/8-linux-tr-command-examples</id>
+    <content type="html"><![CDATA[<p><strong><em>from
+<a href="http://www.thegeekstuff.com/2012/12/linux-tr-command/?utm_source=feedburner&amp;utm_medium=email&amp;utm_campaign=Feed%3A+TheGeekStuff+%28The+Geek+Stuff%29">TheGeekStuff</a></em></strong></p>
+
+<hr />
+
+<p>tr is an UNIX utility for translating, or deleting, or squeezing
+repeated characters. It will read from STDIN and write to STDOUT.</p>
+
+<p>tr stands for translate.</p>
+
+<h3 id="syntax">Syntax</h3>
+
+<p>The syntax of tr command is:</p>
+
+<pre><code>$ tr [OPTION] SET1 [SET2]
+</code></pre>
+
+<h3 id="translation">Translation</h3>
+
+<p>If both the SET1 and SET2 are specified and ‘-d’ OPTION is not
+specified, then tr command will replace each characters in SET1 with
+each character in same position in SET2.
+<!--more--></p>
+
+<h3 id="convert-lower-case-to-upper-case">1. Convert lower case to upper case</h3>
+
+<p>The following tr command is used to convert the lower case to upper case</p>
+
+<pre><code>$ tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ
+ thegeekstuff
+ THEGEEKSTUFF
+</code></pre>
+
+<p>The following command will also convert lower case to upper case</p>
+
+<pre><code>$ tr [:lower:] [:upper:]
+ thegeekstuff
+ THEGEEKSTUFF
+</code></pre>
+
+<p>You can also use ranges in tr. The following command uses ranges to
+convert lower to upper case.</p>
+
+<pre><code>$ tr a-z A-Z
+ thegeekstuff
+ THEGEEKSTUFF
+</code></pre>
+
+<h3 id="translate-braces-into-parenthesis">2. Translate braces into parenthesis</h3>
+
+<p>You can also translate from and to a file. In this example we will
+translate braces in a file with parenthesis.</p>
+
+<pre><code>$ tr '{}' '()' &lt; inputfile &gt; outputfile
+</code></pre>
+
+<p>The above command will read each character from “inputfile”, translate
+if it is a brace, and write the output in “outputfile”.</p>
+
+<h3 id="translate-white-space-to-tabs">3. Translate white-space to tabs</h3>
+
+<p>The following command will translate all the white-space to tabs</p>
+
+<pre><code>$ echo "This is for testing" | tr [:space:] '\t'
+ This   is  for testing
+</code></pre>
+
+<h3 id="squeeze-repetition-of-characters-using--s">4. Squeeze repetition of characters using -s</h3>
+
+<p>In Example 3, we see how to translate space with tabs. But if there are
+two are more spaces present continuously, then the previous command will
+translate each spaces to a tab as follows.</p>
+
+<pre><code>$ echo "This is for testing" | tr [:space:] '\t'
+ This    is  for    testing
+</code></pre>
+
+<p>We can use -s option to squeeze the repetition of characters.</p>
+
+<pre><code>$ echo "This is for testing" | tr -s [:space:] '\t'
+ This   is  for testing
+</code></pre>
+
+<p>Similarly you can convert multiple continuous spaces with a single space</p>
+
+<pre><code>$ echo "This is for testing" | tr -s [:space:] ' '
+ This is for testing
+</code></pre>
+
+<h3 id="delete-specified-characters-using--d-option">5. Delete specified characters using -d option</h3>
+
+<p>tr can also be used to remove particular characters using -d option.</p>
+
+<pre><code>$ echo "the geek stuff" | tr -d 't'
+ he geek suff
+</code></pre>
+
+<p>To remove all the digits from the string, use</p>
+
+<pre><code>$ echo "my username is 432234" | tr -d [:digit:]
+ my username is
+</code></pre>
+
+<p>Also, if you like to delete lines from file, you can use <a href="http://www.thegeekstuff.com/2009/09/unix-sed-tutorial-delete-file-lines-using-address-and-patterns/">sed d
+command</a>.</p>
+
+<h3 id="complement-the-sets-using--c-option">6. Complement the sets using -c option</h3>
+
+<p>You can complement the SET1 using -c option. For example, to remove all
+characters except digits, you can use the following.</p>
+
+<pre><code>$ echo "my username is 432234" | tr -cd [:digit:]
+ 432234
+</code></pre>
+
+<h3 id="remove-all-non-printable-character-from-a-file">7. Remove all non-printable character from a file</h3>
+
+<p>The following command can be used to remove all non-printable characters
+from a file.</p>
+
+<pre><code>$ tr -cd [:print:] &lt; file.txt
+</code></pre>
+
+<h3 id="join-all-the-lines-in-a-file-into-a-single-line">8. Join all the lines in a file into a single line</h3>
+
+<p>The below command will translate all newlines into spaces and make the
+result as a single line.</p>
+
+<pre><code>$ tr -s '\n' ' ' &lt; file.txt
+</code></pre>
+
+]]></content>
+  </entry>
+  
+</feed>

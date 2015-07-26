@@ -1,0 +1,1557 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: insight | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/insight/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2014-09-15T12:37:27+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[C/C++ Byte Alignment]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/04/22/byte-alignment/"/>
+    <updated>2014-04-22T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/04/22/byte-alignment</id>
+    <content type="html"><![CDATA[<p><strong>字节对齐的细节和编译器实现相关，但一般而言，满足三个准则</strong>：</p>
+
+<ol>
+  <li>结构体变量的首地址能够被其<strong>最宽基本类型</strong>成员的大小所整除；</li>
+  <li>结构体每个成员相对于结构体首地址的偏移量（offset）都是<strong>成员大小的整数倍</strong>，如有需要编译器会在成员之间加上填充字节（internal adding）；</li>
+  <li>结构体的总大小为结构体最宽基本类型成员大小的整数倍，如有需要编译器会在最末一个成员之后加上填充字节（trailing padding）。</li>
+</ol>
+
+<p>需要仔细体会上面的三个准则。</p>
+
+<!--more-->
+
+<ul>
+  <li>
+    <p>结构体某个成员相对于结构体首地址的偏移量可以通过宏offsetof()来获得，这个宏也在stddef.h中定义，如下：</p>
+
+    <pre><code>  #define offsetof(s,m) (size_t)&amp;(((s *)0)-&gt;m)
+</code></pre>
+  </li>
+  <li>
+    <p>基本类型是指前面提到的像char、short、int、float、double这样的内置数据类型。这里所说的“数据宽度”就是指其sizeof的大小。由于结构体的成员可以是复合类型，比如另外一个结构体，所以在寻找最宽基本类型成员时，应当包括复合类型成员的子成员，而不是把复合成员看成是一个整体。但在确定复合类型成员的偏移位置时则是将复合类型作为整体看待。</p>
+
+    <pre><code>  struct S1
+  {
+      char c;
+      int i;
+  };
+
+  struct S3
+  {
+      char c1;
+      S1 s;
+      char c2;
+  };
+</code></pre>
+
+    <p>S1的最宽简单成员的类型为int，S3在考虑最宽简单类型成员时是将S1“打散”看的，所以S3的最宽简单类型为int。这样，通过S3定义的变量，其存储空间首地址需要被4整除，整个sizeof(S3)的值也应该被4整除。</p>
+
+    <p>c1的偏移量为0，s的偏移量呢？这时s是一个整体，它作为结构体变量也满足前面三个准则，所以其大小为8，偏移量为4，c1与s之间便需要3个填充字节，而c2与s之间就不需要了，所以c2的偏移量为12，算上c2的大小为13，13是不能被4整除的，这样末尾还得补上3个填充字节。最后得到sizeof(S3)的值为16。</p>
+  </li>
+</ul>
+
+<h2 id="pragma-pack"><code> #pragma pack</code></h2>
+
+<p><code>#pragma pack</code>规定的对齐长度，实际使用的规则是：</p>
+
+<p>结构，联合，或者类的数据成员，第一个放在偏移为0的地方，以后每个数据成员的对齐，按照<code>#pragma pack</code>指定的数值和这个数据成员自身长度中，比较小的那个进行。也就是说，当<code>#pragma pack</code>的值等于或超过所有数据成员长度的时候，这个值的大小将不产生任何效果。而结构整体的对齐，则按照结构体中最大的数据成员和<code>#pragma pack</code>指定值之间，较小的那个进行。</p>
+
+<pre><code>   #pragma pack(4)
+　　class TestB
+　　{
+　　public:
+　　　　int aa; //第一个成员，放在[0,3]偏移的位置，
+　　　　char a; //第二个成员，自身长为1，#pragma pack(4),取小值，也就是1，所以
+这个成员按一字节对齐，放在偏移[4]的位置。
+　　　　short b; //第三个成员，自身长2，#pragma pack(4)，取2，按2字节对齐，所以
+放在偏移[6,7]的位置。
+　　　　char c; //第四个，自身长为1，放在[8]的位置。
+　　};
+</code></pre>
+
+<p>这个类实际占据的内存空间是9字节类之间的对齐，是按照类内部最大的成员的长度，和<code>#pragma pack</code>规定的值之中较小的一个对齐的。所以这个例子中，类之间对齐的长度是<code>min(sizeof(int),4)</code>，也就是4。9按照4字节圆整的结果是12，所以<code>sizeof(TestB)</code>是12。</p>
+
+<pre><code>	#pragma pack(2)
+    class TestB
+　　{
+　　public:
+　　　　int aa; //第一个成员，放在[0,3]偏移的位置，
+　　　　char a; //第二个成员，自身长为1，#pragma pack(4),取小值，也就是1，所以
+这个成员按一字节对齐，放在偏移[4]的位置。
+　　　　short b; //第三个成员，自身长2，#pragma pack(4)，取2，按2字节对齐，所以
+放在偏移[6,7]的位置。
+　　　　char c; //第四个，自身长为1，放在[8]的位置。
+　　};
+</code></pre>
+
+<p>可以看出，上面的位置完全没有变化，只是类之间改为按2字节对齐，9按2圆整的结果是10。所以<code>sizeof(TestB)</code>是10。</p>
+
+<pre><code>	#pragma pack(4)
+　　class TestC
+　　{
+　　public:
+　　　　char a;//第一个成员，放在[0]偏移的位置，
+　　　　short b;//第二个成员，自身长2，#pragma pack(4)，取2，按2字节对齐，所以
+放在偏移[2,3]的位置。
+　　　　char c;//第三个，自身长为1，放在[4]的位置。
+　　};
+</code></pre>
+
+<p>整个类的大小是5字节，按照<code>min(sizeof(short),4)</code>字节对齐，也就是2字节对齐，结果是6</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Effective C++ Rework]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/04/17/Effective/"/>
+    <updated>2014-04-17T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/04/17/Effective</id>
+    <content type="html"><![CDATA[<h2 id="c">让自己习惯C++</h2>
+
+<h3 id="item-01-view-c-as-a-federation-of-languages">Item 01： View C++ as a federation of languages</h3>
+
+<p>C++同时支持过程形式、面对对象形式、函数形式、泛型形式、元编程形式。</p>
+
+<p>次语言有</p>
+
+<ul>
+  <li>C</li>
+  <li>Object-Oriented C++</li>
+  <li>Template C++</li>
+  <li>STL</li>
+</ul>
+
+<p>C++高效编程守则视状况而变化，取决于你使用C++的那一部分。</p>
+
+<!--more-->
+
+<h3 id="item-02-prefer-consts-enums-and-inlines-to-defines">Item 02： Prefer consts, enums and inlines to #defines</h3>
+
+<ul>
+  <li><code>#define</code>的变量没有进入记号表。并且没有作用域，不能提供任何封装性。</li>
+  <li><code>#define</code>定义宏，需要为所有实参加上小括号，且不能够使用<code>++</code>和<code>--</code>。</li>
+</ul>
+
+<p><code>#define</code>难以调试、行为无法预料、类型不安全。</p>
+
+<pre><code>class GamePlayer{
+private:
+	static const int NumTurns = 5; //常量申明式
+};
+</code></pre>
+
+<p>通常C++要求你对你所使用的任何东西提供一个定义式，但那如果它是<code>class</code>专属常量又是<code>static</code>且为<strong>整数型</strong>(ints, chars, bools)则需特殊处理。只要是不取它们的地址，你可以申明并使用它们而无需提供定义式。如果需要取址，必须提供定义式：</p>
+
+<pre><code>const int GamePlayer::NumTurns; //申明时获取了初值，定义不必赋值
+</code></pre>
+
+<p>“The enum hack”表示一个属于枚举类型的数值可权充int被使用，于是<code>GamePlayer</code>定义为</p>
+
+<pre><code>class GamePlayer{
+private:
+	enum { NumTurns = 5 };
+	static const int NumTurns = 5;
+};
+</code></pre>
+
+<ul>
+  <li>取一个<code>enum</code>地址是非法的。<code>enum</code>和<code>#define</code>一样不会导致非必要的内存分配。</li>
+  <li><code>enum hack</code>是<code>template metaprogramming</code>的基础技术。</li>
+</ul>
+
+<p><code>template inline</code>可以提供宏带来的效率以及一般函数的所有可预料行为和类型安全。遵守作用域和访问规则。</p>
+
+<h3 id="item-03-use-const-whenever-possible">Item 03： Use const whenever possible</h3>
+
+<p>令函数返回一个常量值，往往可以降低因客户错误而造成的意外，而不至于放弃安全性和高效性。</p>
+
+<pre><code>const Rational operator* (const Rational&amp; lhs, const Rational&amp; rhs);
+Rational a, b, c;
+...
+(a * b) = c;  //错误
+</code></pre>
+
+<p>重载<code>operator[]</code>并对不同的版本给予不同的返回类型，就可以令<code>const</code>和<code>non-const</code>获得不同的处理。返回 <code>char&amp;</code>也是必要的。</p>
+
+<pre><code>const char&amp; operator[](std::size_t position) const; //operator[] for const Object
+char&amp; operator[](std::size_t position); //operator[] for non-const object
+</code></pre>
+
+<ul>
+  <li>成员函数式<code>const</code>有两个流行的概念：<code>bitwise constness</code>, <code>logical constness</code>。</li>
+  <li><code>mutable</code>变量成员可以再const成员函数中改变。</li>
+  <li><code>static_cast</code>将<code>non-const</code>对象转为<code>const</code>对象。<code>const_cast</code>相反。</li>
+</ul>
+
+<h3 id="item-04-make-sure-that-objects-are-initialized-before-theyre-used">Item 04： Make sure that objects are initialized before they’re used</h3>
+
+<ul>
+  <li><code>C++</code>对定义与不同编译单元(文件)内的<code>non-local static</code>对象的初始化次序并无明确定义。</li>
+  <li>函数内的<code>local static</code>对象会在该函数被调用期间首次遇上该对象的定义式时被初始化。</li>
+</ul>
+
+<p>为内置对象进行手工初始化，<code>C++</code>不保证初始化它们。
+构造函数使用<code>成员初值列</code>，不要在函数内使用赋值操作。其排列次序应该和申明次序相同。
+为免除跨编译单元初始化次序问题。以<code>local static</code>对象替代<code>non-local static</code>对象。</p>
+
+<h2 id="constructors-destructors-and-assignment-operators">Constructors, destructors, and Assignment Operators</h2>
+
+<h3 id="item-05-know-what-functions-c-silently-writes-and-calls">Item 05： Know what functions C++ silently writes and calls</h3>
+
+<ul>
+  <li><code>default</code>构造函数和析构函数调用<code>base classes</code>和<code>non-static</code>成员变量的构造函数和析构函数。且只有base是<code>virtual</code>析构时，它才是<code>virtual</code>的。</li>
+  <li>如果类内含<code>reference</code>或<code>const</code>成员，或者<code>base classes</code>将<code>copy assignment</code>操作符申明为<code>private</code>，则需要自己定义<code>copy assignment</code></li>
+</ul>
+
+<h3 id="item-06-explicitly-disallow-the-use-of-compiler-generated-functions-you-do-not-want">Item 06: Explicitly disallow the use of compiler-generated functions you do not want</h3>
+
+<p>不实现<code>copy</code>或<code>copy assignment</code>的方法：</p>
+
+<ol>
+  <li>将成员函数声明为private而且故意不实现它们。</li>
+  <li>设计一个专门为了组织copying动作的<code>base class</code>， 将<code>copy</code>和<code>copy assigment</code>声明为<code>private</code>。接着私有继承base class</li>
+  <li><code>Boost</code>提供的class，<code>nonecopyable</code></li>
+</ol>
+
+<h3 id="item-07-declare-destructors-virtual-in-ploymorphic-base-classes">Item 07: Declare destructors virtual in ploymorphic base classes</h3>
+
+<pre><code>Base *pt = new Derived;
+delete pt;
+</code></pre>
+
+<p><code>derived class</code>对象经由一个<code>base class</code>指针被删除，如果<code>base class</code>有个<code>non-virtual</code>析构函数，则对象的<code>derived</code>成分没被销毁。</p>
+
+<p>无端地将所有classes的析构函数声明为<code>virtual</code>，就像从未声明它们为<code>virtual</code>一样，都是错误的，带来对象体积的增加。只有当class内含有至少一个<code>virtual</code>函数才为它声明<code>virtual</code>析构函数。</p>
+
+<p>为你希望它成为抽象的那个class(polymorphic base classes)声明一个<code>pure virtual</code>析构函数。</p>
+
+<pre><code>class AWOV {
+public:
+	virtual  ~AWOV() = 0;
+};
+AWOV::~AWOV() {}  //pure virtual 析构函数的定义 
+</code></pre>
+
+<p>然而必须为这个<code>pure virtual</code>函数提供一份定义，根据析构函数的运作方式，编译器会在AWOV的<code>derived classes</code>的析构函数中创建一个对~AWOV的调用动作，所以必须为这个函数提供一份定义。否则，连接器会发出抱怨。</p>
+
+<h3 id="item-08-prevent-exceptions-from-leaving-destructors">Item 08: Prevent exceptions from leaving destructors</h3>
+
+<ul>
+  <li>析构函数绝对不要突出异常。如果一个被析构函数调用的函数可能抛出异常，析构函数应该捕捉任何异常，然后吞下它们（不传播）或结束程序。</li>
+  <li>如果客户需要对某个操作函数运行期间抛出的异常作出反应，那么class应该提供一个普通函数（而非在析构函数中）执行该操作。</li>
+</ul>
+
+<h3 id="item-09-never-call-virtual-functions-during-construction-or-destruction">Item 09: Never call virtual functions during construction or destruction</h3>
+
+<p><strong>在base class构造期间，virtual函数不是virtual函数</strong>。因为derived class对象还未构造好，所以base class构造期间virtual函数绝不会下降到derived classes阶层。在derived class对象的base class构造期间，对象类型是base class而不是derived class。</p>
+
+<p>在构造期间，可以借由“令derived classes将必要的构造信息向上传递至base class构造函数”替换之。</p>
+
+<p><strong>同样的道理也适用于析构函数</strong>。一旦derived class析构函数开始执行，对象内的derived class成员变量变成未定义值，所以C++是它们仿佛不再存在。进入base class析构函数后对象就称为一个base class 对象，而C++的任何部分包括virtual函数、<code>dynamic_cast</code>等等也就这么看它。</p>
+
+<p>所以，在构造和析构席间不要调用virtual函数，因为这类调用从不降至derived class（比起当前执行构造函数和析构函数的那层）。</p>
+
+<h3 id="item-10-have-assignment-operators-return-a-reference-to-this">Item 10: Have assignment operators return a reference to *this</h3>
+
+<pre><code>Widget&amp; operator=(const widget &amp;rhs) {
+	...
+	return *this;
+}
+</code></pre>
+
+<h3 id="item-11-handle-assignment-to-self-in-operator">Item 11: Handle assignment to self in operator=</h3>
+
+<p>容易掉进“在停止使用资源之前意外释放了它”的陷阱。</p>
+
+<p>让<code>operator=</code>具备“异常安全性”往往自动获得“自我复制安全”的汇报。</p>
+
+<pre><code>Widget&amp; operator=(const widget &amp;rhs) {
+	Bitmap * pOrig = pb;
+	pb = new Bitmap(*rhs.pb);
+	delete pOrig;
+	return *this;
+}
+</code></pre>
+
+<p>还可以使用<code>copy and swap</code>技术。或利用一下事实：(1)某class的<code>copy assignment</code>操作符可能被声明<code>by value</code>的方式；(2)以<code>by value</code>的方式传递东西会造成一份副本。</p>
+
+<h3 id="item-12-copy-all-parts-of-an-object">Item 12: Copy all parts of an object</h3>
+
+<ul>
+  <li>编写一个copying函数确保(1)复制所有local成员变量，(2)调用所有base classes内的适当的copy函数。</li>
+  <li>不要尝试以某个copying函数实现另一个copying函数。应该讲共同机能放进第三个函数中，并有两个copying函数共同调用。</li>
+</ul>
+
+<h2 id="section">资源管理</h2>
+
+<h3 id="item-13-use-objects-to-manage-resources">Item 13: Use objects to manage resources.</h3>
+
+<ul>
+  <li>获得资源后立即放进资源对象内。<code>RAII</code>–Resource Acquisition Is initialization</li>
+  <li>管理对象运用析构函数确保资源被释放。</li>
+  <li>auto_ptr通过copy构造函数或copy assignment操作符复制它们，它们会变成null，而复制所得到的指针将取得资源的唯一拥有权。</li>
+  <li>动态分配得到的<code>array</code>身上使用auto_ptr或tr1::shared_ptr是个馊主意。两者再析构函数内做delete而不是delete[]动作。</li>
+</ul>
+
+<h3 id="item-14-think-carefully-about-copying-behavior-in-resource-managing-classes">Item 14: Think carefully about copying behavior in resource-managing classes</h3>
+
+<p>当一个RAII对象被复制，考虑两种可能性：</p>
+
+<ul>
+  <li>禁止复制</li>
+  <li>对底层资源采用<code>引用计数法</code>， 
+    <ul>
+      <li><code>shared_ptr</code>的缺省行为是“当引用次数为0时删除其所指之物”，允许制定特定的删除器(<code>deleter</code>)</li>
+    </ul>
+  </li>
+  <li>复制底部资源</li>
+  <li>转移底部资源的拥有权</li>
+</ul>
+
+<h3 id="item-15-provide-access-to-raw-resources-in-resource-managing-classes">Item 15: Provide access to raw resources in resource-managing classes</h3>
+
+<p>智能指针重载了指针取值操作符(operator-&gt; 和 operator*)，它们允许隐式转换至底部原始指针。</p>
+
+<p>隐式转换举例：</p>
+
+<pre><code>class Font {
+public:
+	...
+	operator FontHandle() const //隐式转换函数
+	{ return f; }
+	...
+}
+</code></pre>
+
+<ul>
+  <li>API往往要求访问原始资源，所以每个RAII class应该提供一个取得原始资源的方法。</li>
+  <li>对原始资源的访问可能经由显示转换或隐式转换。一般而言显示转换比较安全，但隐私转换对客户比较方便。</li>
+</ul>
+
+<h3 id="item-16-use-the-same-form-in-corresponding-uses-of-new-and-delete">Item 16: Use the same form in corresponding uses of new and delete</h3>
+
+<p>new对应delete，new[] 对应delete[]</p>
+
+<p>对于typedef,必须要在程序中说明清楚</p>
+
+<pre><code>typedef std::string AddressLines[4];
+std::string * pal = new AddressLines;
+delete [] pal; //delete pal 导致行为未有定义 因此，最好尽量不要对数组形式做typedef动作。
+</code></pre>
+
+<h3 id="item-17-store-newed-objects-in-smart-pointers-in-standalone-statements">Item 17: Store newed objects in smart pointers in standalone statements.</h3>
+
+<p>假设有个函数解释处理程序的优先权，另一个函数用来在某动态分配所得的Widget上进行某些带有优先权的处理：</p>
+
+<pre><code>int priority();
+void processWidget(std::tr1::shared_ptr&lt;Widget&gt; pw, int priority);
+</code></pre>
+
+<p>如果这样调用</p>
+
+<pre><code>processWidget(std::tr1::shared_ptr&lt;Widget&gt;(new Widget), priority()); 编译器创建代码，做以下三件事：
+</code></pre>
+
+<ul>
+  <li>调用priority</li>
+  <li>执行new Widget</li>
+  <li>调用tr1::shared_ptr构造函数。</li>
+</ul>
+
+<p>只能保证new Widget在shared_ptr构造函数之前被调用。如果priority在两者中间被调用，而且导致异常。那么new Widget返回的指针将会遗失。</p>
+
+<h2 id="section-1">设计与声明</h2>
+
+<h3 id="item-18-make-interfaces-easy-to-use-correctly-and-hard-to-use-incorrectly">Item 18: Make interfaces easy to use correctly and hard to use incorrectly</h3>
+
+<ul>
+  <li>好的接口很容易被正确使用，不容易被误用。你应该在你的所有接口中努力达成这些性质。</li>
+  <li>“促进正确使用”的办法包括借口的一致性，以及与内置类型的行为兼容。任何接口如果要求客户必须记得做某些事情，就是有着“不正确使用”的倾向，因为客户可能会忘记做那件事。</li>
+  <li>“阻止误用”的办法包括建立新类型、限制类型上的操作，束缚对象值，以及消除客户的资源管理责任。</li>
+  <li>tr1::shared_ptr支持定制性删除器(custom deleter)。可以防范<code>cross-DLL problem</code>(在一个DLL中被new创建，却在另一个DLL中被delete销毁)，自动解除互斥锁等等。</li>
+</ul>
+
+<h3 id="item-20-prefer-pass-by-reference-to-const-to-pass-by-value">Item 20: Prefer pass-by-reference-to-const to pass-by-value.</h3>
+
+<ul>
+  <li>尽量以<code>pass-by-reference-to-const</code>替换<code>pass-by-value</code>。前者通常比较高效，并可以避免切割问题。</li>
+  <li>以上规则并不适用于<strong>内置类型，以及STL的迭代器和函数对象</strong>。对它们而言，pass-by-value往往比较适当。</li>
+</ul>
+
+<h3 id="item-21-dont-try-to-return-a-reference-when-you-must-return-an-object">Item 21: Don’t try to return a reference when you must return an object</h3>
+
+<p>绝不要返回pointer或reference指向一个local stack对象，或返回reference指向一个heap-allocated对象，或返回pointer或reference指向一个local static对象而有可能同时需要多个这样的对象。</p>
+
+<h3 id="item-22-declare-data-members-private">Item 22: Declare data members private.</h3>
+
+<ul>
+  <li>封装的重要性比你最初见到它时还要重要</li>
+  <li>切记将成员变量声明为private。这可赋予客户访问数据的一致性、可细微划分访问控制、允诺约束条件获得保证，并提供class作者以充分的实现弹性。</li>
+  <li>protected并不比public更具有封装性。</li>
+</ul>
+
+<h3 id="item-23-prefer-non-member-non-friend-functions-to-member-functions">Item 23: Prefer non-member non-friend functions to member functions</h3>
+
+<ul>
+  <li>提供更大的封装性</li>
+  <li>比较自然的做法是让 non-member non-friend函数作为便利函数位于类所在的同一个namespace内。并将同类便利函数声明放在同一头文件中。</li>
+  <li>将所有便利函数放在多个头文件内但隶属于同一个命名空间，意味客户可以轻松扩展这一组便利函数。</li>
+</ul>
+
+<h3 id="item-24-declare-non-member-functions-when-type-conversions-should-apply-to-all-parameters">Item 24: Declare non-member functions when type conversions should apply to all parameters</h3>
+
+<pre><code>class Rational {
+public:
+	const Rational operator* (const Rational &amp;rhs) const;
+};
+
+Rational oneHalf(1, 2);
+result = oneHalf * 2; // oneHalf.operator*(2)，可以执行
+result = 2 * oneHalf; // 2.operator*(oneHalf)，错误
+</code></pre>
+
+<p>所以让函数称为一个<code>non-member</code>函数</p>
+
+<pre><code>const Rational operator* (const Rational &amp;lhs， const Rational &amp;rhs);	 允许编译器在每一个实参身上执行隐私转换类型。
+</code></pre>
+
+<h3 id="item-25-consider-support-for-a-non-throwing-swap">Item 25: Consider support for a non-throwing swap</h3>
+
+<pre><code>namespace std {
+	template&lt;&gt; //全特化
+	void swap&lt;Widget&gt;( Widget &amp;a, Widget &amp;b) {
+		swap(a.pImpl, b.pImpl); //私有变量，编译不通过，需要创建类的成员函数
+	} }
+
+class Widget {
+public:
+	void swap(Widget&amp; other) {
+		using std::swap; //声明是有必要的，下个swap调用std版本的
+		swap(pImpl, other.pImpl);
+</code></pre>
+
+<ul>
+  <li>当<code>std::swap</code>对你的类型效率不高时，提供一个<code>swap</code>成员函数，并确定这个函数不抛出异常</li>
+  <li>如果你提供一个<code>member swap</code>，也应该提供一个<code>non-member swap</code>用来调用前者。对于classes（而非templates），也请特化<code>std::swap</code></li>
+  <li>调用<code>swap</code>时应针对<code>std::swap</code>使用<code>using</code>声明式，然后调用<code>swap</code>并且不带任何“命名空间资格修饰”。</li>
+  <li>为“用户定义类型”进行<code>std templates</code>全特化是好的，但千万不要尝试在<code>std</code>内加入某些对<code>std</code>而言是全新的东西</li>
+</ul>
+
+<h2 id="section-2">实现</h2>
+
+<h3 id="item-26-postpone-variable-definitions-as-long-as-possible">Item 26: Postpone variable definitions as long as possible</h3>
+
+<p>不止应该延后变量的定义，这道非得使用该变量的前一刻为止，甚至应该尝试延后这份定义知道能够给它初值实参为止。</p>
+
+<h3 id="item-27-minimize-casting">Item 27: Minimize casting</h3>
+
+<ul>
+  <li><code>const_cast</code>被用来将对象的常量性转除，也是唯一有此能力的c++ style转型操作符</li>
+  <li><code>dynamic_cast</code>主要用来执行“safe downcasting”，可能需要耗费重大运行成本。</li>
+  <li><code>reinterpret_cast</code>执行低级转型，实际动作及结果可能取决于编译器，也就表示它不可移植。</li>
+  <li><code>static_cast</code>用来强迫隐式转换。例如将non-const转为const对象，将int转为double。</li>
+</ul>
+
+<p>单一对象(例如一个类型为Derived的对象)<code>可能拥有一个以上的地址</code>(例如“以Base* 指向它”时的地址和“以Derived* 指向它”时的地址)。这至少意味着你通常应该避免作出“对象在C++中如何布局”的假设。</p>
+
+<ul>
+  <li>如果可以，尽量避免转型，特别是在注重效率的代码中避免<code>dynamic_cast</code>。如果有个设计需要转向动作，试着发展无需转型的替代设计。</li>
+  <li>如果转型是必要的，试着将它隐藏于某个函数背后。客户随后可以调用该函数，而不需将转型放进他们自己的代码内。</li>
+  <li>宁可使用C++ style转型，不要使用旧式转型。前者很容易辨识出来，而且也比较有着分门别类的职掌。</li>
+</ul>
+
+<h3 id="item-28-avoid-returning-handles-to-object-internals">Item 28: Avoid returning “handles” to object internals</h3>
+
+<p>避免返回handles(包括references、指针、迭代器)指向对象内部。遵守这个条款可增加封装性，帮助const成员函数的行为像个const，并将发生dangling handles的可能性降至最低。</p>
+
+<p>考虑一个例子：</p>
+
+<pre><code>const Point&amp; Rectangle::upperLeft() const { return pData-&gt;ulhc; }	
+
+class GUIObject{};
+const Rectangle boundingBox(const GUIObject &amp;obj);
+
+GUIObject *pgo;
+const Point* pUpperLeft = &amp;(boundingBox(*pgo).upperLeft()); //指向一个不存在的对象
+</code></pre>
+
+<h3 id="item-29-strive-for-exception-safe-code">Item 29: Strive for exception-safe code.</h3>
+
+<ul>
+  <li>异常安全函数即使发生异常也不会泄露资源或允许任何数据结构败坏。这样的函数区分三种可能的保证：基本型、强烈型、不抛异常型。</li>
+  <li>强烈保证往往能够以copy-and-swap实现出来，但强烈保证并非对所有函数都可实现或具备现实意义。</li>
+  <li>函数提供的异常安全保证通常最高只等于其所调用之各个函数的异常安全保证中的最弱者。</li>
+</ul>
+
+<h3 id="item-30-understand-the-ins-and-outs-of-inlining">Item 30: Understand the ins and outs of inlining</h3>
+
+<p><code>inline</code>只是对编译器的一个申请，不是强制命令。这项申请可以隐喻提出，也可以明确提出。隐喻方式是将函数定义于class定义内：</p>
+
+<pre><code>class Person {
+public:
+	int age() const { return theAge; } //隐喻的inline申请
+private:
+	int the Age;
+};
+</code></pre>
+
+<p>这样的函数通常是成员函数，<code>friend</code>函数也可以被定义于class内，这样它们也是被隐喻为<code>inline</code>。</p>
+
+<p><code>inline</code>和<code>template</code>函数通常都被定义于头文件内。</p>
+
+<pre><code>inline void f() {}
+void ( * pf )() = f;
+f(); //这个调用将被inlined
+pf(); //或许不被inlined，因为它通过函数指针达成。
+</code></pre>
+
+<ul>
+  <li><code>inline</code>函数无法随着程序库升级而升级。调用<code>inline</code>函数的程序都必须重新编译。</li>
+  <li>大部分调试器面对<code>inline</code>函数都束手无策。</li>
+</ul>
+
+<h3 id="item-31-minimize-compilation-dependencies-between-files">Item 31: Minimize compilation dependencies between files</h3>
+
+<p>以<code>声明的依存性</code>替换<code>定义的依存性</code>：</p>
+
+<ul>
+  <li>如果使用<code>object reference</code>或<code>object pointers</code>可以完成任务，就不要使用objects。</li>
+  <li>如果能够，尽量以class<code>声明式</code>替换class<code>定义式</code>。 </li>
+  <li>为声明式和定义式提供不同的头文件。这种方法无论是否涉及templates都适用。
+    <ul>
+      <li>
+        <iosfwd>内含iostream各组件的声明式，包括<sstream>, <streambuf>, <fstream>和<iostream>
+
+
+
+</iostream></fstream></streambuf></sstream></iosfwd>
+      </li>
+    </ul>
+  </li>
+</ul>
+<p>##继承和面向对象设计</p>
+
+<h3 id="item-32-make-sure-public-inheritance-models-is-a">Item 32: Make sure public inheritance models “is-a”</h3>
+
+<h3 id="item-33-avoid-hiding-inherited-names">Item 33: Avoid hiding inherited names</h3>
+
+<pre><code>class Base {
+public:
+	virtual void mf1() = 0;
+	virtual void mf1(int);
+	virtual void mf2();
+	void mf3();
+	void mf3(double);
+};
+
+class Derived: public Base {
+public:	
+	using Base::mf1;  //让base class内名为mf1和mf3的所有东西
+	using Base::mf3;  //在Derived作用域内都可见
+	virtual void mf1();
+	void mf3();
+};	
+
+//或者
+class Derived: private Base {
+public:
+	virtual void mf1() { Base::mf1(); }  //转交函数，暗自称为inline
+};
+</code></pre>
+
+<ul>
+  <li>derived class内的名称会遮掩base classes内的名称。在public继承下从来没有人希望如此。
+    <ul>
+      <li>上述规则对不同参数类型也适用，而且不论函数式virtual或non-virtual。</li>
+    </ul>
+  </li>
+  <li>为了让被遮掩的名称再见天日，可使用using声明式或转变函数。</li>
+</ul>
+
+<h3 id="item-34-differentiate-between-inheritance-of-interface-and-inheritance-of-implementation">Item 34: Differentiate between inheritance of interface and inheritance of implementation</h3>
+
+<ul>
+  <li>接口继承和实现继承不同。在public继承之下，derived classes总是继承base class的接口。</li>
+  <li>pure virtual函数只具体指定接口继承。pure virtual函数必须在derived classes中重新声明，但它们也可以拥有自己的实现。</li>
+  <li>简朴的impure virtual函数具体指定接口继承及缺省实现继承。</li>
+  <li>non-virtual函数具体指定接口继承以及强制性实现继承。</li>
+</ul>
+
+<h3 id="item-35-consider-alternatives-to-virtual-functions">Item 35: Consider alternatives to virtual functions</h3>
+
+<p>当你为解决问题而寻找某个设计方法时，不妨考虑virtual函数的替代方案。</p>
+
+<ul>
+  <li>使用non-virtual interface（NVI）手法，那是Template Method设计模式的一种特殊形式。它以public non-virtual成员函数包裹较低访问性(private或protected)的virtual函数, wrapper。</li>
+  <li>将virtual函数替换为函数指针成员变量，这是Strategy设计模式的一种分解表现形式。</li>
+  <li>以tr1::function成员变量替换virtual函数，因而允许使用任何可调用物(callable entity)搭配一个兼容于需求的签名式。这也是Strategy设计模式的某种形式。</li>
+  <li>将继承体系内的virtual函数替换为另一个继承体系内的virtual函数。这是Strategy设计模式的传统实现手法。</li>
+</ul>
+
+<h3 id="item-36-never-redefine-an-inherited-non-virtual-function">Item 36: Never redefine an inherited non-virtual function</h3>
+
+<p>non-virtual是静态绑定，调用的方法是静态类型所拥有的方法，而不是实际类型所拥有的方法。</p>
+
+<h3 id="item-37-never-redefine-a-functions-inherited-default-parameter-value">Item 37: Never redefine a function’s inherited default parameter value</h3>
+
+<p>virtual函数是动态绑定，而缺省参数值确实静态绑定。静态绑定为early binding，动态绑定为late binding。即使子类重新定义了virtual函数的缺省参数，调用还是用了父类的缺省参数。这是为了运行期效率。如果缺省参数值是动态绑定，编译器就必须有某种办法在运行期间为virtual函数决定适当的缺省参数值。</p>
+
+<p>可以使用NVI（non-virtual interface）手法：</p>
+
+<pre><code>class Shape {
+public:
+	enum ShapeColor { Red, Green, Blue};
+	void draw(ShapeColor color = Red) const {
+		doDraw(color);
+	}
+private:
+	virtual void doDraw(ShapeColor color) const = 0;//真正的工作在此处
+}；
+class Rectangle: public Shape {
+public:
+	...
+private:
+	virtual void doDraw(ShapeColor color) const; //不须制定缺省参数值
+};
+</code></pre>
+
+<h3 id="item-39-use-private-inheritance-judiciously">Item 39: Use private inheritance judiciously</h3>
+
+<ul>
+  <li>编译器不会自动将一个derived class对象转换为一个base class对象。</li>
+  <li>由private base class继承而来的所有成员，在derived class 中都会变成private 属性。</li>
+  <li>private继承在软件设计层面没有意义，只有在软件实现层面有意义。</li>
+  <li>Private继承意味is-implemented-in-terms of(根据某物实际出)。它通常比复合的级别低。但是当derived class需要访问protected base class的成员，或需要重新定义继承而来的virtual函数时，这么设计是合理的。
+和</li>
+  <li>复合不同，private继承可以造成empty base最优化。这对致力于对象尺寸最小化的程序库开发者而言，可能很重要。</li>
+</ul>
+
+<p>怎样阻止derived classes重新定义virtual函数？</p>
+
+<pre><code>class Widget {
+private:
+	class WidgetTimer: public Timer {
+	public:
+		virtual void onTick() const;
+	};
+	WidgetTimer timer;
+};
+</code></pre>
+
+<p>私有继承空类并不继承空类的空间</p>
+
+<pre><code>class Empty {}; //sizeof Empty == 1;
+class HoldsAnInt: private Empty { int x; }; //sizeof HoldsAnInt == 4;
+</code></pre>
+
+<h3 id="item-40-use-multiple-inheritance-judiciously">Item 40: Use multiple inheritance judiciously</h3>
+
+<ul>
+  <li>多重继承比单一继承复杂。它可能导致新的歧义性，以及对virtual继承的需要。</li>
+  <li>virtual继承会增加大小、速度、</li>
+  <li>初始化（及赋值）复杂度等等成本。如果virutal base classes不带任何数据，将是最具使用价值的情况。Java和.Net的Interfaces指的注意，它在许多方面兼容于C++的virtual base classes，而且也不允许含有任何数据。</li>
+  <li>多重继承的确有正当用途。其中一个情节涉及public继承某个Interface class和private继承某个协助实现的class的两相结合。</li>
+</ul>
+
+<h2 id="section-3">模版与泛型编程</h2>
+
+<h3 id="item-41-understand-implicit-interfaces-and-compile-time-polymorphism">Item 41: Understand implicit interfaces and compile-time polymorphism</h3>
+
+<ul>
+  <li>classes和templates都支持接口和多态。</li>
+  <li>对classes而言接口是显示的，以数字签名为中心。多态则是通过virtual函数发生于运行期。</li>
+  <li>对template参数而言，接口是隐式的，奠基于<strong>有效表达式</strong>。多态则是通过template具现化和函数重载解析发生于编译器。</li>
+</ul>
+
+<h3 id="item-42-understand-the-two-meanings-of-typename">Item 42: Understand the two meanings of typename.</h3>
+
+<p>在template声明式中，<code>class</code>和<code>typename</code>不一定相同。</p>
+
+<pre><code>template&lt;typename C&gt;
+void print2nd(const C&amp; container) {
+	if(container.size() &gt;= 2) {
+		C::const_iterator iter(container.begin());
+		++iter;
+		int value = *iter;
+	{
+}
+</code></pre>
+
+<p><code>iter</code>的类型是<code>C::const_iterator</code>，实际是什么值取决于<code>template</code>参数<code>C</code>。<code>template</code>内出现的名称如果相依于某个<code>template</code>参数，称之为从属名称。如果从属名称在<code>class</code>内呈嵌套状，我们称它为嵌套从属名称。<code>C::const_iterator</code>就是这样的一个名称。而<code>value</code>的类型<code>int</code>并不依赖<code>template</code>参数的名称，称之为非从属名称。<strong>在缺省情况下，嵌套从属名称不是类型</strong>。</p>
+
+<p>改为<code>typename C::const_iterator iter(container.begin());</code>。</p>
+
+<p>一种特列情况为，<code>typename</code>不可以出现在<code>base classes list</code>内的嵌套从属类型名称之前，也不可以在<code>member initialization list</code>中作为<code>base class</code>修饰符。</p>
+
+<pre><code>template&lt;typename T&gt;
+class Derived: public Base&lt;T&gt;::Nested {
+public:
+	explict Derived(int x): Base&lt;T&gt;::Nested(x) {
+		typename Base&lt;T&gt;::Nested temp;
+	}
+};
+
+最后一个例子：
+template&lt;typename IterT&gt;
+void workWithIterator(IterT iter) {
+	typename std::iterator_traits&lt;IterT&gt;::value_type temp(*iter);
+}
+</code></pre>
+
+<h3 id="item-43-know-how-to-access-names-in-templatized-base-classes">Item 43: Know how to access names in templatized base classes</h3>
+
+<p>当我们从<code>Object Oriented C++</code>进入<code>Template C++</code>，继承就不像以前那般顺利。编译器知道<code>base class templates</code>有可能被特化，而那个特化版本可能不提供和一般性template相同的接口，因而它往往拒绝在<code>templatized base classes</code>内寻找继承而来的名称。</p>
+
+<pre><code>template&lt;typename Company&gt;
+class LoggingMsgSender: public MsgSender&lt;Company&gt; {
+public:
+	void sendClearMsg(const MsgInfo* info) {
+		sendClear(info);  //调用base class函数；这段代码无法通过编译
+	}
+};
+</code></pre>
+
+<p>基类<code>MsgSender&lt;Company&gt;</code>的特化版本，可能不提供<code>sendClear()</code>方法。</p>
+
+<p>解决方法：</p>
+
+<ol>
+  <li>base class函数调用动作之前加上<code>this-&gt;</code></li>
+  <li>在函数前使用using声明式，<code>using MsgSender&lt;Company&gt;::sendClear</code>.</li>
+  <li>直接使用<code>MsgSender&lt;Company&gt;：：sendClear(info)</code>。</li>
+</ol>
+
+<p>第三种做法有缺陷，如果被调用的是<code>virtual</code>函数，上述的做法会关闭<code>virtual绑定行为</code>。</p>
+
+<h3 id="item-44-factor-parameter-independent-code-out-of-templates">Item 44: Factor parameter-independent code out of templates.</h3>
+
+<ul>
+  <li>Templates生成多个classes和多个函数，所以任何template代码都不该与某个造成膨胀的template参数产生相依关系。</li>
+  <li>因非类型模版参数而造成的代码膨胀，往往可消除，做法是以函数参数或class成员变量替换template参数。</li>
+  <li>因类型参数而造成的代码膨胀，往往可降低，做法是让带有完全相同二进制表述的具现类型共享实现码。</li>
+</ul>
+
+<p>template &lt;T*&gt;可以改为<code>tempalte&lt;void*&gt;</code>减少代码膨胀。</p>
+
+<h3 id="item-45-use-member-function-templates-to-accept-all-compatible-types">Item 45: Use member function templates to accept “all compatible types”</h3>
+
+<p>如果以带有<code>base-derived</code>关系的B，D两类型分别具现化某个template，产生出来的两个具现体并不带有<code>base-derived</code>关系。</p>
+
+<pre><code>template&lt;typename T&gt;
+class SmartPtr {
+public:
+	tempalte&lt;typename U&gt; //member template, 为了生成copy构造函数
+	SmartPtr(const SmartPtr&lt;U&gt;&amp; other); 
+};
+</code></pre>
+
+<p>这一类构造函数根据SmartPtr&lt;U&gt;创建一个Smart&lt;T&gt;。未加上<code>explicit</code>是因为原始指针类型之间的转换（例如从derived转化base）是隐式转换。可以在构造模板实现代码中约束行为：</p>
+
+<pre><code>template&lt;typename T&gt;
+class SmartPtr {
+public:
+	tempalte&lt;typename U&gt; //以other的heldPtr初始化this的heldPtr
+	SmartPtr(const SmartPtr&lt;U&gt;&amp; other):heldPtr(other.get()) {}
+	T * get() const { return heldPtr; }
+private:
+	T* heldPtr; 
+};
+</code></pre>
+
+<p>成员函数模板的效用不限于构造函数，它们常扮演的另一个角色是支持赋值操作。</p>
+
+<pre><code>template&lt;typename T&gt;
+class shared_ptr {
+public:
+	template&lt;class Y&gt;
+	explicit shared_ptr(Y* p);
+	template&lt;class Y&gt;
+	shared_ptr(shared_ptr&lt;Y&gt; const&amp; r);
+	template&lt;class Y&gt;
+	explicit shared_ptr(weak_ptr&lt;Y&gt; const&amp; r);
+	template&lt;class Y&gt;
+	explicit shared_ptr(auto_ptr&lt;Y&gt; const&amp; r);
+	template&lt;class Y&gt;
+	shared_ptr&amp; operator=(shared_ptr&lt;Y&gt; const&amp; r);
+	template&lt;class Y&gt;
+	shared_ptr&amp; operator=(auto_ptr&lt;Y&gt; &amp; r);
+};
+</code></pre>
+
+<p>上述函数的<code>explict</code>表示从某个shared_ptr类型隐式转换至另一个shared_ptr类型是被允许的，但从某个内置指针或从其他智能指针类型进行隐式转换则不被认可。auto_ptr不声明const是因为复制一个auto_ptr，它其实被改动了。</p>
+
+<p>在class内声明泛化copy构造函数并不会阻止编译器生成它们自己的copy构造函数。</p>
+
+<h3 id="item-46-define-non-member-functions-inside-templates-when-type-conversions-are-desired">Item 46: Define non-member functions inside templates when type conversions are desired.</h3>
+
+<p>将Item24的例子改为模板：</p>
+
+<pre><code>template&lt;typename T&gt;
+class Rational {
+public:
+	Rational(const T&amp; numerator = 0, const T&amp; denominator = 1);
+	
+	template&lt;typename T&gt;
+	const Rational&lt;T&gt; operator* (const Rational&lt;T&gt; &amp;rhs, const Rational&lt;T&gt; &amp;rhs);
+};
+
+Rational oneHalf(1, 2);
+result = oneHalf * 2; // 无法通过编译，不加模板则可以
+</code></pre>
+
+<p>这是因为template实参推导过程中从不将隐式类型转换函数考虑在内。可以改为如下：</p>
+
+<pre><code>friend const Rational operator* (const Rational &amp;rhs, const Rational &amp;rhs); //省略了&lt;T&gt;
+</code></pre>
+
+<p>当对象oneHalf被声明为一个Rational<int>, 模板被具现化出来，而作为过程的一部分friend函数（接受Rational<int> 参数）也就自动声明出来，后者作为一个函数而非函数模板，因此编译器可以在调用它时使用隐式转换函数。</int></int></p>
+
+<h3 id="item-47-use-traits-classes-for-information-about-types">Item 47: Use traits classes for information about types</h3>
+
+<p>``` c++
+//define traits’ type
+struct bidirectional_iterator_tag: public forward_iterator_tag { };</p>
+
+<p>//functional class, contain iterator
+template&lt;…&gt;
+class list {
+public:
+    class iterator {
+        typedef bidirectional_iterator_tag iterator_category;
+    };
+};</p>
+
+<p>//partial template specialization
+template<typename itert="">
+struct iterator_traits {
+    typedef IterT::iterator_category iterator_category;
+};</typename></p>
+
+<p>template&lt;typename IterT*&gt;
+struct iterator_traits {
+    typedef IterT::iterator_category iterator_category;
+};</p>
+
+<p>//overloading to do compiling verdict
+template&lt;typename IterT, typename DistT&gt;
+doAdvance(IterT &amp;iter, DistT d, std::bidirectional_iterator_tag) {
+    …
+}</p>
+
+<p>template&lt;typename IterT, typename DistT&gt;
+doAdvance(IterT &amp;iter, DistT d, std::forward_iterator_tag) {
+    …
+}</p>
+
+<p>//specific function for iterator, advance
+//judge the types for information
+template&lt;typename IterT, typename DistT&gt;
+void advance(IterT &amp;iter, DistT d) {
+    doAdvance(iter, d, typename iterator_traits<itert>::iterator_category());
+}
+```</itert></p>
+
+<h2 id="newdelete">定制new和delete</h2>
+
+<h3 id="item-49-understand-the-behavior-of-the-new-handler">Item 49: Understand the behavior of the new-handler.</h3>
+
+<p>set_new_handler允许客户指定一个函数，在内存分配无法获得满足时候被调用。</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Inside C++ Object]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/04/12/Inside-Object/"/>
+    <updated>2014-04-12T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/04/12/Inside-Object</id>
+    <content type="html"><![CDATA[<p>modified from <a href="http://blog.csdn.net/eroswang/article/details/1749609">http://blog.csdn.net/eroswang/article/details/1749609</a></p>
+
+<hr />
+
+<h2 id="ooob">面对对象（OO）和基于对象（OB）</h2>
+
+<p>基于对象的数据类型可以展示封装的非多态形式，但是不支持类型的扩充。一个OB设计可能比一个对等的OO设计速度更快而且空间更紧凑。速度快是因为所有的函数引发操作都在编译时期解析完成，对象建构起来时不需要设置virtual机制；空间紧凑则是因为每一个class object不需要负担传统上为了支持virtual机制而需要的额外符合。不过，OB设计比较没有弹性。 </p>
+
+<h2 id="c">C++对象模型</h2>
+
+<p>在C++中，有两种<strong>class data members：static和nonstatic</strong>，以及三种<strong>class member functions：static、nonstatic和virtual</strong>。</p>
+
+<p>Nonstatic data members被配置于每一个class object之内，static data members则被存放在所有的class object之外。Static和nonstatic function members也被放在所有的class object之外，Virtual functions则以两个步骤支持之：</p>
+
+<ul>
+  <li>每一个class产生出一堆指向virtual functions的指针，放在表格之中，这个表格被称为<strong>virtual table（vtbl）</strong>。每一个class所关联的type_info object（用以支持<strong>runtime type identification，RTTI</strong>）也经由virtual table被指出来，通常是放在表格的第一个slot处。</li>
+  <li>每一个class object被添加了一个指针，指向相关的virtual table。通常这个指针被称为<strong>vptr</strong>。</li>
+</ul>
+
+<!--more-->
+
+<p><img src="http://p.blog.csdn.net/images/p_blog_csdn_net/arthurkingios/1.JPG" alt="" /></p>
+
+<p><strong>重置vptr：</strong></p>
+
+<p>假设Bear继承于ZooAnimal，如下所示：</p>
+
+<pre><code>Bear b;
+ZooAnimal za = b;  // 这会引起切割（sliced）
+// 调用 ZooAnimal::rotate()
+za.rotate();
+</code></pre>
+
+<p><strong>为什么rotate所调用的是ZooAnimal实体而不是Bear实体？</strong></p>
+
+<p>ZooAnimal class object以另一个ZooAnimal class object作为初值，或Bear class object以另一个Bear class object作为初值，都可以直接靠bitwise copy semantics完成（剔除pointer member情况）
+。</p>
+
+<p>而当一个base class object以其derived class object内容做初始化操作时，其vptr复制操作也必须保证其安全。编译器必须确保如果某个object含有一个或一个以上的vptrs，那些vptrs的内容不会被base class object初始化改变。</p>
+
+<h2 id="constructor">Constructor的建构操作</h2>
+
+<h3 id="default-constructor">Default Constructor的建构操作</h3>
+
+<p>default constructor仅在编译器需要它时，才会被合成出来。
+通常来说，由编译器合成出来的default constructor是没啥用的（trivial），但有以下几种例外：</p>
+
+<ol>
+  <li>
+    <p>带有“Default Constructor”的Member Class Object</p>
+
+    <p>如果一个class没有任何constructor，但它内含一个member object，而后者有default constructor，那么编译器会在constructor真正需要被调用时未此class合成一个“nontrivial”的default constructor。</p>
+
+    <p>为了避免合成出多个default constructor，解决方法是把合成的default constructor、copy constructor、destructor、assignment copy operator都以inline方式完成。一个inline函数有静态链接（static linkage），不会被档案以外者看到。如果函数太复杂，不适合做成inline，就会合成出一个explicit non-inline static实体。</p>
+  </li>
+  <li>“带有Default Constructor”的Base Class</li>
+  <li>“带有一个Virtual Function”的Class
+    <ul>
+      <li>class声明（或继承）一个virtual function</li>
+      <li>class派生自一个继承串链，其中有一个或更多的virtual base classes</li>
+    </ul>
+  </li>
+  <li>
+    <p>“带有一个virtual Base Class”的Class</p>
+
+    <p>编译器需要在derived class object中为每一个virtual base classes安插一个指针，使得所有“经由reference或pointer来存取一个virtual base class”的操作可以通过相关指针完成。</p>
+  </li>
+</ol>
+
+<p><strong>总结：</strong>
+被合成出来的constructor只能满足编译器（而非程序）的需要。
+没有存在着四种情况而又没有声明任何constructor的classes，它们拥有的是implicit trivial default constructor，实际上并不会被合成出来。</p>
+
+<p>在合成的default constructor中，只有base class subobjects和member class objects会被初始化，所有其它的nonstatic data member，如整数、整数指针，整数数组等都不会被初始化。</p>
+
+<p><strong>一般会对dafult constructor有两个误解：</strong></p>
+
+<ol>
+  <li>任何class如果没有定义default constructor，就会被合成出来。</li>
+  <li>编译器合成出来的default constructor会明确设定“class内每一个data memeber”的默认值。</li>
+</ol>
+
+<h3 id="copy-constructor">Copy Constructor的建构操作</h3>
+
+<p>有三种情况会以一个object的内容作为另一个class object的初值，即<strong>object赋值、object参数传递、object作为函数返回值</strong>。</p>
+
+<p>如果class没有提供一个explicit copy constructor，其内部是以所谓的default memberwise initialization手法完成的，也就是把每一个内建的或派生的data member（例如一个指针或一个数组）的值，从某个object拷贝一份到另一个object身上，不过它并不会拷贝其中的member class object，而是以递归的方式施行memberwise initialization。</p>
+
+<p>copy constructor仅在必要的时候（class不展现bitwise copy semantics）才由编译器产生出来。</p>
+
+<p>比如，某个类含有<code>String&amp; str</code>成员变量，在这种情况下，编译器必须合成出一个copy constructor以便调用member class String object的copy constructor：</p>
+
+<p><strong>一个class不展现出“bitwise copy semantics”的四种情况：</strong></p>
+
+<ol>
+  <li>当class内含一个member object而后者的class声明有一个copy constructor时（无论是被明确声明或被合成而得）</li>
+  <li>当class继承自一个base class而后者存在有一个copy constructor时</li>
+  <li>
+    <p>当class声明了一个或多个virtual functions时</p>
+
+    <p>由于编译器要对每个新产生的class object的vptr设置初值，因此，当编译器导入一个vptr到class之中时，该class就不再展现bitwise semantics了。特别地，当一个base class object以其derived class的object内容做初始化操作时，其vptr复制操作必须保证安全，而如果依旧采用bitwise copy的话，base class object的vptr会被设定指向derived class的virtual table，而这将导致灾难。</p>
+  </li>
+  <li>
+    <p>当class派生自一个继承串链，其中有一个或多个virtual base classes时</p>
+
+    <p>当一个class object以其derived classes的某个object作为初值时，为了完成正确的virtual base class pointer/offset的初值设定，编译器必须合成一个copy constructor，安插一些码以设定virtual base class pointer/offset的初值，对每一个member执行必要的memberwise初始化操作，以及执行其他的内存相关操作。</p>
+  </li>
+</ol>
+
+<h2 id="section">成员的初始化列表</h2>
+
+<p>下列情况中，为了让你的程序能够被顺利编译，你必须使用member initialization list：</p>
+
+<ul>
+  <li>当初始化一个reference member时；</li>
+  <li>当初始化一个const member时；</li>
+  <li>当调用一个base class的constructor，而它拥有一组参数时；</li>
+  <li>当调用一个member class的constructor，而它拥有一组参数时。</li>
+</ul>
+
+<h2 id="class">class大小</h2>
+
+<p>考虑下面的代码：</p>
+
+<pre><code>#include "iostream"
+using namespace std;
+
+class X {};
+class Y : public virtual X {};
+class Z : public virtual X {};
+class A : public Y,public Z {};
+
+int main()
+{
+    cout&lt;&lt;"sizeof(X): "&lt;&lt;sizeof(X)&lt;&lt;endl;
+    cout&lt;&lt;"sizeof(Y): "&lt;&lt;sizeof(Y)&lt;&lt;endl;
+    cout&lt;&lt;"sizeof(Z): "&lt;&lt;sizeof(Z)&lt;&lt;endl;
+    cout&lt;&lt;"sizeof(A): "&lt;&lt;sizeof(A)&lt;&lt;endl;
+
+    return 0;
+}
+</code></pre>
+
+<p>得到的结果是什么呢？答案是</p>
+
+<pre><code>sizeof(X): 1
+sizeof(Y): 4
+sizeof(Z): 4
+sizeof(A): 8
+</code></pre>
+
+<ul>
+  <li>对于一个class X这样的空的class，由于需要使得这个class的两个objects得以在内存中配置独一无二的地址，故编译器会在其中安插进一个char。因而class X的大小为1。</li>
+  <li>由于class Y虚拟继承于class X，而在derived class中，会包含指向visual base class subobject的指针（4 bytes），而由于需要区分这个class的不同对象，因而virtual base class X subobject的1 bytes也出现在class Y中（1 bytes），此外由于Alignment的限制，class Y必须填补3bytes（3 bytes），这样一来，class Y的大小为8。<strong>编译器将一个empty virtual base class视为derived class object最开头的一部分，因而省去了其后的1 bytes，自然也不存在后面Alignment的问题，故实际的执行结果为4。</strong></li>
+  <li>不管它在class继承体系中出现了多少次，一个virtual base class subobject只会在derived class中存在一份实体。因此，class A的大小有以下几点决定：（1）被大家共享的唯一一个class X实体（1 byte）；（2）Base class Y的大小，减去“因virtual base class X而配置”的大小，结果是4 bytes。Base class Z的算法亦同。（3）classs A的alignment数量。前述总和为9 bytes，需要填补3 bytes，结果是12 bytes。empty virtual base class所做的处理，class X实体的那1 byte将被拿掉，于是额外的3 bytes填补额也不必了，故实际的执行结果为8。</li>
+</ul>
+
+<p><strong>不管是自身class的还是继承于virtual或nonvirtual base class的nonstatic data members，其都是直接存放在每个class object之中的。至于static data members，则被放置在程序的一个global data segment中，不会影响个别的class object的大小，并永远只存在一份实体。</strong></p>
+
+<h2 id="data-member">Data Member</h2>
+
+<h3 id="data-member-1">Data Member布局</h3>
+
+<p>同一个access section中的nonstatic data member在class object中的排列顺序和其被声明的顺序一致，而多个access sections中的data members可以自由排列。（虽然当前没有任何编译器会这么做）</p>
+
+<p>编译器还可能会合成一些内部使用的data members（例如vptr，编译器会把它安插在每一个“内含virtual function之class”的object内），以支持整个对象模型。</p>
+
+<h3 id="data-member-2">Data Member的存取</h3>
+
+<p><strong>Static Data Members：</strong></p>
+
+<ul>
+  <li>每一个static data member只有一个实体，存放在程序的data segment之中，每次程序取用static member，就会被内部转化为对该唯一的extern实体的直接参考操作。</li>
+  <li>若取一个static data member的地址，会得到一个指向其数据类型的指针，而不是一个指向其class member的指针，因为static member并不内含在一个class object之中。</li>
+  <li>如果有两个classes，每一个都声明了一个static member freeList，那么编译器会采用name-mangling对每一个static data member编码，以获得一个独一无二的程序识别代码。</li>
+</ul>
+
+<p><strong>Nonstatic Data Members：</strong></p>
+
+<pre><code>Point3d origin, *pt = &amp;origin;
+origin.x = 0.0;
+pt-&gt;x = 0.0;
+</code></pre>
+
+<p><strong>这两种存取方式有什么区别吗？</strong></p>
+
+<p>答案是“<strong>当Point3d是一个derived class，而在其继承结构中有一个virtual base class，并且并存取的member（如本例的x）是一个从该virtual base class继承而来的member时，就会有重大的差异</strong>”。这时候我们不能够说pt必然指向哪一种 class type（因此我们也就不知道编译期间这个member真正的offset位置），所以这个存取操作必须延迟到<strong>执行期</strong>，经由一个额外的简洁导引，才能够解决。但如果使用origin，就不会有这些问题，其类型无疑是Point3d class，而即使它继承自virtual base class，members的offset位置也在<strong>编译时期就固定了</strong>。</p>
+
+<h3 id="data-member-3">继承与Data Member</h3>
+
+<p><strong>1. 只要继承不要多态</strong></p>
+
+<pre><code>class Concrete {
+private:
+int val;
+char bit1;
+};
+
+class Concrete2 : public Concrete1 {
+private:
+char bit2;
+};
+
+class Concrete3 : public Concrete2 {
+private:
+char bit3;
+};
+</code></pre>
+
+<p>现在Concrete3 object的大小为16 bytes，细分如下：（a）Concrete1内含两个members：val和bit1，加起来是5 bytes，再填补3 bytes，故一个Concrete1 object实际用掉8 bytes；（b）需要注意的是，Concrete2的bit2实际上是被放在填补空间之后的，于是一个Concrete2 object的大小变成12 bytes；（c）依次类推，一个Concrete3 object的大小为16 bytes。</p>
+
+<p><strong>2. 加上多态</strong></p>
+
+<p>virtual function带来的额外负担：</p>
+
+<ul>
+  <li>导入一个virtual table，用来存放它声明的每一个virtual function的地址；</li>
+  <li>在每一个class object中导入一个vptr；</li>
+  <li>加强constructor和destructor，使它们能设置和抹消vptr。</li>
+</ul>
+
+<p><strong>3. 多重继承</strong></p>
+
+<p>对一个多重继承对象，将其地址指定给“第一个base class的指针”，情况将和单一继承时相同，因为二者都指向相同的起始地址，需付出的成本只有地址的指定操作而已。至于第二个或后继的base class的地址指定操作，则需要将地址修改过，加上（或减去，如果downcast的话）介于中间的base class subobjects的大小。</p>
+
+<p><strong>4. 虚拟继承</strong></p>
+
+<p>class如果内含一个或多个virtual base class subobject，将被分隔为两部分：一个不变局部和一个共享局部。不变局部中的数据，不管后继如何衍化，总是拥有固定的offset，所以这一部分数据可以被直接存取。至于共享局部，所表现的就是virtual base class subobject。这一部分的数据，其位置会因为每次的派生操作而变化，所以它们只可以被间接存取。
+间接存取主要有以下三种主流策略：</p>
+
+<ol>
+  <li>在每一个derived class object中安插一些指针，每个指针指向一个virtual base class。要存取继承得来的virtual base class members，可以使用相关指针间接完成。由于虚拟继承串链得加长，导致间接存取层次的增加。</li>
+  <li>在上一个的基础上，为了解决每一个对象必须针对每一个virtual base class背负一个额外的指针的问题，Micorsoft编译器引入所谓的virtual base class table。每一个class object如果有一个或多个virtual base classes，就会由编译器安插一个指针，指向virtual base class table。这样一来，就可以保证class object有固定的负担，不因为其virtual base classes的数目而有所变化。</li>
+  <li>在virtual function table中放置virtual base class的offset。新近的Sun编译器采取这样的索引方法，若为正值，就索引到virtual functions，若为负值，则索引到virtual base class offsets。</li>
+</ol>
+
+<p><strong>小结：一般而言，virtual base class最有效的一种运用方式就是：一个抽象的virtual base class，没有任何data members。</strong></p>
+
+<h3 id="data-members">指向Data Members的指针</h3>
+
+<pre><code>class Point3d {
+public:
+	virtual ~Point3d();
+protected:
+	static Point3d origin;
+	float x, y, z;
+} 
+</code></pre>
+
+<p>如果你去取class中某个data member的地址时，得到的都是data member在class object中的实际偏移量加1。例如<code>&amp;Point3d::z</code>得到9或13，根据vptr放在对象头还是对象尾确定。为什么要这么做呢？主要是为了区分一个“没有指向任何data member”的指针和一个指向“的第一个data member”的指针。即，区分一下情况：</p>
+
+<pre><code>float Point3d::*p1 = 0;
+float Point3d::*p2 = &amp;Point3d::x;
+</code></pre>
+
+<p>为了区分<code>p1</code>和<code>p2</code>每一个真正的member offset值都被加上1。因此，无论编译器或使用者都必须记住，在真正使用该值以指出一个member之前，请先减掉1。</p>
+
+<p>另外正确区分<code>&amp; Point3d::z</code>和<code>&amp;origin.z</code>：取一个nonstatic data member的地址将会得到它在class中的offset，取一个绑定于真正class object身上的data member的地址将会得到该member在内存中的真正地址。</p>
+
+<p>在多重继承之下，若要将第二个（或后继）base class的指针和一个与derived class object绑定之member结合起来那么将会因为需要加入offset值而变得相当复杂。</p>
+
+<pre><code>struct Base1 { int val1; };
+struct Base2 { int val2; };
+struct Derived : Base1, Base2 { ... };
+
+void func1(int Derived::*dmp, Derived *pd)
+{
+	// 期望第一个参数得到的是一个“指向derived class之member”的指针
+	// 如果传来的却是一个“指向base class之member”的指针，会怎样呢
+	pd-&gt;*dmp;
+}
+
+void func2(Derived *pd)
+{
+	// bmp将成为1
+	int Base2::*bmp = &amp;Base2::val2;
+	// bmp == 1
+	// 但是在Derived中，val2 == 5
+	func1(bmp,pd);
+}
+</code></pre>
+
+<p>也就是说<code>pd-&gt;*dmp</code>将存取到<code>Base1::val1</code>，为解决这个问题，当bmp被作为func1()的第一个参数时，它的值必须因介入的Base1 class的大小而调整：</p>
+
+<pre><code>// 内部转换，防止bmp == 0
+func1(bmp ? bmp + sizeof(Base1) : 0, pd);
+</code></pre>
+
+<h2 id="functions">Functions</h2>
+
+<h3 id="nonstatic-member-functions">非静态成员函数（Nonstatic Member Functions）</h3>
+
+<p>C++的设计准则之一就是：nonstatic member function至少必须和一般的nonmember function有相同的效率。因为编译器内部已将“member函数实体”转化为对等的“nonmember函数实体”。下面是magnitude()的一个nonmember定义：</p>
+
+<pre><code>loat Pointer3d::magnitude() const
+{
+	return sqrt(_x*_x + _y*_y + _z*_z);
+}
+// 内部转化为
+float magnitude_7Point3dFv(const Point3d *this)  //已对函数名称进行“mangling”处理
+{
+	return sqrt(this-&gt;_x*this-&gt;_x + this-&gt;_y*this-&gt;_y + this-&gt;_z*this-&gt;_z);
+}
+</code></pre>
+
+<p>现在，对该函数的每一个调用操作也都必须转换：</p>
+
+<pre><code>obj.magnitude();
+// 转换为
+magnitude_7Point3dFv(&amp;obj);
+</code></pre>
+
+<p>mangling手法可在链接时期检查出任何不正确的调用操作，但由于编码时未考虑返回类型，故<strong>如果返回类型声明错误，就无法检查出来</strong>。</p>
+
+<h3 id="virtual-member-functions">虚拟成员函数（Virtual Member Functions）</h3>
+
+<p>一个class只会有一个virtual table，其中内含其对应的class object中所有active virtual functions函数实体的地址，具体包括：</p>
+
+<ol>
+  <li>
+    <p>这个class所定义的函数实体</p>
+
+    <p>它会改写一个可能存在的base class virtual function函数实体。若base class中不存在相应的函数，则会在derived class的virtual table增加相应的slot。</p>
+  </li>
+  <li>
+    <p>继承自base class的函数实体</p>
+
+    <p>这是在derived class决定不改写virtual function时才会出现的情况。具体来说，base class中的函数实体的地址会被拷贝到derived class的virtual table相对应的slot之中。</p>
+  </li>
+  <li>
+    <p>pure_virtual_called函数实体</p>
+  </li>
+</ol>
+
+<p>对于那些不支持多态的对象，经由一个class object调用一个virtual function，这种操作应该总是被编译器像对待一般的nonstatic member function一样地加以决议：</p>
+
+<pre><code>// Point3d obj
+obj.normalize();
+// 不会转化为
+(*obj.vptr[1])(&amp;obj);
+// 而会被转化未
+normalize_7Point3dFv(&amp;obj);
+</code></pre>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/virtualtable_zpsc5065cda.png" alt="" /></p>
+
+<h3 id="static-member-functions">静态成员函数（Static Member Functions）</h3>
+
+<p>编译器的开发者针对static member functions，分别从编译层面和语言层面对其进行了支持：</p>
+
+<p><strong>编译层面</strong>：当class设计者希望支持“没有class object存在”的情况时，可把0强制转型为一个class指针，因而提供出一个this指针实体：</p>
+
+<pre><code>// 函数调用的内部转换
+object_count((Point3d*)0);
+</code></pre>
+
+<p><strong>语言层面</strong>：static member function的最大特点是没有this指针，如果取一个static member function的地址，获得的将是其在内存中的位置，其地址类型并不是一个“指向class member function的指针”，而是一个“nonmember函数指针”：</p>
+
+<pre><code>unsigned int Point3d::object_count() { return _object_count; }
+&amp;Point3d::object_count();
+// 会得到一个地址，其类型不是
+unsigned int (Point3d::*)();
+// 而是
+unsigned int (*)();
+</code></pre>
+
+<ul>
+  <li>它不能够直接存取其class的nonstatic members。</li>
+  <li>它不能够被声明为const、volatile或virtual。</li>
+  <li>它不需要经由class object才被调用。</li>
+</ul>
+
+<p>static member function经常被用作回调（callback）函数。</p>
+
+<h3 id="virtual-functions">多重继承下的Virtual Functions</h3>
+
+<p>在多重继承中支持virtual functions，其复杂度围绕在第二个及后继的base classes身上，以及“必须在执行期调整this指针”这一点。</p>
+
+<p><strong>多重继承到来的问题：</strong></p>
+
+<ol>
+  <li>
+    <p>经由指向“第二或后继之base class”的指针（或reference）来调用derived class virtual function，该调用操作连带的“必要的this指针调整”操作，必须在执行期完成；</p>
+
+    <pre><code> Base2 *pbase2 = new Derived;
+ //会被内部转化为：
+ Derived *temp = new Derived;
+ Base2 *pbase2 = temp ? temp + sizeof(Base1) : 0;
+ // 必须调用正确的virtual destructor函数实体
+ // pbase2需要调整，以指出完整对象的起始点
+ delete pbase2;
+</code></pre>
+
+    <p>上述的offset加法却不能够在编译时期直接设定，因为pbase2所指的真正对象只有在执行期才能确定。自此，我们明白了在多重继承下所面临的独特问题：经由指向“第二或后继之base class”的指针（或reference）来调用derived class virtual function，该调用操作所连带的“必要的this指针调整”操作，必须在执行期完成。有两种方法来解决这个问题：</p>
+
+    <ol>
+      <li>将virtual table加大，每一个virtual table slot不再只是一个指针，而是一个聚合体，内含可能的offset以及地址。</li>
+      <li>利用Thunk技术，允许virtual table slot继续内含一个简单的指针，slot中的地址可以直接指向virtual function，也可以指向一个相关的thunk。于是，对于那些不需要调整this指针的virtual function而言，也就不需要承载效率上的额外负担。</li>
+    </ol>
+  </li>
+  <li>
+    <p>由于两种不同的可能：（a）经由derived class（或第一个base class）调用；（b）经由第二个（或其后继）base class调用，同一函数在virtual table中可能需要多笔对应的slot；</p>
+
+    <pre><code> Base1 *pbase1 = new Derived;
+ Base2 *pbase2 = new Derived;
+	
+ delete pbase1;
+ delete pbase2;
+</code></pre>
+
+    <p>虽然两个delete操作导致相同的Derived destructor，但它们需要两个不同的virtual table slots：</p>
+
+    <p><strong>解决方法：</strong>在多重继承下，一个derived class内含n-1个额外的virtual tables，n表示其上一层base classes的数目。按此手法，Derived将内含以下两个tables：vtbl_Derived和vtbl_Base2_Derived。</p>
+  </li>
+  <li>
+    <p>允许一个virtual function的返回值类型有所变化，可能是base type，可能是publicly derived type，这一点可以通过Derived::clone()函数实体来说明。</p>
+
+    <pre><code> Base2 *pb1 = new Derived;
+
+ // 调用Derived::clone()
+ // 返回值必须被调整，以指向Base2 subobject
+ Base2 *pb2 = pb1-&gt;clone();
+</code></pre>
+
+    <p>当运行pb1-&gt;clone()时，pb1会被调整指向Derived对象的起始地址，于是clone()的Derived版会被调用：它会传回一个指针，指向一个新的Derived对象；该对象的地址在被指定给pb2之前，必须先经过调整，以指向Base2 subobject。</p>
+  </li>
+</ol>
+
+<p>virtual table多重继承内存布局图：</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/virtualtable_zps7dae0fad.png" alt="多重继承" /></p>
+
+<p>virtual table虚拟继承内存布局图：</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/virtualtable_zpsb4d94533.png" alt="" /></p>
+
+<h2 id="section-1">其他</h2>
+
+<h3 id="section-2">纯虚函数</h3>
+
+<p>在设计抽象基类时，需要注意以下几点：</p>
+
+<ol>
+  <li>
+    <p>不要将destructor声明为pure virtual function；</p>
+
+    <p>如果将destructor声明为pure virtual function，则设计者一定得定义它。因为每一个derived class destructor会被编译器加以扩展，以静态调用得方式调用其“每一个virtual base class”以及“上一层base class”的destructor。</p>
+  </li>
+  <li>不要将那些函数定义内容并不与类型有关的函数设计为virtual function，因为其几乎不会被后继的derived class改写。</li>
+  <li>对于其derived class可能修改某一个data member的函数，不应被声明为const。</li>
+</ol>
+
+<h3 id="section-3">对象构造</h3>
+
+<p><strong>必须在构造函数初始化列表初始化的类型</strong>：</p>
+
+<ul>
+  <li>没有默认构造函数的类型成员</li>
+  <li>const成员（整数型的可以申明时赋值）</li>
+  <li>
+    <p>引用类型的成员</p>
+
+    <p>class Point {
+  public:
+      Point(float x = 0.0, float y = 0.0) : _x(x),_y(y) {}
+      virtual float z();
+  protected:
+      float _x,_y;
+  };</p>
+  </li>
+</ul>
+
+<p>不能小看z()这个virtual function给class Point带来的巨大变化。virtual function的引入促使每一个class Point拥有一个vtpr，这样一来，编译器在constructor中添加了对vptr进行初始化的代码，而copy constructor和copy assignment operator也会对vptr进行设定，而不再是原先简单的bitwise操作了。</p>
+
+<p>一般而言，如果你的设计之中有很多函数都需要以传值方式（by value）传回一个local class object，那么提供一个copy constructor就比较合理。</p>
+
+<p><strong>constructor的执行算法通常如下：</strong></p>
+
+<ul>
+  <li>在derived class constructor中，所有virtual base classes的constructor会被调用；</li>
+  <li>在derived class constructor中，上一层base class的constructor会被调用；</li>
+  <li>上述完成之后，对象的vptr(s)被初始化，指向相关的virtual table(s)；</li>
+  <li>如果class有member class object，而后者拥有constructor，那么它们会以其声明顺序的相反顺序被调用；</li>
+  <li>用户所定义的代码。</li>
+</ul>
+
+<h3 id="section-4">析构函数</h3>
+
+<p>如果class没有定义destructor，那么只有在class内含的member object（或是class自己的base class）拥有destructor的情况下，编译器才会自动合成出一个来。
+其解构顺序与建构顺序正好相反。</p>
+
+<p>一般而言，我们会把object尽可能放置在使用它的那个程序区段附近，这样做可以节省不必要的对象产生操作和销毁操作。</p>
+
+<h3 id="section-5">全局对象</h3>
+
+<p>全局对象的静态初始化策略包括以下几个步骤：</p>
+
+<ol>
+  <li>为每一个需要静态初始化的对象产生一个<code>_sti_...()</code>函数，内含必要的constructor调用操作或inline expansions；</li>
+  <li>为每一个需要静态的内存释放操作的对象产生一个<code>_std_...()</code>函数，内含必要的destructor调用操作或inline expansions；</li>
+  <li>在main()函数的首尾分别添加一个<code>_main()</code>函数（用以调用可执行文件中的所有<code>_sti()</code>函数）和一个<code>_exit()</code>函数（用以调用可执行文件中的所有<code>_std()</code>函数）。</li>
+</ol>
+
+<p><strong>建议根本不要用那些需要静态初始化的全局对象。</strong> </p>
+
+<h3 id="section-6">局部静态对象</h3>
+
+<pre><code>const Matrix&amp; identity() {
+	static Matrix mat_identity;
+	// ...
+	return mat_identity;
+}
+</code></pre>
+
+<p>此处的local static class object保证了以下语意：</p>
+
+<ul>
+  <li><code>mat_identity</code>的constructor必须只能施行一次，虽然上述函数可能会被调用多次；</li>
+  <li><code>mat_identity</code>的destructor必须只能施行一次，虽然上述函数可能会被调用多次。</li>
+</ul>
+
+<p>编译器的实际做法如下：在第一次调用<code>identity()</code>时把<code>mat_identity</code>构造出来，而在与相应文件关联的静态内存释放函数中将其解构。（局部静态对象的地址在downstream component中将会被转换到程序内用来放置global object的data segment中）</p>
+
+<h3 id="section-7">对象数组</h3>
+
+<p>如何支持以下的语句：<code>complex::complex(double=0.0, double=0.0);</code></p>
+
+<pre><code>complex c_array[10];
+//内部转换
+vec_new(&amp;c_array,sizeof(complex),10,&amp;complex::complex,0);
+</code></pre>
+
+<p>为了解决这个问题，可由编译器产生一个内部的constructor，没有参数，在其函数内调用由程序员提供的constructor，并将default参数值明确地指定过去：</p>
+
+<pre><code>complex::complex() {
+	complex(0.0, 0.0);
+}
+</code></pre>
+
+<h3 id="new--delete">new &amp; delete</h3>
+
+<p>以constructor来配置一个class object：<code>Point3d *origin = new Point3d;</code>
+转为</p>
+
+<pre><code>Point3d *origin;
+if(origin = _new(sizeof(Point3d))) {
+	try {
+		origin = Point3d::Point3d(origin);
+	}
+	catch( ... ) {
+		_delete(origin);  // 释放因new而配置的内存
+		throw;  // 将原来的exception上传
+	}
+}
+</code></pre>
+
+<p>如果我们配置一个数组，内带10个Point3d objects，我们预期Point和Point3d的constructor被调用各10次，每次作用于数组中的一个元素：</p>
+
+<pre><code>// 危险
+Point *ptr = new Point3d[10];
+// 只有Point::~Point被调用
+delete []ptr;
+</code></pre>
+
+<p>由于其触发的<code>vec_delete()</code>是通过迭代走过每一个数组元素，而本例中被传递过去的是Point class object的大小而不是Point3d class object的大小，整个运行过程将会失败。
+解决之道在于程序层面，而非语言层面：</p>
+
+<pre><code>for(int ix = 0; ix &lt; 10; ix++)
+{
+	Point3d *p = &amp;((Point3d*)ptr)[ix];
+	delete p;
+}
+</code></pre>
+
+<p>当然，最好还是<strong>避免以一个base class指针指向一个derived class objects所组成的数组。</strong></p>
+
+<h3 id="template">Template</h3>
+
+<p><strong>member functions只有在member functions被使用的时候，C++ Standard才要求它们被“具现”出来</strong>。这个规则的由来主要有两个原因：</p>
+
+<ol>
+  <li>空间和效率的考虑。对于未使用的函数进行“具现”将会花费大量的时间和空间；</li>
+  <li>尚未实现的功能。并不是一个template具现出来的所有类型一定能够完整支持一组member functions，因而只需具现真正需要的member functions。</li>
+</ol>
+
+<p>举个例子：<code>Point&lt;float&gt; *p = new Point&lt;float&gt;;</code></p>
+
+<p>只有（a）Point template的float实例、（b）new 运算符、（c）default constructor需要被“具现”。</p>
+
+<p><strong>并且所有与类型相关的检验，如果涉及到template参数，都必须延迟到真正的具现操作发生</strong>。</p>
+
+<p>区分以下两种意义：一种是“<strong>scope of the template definition</strong>”，也就是“定义出template”的程序，另一种是“<strong>scope of the template instantiation</strong>”，也就是“具现出template”的程序。</p>
+
+<pre><code>// scope of the template definition
+extern double foo(double);
+
+template &lt;class type&gt;
+class ScopeRules {
+public:
+	void invariant() { _member = foo(_val); }
+	type type_dependent() { return foo(_member); }
+	// ...
+private:
+	int _val;
+	type _member;
+};
+
+// scope of the template instantiation
+extern int foo(int);
+
+ScopeRules&lt;int&gt; sr0;
+</code></pre>
+
+<p>在“scope of the template definition”中，只有一个foo()函数声明位于scope之内；然而在“scope of the template instantiation”中，两个foo()函数声明都位于scope之内。对于以下函数操作：<code>sr0.invariant();</code>，那么，在invariant()中调用的究竟是哪一个foo()函数实体呢？</p>
+
+<p>Template之中，对于一个nonmember name的决议结果是根据这个name的使用是否与“用以具现出该template的参数类型”有关而决定的，如果其使用互不相关，那么就以“scope of the template definition”来决定name，否则就以“scope of the template instantiation”来决定name。</p>
+
+<pre><code>// 因为_val的类型是int，而函数的决议只和函数原型有关，与函数返回值无关
+// 被用来具现这个template的真正类型对于_val的类型没有影响
+_member = foo(_val);
+</code></pre>
+
+<p>故此处的调用操作由“scope of the template definition”来决议。</p>
+
+<p>若是如下的函数调用：<code>sr0.type_dependent();</code>。由于_member的类型与template参数有关，故此处由“scope of the template instantiation”来决议。</p>
+
+<h3 id="section-8">执行期类型识别</h3>
+
+<p><code>dynamic_cast</code>运算符可以在执行期决定真正的类型。如果downcast是安全的（也就是说，一个base type pointer指向一个derived class object），这个运算符会传回被适当转型过的指针；如果downcast不是安全的，这个运算符会传回0。</p>
+
+<pre><code>typedef type *ptype;
+typedef fct *pfct;
+
+simplify_conv_op(ptype pt)
+{
+	if(pfct pf = dynamic_cast&lt;pfct&gt;(pt)) {
+	...
+	}
+	else { ... }
+}
+</code></pre>
+
+<p>什么是<code>dynamic_cast</code>的真正成本？<code>pfct</code>的一个类型描述器会被编译器产生出来，由<code>pt</code>指向之class object类型描述器必须在执行期通过vptr取得。下面是可能的转换：</p>
+
+<pre><code>// 取得pt的类型描述器
+((type_info*)(pt-&gt;vptr[0]))-&gt;_type_description;
+</code></pre>
+
+<p>其中，<code>type_info</code>是C++ Standard所定义的类型描述器的class名称，该class中放置着待索求的类型信息。virtual table的第一个slot内含<code>type_info</code> object的地址，此<code>type_info</code> object与pt所指之class type有关。</p>
+
+<p><code>dynamic_cast</code>运算符也适用于reference身上，然而对于一个non-type-safe-cast，其结果不会与施行于指针的情况一样。一个reference不可以像指针那样“把自己设为0便代表了no object”；若将一个reference设为0，会引起一个临时性对象（拥有被参考到的类型）被产生出来，该临时对象的初值为0，这个reference然后被设定为该临时变量的一个别名。</p>
+
+<p>因而，如果reference并不真正是某一种derived class，那么可通过丢出一个<code>bad_cast exception</code>进行处理：</p>
+
+<pre><code>simplify_conv_op(const type &amp;rt)
+{
+	try {
+		fct &amp;rf = dynamic_cast&lt;fct&amp;&gt;(rt);
+	}
+	catch(bad cast) {
+		// ...
+	}
+}
+</code></pre>
+
+<p>当然，你也可以使用typeid运算符来达到同样的目的：</p>
+
+<pre><code>simplify_conv_op(const type &amp;rt)
+{
+	if(typeid(rt) == typeid(fct))
+	{
+		fct &amp;rf = dynamic_cast&lt;fct&amp;&gt;(rt);
+	}
+	else { ... }
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

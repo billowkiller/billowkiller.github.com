@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: scrum | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/scrum/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2014-09-15T12:37:27+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[硝烟中的Scrum和XP]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/xiao-yan-zhong-de-scrumhe-xp/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/xiao-yan-zhong-de-scrumhe-xp</id>
+    <content type="html"><![CDATA[<p><strong>refine from</strong> <em>硝烟中的Scrum和XP–我们如何实施Scrum</em></p>
+
+<hr />
+
+<p>产品的backlog时Scrum的核心，也是一切的起源，从根本上说，它就是一个需求或故事特性等组成的列表，按照重要性的级别进行排序。它里面包含的是客户想要的东西，并用客户的术语加一描述。</p>
+
+<p>backlog的另外一个名称是故事。包括以下字段：</p>
+
+<ul>
+  <li>ID</li>
+  <li>Name：一个简短的描述</li>
+  <li>Importance：100以内打分，分数越高越重要</li>
+  <li>Initial estimate：最小单位为stroy
+point，即为人天。估值无需准确，但是要保证相对的正确性。</li>
+  <li>How to demo：简短的测试规范，先做啥，然后做啥，最后做啥，得到什么结果。</li>
+  <li>Notes：相关信息，解释说明，对其他资料的引用等等，简短。</li>
+</ul>
+
+<p>额外的字段，根据需要：</p>
+
+<ul>
+  <li>Track：当前故事的大致分类（后台系统，优化…）</li>
+  <li>Components：再多个Scrum团队协作的时候很有用，包括数据库，服务器，客户端等组件</li>
+  <li>Requestor：哪个客户活相关人员最先提出的需求，再后续的开发过程中向他反馈</li>
+  <li>Bug tracking ID</li>
+</ul>
+
+<p>产品的backlog应该停留再业务层次上，例如给Events表添加索引，潜在的目标是“提高再后台系统中搜索事件表单的相应速度”，这时需要改写，原先的目标作为一个注释存在。
+<!--more-->
+产品负责人维护backlog，理解每个故事的含义，不需要知道故事的具体实现，但是要知道为什么这个故事会在这里。其他人向负责人申请故事，负责人对它们划分先后次序。</p>
+
+<p>sprint计划会议产生的成果：</p>
+
+<ul>
+  <li>sprint目标</li>
+  <li>团队成员名单（以及他们的投入程度）</li>
+  <li>sprint backlog</li>
+  <li>确定好sprint演示日期</li>
+  <li>确定每日Scrum会议的时间和地点</li>
+</ul>
+
+<p>过程中实践TDD（测试驱动开发），包括开发和提问需求方式…</p>
+
+<p>故事可以分成更小的故事，而小故事又可以分成任务。</p>
+
+<p>一些重要的开发概念：</p>
+
+<ul>
+  <li>结对编程</li>
+  <li>测试驱动开发：Juit/httpnit/JWebUnit，HSQLDB，Jetty，Cobertura，mock</li>
+  <li>增量设计</li>
+  <li>代码集体所有权</li>
+  <li>持续集成：Maven，QuickBuild</li>
+  <li>代码标准</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

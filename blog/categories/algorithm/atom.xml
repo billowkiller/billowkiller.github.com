@@ -1,0 +1,1128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: algorithm | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/categories/algorithm/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2014-09-15T12:37:27+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[QuickSort and Derivatives]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/08/09/quicksort/"/>
+    <updated>2014-08-09T03:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/08/09/quicksort</id>
+    <content type="html"><![CDATA[<p>记录下快排相关的一些东西。包括普通快排，迭代快排和单链表快排。</p>
+
+<hr />
+
+<!--more-->
+
+<h2 id="section">普通快排</h2>
+
+<p>``` c++
+/* A typical recursive implementation of quick sort */</p>
+
+<p>/* This function takes last element as pivot, places the pivot element at its correct position in sorted array, and places all smaller (smaller than pivot) to left of pivot and all greater elements to right of pivot */
+int partition (int arr[], int l, int h) {
+    int x = arr[h];
+    int i = (l - 1);</p>
+
+<pre><code>for (int j = l; j &lt;= h- 1; j++) {
+    if (arr[j] &lt;= x) {
+        i++;
+        swap (arr[i], arr[j]);
+    }
+}
+swap (arr[i + 1], arr[h]);
+return (i + 1); }
+</code></pre>
+
+<p>/* A[] –&gt; Array to be sorted, l  –&gt; Starting index, h  –&gt; Ending index */
+void quickSort(int A[], int l, int h) {
+    if (l &lt; h){      <br />
+        int p = partition(A, l, h);
+        quickSort(A, l, p - 1);<br />
+        quickSort(A, p + 1, h);
+    }
+}
+```</p>
+
+<p>这种实现方式有很多可以值得改进的地方：</p>
+
+<ol>
+  <li>上面的实现使用最后一个元素作为pivot，这对于已经排好序的数组来说是个灾难。可以随机选取一个元素或者直接用中位数来替代。</li>
+  <li>为了减少递归层次，可以先递归数组中个数少的一半。</li>
+  <li>对于小数组来说，插入排序可能更快。可以综合下插入和快排。</li>
+  <li>使用了递归和函数调用栈来存储中间值，并且还需要存储其他的信息。此外还包括存储函数调用的活动记录，恢复上层函数执行的费用。</li>
+</ol>
+
+<p>可以使用迭代来替代递归。</p>
+
+<h3 id="section-1">迭代快排</h3>
+
+<p>``` c++
+/* This function is same in both iterative and recursive*/
+int partition (int arr[], int l, int h) {
+    int x = arr[h]， i = (l - 1);</p>
+
+<pre><code>for (int j = l; j &lt;= h- 1; j++){
+    if (arr[j] &lt;= x){
+        i++;
+        swap (arr[i], arr[j]);
+    }
+}
+swap (arr[i + 1], arr[h]);
+return (i + 1); }
+</code></pre>
+
+<p>void quickSortIterative (int arr[], int l, int h) {
+	// initialize top of stack
+    int stack[ h - l + 1 ]; int top = -1;</p>
+
+<pre><code>// push initial values of l and h to stack
+stack[ ++top ] = l;  stack[ ++top ] = h;
+ 
+// Keep popping from stack while is not empty
+while ( top &gt;= 0 ){
+    // Pop h and l
+    h = stack[ top-- ];  l = stack[ top-- ];
+ 
+    int p = partition( arr, l, h );
+
+    if ( p-1 &gt; l ) {
+        stack[ ++top ] = l; stack[ ++top ] = p - 1;
+    }
+ 
+    if ( p+1 &lt; h ) {
+        stack[ ++top ] = p + 1; stack[ ++top ] = h;
+    }
+} } ```
+</code></pre>
+
+<h2 id="section-2">文艺快排</h2>
+
+<p>思路和数据的快速排序一样，都需要找到一个pivot元素、或者节点。然后将数组或者单向链表划分为两个部分，然后递归分别快排。</p>
+
+<p>针对数组进行快排的时候，交换交换不同位置的数值，在分而治之完成之后，数据就是排序好的。那么单向链表是什么样的情况呢？除了交换节点值之外，是否有其他更好的方法呢？可以修改指针，不进行数值交换。这可以获取更高的效率。</p>
+
+<p>在修改指针的过程中，会产生新的头指针以及尾指针，要记录下来。在partition之后，要将小于pivot的的部分、pivot、以及大于pivot的部分重新串起来成为一个singly linked list。</p>
+
+<p>在partition时，我们用最后的节点作为pivot。当我们扫描链表时，如果节点值大于pivot，将节点移到尾部之后；如果节点小于，保持不变。</p>
+
+<p>在递归排序时，我们先调用partition将pivot放到正确的为止并返回pivot，然后，递归左边，递归右边，最后在合成一个单链表。</p>
+
+<p>``` c++
+struct node *partition(struct node *head, struct node *end,<br />
+                      struct node **newHead, struct node **newEnd)
+{
+   struct node *pivot = end;
+   struct node *prev = NULL, *cur = head, *tail = pivot;</p>
+
+<p>while(cur != pivot)
+   {
+       if(cur-&gt;data &lt; pivot-&gt;data)
+       {
+          if((<em>newHead) == NULL)
+               (</em>newHead) = cur;
+           prev = cur;<br />
+           cur = cur-&gt;next;
+       }
+       else
+       {
+           if(prev)
+               prev-&gt;next = cur-&gt;next;
+           struct node <em>tmp = cur-&gt;next;
+           cur-&gt;next = NULL;
+           tail-&gt;next = cur;
+           tail = cur;
+           cur = tmp;
+       }
+   }
+   if((</em>newHead) == NULL) (<em>newHead) = pivot;
+   (</em>newEnd) = tail;
+   return pivot;
+}
+struct node <em>quickSortRecur(struct node *head, struct node *end)
+{
+   if(!head || head == end)
+       return head;
+   struct node *newHead = NULL, *newEnd = NULL;
+   struct node *pivot = partition(head, end, &amp;newHead, &amp;newEnd);
+   if(newHead != pivot)
+   {
+      struct node *tmp = newHead;
+       while(tmp-&gt;next != pivot)
+           tmp = tmp-&gt;next;
+       tmp-&gt;next = NULL;
+       newHead = quickSortRecur(newHead, tmp);
+       tmp = getTail(newHead);
+       tmp-&gt;next =  pivot;
+   }
+   pivot-&gt;next = quickSortRecur(pivot-&gt;next, newEnd);
+   returnn ewHead;
+}
+void quickSort(struct node **headRef)
+{
+   (</em>headRef) = quickSortRecur(<em>headRef, getTail(</em>headRef));
+   return;
+}
+```</p>
+
+<h3 id="section-3">链表的归并排序方法</h3>
+
+<p>``` c++ 链表的归并排序
+void FrontBackSplit(ListNode *source, ListNode** front, ListNode** back) {
+    ListNode *fast, *slow;
+    if(source == NULL || source-&gt;next == NULL) {
+        *front = source; *back = NULL;
+    } else {
+       slow = source; fast = source-&gt;next;</p>
+
+<pre><code>   while(fast) {
+       fast = fast-&gt;next;
+       if(fast) {
+           slow = slow-&gt;next;
+           fast = fast-&gt;next;
+       }
+   }
+}
+
+*front = source;
+*back = slow-&gt;next;
+slow-&gt;next = NULL; }
+</code></pre>
+
+<p>ListNode *merge_sort(ListNode *a, ListNode *b) {
+     ListNode *result = NULL;
+     if(!a) return b;
+     else if(!b) return a;</p>
+
+<pre><code> if(a-&gt;val &lt;= b-&gt;val) {
+     result = a;
+     result-&gt;next = merge_sort(a-&gt;next, b);
+ } else {
+     result = b;
+     result-&gt;next = merge_sort(a, b-&gt;next);
+ }
+ return result; }
+</code></pre>
+
+<p>void merge(ListNode **node) {
+    ListNode *head = *node, *a, *b;        </p>
+
+<pre><code>if(head==NULL || head-&gt;next==NULL) return;
+
+FrontBackSplit(head, &amp;a, &amp;b);
+merge(&amp;a); merge(&amp;b);
+*node = merge_sort(a, b);  } ```
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Number Theory Introduction]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/08/09/Number-theory-introduction/"/>
+    <updated>2014-08-09T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/08/09/Number-theory-introduction</id>
+    <content type="html"><![CDATA[<h2 id="catalan">Catalan数</h2>
+
+<p>卡塔兰数是组合数学中一个常在各种计数问题中出现的数列。卡塔兰数的一般项公式为：</p>
+
+<p><img src="http://upload.wikimedia.org/math/d/1/1/d118d8cea7b639dfd5244fcba65910cf.png" alt="" /></p>
+
+<p>它的另外一个表达式是：</p>
+
+<p><img src="http://upload.wikimedia.org/math/f/7/9/f7943e307a891716ca1266a5f5957cdd.png" alt="" /></p>
+
+<p><strong>递推关系：</strong></p>
+
+<p><img src="http://upload.wikimedia.org/math/6/2/1/6217b3c99a3243afcd5d8dbd58186822.png" alt="" /></p>
+
+<p><img src="http://upload.wikimedia.org/math/8/a/4/8a49332e4a46b3a2c7accec81160f5e3.png" alt="" /></p>
+
+<!--more-->
+
+<h3 id="section">组合数学中的应用</h3>
+
+<ol>
+  <li>长度2n的dyck word的个数。Dyck word是一个有n个X和n个Y组成的字串，且所有的前缀字串皆满足X的个数大于等于Y的个数。以下为长度为6的dyck words: <code>XXXYYY</code> <code>XYXXYY</code> <code>XYXYXY</code> <code>XXYYXY</code> <code>XXYXYY</code></li>
+  <li>将上例的X换成左括号，Y换成右括号，Cn表示所有包含n组括号的合法运算式的个数</li>
+  <li>
+    <p>Cn表示有n个节点组成不同构二叉树的方案数。下图中，n等于3，圆形表示节点，月牙形表示什么都没有。</p>
+
+    <p><img src="http://upload.wikimedia.org/wikipedia/commons/0/01/Catalan_number_binary_tree_example.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Cn表示有2n+1个节点组成不同构满二叉树（full binary tree）的方案数。</p>
+
+    <p>证明：
+ 令1表示进栈，0表示出栈，则可转化为求一个2n位、含n个1、n个0的二进制数，满足从左往右扫描到任意一位时，经过的0数不多于1数。显然含n个1、n个0的2n位二进制数共有<img src="http://upload.wikimedia.org/math/c/9/2/c92da943df73dc077dbee5514376346a.png" alt="" />个，下面考虑不满足要求的数目。</p>
+
+    <p>考虑一个含n个1、n个0的2n位二进制数，扫描到第2m+1位上时有m+1个0和m个1（容易证明一定存在这样的情况），则后面的0-1排列中必有n-m个1和n-m-1个0。将2m+2及其以后的部分0变成1、1变成0，则对应一个n+1个0和n-1个1的二进制数。反之亦然（相似的思路证明两者一一对应）。从而：</p>
+
+    <p><img src="http://upload.wikimedia.org/math/4/8/2/4828faf1c29e4b699529f2275cc63453.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Cn表示所有在n × n格点中不越过对角线的单调路径的个数。一个单调路径从格点左下角出发，在格点右上角结束，每一步均为向上或向右。计算这种路径的个数等价于计算Dyck word的个数：X代表“向右”，Y代表“向上”。下图为n = 4的情况：</p>
+
+    <p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Catalan_number_4x4_grid_example.svg/450px-Catalan_number_4x4_grid_example.svg.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Cn表示通过连结顶点而将n + 2边的凸多边形分成三角形的方法个数。下图中为n = 4的情况：</p>
+
+    <p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Catalan-Hexagons-example.svg/400px-Catalan-Hexagons-example.svg.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Cn表示用n个长方形填充一个高度为n的阶梯状图形的方法个数。下图为n = 4的情况：</p>
+
+    <p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Catalan_stairsteps_4.svg/400px-Catalan_stairsteps_4.svg.png" alt="" /></p>
+  </li>
+</ol>
+
+<h3 id="section-1">面试题</h3>
+
+<p><strong>12个高矮不同的人，排成两排，每排必须是从矮到高排列，而且第二排比对应的第一排的人高，问排列方式有多少种？</strong></p>
+
+<p>我们先把这12个人从低到高排列，然后，选择6个人排在第一排，那么剩下的6个肯定是在第二排。</p>
+
+<p>用0表示对应的人在第一排，用1表示对应的人在第二排，那么含有6个0，6个1的序列，就对应一种方案。问题转换为，这样的满足条件的01序列有多少个。</p>
+
+<p><strong>给乘积X1X,X3……Xn加括号的方法数</strong></p>
+
+<p><strong>n+m个人排队买票，并且满足$n \ge m$，票价为50元，其中n个人各手持一张50元钞票，m个人各手持一张100元钞票，除此之外大家身上没有任何其他的钱币，并且初始时候售票窗口没有钱，问有多少种排队的情况数能够让大家都买到票。</strong></p>
+
+<p>这个题目是Catalan数的变形，不考虑人与人的差异，如果m=n的话那么就是我们初始的Catalan数问题，也就是将手持50元的人看成是+1，手持100元的人看成是-1，任前k个数值的和都非负的序列数。</p>
+
+<p>这个题目区别就在于$n&gt;m$的情况，此时我们仍然可以用原先的证明方法考虑，假设我们要的情况数是$D_{n+m}$，无法让每个人都买到的情况数是$U_{n + m}$，那么就有$D_{n + m} + U_{n +m} = {n + m \choose n}$，此时我们求$U_{n + m}$，我们假设最早买不到票的人编号是k，他手持的是100元并且售票处没有钱，那么将前k个人的钱从50元变成100元，从100元变成50元，这时候就有$n+1$个人手持50元，$m-1$个手持100元的，所以就得到$U_{n + m} = {n + m \choose n + 1}$，于是我们的结果就因此得到了，表达式是$D_{n + m} = {n + m \choose n} - {n + m \choose n + 1}$。</p>
+
+<h2 id="section-2">欧拉函数</h2>
+
+<p>在数论中，对正整数n，欧拉函数$\varphi(n)$是小于或等于n的正整数中与n互质的数的数目。例如$\varphi(8)=4$，因为1,3,5,7均和8互质。</p>
+
+<ul>
+  <li>
+    <p>$\varphi(1)=1$（小于等于1的正整数中唯一和1互质的数就是1本身）。</p>
+  </li>
+  <li>
+    <p>若$n$是质数$p$的$k$次幂，$\varphi(n)=\varphi(p^k)=p^k-p^{k-1}=(p-1)p^{k-1}$，因为除了$p$的倍数外，其他数都跟$n$互质。</p>
+  </li>
+  <li>
+    <p>若$n = p_1^{k_1} p_2^{k_2} \cdots p_r^{k_r}$, 则$\varphi(n) = \prod_{i=1}^r p_i^{k_i-1}(p_i-1) = \prod_{p\mid n} p^{\alpha_p-1}(p-1) = n\prod_{p|n}\left(1-\frac{1}{p}\right)$。
+其中$\alpha_p$是使得$p^{\alpha}$整除$n$的最大整数$\alpha（这里\alpha_{p_i} = k_i）$。</p>
+
+    <p>例如$\varphi(72)=\varphi(2^3\times3^2)=72\times(1 - \frac{1}{2})\times(1 - \frac{1}{3})=24$</p>
+  </li>
+  <li>
+    <p>对任何两个互质的正整数$a, m（即 gcd(a,m) = 1），m\ge2$，有$a^{\varphi(m)} \equiv 1 \pmod m$。即<strong>欧拉定理</strong>。</p>
+  </li>
+  <li>
+    <p>当$m$是质数$p$时，此式则为：$a^{p-1} \equiv 1 \pmod p$。即<strong>费马小定理</strong>。</p>
+  </li>
+</ul>
+
+<p><strong>欧拉函数的程序:</strong></p>
+
+<p><code>c++
+int phi(int x) {
+    int ans = x;
+    int m = (int)sqrt(x+0.5);
+    for(int i = 2; i &lt;= m; i++) {
+        if(x % i == 0) {   // 求素因子
+            ans = ans / i * (i - 1);    // 运用通项求解欧拉函数
+            while(x % i == 0)  x /= i;  // 每个素因子只计算一次
+        }
+    }
+    if(x &gt; 1)  ans = ans / x * (x - 1);  // 防质数
+    return ans;
+}
+</code></p>
+
+<p><strong>1-n中所有树的欧拉phi函数值。</strong>并不需要一次计算。可以用与筛法求素数类似的方法，在$O(nloglogn)$时间内计算完毕。</p>
+
+<p>``` c++
+void phi_table(int n, int* phi) {
+    for(int i = 2; i &lt;= N; i++)  p[i] = 0;
+    phi[1] = 1;</p>
+
+<pre><code>for(int i = 2; i &lt;= N; i++) {
+    if(!phi[i]) {
+        for(int j = i; j &lt;= n; j += i) {    // 处理素因子phi[i]
+            if(!phi[j]) phi[j] = j;
+             phi[j] = phi[j] / i * (i - 1);    // 先除后乘，防止中间过程超出范围
+        }
+    }
+} } ```
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Probability Problem]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/08/02/probability-problem/"/>
+    <updated>2014-08-02T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/08/02/probability-problem</id>
+    <content type="html"><![CDATA[<p><strong>概念：贝叶斯公式</strong></p>
+
+<p>贝叶斯定理是关于随机事件$A$和$B$的条件概率（或边缘概率）的一则定理。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/e824b899a9014c086ec5068f097b02087bf4f419_zps22b92ed4.gif" alt="" /></p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>其中$P(A</td>
+      <td>B)$是在$B$发生的情况下$A$发生的可能性。</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="section">一、抛硬币问题</h2>
+
+<p><strong>问题1 有一苹果，两个人抛硬币来决定谁吃这个苹果，先抛到正面者吃。问先抛这吃到苹果的概率是多少？</strong></p>
+
+<p>假设第一个人吃到苹果的概率是P。第一次抛硬币若为正面则先抛者赢；若为负面且后抛者也为负面，则主动权回到先抛者，回到原问题。</p>
+
+<p>得到关系：P = 1/2 + 1/2 * 1/2 * P  </p>
+
+<p>得出 P = 2/3</p>
+
+<p><strong>问题2 游戏规则为，连续2次抛到硬币朝上，则游戏结束。问平均抛多少次游戏可以结束？</strong></p>
+
+<!--more-->
+
+<p>平均抛多少次，即是求问题的期望。</p>
+
+<p>首先先抛一枚硬币，如果是花，那么需要重头开始；如果是字，那么再抛一枚硬币，新抛的这枚如果也是字，则游戏结束，如果是花，那么又需要重头开始。根据这个过程，设抛硬币的期望次数为T，可以得到关系：T = 1/2(1 + T) + 1/4 * 2 + 1/4(2 + T)</p>
+
+<p>得出 T = 6 </p>
+
+<p><strong>问题3 连续抛 k 次朝上的解法：</strong></p>
+
+<p>假设连续k次正面朝上的期望为Ek，在连续出现k次正面朝上后，下次一也为正面的期望为</p>
+
+<p>E(k+1) = 1/2 (Ek + 1) + 1/2(Ek + 1 + E(k+1))</p>
+
+<p>推到出公式 (E(k+1) +2) /(Ek +2) = 2 得出 Ek = 2^(k+1) -2</p>
+
+<p><strong>问题4 A和B2人投硬币,正面A得1元,反面B得一元.起始时A有1元,B有100元.游戏持续进行,直到其中1人破产才终止.</strong></p>
+
+<ol>
+  <li>
+    <p>如果硬币正反概率相同,游戏的期待长度(expected duration)是几次投掷?</p>
+
+    <p>目前认为只有奇数次才可能破产。<code>1*0.5 + 3*0.5^3 + 5*0.5^5+...</code></p>
+  </li>
+  <li>
+    <p>如果硬币是不公正的,正面概率为P,反面概率为Q.(P+Q=1), 那么游戏的期待长度(expectedduration)是几次投掷?</p>
+
+    <p>那么问题的答案是计算E(T(n)),即该事件的期望值。</p>
+
+    <p>第1次出现破产的概率是p  //只可能A破产</p>
+
+    <p>第2次出现            0  //因为A第1次赢了1个，共2个了，最多只能输1个，还会剩1个</p>
+
+    <p>第3次出现            <code>q×p×p</code></p>
+
+    <p>第4次出现            0</p>
+
+    <p>第5次                <code>q*q*p*p*p</code></p>
+
+    <p>第99次               q(49次方)×P(50次方)</p>
+
+    <hr />
+
+    <p>在100次以下投掷次数时，不可能是B破产，只有可能是A破产</p>
+
+    <p>第100次时            只有B破产可能  即  q（100次方）</p>
+
+    <p>第101次              q(50次方)×P(51次方) </p>
+
+    <p>第102次              q(102次方)*p</p>
+
+    <p><strong>综上所述，奇数次时，唯A可能破产，偶数次&gt;=100时，唯B可能破产</strong>。</p>
+
+    <p>E（T(n))=<code>∑ n*T(n)  n=1...+∞</code>
+         =<code>∑奇数次  +∑偶数次</code>
+          =<code>p/(1-p*q)+q(100次方)/(1-P*q)</code></p>
+
+    <p>其中q=1-p
+ 问题1把p=q=1/2 代入即可。</p>
+  </li>
+</ol>
+
+<h2 id="section-1">二、骰子问题</h2>
+
+<p><strong>问题1 一个骰子，6面，1个面是 1， 2个面是2， 3个面是3， 问平均掷多少次能使1,2,3都至少出现一次？</strong></p>
+
+<p>这是一个求数学期望的问题，最终是求1，2，3出现至少一次的最短长度的期望。</p>
+
+<p>这样分叉树的每个节点是一个期望状态，而每个分叉是一次投掷结果。将后续期望出现1、2、3各至少一次的情形记作L123（即题目所求），将后续期望出现1、2各至少一次（3无关）情形记作L12，而1至少一次（2，3无关）情形L1，其余数值符号类推，则树结构如下（列出4级结构已经足够）：</p>
+
+<pre><code>           L123
+	   /1    |2    \3
+      L23    L13    L12
+   /1  |2  \3 
+  L23  L3   L2
+		  /1 |2 \3  
+         L2  P2  L3  
+
+L123 = p1 (L23+ 1) + p2 (L13+1) + p3 (L12 + 1) = p1*L23 +p2*L13+ p3*L12 + 1
+L23 = p1*L23 +p2*L3+ p3*L2 + 1
+L13 = p1*L3 +p2*L13+ p3*L1 + 1
+L12 = p1*L2 +p2*L1+ p3*L12 + 1
+L1 = p1 + p2*(L1+1) + p3*(L1 +1) =p2*L1+ p3*L1 + 1
+L2 = p1*L2 + p3*L2 + 1
+L3 = p1*L3 + p2*L3 + 1
+
+解得：
+L1 = 6， L2 = 3， L3 = 2
+L12 = 7， L13 = 13/2， L23 = 19/56
+L123 = 219/30 = 7.3
+</code></pre>
+
+<h3 id="section-2">扑克牌问题</h3>
+
+<p><strong>数学证明的随机洗牌算法</strong></p>
+
+<pre><code>for (i = 0; i &lt; N; ++i){
+	k = rand() % ( i + 1)
+	if (i != k)
+		switch(Poker[k], Poker[i]);
+}
+</code></pre>
+
+<p>分析：</p>
+
+<p>第一次取第一张牌(i=0)保持位置不变。第二次取第二张牌(i=1)，随机生成0-1的随机数k，如果随机生成数不为1，则交换下标为k和i的牌，否则不进行交换。</p>
+
+<p>假设现在取第Z张牌(i = Z - 1)， k= rand()%Z, 如果k!=i则交换下标为k和i的两张牌。</p>
+
+<p>这个算法粗看起来有点像蓄水池抽样的操作方法。这样我们来看一下每张牌出现位置的概率。</p>
+
+<p>第一次计算时第一张牌(i=0)出现在第一个位置的概率为1。</p>
+
+<p>第二次计算时第二张牌(i=1)很明显出现在两个位置中的概率都是1/2。</p>
+
+<p>我们就是要证明第Z（Z&lt;=N)次计算时每张牌出位位置的概率为1/Z。</p>
+
+<p>下面采用归纳法来证明。</p>
+
+<ol>
+  <li>
+    <p>很明显Z=1时结论成立。</p>
+  </li>
+  <li>
+    <p>假设当Z = K时结论也成立。</p>
+
+    <p>当Z=K+1时，易知第Z张牌出现在任意位置的概率为1/Z。</p>
+
+    <p>前K个数能够保留当前位置的概率为（1 - 1/(K+1)), 那么任意一张牌出现在任意位置的概率为(1/K) *（1 - 1/(K+1)) = 1/(K+1)。</p>
+  </li>
+  <li>
+    <p>同样当Z=N时该算法也成立。</p>
+  </li>
+</ol>
+
+<h2 id="section-3">其他</h2>
+
+<p><strong>从n个数中生成m个不重复的随机数</strong></p>
+
+<p>对于第一个数，可以用概率m/n选取；但是对于下一个，必须考虑之前的数是否被选取而以(m-1)/(n-1)或m/(n-1)的概率选取。</p>
+
+<p>可用下列代码得到结果：</p>
+
+<pre><code>void random_generate(int n, int m)  
+{  
+    int i=1,t，remain;  
+    while(n-i&gt;m)  
+    {  
+        t = rand()%(n-i);  
+        if(t&lt;m){  
+            printf("%d ",i);  
+            m--;  
+        }  
+        i++;  
+    }  
+    while(++i&lt;=n)printf("%d ",i);  
+}  
+</code></pre>
+
+<p><strong>利用等概率Rand互换</strong></p>
+
+<pre><code>#Rand5到Rand3
+def Rand3():
+  x = -1
+  while not 0 &lt;= x &lt; 3:
+    x = Rand5()
+  return x
+
+#Rand5到Rand7
+def Rand7():
+  x = -1
+  while not 0 &lt;= x &lt; 21:
+    x = Rand5() * 5 + Rand5()
+  return x % 7
+</code></pre>
+
+<p><strong>单次遍历，等概率随机选取问题</strong></p>
+
+<p><a href="http://www.gocalf.com/blog/random-selection.html">http://www.gocalf.com/blog/random-selection.html</a></p>
+
+<p><strong>条件概率：两个都是男孩的概率</strong></p>
+
+<p><a href="http://www.gocalf.com/blog/the-probability-of-two-boys.html">http://www.gocalf.com/blog/the-probability-of-two-boys.html</a></p>
+
+<p><strong>平均要取多少个(0,1)中的随机数才能让和超过1</strong></p>
+
+<p><img src="http://hi.csdn.net/attachment/201203/13/0_1331634834uu6L.gif" alt="" /></p>
+
+<p><strong>一个口袋内有10个红色球，20个蓝色球，30个绿色球，你随机地
+把球一个一个取出来，请问红色球最先被拿完的概率？也就是当第10个红
+色球被取出时，口袋内至少还有一个蓝色球和一个绿色球的概率。</strong></p>
+
+<p>60个球随机排列，红球先取完就等于说后面至少还有一个蓝球，
+一个绿球。<strong>如果把这个排列倒过来看，就是说看见红球前先看见
+蓝球和绿球</strong>。这样一来就容易了。总共有两种情况，先蓝后绿再
+红，或者先绿后蓝再红。</p>
+
+<p>先蓝的概率是<code>1/3</code>，绿红两色中先绿再红的概率是<code>3/4</code> （先蓝以后
+其它蓝球不影响绿红的概率）。所以第一种情况的概率是<code>1/3×3/4=1/4</code></p>
+
+<p>先绿的概率是1/2，蓝红两色中先蓝再红的概率是<code>2/3</code> （先绿以后
+其它绿球不影响蓝红的概率）。所以第二种情况的概率是<code>1/2×2/3=1/3</code></p>
+
+<p>所以，总概率是<code>1/4+1/3=7/12</code>.</p>
+
+<p>仔细看一看上面的解法，我们会发现红蓝绿球的数量不重要，比例最重
+要。也就是说如果有100红，200蓝，300绿，答案还是一样的。</p>
+
+<p><strong>在圆环上随机取N个点，请问这N个点正好都在同一半圆环内的概
+率是多少？要注意的是这个半圆环可以是任意半圆环。</strong></p>
+
+<p>起来无从下手，但很多概率组合题都是如此，只要想对了思路就容易了。</p>
+
+<p>一共N个点，固定一个点，从这点开始顺时针，逆时针各有一个半圆，其它N-1个点都落在同
+一个（比如顺时针）半圆上的概率是1/2^（N-1). 总共N个点，所以总概率是N/2^（N-1）。</p>
+
+<p><strong>你分别写好5封信给5个朋友，你在5个信封上分别写上他们的地址，
+如果你把5封信随机地放进5个信封，请问所有5封信都寄错人的概率是多少？</strong></p>
+
+<p>这题是著名的Derangement问题。关键步骤是要找到递推公式。</p>
+
+<p>如果假设N个人有S_n种 derangement。考虑第N+1个与每一个的交换。我们可以证明<code>S_(n+1) = n*(S_n + S_(n-1))</code></p>
+
+<p>有了这个递推公式以后，可以证明Derangement的概率是<code>p_n = sum((-1)^k/k!, k=0,n)</code></p>
+
+<p>对这道题来说，N=6. 当N趋于无穷大时，<code>p_n趋于e^(-1)</code></p>
+
+<p><strong>一个骰子6面分别是1到6，请问你平均要投多少次才能让每个数字都
+投中过？</strong></p>
+
+<p>掷第一次可以得到一个数，第二次掷出不同的数的概率是5/6，所以掷出第
+二个数的期望长度是6/5，掷出第三个不同的数的概率是4/6，所以掷出第二
+个数的期望长度是6/4，以此类推，所以掷出所有六个数的期望长度是</p>
+
+<pre><code>1+6/5+6/4+6/3+6/2+6/1=6×（1/6+1/5+1/4+1/3+1/2+1/1） = 14.7
+</code></pre>
+
+<p>当然这个题也可以推广到任意N面的骰子。
+在第一个数已经出现的情况下，抛出第二个数的期望次数是</p>
+
+<pre><code>E(x) = 5/6 + 1/6*5/6*2 + 1/6^2 * 5/6 *3 + 1/6^3 * 5/6 * 4 +....
+E(x) = 6/5
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Some Code Snippets]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/05/01/code-snippet/"/>
+    <updated>2014-05-01T03:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/05/01/code-snippet</id>
+    <content type="html"><![CDATA[<ol>
+  <li>
+    <p><strong>在一个二叉树中查找值为x的结点，并打印该结点所有祖先结点的算法，也就是根节点到x的路径。</strong></p>
+
+    <p>思路1： 利用<strong>后序遍历</strong>的非递归算法，在访问结点时增加一个判断，若该结点的值等于x，则打印栈中保持的路径，再中断算法。</p>
+
+    <p>思路2： 采用<strong>前序遍历</strong>的递归算法，在典型的便利算法的参数表中增加了x、path[n]等参数。</p>
+
+    <pre><code> template&lt;class T&gt;
+ int Find_Print(BinTreeNode&lt;T*&amp; BT, T x, T path[], int level, int &amp;count) {
+     if(BT != NULL) {
+         level++;
+         path[level] = BT-&gt;data;
+         if (BT-&gt;data==x) { count=level; return 1; }
+         if( Find_Print(BT-&gt;left, x, path, level, count) ) return 1;
+         return Find_Print(BT-&gt;right, x, path, level, count);
+     } else 
+         return 0;
+ }
+</code></pre>
+  </li>
+</ol>
+
+<!--more-->
+
+<ol>
+  <li>
+    <p><strong>判断二叉树是不是平衡</strong></p>
+
+    <pre><code> bool IsBalanced(BinaryTreeNode* pRoot)
+ {
+     if(pRoot == NULL)
+         return true;
+	 
+     int left = TreeDepth(pRoot-&gt;m_pLeft);
+     int right = TreeDepth(pRoot-&gt;m_pRight);
+     int diff = left - right;
+     if(diff &gt; 1 || diff &lt; -1)
+         return false;
+	 
+     return IsBalanced(pRoot-&gt;m_pLeft) &amp;&amp; IsBalanced(pRoot-&gt;m_pRight);
+ }
+</code></pre>
+
+    <p>一个节点会被重复遍历多次，这种思路的时间效率不高。用<strong>后序遍历</strong>的方式遍历二叉树的每一个结点，在遍历到一个结点之前我们已经遍历了它的左右子树。只要在遍历每个结点的时候记录它的深度，我们就可以一边遍历一边判断每个结点是不是平衡的。</p>
+
+    <pre><code> bool IsBalanced(BinaryTreeNode* pRoot, int* pDepth)
+ {
+     if(pRoot == NULL)
+     {
+         *pDepth = 0;
+         return true;
+     }
+	 
+     int left, right;
+     if(IsBalanced(pRoot-&gt;m_pLeft, &amp;left)
+         &amp;&amp; IsBalanced(pRoot-&gt;m_pRight, &amp;right))
+     {
+         int diff = left - right;
+         if(diff &lt;= 1 &amp;&amp; diff &gt;= -1)
+         {
+             *pDepth = 1 + (left &gt; right ? left : right);
+             return true;
+         }
+     }
+     return false;
+ }
+ bool IsBalanced(BinaryTreeNode* pRoot)
+ {
+     int depth = 0;
+     return IsBalanced(pRoot, &amp;depth);
+ }
+</code></pre>
+  </li>
+  <li>
+    <p>Reverse Bits</p>
+
+    <pre><code>  // special case: only works for 4 bytes (32 bits).
+
+ uint reverseMask(uint x) 
+ {
+ 	assert(sizeof(x) == 4);
+ 	x= ((x &amp; 0x55555555) &lt;&lt; 1) | ((x &amp; 0xAAAAAAAA) &gt;&gt; 1);
+ 	x = ((x &amp; 0x33333333) &lt;&lt; 2) | ((x &amp; 0xCCCCCCCC) &gt;&gt; 2);
+ 	x = ((x &amp; 0x0F0F0F0F) &lt;&lt; 4) | ((x &amp; 0xF0F0F0F0) &gt;&gt; 4);
+ 	x = ((x &amp; 0x00FF00FF) &lt;&lt; 8) | ((x &amp; 0xFF00FF00) &gt;&gt; 8);
+ 	x= ((x &amp; 0x0000FFFF) &lt;&lt; 16) | ((x &amp; 0xFFFF0000) &gt;&gt; 16);
+ 	return x;
+ }
+</code></pre>
+  </li>
+  <li>
+    <p>Find the k-th Smallest Element in the Union of Two Sorted Arrays</p>
+
+    <pre><code> int findKthSmallest(int A[], int m, int B[], int n, int k) {
+   assert(m &gt;= 0); assert(n &gt;= 0); assert(k &gt; 0); assert(k &lt;= m+n);
+	  
+   int i = (int)((double)m / (m+n) * (k-1));
+   int j = (k-1) - i;
+	 
+   assert(i &gt;= 0); assert(j &gt;= 0); assert(i &lt;= m); assert(j &lt;= n);
+   // invariant: i + j = k-1
+   // Note: A[-1] = -INF and A[m] = +INF to maintain invariant
+   int Ai_1 = ((i == 0) ? INT_MIN : A[i-1]);
+   int Bj_1 = ((j == 0) ? INT_MIN : B[j-1]);
+   int Ai   = ((i == m) ? INT_MAX : A[i]);
+   int Bj   = ((j == n) ? INT_MAX : B[j]);
+	 
+   if (Bj_1 &lt; Ai &amp;&amp; Ai &lt; Bj)
+     return Ai;
+   else if (Ai_1 &lt; Bj &amp;&amp; Bj &lt; Ai)
+     return Bj;
+	 
+   assert((Ai &gt; Bj &amp;&amp; Ai_1 &gt; Bj) || 
+          (Ai &lt; Bj &amp;&amp; Ai &lt; Bj_1));
+	 
+   // if none of the cases above, then it is either:
+   if (Ai &lt; Bj)
+     // exclude Ai and below portion
+     // exclude Bj and above portion
+     return findKthSmallest(A+i+1, m-i-1, B, j, k-i-1);
+   else /* Bj &lt; Ai */
+     // exclude Ai and above portion
+     // exclude Bj and below portion
+     return findKthSmallest(A, i, B+j+1, n-j-1, k-j-1);
+ }
+</code></pre>
+  </li>
+  <li>
+    <p>最长等差数列分析</p>
+
+    <p>原题</p>
+
+    <p>给定未排序的数组，请给出方法找到最长的等差数列。</p>
+
+    <p>分析</p>
+
+    <p>题目描述比较简单，但是有一个问题我们需要首先搞清楚：等差数列中的数字，是否要和原始数组中的顺序一致。题目中，并没有说明，这个就需要大家在面试的过程中和面试官进行交流。我们在这里对两种情况都进行讨论</p>
+
+    <p>保证数字的顺序</p>
+
+    <p>等差数列是要求相邻两个元素之间的差是相同的。那我们可以记录下来数组中任意两个数的差，并且记录下来。对于数组A，记录A[j]-A[i]，其中 i</p>
+
+    <pre><code> -1=&gt;(0,1)(1,2)
+	
+ 1=&gt;(2,3)(4,5)
+	
+ 3=&gt;(3,4)
+</code></pre>
+
+    <p>上面已经排好序，对于第一个，找到等差数列0,1,2对应数字诶5,4,3.第二个，3和4位置没有连起来，不够成等差数列。方法平均时间复杂度为O(n^2),空间复杂度为O(n^2).</p>
+
+    <p>无需保证数字的顺序</p>
+
+    <p>不需要保证数字的顺序与原来数组一致，如何找到最长的等差数列呢？原来的数组是无序的，我们先对数组进行排序，最终的一定是排序之后序列的子序列。然后，我们采用动态规划的方法解决这个问题。我们假设dp[i][j]表示以A[i]A[j]开始的数列的长度，dp[i][j]如何表示呢？dp[i][j]=dp[j][k]+1，当 A[j]-A[i]=A[k]-A[j],及A[k]+A[i]=2A[j]。根据dp[i][j]的定义，我们知道dp[x][n-1]=2，也就是 最后一列是2，数列只有A[x]和A[n-1]两个元素。首先，j从n-2，开始向前遍历，对于每一个，找到i和k，满足 A[k]+A[i]=2A[j]，则有dp[i][j]=dp[j][k]+1，若没有，则dp[i][j]就为2.</p>
+
+    <p>这里找i和k，有一个小技巧，如下：初始i=j-1,k=j+1，然后分别向两边遍历，如果A[k]+A[i]2*A[j]则i–。大家还是参考代码吧：</p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/01YhyLG4uM7B_zps61cd517c.jpg" alt="" /></p>
+  </li>
+  <li>
+    <p>构造最大数分析</p>
+
+    <p><a href="http://www.ituring.com.cn/article/50249">http://www.ituring.com.cn/article/50249</a></p>
+  </li>
+  <li>
+    <p>Given a sorted array of integers, find the starting and ending position of a given target value.</p>
+
+    <pre><code> int searchLow(int A[], int start, int end, int target) {
+     while(start &lt; end) {
+         int mid = start + (end-start)/2;
+         if(A[mid] &gt;= target) end = mid-1;
+         else start = mid+1;
+     }
+     if(A[start] == target) return start;
+     else return start+1;
+ }
+ int searchHigh(int A[], int start, int end, int target) {
+     while(start &lt; end) {
+         int mid = start + (end-start)/2;
+         if(A[mid] &lt;= target) start = mid+1;
+         else end = mid-1;
+     }
+     if(A[start] == target) return start;
+     else return start-1;
+ }
+</code></pre>
+  </li>
+  <li>
+    <p>树的最长距离</p>
+
+    <pre><code> struct NODE
+ {
+     NODE *pLeft;
+     NODE *pRight;
+ };
+	 
+ struct RESULT
+ {
+     int nMaxDistance;
+     int nMaxDepth;
+ };
+	 
+ RESULT GetMaximumDistance(NODE* root)
+ {
+     if (!root)
+     {
+         RESULT empty = { 0, -1 };   // trick: nMaxDepth is -1 and then caller will plus 1 to balance it as zero.
+         return empty;
+     }
+	 
+     RESULT lhs = GetMaximumDistance(root-&gt;pLeft);
+     RESULT rhs = GetMaximumDistance(root-&gt;pRight);
+	 
+     RESULT result;
+     result.nMaxDepth = max(lhs.nMaxDepth + 1, rhs.nMaxDepth + 1);
+     result.nMaxDistance = max(max(lhs.nMaxDistance, rhs.nMaxDistance), lhs.nMaxDepth + rhs.nMaxDepth + 2);
+     return result;
+ }
+</code></pre>
+  </li>
+  <li>
+    <p>分治法求数组最小值和最大值</p>
+
+    <pre><code> #--coding: utf8 --
+ def find_max_and_min(A, p, r):
+     if r - p &lt;= 1:
+         if A[p] &lt; A[r]:
+             return (A[p], A[r])
+         else:
+             return (A[r], A[p])
+     # 分解
+     q = p + (r - p) / 2
+     (lmin, lmax) = find_max_and_min(A, p, q)
+     (rmin, rmax) = find_max_and_min(A, q + 1, r)
+     # 合并
+     return (min(lmin, rmin), max(lmax, rmax))
+	 
+ if __name__ == "__main__":
+     # A = [1]
+     # A = [1, 2]
+     A = [7, 2, 2, 4, 5, 15, 3, 5, 8, 10, 11]
+     print(find_max_and_min(A, 0, len(A) - 1))
+</code></pre>
+
+    <p>扩展问题，找第二大数</p>
+
+    <pre><code> #--coding: utf8 --
+ def find_second_max(A, p, r):
+     if r - p == 0:
+         return (A[p], None)
+     elif r - p == 1:
+         if A[p] &gt; A[r]:
+             return (A[p], A[r])
+         else:
+             return (A[r], A[p])
+     # 分解
+     q = p + (r - p) / 2
+     (lfmax, lsmax) = find_second_max(A, p, q)
+     (rfmax, rsmax) = find_second_max(A, q + 1, r)
+     # 合并
+     if lfmax &gt; rfmax:
+         fmax = lfmax
+         smax = max(lsmax, rfmax)
+     else:
+         fmax = rfmax
+         smax = max(rsmax, lfmax)
+     return (fmax, smax)
+	 
+ if __name__ == "__main__":
+     # A = [1]
+     # A = [1, 2]
+     A = [7, 2, 2, 4, 5, 15, 3, 5, 8, 10, 11]
+     print(find_second_max(A, 0, len(A) - 1))	
+</code></pre>
+  </li>
+  <li>
+    <p>n个色子点数和的概率。</p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/p1_zps7700f0a2.png" alt="" /> </p>
+  </li>
+  <li>
+    <p>不用加减乘除做加法</p>
+
+    <pre><code>int add(int num1, int num2) {
+    int sum, carry;
+    do {
+        sum = num1 ^ num2;           //合并
+        carry = (num1 &amp; num2) &lt;&lt; 1;  //进位
+			
+        num1 = sum;
+        num2 = carry;
+    } while(num2);
+		
+    return num1;
+}
+</code></pre>
+  </li>
+  <li>
+    <p>丑数</p>
+
+    <p>根据丑数的定义，我们可以知道丑数可以由另外一个丑数乘以2，3或者5得到。因此我们创建一个数组，里面的数字是排好序的丑数，每一个丑数都是前面的丑数乘以2，3或者5得到的。这种思路的关键在于怎样确保数组里面的数字是排序的。</p>
+
+    <pre><code>//获取第k个丑数，假定1为第一个丑数
+int getUglyNumber(int index) {
+    if(index&lt;=0) return 0;
+	
+    int *pUglyNumbers=new int[index];
+    pUglyNumbers[0]=1;
+    int nextUglyIndex=1;
+    //定义三个指向丑数数组的指针，用它们来标识从数组中的哪一个数开始计算M2，M3和M5，开始都是丑数数组的首地址。
+    int *T2=pUglyNumbers;
+    int *T3=pUglyNumbers;
+    int *T5=pUglyNumbers;
+	
+    while(nextUglyIndex&lt;index)//
+    {
+        int min=Min(*T2 * 2,*T3 * 3,*T5 * 5);//M2=*T2 * 2, M3=*T3 * 3, M5=*T5 * 5
+        pUglyNumbers[nextUglyIndex]=min;//求M2，M3，M5的最小值作为新的丑数放入丑数数组
+        //每次生成新的丑数的时候，去更新T2，T3和T5.
+        while(*T2 * 2&lt;=pUglyNumbers[nextUglyIndex]) ++T2;
+        while(*T3 * 3&lt;=pUglyNumbers[nextUglyIndex]) ++T3;
+        while(*T5 * 5&lt;=pUglyNumbers[nextUglyIndex]) ++T5;
+        nextUglyIndex++;
+    }
+    int ugly=pUglyNumbers[index-1];//因为丑数有序排列，所以丑数数组中的最后一个丑数就是我们所求的第index个丑数。
+    delete[] pUglyNumbers;
+    return ugly;
+}
+</code></pre>
+  </li>
+  <li>
+    <p>BST的中序后继，每个节点有指向父节点的指针</p>
+
+    <ul>
+      <li>If X has a right child, then the successor must be on the right side of X (because of the order in which we visit nodes) Specifically, the left-most child must be the first node visited in that subtree</li>
+      <li>Else, we go to X’s parent (call it P) 
+        <ul>
+          <li>If X was a left child (P left = X), then P is the successor of X</li>
+          <li>If X was a right child (P right = X), then we have fully visited P, so we call successor(P)</li>
+        </ul>
+      </li>
+    </ul>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nextnode_zpsf870c92d.png" alt="" /></p>
+  </li>
+  <li>
+    <p>树的公共祖先</p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/ancester1_zpsbaf0b765.png" alt="" /></p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/ancestere_zps539db7ec.png" alt="" /></p>
+  </li>
+  <li>
+    <p>计算0-n中2的数量</p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/2s1_zps37fd204d.png" alt="" /></p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/2s2_zps19a01178.png" alt="" /></p>
+  </li>
+  <li>
+    <p>包含空串的有序字符串数组中寻找特定的字符串</p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/empty_string_zps15c77190.png" alt="" /></p>
+  </li>
+  <li>
+    <p>有序链表转为BST</p>
+
+    <pre><code>BinaryTree* sortedListToBST(ListNode *&amp; list, int start, int end) {
+  if (start &gt; end) return NULL;
+  // same as (start+end)/2, avoids overflow
+  int mid = start + (end - start) / 2;
+  BinaryTree *leftChild = sortedListToBST(list, start, mid-1);
+  BinaryTree *parent = new BinaryTree(list-&gt;data);
+  parent-&gt;left = leftChild;
+  list = list-&gt;next;
+  parent-&gt;right = sortedListToBST(list, mid+1, end);
+  return parent;
+}
+	 
+BinaryTree* sortedListToBST(ListNode *head, int n) {
+  return sortedListToBST(head, 0, n-1);
+}
+</code></pre>
+  </li>
+  <li>
+    <p>Convert Binary Search Tree (BST) to Sorted Doubly-Linked List</p>
+
+    <pre><code>// This is a modified in-order traversal adapted to this problem.
+// prev (init to NULL) is used to keep track of previously traversed node.
+// head pointer is updated with the list's head as recursion ends.
+void treeToDoublyList(Node *p, Node *&amp; prev, Node *&amp; head) {
+  if (!p) return;
+  treeToDoublyList(p-&gt;left, prev, head);
+  // current node's left points to previous node
+  p-&gt;left = prev;
+  if (prev)
+    prev-&gt;right = p;  // previous node's right points to current node
+  else
+    head = p; // current node (smallest element) is head of
+              // the list if previous node is not available
+  // as soon as the recursion ends, the head's left pointer 
+  // points to the last node, and the last node's right pointer
+  // points to the head pointer.
+  Node *right = p-&gt;right;
+  head-&gt;left = p;
+  p-&gt;right = head;
+  // updates previous node
+  prev = p;
+  treeToDoublyList(right, prev, head);
+}
+	 
+// Given an ordered binary tree, returns a sorted circular
+// doubly-linked list. The conversion is done in-place.
+Node* treeToDoublyList(Node *root) {
+  Node *prev = NULL;
+  Node *head = NULL;
+  treeToDoublyList(root, prev, head);
+  return head;
+}
+</code></pre>
+
+    <p>divide and conquer method <a href="http://cslibrary.stanford.edu/109/TreeListRecursion.html">http://cslibrary.stanford.edu/109/TreeListRecursion.html</a></p>
+  </li>
+  <li>
+    <p>search in rotated sorted array(allow duplicated num)</p>
+  </li>
+</ol>
+
+<p>``` c++
+bool search(int A[], int n, int target) {</p>
+
+<pre><code>int l=0, r=n-1;
+while(l&lt;=r) {
+    int m = l+(r-l)/2;
+    if(A[m]==target) return true;
+	if(A[l] &lt; A[m]) { //left half is sorted
+        if(A[m]&gt;target &amp;&amp; target&gt;=A[l]) r=m-1; else l=m+1;
+    } else if(A[l] &gt; A[m]){ //right half is sorted
+        if(target&gt;A[m] &amp;&amp; target&lt;=A[r]) l=m+1;
+        else r = m-1;
+    } else l++;
+}
+return false; } ```
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[最小生成树]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/05/14/zui-xiao-sheng-cheng-shu/"/>
+    <updated>2013-05-14T01:09:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/05/14/zui-xiao-sheng-cheng-shu</id>
+    <content type="html"><![CDATA[<p>算法使用的是二叉堆，时间为O(ElgV)。如果V小于E的话，使用Prim更好。</p>
+
+<p>Kruskal算法：</p>
+
+<p>O(ElgE): E&lt;V<sup>2&nbsp;</sup>,所以有 lgE=O(lgV)</p>
+
+<p>集合A是一个森林，加入集合A中的安全边总是图中连接两个不同连通分支的最小权边。</p>
+
+<p>使用不相交集合数据结构。</p>
+
+<p>测试边时，即测试两端点是否在同一棵树上。</p>
+
+<p>若不在则可以对集合进行合并。</p>
+
+<!--more-->
+<p>Prim算法：</p>
+
+<p>集合A形成单棵树，添加集合A的安全边总是连接树与一个不在树中的顶点的最小权边。</p>
+
+<p>使用最小优先队列。优先队列基于Key值，key[v]是所有将v与树中某一顶点相连的边中的最小权值。</p>
+
+<p>一开始除了根节点，其他节点的key为无穷大。</p>
+]]></content>
+  </entry>
+  
+</feed>

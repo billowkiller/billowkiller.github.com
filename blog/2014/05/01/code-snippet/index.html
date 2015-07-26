@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Some Code Snippets - Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2014/05/01/code-snippet">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-05-01T03:18:00+08:00" pubdate data-updated="true">May 1<span>st</span>, 2014</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        Some Code Snippets
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><ol>
+  <li>
+    <p><strong>在一个二叉树中查找值为x的结点，并打印该结点所有祖先结点的算法，也就是根节点到x的路径。</strong></p>
+
+    <p>思路1： 利用<strong>后序遍历</strong>的非递归算法，在访问结点时增加一个判断，若该结点的值等于x，则打印栈中保持的路径，再中断算法。</p>
+
+    <p>思路2： 采用<strong>前序遍历</strong>的递归算法，在典型的便利算法的参数表中增加了x、path[n]等参数。</p>
+
+    <pre><code> template&lt;class T&gt;
+ int Find_Print(BinTreeNode&lt;T*&amp; BT, T x, T path[], int level, int &amp;count) {
+     if(BT != NULL) {
+         level++;
+         path[level] = BT-&gt;data;
+         if (BT-&gt;data==x) { count=level; return 1; }
+         if( Find_Print(BT-&gt;left, x, path, level, count) ) return 1;
+         return Find_Print(BT-&gt;right, x, path, level, count);
+     } else 
+         return 0;
+ }
+</code></pre>
+  </li>
+</ol>
+
+<!--more-->
+
+<ol>
+  <li>
+    <p><strong>判断二叉树是不是平衡</strong></p>
+
+    <pre><code> bool IsBalanced(BinaryTreeNode* pRoot)
+ {
+     if(pRoot == NULL)
+         return true;
+	 
+     int left = TreeDepth(pRoot-&gt;m_pLeft);
+     int right = TreeDepth(pRoot-&gt;m_pRight);
+     int diff = left - right;
+     if(diff &gt; 1 || diff &lt; -1)
+         return false;
+	 
+     return IsBalanced(pRoot-&gt;m_pLeft) &amp;&amp; IsBalanced(pRoot-&gt;m_pRight);
+ }
+</code></pre>
+
+    <p>一个节点会被重复遍历多次，这种思路的时间效率不高。用<strong>后序遍历</strong>的方式遍历二叉树的每一个结点，在遍历到一个结点之前我们已经遍历了它的左右子树。只要在遍历每个结点的时候记录它的深度，我们就可以一边遍历一边判断每个结点是不是平衡的。</p>
+
+    <pre><code> bool IsBalanced(BinaryTreeNode* pRoot, int* pDepth)
+ {
+     if(pRoot == NULL)
+     {
+         *pDepth = 0;
+         return true;
+     }
+	 
+     int left, right;
+     if(IsBalanced(pRoot-&gt;m_pLeft, &amp;left)
+         &amp;&amp; IsBalanced(pRoot-&gt;m_pRight, &amp;right))
+     {
+         int diff = left - right;
+         if(diff &lt;= 1 &amp;&amp; diff &gt;= -1)
+         {
+             *pDepth = 1 + (left &gt; right ? left : right);
+             return true;
+         }
+     }
+     return false;
+ }
+ bool IsBalanced(BinaryTreeNode* pRoot)
+ {
+     int depth = 0;
+     return IsBalanced(pRoot, &amp;depth);
+ }
+</code></pre>
+  </li>
+  <li>
+    <p>Reverse Bits</p>
+
+    <pre><code>  // special case: only works for 4 bytes (32 bits).
+
+ uint reverseMask(uint x) 
+ {
+ 	assert(sizeof(x) == 4);
+ 	x= ((x &amp; 0x55555555) &lt;&lt; 1) | ((x &amp; 0xAAAAAAAA) &gt;&gt; 1);
+ 	x = ((x &amp; 0x33333333) &lt;&lt; 2) | ((x &amp; 0xCCCCCCCC) &gt;&gt; 2);
+ 	x = ((x &amp; 0x0F0F0F0F) &lt;&lt; 4) | ((x &amp; 0xF0F0F0F0) &gt;&gt; 4);
+ 	x = ((x &amp; 0x00FF00FF) &lt;&lt; 8) | ((x &amp; 0xFF00FF00) &gt;&gt; 8);
+ 	x= ((x &amp; 0x0000FFFF) &lt;&lt; 16) | ((x &amp; 0xFFFF0000) &gt;&gt; 16);
+ 	return x;
+ }
+</code></pre>
+  </li>
+  <li>
+    <p>Find the k-th Smallest Element in the Union of Two Sorted Arrays</p>
+
+    <pre><code> int findKthSmallest(int A[], int m, int B[], int n, int k) {
+   assert(m &gt;= 0); assert(n &gt;= 0); assert(k &gt; 0); assert(k &lt;= m+n);
+	  
+   int i = (int)((double)m / (m+n) * (k-1));
+   int j = (k-1) - i;
+	 
+   assert(i &gt;= 0); assert(j &gt;= 0); assert(i &lt;= m); assert(j &lt;= n);
+   // invariant: i + j = k-1
+   // Note: A[-1] = -INF and A[m] = +INF to maintain invariant
+   int Ai_1 = ((i == 0) ? INT_MIN : A[i-1]);
+   int Bj_1 = ((j == 0) ? INT_MIN : B[j-1]);
+   int Ai   = ((i == m) ? INT_MAX : A[i]);
+   int Bj   = ((j == n) ? INT_MAX : B[j]);
+	 
+   if (Bj_1 &lt; Ai &amp;&amp; Ai &lt; Bj)
+     return Ai;
+   else if (Ai_1 &lt; Bj &amp;&amp; Bj &lt; Ai)
+     return Bj;
+	 
+   assert((Ai &gt; Bj &amp;&amp; Ai_1 &gt; Bj) || 
+          (Ai &lt; Bj &amp;&amp; Ai &lt; Bj_1));
+	 
+   // if none of the cases above, then it is either:
+   if (Ai &lt; Bj)
+     // exclude Ai and below portion
+     // exclude Bj and above portion
+     return findKthSmallest(A+i+1, m-i-1, B, j, k-i-1);
+   else /* Bj &lt; Ai */
+     // exclude Ai and above portion
+     // exclude Bj and below portion
+     return findKthSmallest(A, i, B+j+1, n-j-1, k-j-1);
+ }
+</code></pre>
+  </li>
+  <li>
+    <p>最长等差数列分析</p>
+
+    <p>原题</p>
+
+    <p>给定未排序的数组，请给出方法找到最长的等差数列。</p>
+
+    <p>分析</p>
+
+    <p>题目描述比较简单，但是有一个问题我们需要首先搞清楚：等差数列中的数字，是否要和原始数组中的顺序一致。题目中，并没有说明，这个就需要大家在面试的过程中和面试官进行交流。我们在这里对两种情况都进行讨论</p>
+
+    <p>保证数字的顺序</p>
+
+    <p>等差数列是要求相邻两个元素之间的差是相同的。那我们可以记录下来数组中任意两个数的差，并且记录下来。对于数组A，记录A[j]-A[i]，其中 i</p>
+
+    <pre><code> -1=&gt;(0,1)(1,2)
+	
+ 1=&gt;(2,3)(4,5)
+	
+ 3=&gt;(3,4)
+</code></pre>
+
+    <p>上面已经排好序，对于第一个，找到等差数列0,1,2对应数字诶5,4,3.第二个，3和4位置没有连起来，不够成等差数列。方法平均时间复杂度为O(n^2),空间复杂度为O(n^2).</p>
+
+    <p>无需保证数字的顺序</p>
+
+    <p>不需要保证数字的顺序与原来数组一致，如何找到最长的等差数列呢？原来的数组是无序的，我们先对数组进行排序，最终的一定是排序之后序列的子序列。然后，我们采用动态规划的方法解决这个问题。我们假设dp[i][j]表示以A[i]A[j]开始的数列的长度，dp[i][j]如何表示呢？dp[i][j]=dp[j][k]+1，当 A[j]-A[i]=A[k]-A[j],及A[k]+A[i]=2A[j]。根据dp[i][j]的定义，我们知道dp[x][n-1]=2，也就是 最后一列是2，数列只有A[x]和A[n-1]两个元素。首先，j从n-2，开始向前遍历，对于每一个，找到i和k，满足 A[k]+A[i]=2A[j]，则有dp[i][j]=dp[j][k]+1，若没有，则dp[i][j]就为2.</p>
+
+    <p>这里找i和k，有一个小技巧，如下：初始i=j-1,k=j+1，然后分别向两边遍历，如果A[k]+A[i]2*A[j]则i–。大家还是参考代码吧：</p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/01YhyLG4uM7B_zps61cd517c.jpg" alt="" /></p>
+  </li>
+  <li>
+    <p>构造最大数分析</p>
+
+    <p><a href="http://www.ituring.com.cn/article/50249">http://www.ituring.com.cn/article/50249</a></p>
+  </li>
+  <li>
+    <p>Given a sorted array of integers, find the starting and ending position of a given target value.</p>
+
+    <pre><code> int searchLow(int A[], int start, int end, int target) {
+     while(start &lt; end) {
+         int mid = start + (end-start)/2;
+         if(A[mid] &gt;= target) end = mid-1;
+         else start = mid+1;
+     }
+     if(A[start] == target) return start;
+     else return start+1;
+ }
+ int searchHigh(int A[], int start, int end, int target) {
+     while(start &lt; end) {
+         int mid = start + (end-start)/2;
+         if(A[mid] &lt;= target) start = mid+1;
+         else end = mid-1;
+     }
+     if(A[start] == target) return start;
+     else return start-1;
+ }
+</code></pre>
+  </li>
+  <li>
+    <p>树的最长距离</p>
+
+    <pre><code> struct NODE
+ {
+     NODE *pLeft;
+     NODE *pRight;
+ };
+	 
+ struct RESULT
+ {
+     int nMaxDistance;
+     int nMaxDepth;
+ };
+	 
+ RESULT GetMaximumDistance(NODE* root)
+ {
+     if (!root)
+     {
+         RESULT empty = { 0, -1 };   // trick: nMaxDepth is -1 and then caller will plus 1 to balance it as zero.
+         return empty;
+     }
+	 
+     RESULT lhs = GetMaximumDistance(root-&gt;pLeft);
+     RESULT rhs = GetMaximumDistance(root-&gt;pRight);
+	 
+     RESULT result;
+     result.nMaxDepth = max(lhs.nMaxDepth + 1, rhs.nMaxDepth + 1);
+     result.nMaxDistance = max(max(lhs.nMaxDistance, rhs.nMaxDistance), lhs.nMaxDepth + rhs.nMaxDepth + 2);
+     return result;
+ }
+</code></pre>
+  </li>
+  <li>
+    <p>分治法求数组最小值和最大值</p>
+
+    <pre><code> #--coding: utf8 --
+ def find_max_and_min(A, p, r):
+     if r - p &lt;= 1:
+         if A[p] &lt; A[r]:
+             return (A[p], A[r])
+         else:
+             return (A[r], A[p])
+     # 分解
+     q = p + (r - p) / 2
+     (lmin, lmax) = find_max_and_min(A, p, q)
+     (rmin, rmax) = find_max_and_min(A, q + 1, r)
+     # 合并
+     return (min(lmin, rmin), max(lmax, rmax))
+	 
+ if __name__ == "__main__":
+     # A = [1]
+     # A = [1, 2]
+     A = [7, 2, 2, 4, 5, 15, 3, 5, 8, 10, 11]
+     print(find_max_and_min(A, 0, len(A) - 1))
+</code></pre>
+
+    <p>扩展问题，找第二大数</p>
+
+    <pre><code> #--coding: utf8 --
+ def find_second_max(A, p, r):
+     if r - p == 0:
+         return (A[p], None)
+     elif r - p == 1:
+         if A[p] &gt; A[r]:
+             return (A[p], A[r])
+         else:
+             return (A[r], A[p])
+     # 分解
+     q = p + (r - p) / 2
+     (lfmax, lsmax) = find_second_max(A, p, q)
+     (rfmax, rsmax) = find_second_max(A, q + 1, r)
+     # 合并
+     if lfmax &gt; rfmax:
+         fmax = lfmax
+         smax = max(lsmax, rfmax)
+     else:
+         fmax = rfmax
+         smax = max(rsmax, lfmax)
+     return (fmax, smax)
+	 
+ if __name__ == "__main__":
+     # A = [1]
+     # A = [1, 2]
+     A = [7, 2, 2, 4, 5, 15, 3, 5, 8, 10, 11]
+     print(find_second_max(A, 0, len(A) - 1))	
+</code></pre>
+  </li>
+  <li>
+    <p>n个色子点数和的概率。</p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/p1_zps7700f0a2.png" alt="" /> </p>
+  </li>
+  <li>
+    <p>不用加减乘除做加法</p>
+
+    <pre><code>int add(int num1, int num2) {
+    int sum, carry;
+    do {
+        sum = num1 ^ num2;           //合并
+        carry = (num1 &amp; num2) &lt;&lt; 1;  //进位
+			
+        num1 = sum;
+        num2 = carry;
+    } while(num2);
+		
+    return num1;
+}
+</code></pre>
+  </li>
+  <li>
+    <p>丑数</p>
+
+    <p>根据丑数的定义，我们可以知道丑数可以由另外一个丑数乘以2，3或者5得到。因此我们创建一个数组，里面的数字是排好序的丑数，每一个丑数都是前面的丑数乘以2，3或者5得到的。这种思路的关键在于怎样确保数组里面的数字是排序的。</p>
+
+    <pre><code>//获取第k个丑数，假定1为第一个丑数
+int getUglyNumber(int index) {
+    if(index&lt;=0) return 0;
+	
+    int *pUglyNumbers=new int[index];
+    pUglyNumbers[0]=1;
+    int nextUglyIndex=1;
+    //定义三个指向丑数数组的指针，用它们来标识从数组中的哪一个数开始计算M2，M3和M5，开始都是丑数数组的首地址。
+    int *T2=pUglyNumbers;
+    int *T3=pUglyNumbers;
+    int *T5=pUglyNumbers;
+	
+    while(nextUglyIndex&lt;index)//
+    {
+        int min=Min(*T2 * 2,*T3 * 3,*T5 * 5);//M2=*T2 * 2, M3=*T3 * 3, M5=*T5 * 5
+        pUglyNumbers[nextUglyIndex]=min;//求M2，M3，M5的最小值作为新的丑数放入丑数数组
+        //每次生成新的丑数的时候，去更新T2，T3和T5.
+        while(*T2 * 2&lt;=pUglyNumbers[nextUglyIndex]) ++T2;
+        while(*T3 * 3&lt;=pUglyNumbers[nextUglyIndex]) ++T3;
+        while(*T5 * 5&lt;=pUglyNumbers[nextUglyIndex]) ++T5;
+        nextUglyIndex++;
+    }
+    int ugly=pUglyNumbers[index-1];//因为丑数有序排列，所以丑数数组中的最后一个丑数就是我们所求的第index个丑数。
+    delete[] pUglyNumbers;
+    return ugly;
+}
+</code></pre>
+  </li>
+  <li>
+    <p>BST的中序后继，每个节点有指向父节点的指针</p>
+
+    <ul>
+      <li>If X has a right child, then the successor must be on the right side of X (because of the order in which we visit nodes) Specifically, the left-most child must be the first node visited in that subtree</li>
+      <li>Else, we go to X’s parent (call it P) 
+        <ul>
+          <li>If X was a left child (P left = X), then P is the successor of X</li>
+          <li>If X was a right child (P right = X), then we have fully visited P, so we call successor(P)</li>
+        </ul>
+      </li>
+    </ul>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nextnode_zpsf870c92d.png" alt="" /></p>
+  </li>
+  <li>
+    <p>树的公共祖先</p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/ancester1_zpsbaf0b765.png" alt="" /></p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/ancestere_zps539db7ec.png" alt="" /></p>
+  </li>
+  <li>
+    <p>计算0-n中2的数量</p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/2s1_zps37fd204d.png" alt="" /></p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/2s2_zps19a01178.png" alt="" /></p>
+  </li>
+  <li>
+    <p>包含空串的有序字符串数组中寻找特定的字符串</p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/empty_string_zps15c77190.png" alt="" /></p>
+  </li>
+  <li>
+    <p>有序链表转为BST</p>
+
+    <pre><code>BinaryTree* sortedListToBST(ListNode *&amp; list, int start, int end) {
+  if (start &gt; end) return NULL;
+  // same as (start+end)/2, avoids overflow
+  int mid = start + (end - start) / 2;
+  BinaryTree *leftChild = sortedListToBST(list, start, mid-1);
+  BinaryTree *parent = new BinaryTree(list-&gt;data);
+  parent-&gt;left = leftChild;
+  list = list-&gt;next;
+  parent-&gt;right = sortedListToBST(list, mid+1, end);
+  return parent;
+}
+	 
+BinaryTree* sortedListToBST(ListNode *head, int n) {
+  return sortedListToBST(head, 0, n-1);
+}
+</code></pre>
+  </li>
+  <li>
+    <p>Convert Binary Search Tree (BST) to Sorted Doubly-Linked List</p>
+
+    <pre><code>// This is a modified in-order traversal adapted to this problem.
+// prev (init to NULL) is used to keep track of previously traversed node.
+// head pointer is updated with the list's head as recursion ends.
+void treeToDoublyList(Node *p, Node *&amp; prev, Node *&amp; head) {
+  if (!p) return;
+  treeToDoublyList(p-&gt;left, prev, head);
+  // current node's left points to previous node
+  p-&gt;left = prev;
+  if (prev)
+    prev-&gt;right = p;  // previous node's right points to current node
+  else
+    head = p; // current node (smallest element) is head of
+              // the list if previous node is not available
+  // as soon as the recursion ends, the head's left pointer 
+  // points to the last node, and the last node's right pointer
+  // points to the head pointer.
+  Node *right = p-&gt;right;
+  head-&gt;left = p;
+  p-&gt;right = head;
+  // updates previous node
+  prev = p;
+  treeToDoublyList(right, prev, head);
+}
+	 
+// Given an ordered binary tree, returns a sorted circular
+// doubly-linked list. The conversion is done in-place.
+Node* treeToDoublyList(Node *root) {
+  Node *prev = NULL;
+  Node *head = NULL;
+  treeToDoublyList(root, prev, head);
+  return head;
+}
+</code></pre>
+
+    <p>divide and conquer method <a href="http://cslibrary.stanford.edu/109/TreeListRecursion.html">http://cslibrary.stanford.edu/109/TreeListRecursion.html</a></p>
+  </li>
+  <li>
+    <p>search in rotated sorted array(allow duplicated num)</p>
+  </li>
+</ol>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="kt">bool</span> <span class="n">search</span><span class="p">(</span><span class="kt">int</span> <span class="n">A</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">int</span> <span class="n">target</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">
+</span><span class="line">    <span class="kt">int</span> <span class="n">l</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class="line">    <span class="k">while</span><span class="p">(</span><span class="n">l</span><span class="o">&lt;=</span><span class="n">r</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">        <span class="kt">int</span> <span class="n">m</span> <span class="o">=</span> <span class="n">l</span><span class="o">+</span><span class="p">(</span><span class="n">r</span><span class="o">-</span><span class="n">l</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span>
+</span><span class="line">        <span class="k">if</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">==</span><span class="n">target</span><span class="p">)</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+</span><span class="line">		<span class="k">if</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">A</span><span class="p">[</span><span class="n">m</span><span class="p">])</span> <span class="p">{</span> <span class="c1">//left half is sorted</span>
+</span><span class="line">            <span class="k">if</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">&gt;</span><span class="n">target</span> <span class="o">&amp;&amp;</span> <span class="n">target</span><span class="o">&gt;=</span><span class="n">A</span><span class="p">[</span><span class="n">l</span><span class="p">])</span> <span class="n">r</span><span class="o">=</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="k">else</span> <span class="n">l</span><span class="o">=</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+</span><span class="line">        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">A</span><span class="p">[</span><span class="n">m</span><span class="p">]){</span> <span class="c1">//right half is sorted</span>
+</span><span class="line">            <span class="k">if</span><span class="p">(</span><span class="n">target</span><span class="o">&gt;</span><span class="n">A</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="n">target</span><span class="o">&lt;=</span><span class="n">A</span><span class="p">[</span><span class="n">r</span><span class="p">])</span> <span class="n">l</span><span class="o">=</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+</span><span class="line">            <span class="k">else</span> <span class="n">r</span> <span class="o">=</span> <span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class="line">        <span class="p">}</span> <span class="k">else</span> <span class="n">l</span><span class="o">++</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-05-01T03:18:00+08:00" pubdate data-updated="true">May 1<span>st</span>, 2014</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/algorithm/'>algorithm</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2014/05/01/code-snippet/" data-via="" data-counturl="http://billowkiller.github.io/blog/2014/05/01/code-snippet/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2014/04/27/New-features-in/" title="Previous Post: New features in C++11">&laquo; New features in C++11</a></li>
+            
+            
+            <li class="next"><a href="/blog/2014/06/28/signal-status-and-lifecycle/" title="Next Post: Signal status and lifecycle">Signal status and lifecycle &raquo;</a></li>
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item " href="/blog/2014/08/29/static-and-dynamic-library/">Static and Dynamic Library</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/23/classical-sync-problem/">Classical Sync Problem</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/22/design-pattern/">Design Pattern Abstraction</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/14/linux-memory-management/">Linux Memory Management</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/09/quicksort/">QuickSort and Derivatives</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">8</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">10</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">8</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">13</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">12</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">6</span>
+        algorithm
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2014 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2014/05/01/code-snippet/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2014/05/01/code-snippet/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>

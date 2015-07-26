@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Nginx architecture(2)--Event Driven - Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-2-event-driven">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-11-14T00:16:00+08:00" pubdate data-updated="true">Nov 14<span>th</span>, 2013</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        Nginx architecture(2)--Event Driven
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><p>Nginx是一个事件驱动架构的Web服务器。在Linux中，<code>epoll</code>是目前最强大的事件管理机制(I/O多路复用)，定时器事件也是由<code>epoll</code>等事件模块触发的，它是由红黑树实现的。并且Nginx很好的解决多个<code>worker</code>子进程监听同一个端口引起的惊群问题，以及对<code>worker</code>进行负载平衡。最后会讨论下linux内核中的文件异步I/O。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx-logo_zpsabde8e46.png" /></p>
+
+<!--more-->
+
+<h2 id="section">1. 框架概述</h2>
+
+<p>关于事件驱动模型的介绍已经在上篇介绍过了，这里再做一些补充说明。</p>
+
+<p>事件处理框架所要解决的问题是如何收集、管理、分发事件。对于一个基本的web服务器来说，事件通常有三种类型，<strong>网络事件</strong>、<strong>信号</strong>、<strong>定时器</strong>。这里的事件主要是指<code>网络事件</code>（TCP事件）和<code>定时器事件</code>。</p>
+
+<p>网络事件与网卡中断处理程序、内核提供的系统调用密切相关，所以网络事件的驱动受制于不用的操作系统平台，在同一个操作系统中也受制于不同的操作系统内核版本。例如在<code>kernel2.6</code>之前的版本或者大部分类UNIX系统都可以使用<code>poll</code>或<code>select</code>，而2.6后使用<code>epoll</code>。</p>
+
+<p>对比与传统的过程驱动方法(Process-driven method)来说，事件驱动模型可以用更少的线程处理更多的客户请求。</p>
+
+<h3 id="section-1">1.1 事件定义与事件模块</h3>
+
+<p>事件代表过去发生的事件，事件既是技术架构概念，也是业务概念。以事件为驱动的编程模型称为事件驱动架构EDA。</p>
+
+<p>一个事件代表某个发生的事情，在计算机系统中，事件是由一个对象表达，其包含有关事件的数据，比如发生的时间，地点等等。这个事件对象可以存在在一个消息或数据库记录或其他组件的形式中，这样一个对象称为”一个事件”，事件这个概念有两个含义，既代表已经发生的某个事情，也可以表达一个正在发生的对象。至于事件到底是这两个含义中哪一个，取决于事件发生的场景(上下文)。</p>
+
+<p>事件在技术架构上应用能提供无堵塞的高并发性能，如Nginx和<code>Node.js</code>。</p>
+
+<p>所谓事件驱动，简单地说就是你点什么按钮（即产生什么事件），电脑执行什么操作（即调用什么函数）.当然事件不仅限于用户的操作. 事件驱动的核心自然是事件。从事件角度说，事件驱动程序的基本结构是由一个事件收集器、一个事件发送器和一个事件处理器组成。事件收集器专门负责收集所有事件，包括来自用户的（如鼠标、键盘事件等）、来自硬件的（如时钟事件等）和来自软件的（如操作系统、应用程序本身等）。事件发送器负责将收集器收集到的事件分发到目标对象中。事件处理器做具体的事件响应工作，它往往要到实现阶段才完全确定，因而需要运用虚函数机制（函数名往往取为类似于HandleMsg的一个名字）。对于框架的使用者来说，他们唯一能够看到的是事件处理器。这也是他们所关心的内容。</p>
+
+<p>视图（即我们通常所说的“窗口”）是“事件驱动”应用程序的另一个要元。它是我们所说的事件发送器的目标对象。视图接受事件并能够对其进行处理。当我们将事件发送到具体的视图时，实际上我们完成了一个根本性的变化：从传统的流线型程序结构到事件触发方式的转变。这样应用程序具备相当的柔性，可以应付种种离散的、随机的事件。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/ev-server_zps36dcc97a.png" /></p>
+
+<p>在Nginx中，事件都是由<code>ngx_event_t</code>结构体来表示，这个结构体包含了事件的几个要素，方法、状态、参数以及前后事件的链表。</p>
+
+<p>事件模块是一种新的模块类型，<code>ngx_module_t</code>表示Nginx模块的基本接口，而针对每一种不同类型的模块，都有一个结构体来描述这一类模块的通用接口，这个接口保存在<code>ngx_module_t</code>结构体中的<code>ctx</code>成员中。也就是说，不同模块类型的区别就是<code>ctx</code>成员保存内容的区别，而模块还是在一个统一的结构体中表示。事件模块的通用接口则<code>ngx_event_module_t</code>结构体，它里面定义了模块名称、配置项参数的回调函数以及每个事件模块需要实现的10个抽象方法，如初始化添加删除事件等。</p>
+
+<h3 id="nginx">1.2 Nginx事件驱动机制</h3>
+
+<p>在上一篇中提到，Nginx将HTTP请求分为多个阶段进行处理</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td> </td>
+      <td><strong>阶段意义</strong></td>
+      <td> </td>
+      <td><strong>触发条件</strong></td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>建立TCP连接</td>
+      <td> </td>
+      <td>接收到TCP中的SYN包</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>开始接受用户请求</td>
+      <td> </td>
+      <td>接收到TCP中的ACK表示连接建立成功</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>接收到用户请求并分析已接收的请求是否完整</td>
+      <td> </td>
+      <td>接收到用户的数据包</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>接收到完整的用户请求后开始处理用户请求</td>
+      <td> </td>
+      <td>接收到用户的数据包</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>…</td>
+      <td> </td>
+      <td>…</td>
+      <td> </td>
+    </tr>
+  </tbody>
+</table>
+
+<p>而异步处理是与多阶段相辅相成的，当事件发生时，由<code>epoll</code>等事件分发器收到通知，调用事件消费者处理请求，在每个阶段中，事件消费者都不清楚本次完整的操作纠结什么时候会完成，只能异步被动地等待下一次时间的通知。</p>
+
+<p>这种设计配合事件驱动架构，将会极大地提高网络性能，同时使得进程不会或很少出现休眠现象。因为一旦出现进程休眠，必然减少并发处理事件的数目，一定会降低网络性能，同时会增加请求处理时间的平均时延！这时，如果网络新能无法满足业务需求将智能增加进程数目，进程数目过多就会增加操作系统内核的额外操作：进程间切换，频繁地进行进程切换仍会消耗CPU等资源，从而减低网络性能。同时，休眠的进程会使进程占用的内存得不到有效是否，这最终比如会导致系统可用内存的下降，从而影响系统能够处理的最大并发连接数。</p>
+
+<p>另外，异步非阻塞的事件处理机制与多线程相比，是有很大的优势的，不需要创建线程，每个请求占用的内存也很少，没有上下文切换，事件处理非常的轻量级。并发数再多也不会导致无谓的资源浪费（上下文切换）。更多的并发数，只是会占用更多的内存而已。 我之前有对连接数进行过测试，在24G内存的机器上，处理的并发请求数达到过200万。现在的网络服务器基本都采用这种方式，这也是Nginx性能高效的主要原因。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mighttpd_e02gif_zpse3ff26a7.gif" /></p>
+
+<h2 id="linuxepoll">2. Linux事件驱动机制——<code>epoll</code></h2>
+
+<p>事件驱动机制也被称为I/O多路复用，其实也就是非阻塞的I/O。<code>poll</code>、<code>select</code>和<code>epoll</code>的功能在本质上是一样的：都允许进程决定是否可以对一个和多个打开文件做非阻塞操作的读取和写入。这些调用也会阻塞进程，直到给定的文件描述符集合中的任何一个可读取或写入。因此，它们常常用于那些要使用多个输入和输出流而又不会阻塞阻于其中任何一个流的应用程序程序中。同一功能之所以要多个独立函数提供，是因为其中两个几乎是同时由两个不同的unix团体分别实现的：<code>select</code>在<code>BSD unix</code>中引入，而<code>poll</code>由<code>System V</code>引入。<code>epoll</code>系统调用，它用于将poll函数的扩展到能个处理数千个文件描述符。对上述系统调用的支持需要来自设备的驱动程序的相应支持。所有三个系统均通过驱动程序的<code>poll</code>方法提供。</p>
+
+<p><code>select</code>和<code>poll</code>在处理事件的时候会造成用户态到内核态内存的大量复制，这是极大的资源浪费。实际上，它会将所有连接的套接字传给操作系统，如果有100万个连接，在某一个时刻，进程收集事件连接的时候，虽然这100万连接中大部分是没有发生的，但<code>select</code>和<code>poll</code>还是会将这100万连接的套接字传给操作系统，而由操作系统内核寻找这些连接上有没有未处理的时间，这是极大的资源浪费，所以它们最多只能处理几千个并发连接。</p>
+
+<p>而<code>epoll</code>不这么做，它在内核中申请了一个简易的文件系统，把原先的一个select或poll调用分成了3个部分：调用<code>epoll_create</code>,建立1个<code>epoll</code>对象（在<code>epoll</code>文件系统中给这个句柄分配资源）、调用<code>epoll_ctl</code>向<code>epoll</code>对象中添加这100万个连接的套接字、调用<code>epoll_wait</code>收集发生事件的连接。这样，只需要在进程启动时建立1个<code>epoll</code>对象，并在需要的时候向它添加或删除连接就可以了。那么再来看看<code>epoll</code>是如何高效的处理事件的。</p>
+
+<p>当某一个进程调用<code>epoll_create</code>方法时，Linux内核会创建一个<code>eventpoll</code>结构体，这个结构体有一棵红黑树（存储所有添加到<code>epoll</code>中过的事件），还有一个双向链表（保持将要通过<code>epoll_wait</code>返回给用户的、满足条件的事件）。所有添加到<code>epoll</code>中的事件都会与设备驱动程序建立回调关系，这个回调方法会把这样的事件放到上面的双向链表中。当调用<code>epoll_wait</code>检测是否有发生事件的连接时，只是检查<code>eventpoll</code>对象中的双向链表是否有元素而已，如果不为空，则把这里的事件复制到用户内存中，同时将时间数量返回给用户。</p>
+
+<p>所以在<code>epoll</code>中，<code>epoll_ctl</code>向<code>epoll</code>对象中添加、修改、删除事件时，从红黑树中查找事件非常快，同时<code>epoll_wait</code>检查事件的效率也是非常的高。可以处理百万级别的并发事件。</p>
+
+<h2 id="section-2">3. 定时器事件</h2>
+
+<p>要弄清Nginx的定时器事件处理，那么需要搞清楚几个问题：</p>
+
+<ol>
+  <li>定时器事件是如何组织起来的</li>
+  <li>事件超时后又是如何触发的</li>
+  <li>时间又是如何更新的</li>
+</ol>
+
+<p>出于性能原因，Nginx的时间是缓存在内存中，不是每次都通过<code>gettimeofday</code>这个系统函数来实现。在Nginx中，只有在初始化和更新这个缓存时间的时候才会调用<code>gettimeofday</code>。在内存中可以通过各种已经定制好的格式化方法格式化需要转换的时间。</p>
+
+<p>所有的定时器事件是通过红黑树组织起来的。红黑树用事件的超时时间作为关键字，并且以这个关键字组成二叉排序树。这样需要找出最有可能的超时事件，那么只要将最左边的节点取出来即可，可以判断这个时间是否超时或者还需要多久才会超时。红黑树定时器处理添加删除外，还提供了一些方法可以遍历所有的事件，触发事件的<code>handler</code>回调方法。那么何时调用这些方法呢？</p>
+
+<p>首先在程序开始的时候会检测配置选项中是否有<code>timer_resolution</code>这一项内容即用户希望服务器时间精确度是多少毫秒，如果有则采用这个设置项作为阈值时间<code>timer</code>；如果没有设置这一选项，则在红黑树中寻找最近可能发生事件的时间差，以这个时间作为<code>timer</code>。<code>timer</code>也就是用来收集<code>epoll</code>监控事件是否发生的阈值时间，即如果<code>epoll</code>中没有任何一个事件发生，则最多等待<code>timer</code>毫秒后返回。也就是说如果是通过红黑树中找到的<code>timer</code>则肯定会有事件发生，如果是通过<code>timer_resolution</code>赋值的则不一定。</p>
+
+<p>收集来的事件放在队列中按<code>FIFO</code>顺序处理。而如果收集事件消耗的时间大于0，也就是有等待事件发生，那么这时有可能有新的定时器事件被触发，也就需要遍历所有的时间，触发事件的<code>handler</code>回调方法。</p>
+
+<h2 id="section-3">4. 惊群问题</h2>
+
+<p>惊群问题（Thundering Herd）是指多个进程监听同一个事件，操作系统无法判断由谁来负责这个事件，就会索性唤醒所有进程，但最终只有一个进程成功执行，其他进程失败，造成严重的资源浪费。</p>
+
+<p>Nginx的解决思路：<strong>避免惊群</strong>。具体措施有使用全局互斥锁，每个子进程在<code>epoll_wait()</code>之前先去申请锁，申请到则继续处理，获取不到则等待，并设置了一个负载均衡的算法（当某一个子进程的任务量达到总设置量的7/8时，则不会再尝试去申请锁）来均衡各个进程的任务量。</p>
+
+<p>原因和解决方法对比参见<a href="http://blog.163.com/pandalove@126/blog/static/9800324520122633515612/">这篇博客</a>。</p>
+
+<p><a href="http://blog.csdn.net/randyleonard/article/details/9058567">这篇也很精彩</a>。</p>
+
+<h2 id="io">5. 文件异步I/O</h2>
+
+<p>要使用文件异步I/O，则Linux内核必须要支持。这里的异步I/O不同于<code>glibc</code>提供的文件异步I/O库，它是基于多线程实现的，并不是真正意义上的异步I/O。把读取文件的操作异步地提交给内核后，内核会通知I/O设备独立地执行操作，这样，CPU可以得到充分的利用。而且，当大量读事件发生时候，将会发挥出内核读硬盘中“电梯算法”的优势，从而降低随机读取硬盘扇区的成本。</p>
+
+<p>需要注意的是Linux内核级别的文件异步I/O是不支持缓存操作的，所以说文件异步I/O的使用要看场景，并不是所有情况都可以使用，如果用户请求对文件的操作大部分都会落到文件缓存上，那么就不要使用异步I/O，反之则可以试着使用文件异步I/O，看一下是否会为服务器带来并发能力上的提升。</p>
+
+<p>这个文件异步I/O在linux中的称呼是<code>sendfile</code>，那么<code>sendfile</code>的原理是什么呢？</p>
+
+<p>在传统的文件传输里面（read/write方式），在实现上其实是比较复杂的，需要经过多次上下文的切换，我们看一下如下两行代码：</p>
+
+<p>read(file, tmp_buf, len);     <br />
+write(socket, tmp_buf, len);  </p>
+
+<p>以上两行代码是传统的read/write方式进行文件到socket的传输。</p>
+
+<p>当需要对一个文件进行传输的时候，其具体流程细节如下：</p>
+
+<p>1、调用read函数，文件数据被copy到内核缓冲区</p>
+
+<p>2、read函数返回，文件数据从内核缓冲区copy到用户缓冲区</p>
+
+<p>3、write函数调用，将文件数据从用户缓冲区copy到内核与socket相关的缓冲区。</p>
+
+<p>4、数据从socket缓冲区copy到相关协议引擎。</p>
+
+<p>以上细节是传统read/write方式进行网络文件传输的方式，我们可以看到，在这个过程当中，文件数据实际上是经过了四次copy操作：</p>
+
+<p>硬盘—&gt;内核buf—&gt;用户buf—&gt;socket相关缓冲区—&gt;协议引擎</p>
+
+<p>而sendfile系统调用则提供了一种减少以上多次copy，提升文件传输性能的方法。Sendfile系统调用是在2.1版本内核时引进的：</p>
+
+<p>sendfile(socket, file, len);   </p>
+
+<p>运行流程如下：</p>
+
+<p>1、<code>sendfile</code>系统调用，文件数据被copy至内核缓冲区</p>
+
+<p>2、再从内核缓冲区copy至内核中socket相关的缓冲区</p>
+
+<p>3、最后再socket相关的缓冲区copy到协议引擎</p>
+
+<p>相较传统read/write方式，2.1版本内核引进的<code>sendfile</code>已经减少了内核缓冲区到user缓冲区，再由user缓冲区到socket相关缓冲区的文件copy，而在内核版本2.4之后，文件描述符结果被改变，<code>sendfile</code>实现了更简单的方式，系统调用方式仍然一样，细节与2.1版本的 不同之处在于，当文件数据被复制到内核缓冲区时，不再将所有数据copy到socket相关的缓冲区，而是仅仅将记录数据位置和长度相关的数据保存到 socket相关的缓存，而实际数据将由DMA模块直接发送到协议引擎，再次减少了一次copy操作。</p>
+
+<p>目前，Nginx仅支持在读取文件时使用异步I/O，因为正常写入文件时往往是写入内存中就立即返回，效率很高，而使用异步I/O写入时速度会明显的下降。</p>
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-11-14T00:16:00+08:00" pubdate data-updated="true">Nov 14<span>th</span>, 2013</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/rework/'>rework</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-2-event-driven/" data-via="" data-counturl="http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-2-event-driven/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2013/10/13/nginx-architecture-1-overview/" title="Previous Post: Nginx architecture(1)--Overview">&laquo; Nginx architecture(1)--Overview</a></li>
+            
+            
+            <li class="next"><a href="/blog/2013/11/14/nginx-architecture-3-memory-pool/" title="Next Post: Nginx architecture(3)--memory pool">Nginx architecture(3)--memory pool &raquo;</a></li>
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item " href="/blog/2014/08/29/static-and-dynamic-library/">Static and Dynamic Library</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/23/classical-sync-problem/">Classical Sync Problem</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/22/design-pattern/">Design Pattern Abstraction</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/14/linux-memory-management/">Linux Memory Management</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/09/quicksort/">QuickSort and Derivatives</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">8</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">10</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">8</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">13</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">12</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">6</span>
+        algorithm
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2014 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-2-event-driven/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-2-event-driven/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>

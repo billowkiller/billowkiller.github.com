@@ -1,0 +1,865 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: memory | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/memory/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2014-09-15T12:37:27+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Linux Memory Management]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/08/14/linux-memory-management/"/>
+    <updated>2014-08-14T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/08/14/linux-memory-management</id>
+    <content type="html"><![CDATA[<p>reprint from <a href="http://www.kerneltravel.net/journal/v/mem.htm">http://www.kerneltravel.net/journal/v/mem.htm</a></p>
+
+<hr />
+
+<p>看到一篇介绍linux内存管理的好文，忍不住转载，做个记录。内容作了部分删改。</p>
+
+<h2 id="section">摘要</h2>
+
+<p>本章首先以应用程序开发者的角度审视Linux的进程内存管理，在此基础上逐步深入到内核中讨论系统物理内存管理和内核内存的使用方法。力求从外到内、水到渠成地引导网友分析Linux的内存管理与使用。在本章最后，我们给出一个内存映射的实例，帮助网友们理解内核内存管理与用户内存管理之间的关系，希望大家最终能驾驭Linux内存管理。</p>
+
+<!--more-->
+
+<h2 id="section-1">前言</h2>
+
+<p>内存管理一向是所有操作系统书籍不惜笔墨重点讨论的内容，无论市面上或是网上都充斥着大量涉及内存管理的教材和资料。因此，我们这里所要写的Linux内存管理采取避重就轻的策略，从理论层面就不去班门弄斧，贻笑大方了。我们最想做的和可能做到的是从开发者的角度谈谈对内存管理的理解，最终目的是把我们在内核开发中使用内存的经验和对Linux内存管理的认识与大家共享。</p>
+
+<p>当然，这其中我们也会涉及到一些诸如段页等内存管理的基本理论，但我们的目的不是为了强调理论，而是为了指导理解开发中的实践，所以仅仅点到为止，不做深究。</p>
+
+<p>遵循“理论来源于实践”的“教条”，我们先不必一下子就钻入内核里去看系统内 存到底是如何管理，那样往往会让你陷入似懂非懂的窘境（我当年就犯了这个错误！）。所以最好的方式是先从外部（用户编程范畴）来观察进程如何使用内存，等 到大家对内存的使用有了较直观的认识后，再深入到内核中去学习内存如何被管理等理论知识。最后再通过一个实例编程将所讲内容融会贯通。</p>
+
+<h2 id="section-2">进程与内存</h2>
+
+<h3 id="section-3">进程如何使用内存？</h3>
+
+<p>毫无疑问，所有进程（执行的程序）都必须占用一定数量的内存，它或是用来存放从磁盘载入的程序代码，或是存放取自用户输入的数据等等。不过进程对这些内存的管理方式因内存用途不一而不尽相同，有些内存是事先静态分配和统一回收的，而有些却是按需要动态分配和回收的。</p>
+
+<p>对任何一个普通进程来讲，它都会涉及到5种不同的数据段。稍有编程知识的朋友都能想到这几个数据段中包含有“程序代码段”、“程序数据段”、“程序堆栈段”等。不错，这几种数据段都在其中，但除了以上几种数据段之外，进程还另外包含两种数据段。下面我们来简单归纳一下进程对应的内存空间中所包含的5种不同的数据区。</p>
+
+<p><strong>代码段：</strong>代码段是用来存放可执行文件的操作指令，也就是说是它是可执行程序在内存中的镜像。代码段需要防止在运行时被非法修改，所以只准许读取操作，而不允许写入（修改）操作——它是不可写的。</p>
+
+<p><strong>数据段：</strong>数据段用来存放可执行文件中已初始化全局变量，换句话说就是存放程序静态分配的变量和全局变量。</p>
+
+<p><strong>BSS段：</strong>BSS段包含了程序中未初始化的全局变量，在内存中 bss段全部置零。</p>
+
+<p><strong>堆（heap）：</strong>堆是用于存放进程运行中被动态分配的内存段，它的大小并不固定，可动态扩张或缩减。当进程调用malloc等函数分配内存时，新分配的内存就被动态添加到堆上（堆被扩张）；当利用free等函数释放内存时，被释放的内存从堆中被剔除（堆被缩减）</p>
+
+<p><strong>栈：</strong>栈是用户存放程序临时创建的局部变量，也就是说我们函数括弧“{}”中定义的变量（但不包括static声明的变量，static意味着在数据段中存放变量）。除此以外，在函数被调用时，其参数也会被压入发起调用的进程栈中，并且待到调用结束后，函数的返回值也会被存放回栈中。由于栈的先进先出特点，所以栈特别方便用来保存/恢复调用现场。从这个意义上讲，我们可以把堆栈看成一个寄存、交换临时数据的内存区。</p>
+
+<p><img src="http://dl.iteye.com/upload/picture/pic/80993/96d2c983-bec7-34d6-805b-2a8e40506848.png" alt="" /></p>
+
+<p>从用户向内核看，所使用的内存表象形式会依次经历“逻辑地址”——“线性地址”——“物理地址”几种形式（关于几种地址的解释在前面已经讲述了）。逻辑地址经段机制转化成线性地址；线性地址又经过页机制转化为物理地址。（但是我们要知道Linux系统虽然保留了段机制，但是将所有程序的段地址都定死为0-4G，所以虽然逻辑地址和线性地址是两种不同的地址空间，但在Linux中逻辑地址就等于线性地址，它们的值是一样的）。沿着这条线索，我们所研究的主要问题也就集中在下面几个问题。</p>
+
+<ol>
+  <li>进程空间地址如何管理？</li>
+  <li>进程地址如何映射到物理内存？</li>
+  <li>物理内存如何被管理？</li>
+</ol>
+
+<p>以及由上述问题引发的一些子问题。如系统虚拟地址分布；内存分配接口；连续内存分配与非连续内存分配等。</p>
+
+<h2 id="section-4">进程内存空间</h2>
+
+<p>Linux操作系统采用虚拟内存管理技术，使得每个进程都有各自互不干涉的进程地址空间。该空间是块大小为4G的线性虚拟空间，用户所看到和接触到的都是该虚拟地址，无法看到实际的物理内存地址。利用这种虚拟地址不但能起到保护操作系统的效果（用户不能直接访问物理内存），而且更重要的是，用户程序可使用比实际物理内存更大的地址空间（具体的原因请看硬件基础部分）。</p>
+
+<p>在讨论进程空间细节前，这里先要澄清下面几个问题：</p>
+
+<ol>
+  <li>4G的进程地址空间被人为的分为两个部分——用户空间与内核空间。用户空间从0到3G（0xC0000000），内核空间占据3G到4G。用户进程通常情况下只能访问用户空间的虚拟地址，不能访问内核空间虚拟地址。只有用户进程进行系统调用（代表用户进程在内核态执行）等时刻可以访问到内核空间。</li>
+  <li>用户空间对应进程，所以每当进程切换，用户空间就会跟着变化；而内核空间是由内核负责映射，它并不会跟着进程改变，是固定的。内核空间地址有自己对应的页表（init_mm.pgd），用户进程各自有不同的页表。</li>
+  <li>每个进程的用户空间都是完全独立、互不相干的。不信的话，你可以把上面的程序同时运行10次（当然为了同时运行，让它们在返回前一同睡眠100秒吧），你会看到10个进程占用的线性地址一模一样。</li>
+</ol>
+
+<h3 id="section-5">进程内存管理</h3>
+
+<p>进程内存管理的对象是进程线性地址空间上的内存镜像，这些内存镜像其实就是进程使用的虚拟内存区域（memory region）。进程虚拟空间是个32或64位的“平坦”（独立的连续区间）地址空间（空间的具体大小取决于体系结构）。要统一管理这么大的平坦空间可绝非易事，为了方便管理，虚拟空间被划分为许多大小可变的(但必须是4096的倍数)内存区域，这些区域在进程线性地址中像停车位一样有序排列。这些区域的划分原则是“将访问属性一致的地址空间存放在一起”，所谓访问属性在这里无非指的是“可读、可写、可执行等”。</p>
+
+<p>如果你要查看某个进程占用的内存区域，可以使用命令<code>cat /proc/&lt;pid&gt;/maps</code>获得。</p>
+
+<p><strong>注意，你一定会发现进程空间只包含三个内存区域，似乎没有上面所提到的堆、bss等，其实并非如此，程序内存段和进程地址空间中的内存区域是种模糊对应，也就是说，堆、bss、数据段（初始化过的）都在进程空间中由数据段内存区域表示。</strong></p>
+
+<p>在Linux内核中对应进程内存区域的数据结构是: vm_area_struct, 内核将每个内存区域作为一个单独的内存对象管理，相应的操作也都一致。采用面向对象方法使VMA结构体可以代表多种类型的内存区域－－比如内存映射文件或进程的用户空间栈等，对这些区域的操作也都不尽相同。</p>
+
+<p>vm_area_strcut结构比较复杂，关于它的详细结构请参阅相关资料。我们这里只对它的组织方法做一点补充说明。vm_area_struct是描述进程地址空间的基本管理单元，对于一个进程来说往往需要多个内存区域来描述它的虚拟空间，如何关联这些不同的内存区域呢？大家可能都会想到使用链表，的确vm_area_struct结构确实是以链表形式链接，不过为了方便查找，内核又以红黑树（以前的内核使用平衡树）的形式组织内存区域，以便降低搜索耗时。并存的两种组织形式，并非冗 余：链表用于需要遍历全部节点的时候用，而红黑树适用于在地址空间中定位特定内存区域的时候。内核为了内存区域上的各种不同操作都能获得高性能，所以同时 使用了这两种数据结构。</p>
+
+<p>下图反映了进程地址空间的管理模型：</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/tu1_zps5b8ee942.jpg" alt="" /></p>
+
+<p><strong>进程的地址空间对应的描述结构是“内存描述符结构”,它表示进程的全部地址空间，——包含了和进程地址空间有关的全部信息，其中当然包含进程的内存区域。</strong></p>
+
+<h3 id="section-6">进程内存的分配与回收</h3>
+
+<p>创建进程<code>fork()</code>、程序载入<code>execve()</code>、映射文件<code>mmap()</code>、动态内存分配<code>malloc()/brk()</code>等进程相关操作都需要分配内存给进程。不过这时进程申请和获得的还不是实际内存，而是虚拟内存，准确的说是“内存区域”。进程对内存区域的分配最终都会归结到<code>do_mmap（）</code>函数上来（<code>brk</code>调用被单独以系统调用实现，不用<code>do_mmap()</code>），</p>
+
+<p>内核使用<code>do_mmap()</code>函数创建一个新的线性地址区间。但是说该函数创建了一个新VMA并不非常准确，因为如果创建的地址区间和一个已经存在的地址区间相邻，并且它们具有相同的访问权限的话，那么两个区间将合并为一个。如果不能合并，那么就确实需要创建一个新的VMA了。但无论哪种情况， <code>do_mmap()</code>函数都会将一个地址区间加入到进程的地址空间中－－无论是扩展已存在的内存区域还是创建一个新的区域。</p>
+
+<p>同样，释放一个内存区域应使用函数<code>do_ummap()</code>，它会销毁对应的内存区域。</p>
+
+<h3 id="section-7">如何由虚变实！</h3>
+
+<p>从上面已经看到进程所能直接操作的地址都为虚拟地址。当进程需要内存时，从内核获得的仅仅是虚拟的内存区域，而不是实际的物理地址，进程并没有获得物理内存（物理页面——页的概念请大家参考硬件基础一章），获得的仅仅是对一个新的线性地址区间的使用权。实际的物理内存只有当进程真的去访问新获取的虚拟地址时，才会由“请求页机制”产生“缺页”异常，从而进入分配实际页面的例程。</p>
+
+<p>该异常是虚拟内存机制赖以存在的基本保证——它会告诉内核去真正为进程分配物理页，并建立对应的页表，这之后虚拟地址才实实在在地映射到了系统的物理内存上。（当然，如果页被换出到磁盘，也会产生缺页异常，不过这时不用再建立页表了）</p>
+
+<p>这种请求页机制把页面的分配推迟到不能再推迟为止，并不急于把所有的事情都一次做完（这种思想有点像设计模式中的代理模式（proxy））。之所以能这么做是利用了内存访问的“局部性原理”，请求页带来的好处是节约了空闲内存，提高了系统的吞吐率。要想更清楚地了解请求页机制，可以看看《深入理解linux内核》一书。</p>
+
+<p>这里我们需要说明在内存区域结构上的nopage操作。当访问的进程虚拟内存并未真正分配页面时，该操作便被调用来分配实际的物理页，并为该页建立页表项。在最后的例子中我们会演示如何使用该方法。</p>
+
+<h2 id="section-8">系统物理内存管理</h2>
+
+<p>虽然应用程序操作的对象是映射到物理内存之上的虚拟内存，但是处理器直接操作的却是物理内存。所以当应用程序访问一个虚拟地址时，首先必须将虚拟地址转化成 物理地址，然后处理器才能解析地址访问请求。地址的转换工作需要通过查询页表才能完成，概括地讲，地址转换需要将虚拟地址分段，使每段虚地址都作为一个索引指向页表，而页表项则指向下一级别的页表或者指向最终的物理页面。</p>
+
+<p>每个进程都有自己的页表。进程描述符的pgd域指向的就是进程的页全局目录。下面我们借用《linux设备驱动程序》中的一幅图大致看看进程地址空间到物理页之间的转换关系。</p>
+
+<p><img src="http://www.kerneltravel.net/journal/v/mem.files/image003.jpg" alt="" /></p>
+
+<p>上面的过程说起来简单，做起来难呀。因为在虚拟地址映射到页之前必须先分配物理页——也就是说必须先从内核中获取空闲页，并建立页表。下面我们介绍一下内核管理物理内存的机制。</p>
+
+<h3 id="section-9">物理内存管理（页管理）</h3>
+
+<p>Linux内核管理物理内存是通过分页机制实现的，它将整个内存划分成无数个4k（在i386体系结构中）大小的页，从而分配和回收内存的基本单位便是内存页了。利用分页管理有助于灵活分配内存地址，因为分配时不必要求必须有大块的连续内存,系统可以东一页、西一页的凑出所需要的内存供进程使用。虽然如此，但是实际上系统使用内存时还是倾向于分配连续的内存块，因为分配连续内存时，页表不需要更改，因此能降低TLB的刷新率（频繁刷新会在很大程度上降低访问速度）。</p>
+
+<p>鉴于上述需求，内核分配物理页面时为了尽量减少不连续情况，采用了“伙伴”关系来管理空闲页面。伙伴关系分配算法大家应该不陌生——几乎所有操作系统方面的书都会提到,我们不去详细说它了，如果不明白可以参看有关资料。这里只需要大家明白Linux中空闲页面的组织和管理利用了伙伴关系，因此空闲页面分配时也需要遵循伙伴关系，最小单位只能是2的幂倍页面大小。内核中分配空闲页面的基本函数是<code>get_free_page/get_free_pages</code>，它们或是分配单页或是分配指定的页面（2、4、8…512页）。</p>
+
+<p><strong>注意：</strong> <code>get_free_page</code>是在内核中分配内存，不同于<code>malloc</code>在用户空间中分配，<code>malloc</code>利用堆动态分配，实际上是调用<code>brk()</code>系统调用，该调用的作用是扩大或缩小进程堆空间（它会修改进程的<code>brk</code>域）。如果现有的内存区域不够容纳堆空间，则会以页面大小的倍数为单位，扩张或收缩对应的内存区域，但<code>brk</code>值并非以页面大小为倍数修改，而是按实际请求修改。因此<code>malloc</code>在用户空间分配内存可以以字节为单位分配,但内核在内部仍然会是以页为单位分配的。</p>
+
+<p>另外,需要提及的是，物理页在系统中由页结构<code>struct page</code>描述，系统中所有的页面都存储在数组<code>mem_map[]</code>中，可以通过该数组找到系统中的每一页（空闲或非空闲）。而其中的空闲页面则可由上述提到的以伙伴关系组织的空闲页链表（<code>free_area[MAX_ORDER]</code>）来索引。</p>
+
+<p><img src="http://p.blog.csdn.net/images/p_blog_csdn_net/kanghua/systemcall.bmp" alt="" /></p>
+
+<h3 id="section-10">内核内存使用</h3>
+
+<p><strong>Slab</strong></p>
+
+<p>所 谓尺有所长，寸有所短。以页为最小单位分配内存对于内核管理系统中的物理内存来说的确比较方便，但内核自身最常使用的内存却往往是很小（远远小于一页）的 内存块——比如存放文件描述符、进程描述符、虚拟内存区域描述符等行为所需的内存都不足一页。这些用来存放描述符的内存相比页面而言，就好比是面包屑与面 包。一个整页中可以聚集多个这些小块内存；而且这些小块内存块也和面包屑一样频繁地生成/销毁。</p>
+
+<p>为了满足内核对这种小内存块的需要，Linux系统采用了一种被称为slab分配器的技术。Slab分配器的实现相当复杂，但原理不难，其核心思想就是“存储池”的运用。内存片段（小块内存）被看作对象，当被使用完后，并不直接释放而是被缓存到“存储池”里，留做下次使用，这无疑避免了频繁创建与销毁对象所带来的额外负载。</p>
+
+<p>Slab技术不但避免了内存内部分片（下文将解释）带来的不便（引入Slab分配器的主要目的是为了减少对伙伴系统分配算法的调用次数——频繁分配和回收必然会导致内存碎片——难以找到大块连续的可用内存），而且可以很好地利用硬件缓存提高访问速度。</p>
+
+<p><strong>Slab并非是脱离伙伴关系而独立存在的一种内存分配方式，slab仍然是建立在页面基础之上，换句话说，Slab将页面（来自于伙伴关系管理的空闲页面链表）撕碎成众多小内存块以供分配，slab中的对象分配和销毁使用<code>kmem_cache_alloc</code>与<code>kmem_cache_free</code>。</strong></p>
+
+<p><strong>Kmalloc</strong></p>
+
+<p>Slab分配器不仅仅只用来存放内核专用的结构体，它还被用来处理内核对小块内存的请求。当然鉴于Slab分配器的特点，一般来说内核程序中对小于一页的小块内存的请求才通过Slab分配器提供的接口<code>Kmalloc</code>来完成（虽然它可分配32 到131072字节的内存）。从内核内存分配的角度来讲，kmalloc可被看成是<code>get_free_page（s）</code>的一个有效补充，内存分配粒度更灵活了。</p>
+
+<p>有兴趣的话，可以到<code>/proc/slabinfo</code>中找到内核执行现场使用的各种slab信息统计，其中你会看到系统中所有slab的使用信息。从信息中可以看到系统中除了专用结构体使用的slab外，还存在大量为<code>Kmalloc</code>而准备的Slab（其中有些为dma准备的）。</p>
+
+<p><strong>内核非连续内存分配（Vmalloc）</strong></p>
+
+<p>伙伴关系也好、slab技术也好，从内存管理理论角度而言目的基本是一致的，它们都是为了防止“分片”，不过分片又分为外部分片和内部分片之说，所谓内部分片是说系统为了满足一小 段内存区（连续）的需要，不得不分配了一大区域连续内存给它，从而造成了空间浪费；外部分片是指系统虽有足够的内存，但却是分散的碎片，无法满足对大块 “连续内存”的需求。无论何种分片都是系统有效利用内存的障碍。slab分 配器使得一个页面内包含的众多小块内存可独立被分配使用，避免了内部分片，节约了空闲内存。伙伴关系把内存块按大小分组管理，一定程度上减轻了外部分片的 危害，因为页框分配不在盲目，而是按照大小依次有序进行，不过伙伴关系只是减轻了外部分片，但并未彻底消除。你自己比划一下多次分配页面后，空闲内存的剩余情况吧。</p>
+
+<p>所以避免外部分片的最终思路还是落到了如何利用不连续的内存块组合成“看起来很大的内存块”——这里的情况很类似于用户空间分配虚拟内存，内存逻辑上连续，其实映射到并不一定连续的物理内存上。Linux内核借用了这个技术，允许内核程序在内核地址空间中分配虚拟地址，同样也利用页表（内核页表）将虚拟地址映射到分散的内存页上。以此完美地解决了内核内存使用中的外部分片问题。内核提供<code>vmalloc</code>函数分配内核虚拟内存，该函数不同<code>于kmalloc</code>，它可以分配较<code>Kmalloc</code>大得多的内存空间（可远大于128K，但必须是页大小的倍数），但相比<code>Kmalloc</code>来说,<code>Vmalloc</code>需要对内核虚拟地址进行重映射，必须更新内核页表，因此分配效率上要低一些（用空间换时间）。</p>
+
+<p>与用户进程相似,内核也有一个名为<code>init_mm</code>的<code>mm_strcut</code>结构来描述内核地址空间，其中页表项<code>pdg=swapper_pg_dir</code>包含了系统内核空间（3G-4G）的映射关系。因此<code>vmalloc</code>分配内核虚拟地址必须更新内核页表，而<code>kmalloc</code>或<code>get_free_page</code>由于分配的连续内存，所以不需要更新内核页表。</p>
+
+<p><img src="http://p.blog.csdn.net/images/p_blog_csdn_net/kanghua/systemcall2.bmp" alt="" /></p>
+
+<p><code>vmalloc</code>分配的内核虚拟内存与<code>kmalloc/get_free_page</code>分配的内核虚拟内存位于不同的区间，不会重叠。因为内核虚拟空间被分区管理，各司其职。进程空间地址分布从０到３G(其实是到<code>PAGE_OFFSET</code>, 在0x86中它等于0xC0000000)，从3G到<code>vmalloc_start</code>这段地址是物理内存映射区域（该区域中包含了内核镜像、物理页面表<code>mem_map</code>等等）比如我使用的系统内存是64M(可以用free看到)，那么(3G——3G+64M)这片内存就应该映射到物理内存，而<code>vmalloc_start</code>位置应在3G+64M附近（说”附近”因为是在物理内存映射区与<code>vmalloc_start</code>期间还会存在一个8M大小的gap来防止跃界）,<code>vmalloc_end</code>的位置接近4G(说”接近”是因为最后位置系统会保留一片128k大小的区域用于专用页面映射，还有可能会有高端内存映射区，这些都是细节，这里我们不做纠缠)。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/tu2_zpsfa7ec115.jpg" alt="" /></p>
+
+<p>由<code>get_free_page</code>或<code>Kmalloc</code>函数所分配的连续内存都陷于物理映射区域，所以它们返回的内核虚拟地址和实际物理地址仅仅是相差一个偏移量（<code>PAGE_OFFSET</code>），你可以很方便的将其转化为物理内存地址，同时内核也提供了<code>virt_to_phys（）</code>函数将内核虚拟空间中的物理映射区地址转化为物理地址。要知道，物理内存映射区中的地址与内核页表是有序对应的，系统中的每个物理页面都可以找到它对应的内核虚拟地址（在物理内存映射区中的）。</p>
+
+<p>而<code>vmalloc</code>分配的地址则限于<code>vmalloc_start</code>与<code>vmalloc_end</code>之间。每一块k分配的内核虚拟内存都对应一个<code>vm_struct</code>结构体（可别和<code>vm_area_struct</code>搞混，那可是进程虚拟内存区域的结构），不同的内核虚拟地址被4k大小的空闲区间隔，以防止越界——见下图）。与进程虚拟地址的特性一样，这些虚拟地址与物理内存没有简单的位移关系，必须通过内核页表才可转换为物理地址或物理页。它们有可能尚未被映射，在发生缺页时才真正分配物理页面。</p>
+
+<p><img src="http://www.kerneltravel.net/journal/v/mem.files/image013.jpg" alt="" /></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Inside C++ Object]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/04/12/Inside-Object/"/>
+    <updated>2014-04-12T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/04/12/Inside-Object</id>
+    <content type="html"><![CDATA[<p>modified from <a href="http://blog.csdn.net/eroswang/article/details/1749609">http://blog.csdn.net/eroswang/article/details/1749609</a></p>
+
+<hr />
+
+<h2 id="ooob">面对对象（OO）和基于对象（OB）</h2>
+
+<p>基于对象的数据类型可以展示封装的非多态形式，但是不支持类型的扩充。一个OB设计可能比一个对等的OO设计速度更快而且空间更紧凑。速度快是因为所有的函数引发操作都在编译时期解析完成，对象建构起来时不需要设置virtual机制；空间紧凑则是因为每一个class object不需要负担传统上为了支持virtual机制而需要的额外符合。不过，OB设计比较没有弹性。 </p>
+
+<h2 id="c">C++对象模型</h2>
+
+<p>在C++中，有两种<strong>class data members：static和nonstatic</strong>，以及三种<strong>class member functions：static、nonstatic和virtual</strong>。</p>
+
+<p>Nonstatic data members被配置于每一个class object之内，static data members则被存放在所有的class object之外。Static和nonstatic function members也被放在所有的class object之外，Virtual functions则以两个步骤支持之：</p>
+
+<ul>
+  <li>每一个class产生出一堆指向virtual functions的指针，放在表格之中，这个表格被称为<strong>virtual table（vtbl）</strong>。每一个class所关联的type_info object（用以支持<strong>runtime type identification，RTTI</strong>）也经由virtual table被指出来，通常是放在表格的第一个slot处。</li>
+  <li>每一个class object被添加了一个指针，指向相关的virtual table。通常这个指针被称为<strong>vptr</strong>。</li>
+</ul>
+
+<!--more-->
+
+<p><img src="http://p.blog.csdn.net/images/p_blog_csdn_net/arthurkingios/1.JPG" alt="" /></p>
+
+<p><strong>重置vptr：</strong></p>
+
+<p>假设Bear继承于ZooAnimal，如下所示：</p>
+
+<pre><code>Bear b;
+ZooAnimal za = b;  // 这会引起切割（sliced）
+// 调用 ZooAnimal::rotate()
+za.rotate();
+</code></pre>
+
+<p><strong>为什么rotate所调用的是ZooAnimal实体而不是Bear实体？</strong></p>
+
+<p>ZooAnimal class object以另一个ZooAnimal class object作为初值，或Bear class object以另一个Bear class object作为初值，都可以直接靠bitwise copy semantics完成（剔除pointer member情况）
+。</p>
+
+<p>而当一个base class object以其derived class object内容做初始化操作时，其vptr复制操作也必须保证其安全。编译器必须确保如果某个object含有一个或一个以上的vptrs，那些vptrs的内容不会被base class object初始化改变。</p>
+
+<h2 id="constructor">Constructor的建构操作</h2>
+
+<h3 id="default-constructor">Default Constructor的建构操作</h3>
+
+<p>default constructor仅在编译器需要它时，才会被合成出来。
+通常来说，由编译器合成出来的default constructor是没啥用的（trivial），但有以下几种例外：</p>
+
+<ol>
+  <li>
+    <p>带有“Default Constructor”的Member Class Object</p>
+
+    <p>如果一个class没有任何constructor，但它内含一个member object，而后者有default constructor，那么编译器会在constructor真正需要被调用时未此class合成一个“nontrivial”的default constructor。</p>
+
+    <p>为了避免合成出多个default constructor，解决方法是把合成的default constructor、copy constructor、destructor、assignment copy operator都以inline方式完成。一个inline函数有静态链接（static linkage），不会被档案以外者看到。如果函数太复杂，不适合做成inline，就会合成出一个explicit non-inline static实体。</p>
+  </li>
+  <li>“带有Default Constructor”的Base Class</li>
+  <li>“带有一个Virtual Function”的Class
+    <ul>
+      <li>class声明（或继承）一个virtual function</li>
+      <li>class派生自一个继承串链，其中有一个或更多的virtual base classes</li>
+    </ul>
+  </li>
+  <li>
+    <p>“带有一个virtual Base Class”的Class</p>
+
+    <p>编译器需要在derived class object中为每一个virtual base classes安插一个指针，使得所有“经由reference或pointer来存取一个virtual base class”的操作可以通过相关指针完成。</p>
+  </li>
+</ol>
+
+<p><strong>总结：</strong>
+被合成出来的constructor只能满足编译器（而非程序）的需要。
+没有存在着四种情况而又没有声明任何constructor的classes，它们拥有的是implicit trivial default constructor，实际上并不会被合成出来。</p>
+
+<p>在合成的default constructor中，只有base class subobjects和member class objects会被初始化，所有其它的nonstatic data member，如整数、整数指针，整数数组等都不会被初始化。</p>
+
+<p><strong>一般会对dafult constructor有两个误解：</strong></p>
+
+<ol>
+  <li>任何class如果没有定义default constructor，就会被合成出来。</li>
+  <li>编译器合成出来的default constructor会明确设定“class内每一个data memeber”的默认值。</li>
+</ol>
+
+<h3 id="copy-constructor">Copy Constructor的建构操作</h3>
+
+<p>有三种情况会以一个object的内容作为另一个class object的初值，即<strong>object赋值、object参数传递、object作为函数返回值</strong>。</p>
+
+<p>如果class没有提供一个explicit copy constructor，其内部是以所谓的default memberwise initialization手法完成的，也就是把每一个内建的或派生的data member（例如一个指针或一个数组）的值，从某个object拷贝一份到另一个object身上，不过它并不会拷贝其中的member class object，而是以递归的方式施行memberwise initialization。</p>
+
+<p>copy constructor仅在必要的时候（class不展现bitwise copy semantics）才由编译器产生出来。</p>
+
+<p>比如，某个类含有<code>String&amp; str</code>成员变量，在这种情况下，编译器必须合成出一个copy constructor以便调用member class String object的copy constructor：</p>
+
+<p><strong>一个class不展现出“bitwise copy semantics”的四种情况：</strong></p>
+
+<ol>
+  <li>当class内含一个member object而后者的class声明有一个copy constructor时（无论是被明确声明或被合成而得）</li>
+  <li>当class继承自一个base class而后者存在有一个copy constructor时</li>
+  <li>
+    <p>当class声明了一个或多个virtual functions时</p>
+
+    <p>由于编译器要对每个新产生的class object的vptr设置初值，因此，当编译器导入一个vptr到class之中时，该class就不再展现bitwise semantics了。特别地，当一个base class object以其derived class的object内容做初始化操作时，其vptr复制操作必须保证安全，而如果依旧采用bitwise copy的话，base class object的vptr会被设定指向derived class的virtual table，而这将导致灾难。</p>
+  </li>
+  <li>
+    <p>当class派生自一个继承串链，其中有一个或多个virtual base classes时</p>
+
+    <p>当一个class object以其derived classes的某个object作为初值时，为了完成正确的virtual base class pointer/offset的初值设定，编译器必须合成一个copy constructor，安插一些码以设定virtual base class pointer/offset的初值，对每一个member执行必要的memberwise初始化操作，以及执行其他的内存相关操作。</p>
+  </li>
+</ol>
+
+<h2 id="section">成员的初始化列表</h2>
+
+<p>下列情况中，为了让你的程序能够被顺利编译，你必须使用member initialization list：</p>
+
+<ul>
+  <li>当初始化一个reference member时；</li>
+  <li>当初始化一个const member时；</li>
+  <li>当调用一个base class的constructor，而它拥有一组参数时；</li>
+  <li>当调用一个member class的constructor，而它拥有一组参数时。</li>
+</ul>
+
+<h2 id="class">class大小</h2>
+
+<p>考虑下面的代码：</p>
+
+<pre><code>#include "iostream"
+using namespace std;
+
+class X {};
+class Y : public virtual X {};
+class Z : public virtual X {};
+class A : public Y,public Z {};
+
+int main()
+{
+    cout&lt;&lt;"sizeof(X): "&lt;&lt;sizeof(X)&lt;&lt;endl;
+    cout&lt;&lt;"sizeof(Y): "&lt;&lt;sizeof(Y)&lt;&lt;endl;
+    cout&lt;&lt;"sizeof(Z): "&lt;&lt;sizeof(Z)&lt;&lt;endl;
+    cout&lt;&lt;"sizeof(A): "&lt;&lt;sizeof(A)&lt;&lt;endl;
+
+    return 0;
+}
+</code></pre>
+
+<p>得到的结果是什么呢？答案是</p>
+
+<pre><code>sizeof(X): 1
+sizeof(Y): 4
+sizeof(Z): 4
+sizeof(A): 8
+</code></pre>
+
+<ul>
+  <li>对于一个class X这样的空的class，由于需要使得这个class的两个objects得以在内存中配置独一无二的地址，故编译器会在其中安插进一个char。因而class X的大小为1。</li>
+  <li>由于class Y虚拟继承于class X，而在derived class中，会包含指向visual base class subobject的指针（4 bytes），而由于需要区分这个class的不同对象，因而virtual base class X subobject的1 bytes也出现在class Y中（1 bytes），此外由于Alignment的限制，class Y必须填补3bytes（3 bytes），这样一来，class Y的大小为8。<strong>编译器将一个empty virtual base class视为derived class object最开头的一部分，因而省去了其后的1 bytes，自然也不存在后面Alignment的问题，故实际的执行结果为4。</strong></li>
+  <li>不管它在class继承体系中出现了多少次，一个virtual base class subobject只会在derived class中存在一份实体。因此，class A的大小有以下几点决定：（1）被大家共享的唯一一个class X实体（1 byte）；（2）Base class Y的大小，减去“因virtual base class X而配置”的大小，结果是4 bytes。Base class Z的算法亦同。（3）classs A的alignment数量。前述总和为9 bytes，需要填补3 bytes，结果是12 bytes。empty virtual base class所做的处理，class X实体的那1 byte将被拿掉，于是额外的3 bytes填补额也不必了，故实际的执行结果为8。</li>
+</ul>
+
+<p><strong>不管是自身class的还是继承于virtual或nonvirtual base class的nonstatic data members，其都是直接存放在每个class object之中的。至于static data members，则被放置在程序的一个global data segment中，不会影响个别的class object的大小，并永远只存在一份实体。</strong></p>
+
+<h2 id="data-member">Data Member</h2>
+
+<h3 id="data-member-1">Data Member布局</h3>
+
+<p>同一个access section中的nonstatic data member在class object中的排列顺序和其被声明的顺序一致，而多个access sections中的data members可以自由排列。（虽然当前没有任何编译器会这么做）</p>
+
+<p>编译器还可能会合成一些内部使用的data members（例如vptr，编译器会把它安插在每一个“内含virtual function之class”的object内），以支持整个对象模型。</p>
+
+<h3 id="data-member-2">Data Member的存取</h3>
+
+<p><strong>Static Data Members：</strong></p>
+
+<ul>
+  <li>每一个static data member只有一个实体，存放在程序的data segment之中，每次程序取用static member，就会被内部转化为对该唯一的extern实体的直接参考操作。</li>
+  <li>若取一个static data member的地址，会得到一个指向其数据类型的指针，而不是一个指向其class member的指针，因为static member并不内含在一个class object之中。</li>
+  <li>如果有两个classes，每一个都声明了一个static member freeList，那么编译器会采用name-mangling对每一个static data member编码，以获得一个独一无二的程序识别代码。</li>
+</ul>
+
+<p><strong>Nonstatic Data Members：</strong></p>
+
+<pre><code>Point3d origin, *pt = &amp;origin;
+origin.x = 0.0;
+pt-&gt;x = 0.0;
+</code></pre>
+
+<p><strong>这两种存取方式有什么区别吗？</strong></p>
+
+<p>答案是“<strong>当Point3d是一个derived class，而在其继承结构中有一个virtual base class，并且并存取的member（如本例的x）是一个从该virtual base class继承而来的member时，就会有重大的差异</strong>”。这时候我们不能够说pt必然指向哪一种 class type（因此我们也就不知道编译期间这个member真正的offset位置），所以这个存取操作必须延迟到<strong>执行期</strong>，经由一个额外的简洁导引，才能够解决。但如果使用origin，就不会有这些问题，其类型无疑是Point3d class，而即使它继承自virtual base class，members的offset位置也在<strong>编译时期就固定了</strong>。</p>
+
+<h3 id="data-member-3">继承与Data Member</h3>
+
+<p><strong>1. 只要继承不要多态</strong></p>
+
+<pre><code>class Concrete {
+private:
+int val;
+char bit1;
+};
+
+class Concrete2 : public Concrete1 {
+private:
+char bit2;
+};
+
+class Concrete3 : public Concrete2 {
+private:
+char bit3;
+};
+</code></pre>
+
+<p>现在Concrete3 object的大小为16 bytes，细分如下：（a）Concrete1内含两个members：val和bit1，加起来是5 bytes，再填补3 bytes，故一个Concrete1 object实际用掉8 bytes；（b）需要注意的是，Concrete2的bit2实际上是被放在填补空间之后的，于是一个Concrete2 object的大小变成12 bytes；（c）依次类推，一个Concrete3 object的大小为16 bytes。</p>
+
+<p><strong>2. 加上多态</strong></p>
+
+<p>virtual function带来的额外负担：</p>
+
+<ul>
+  <li>导入一个virtual table，用来存放它声明的每一个virtual function的地址；</li>
+  <li>在每一个class object中导入一个vptr；</li>
+  <li>加强constructor和destructor，使它们能设置和抹消vptr。</li>
+</ul>
+
+<p><strong>3. 多重继承</strong></p>
+
+<p>对一个多重继承对象，将其地址指定给“第一个base class的指针”，情况将和单一继承时相同，因为二者都指向相同的起始地址，需付出的成本只有地址的指定操作而已。至于第二个或后继的base class的地址指定操作，则需要将地址修改过，加上（或减去，如果downcast的话）介于中间的base class subobjects的大小。</p>
+
+<p><strong>4. 虚拟继承</strong></p>
+
+<p>class如果内含一个或多个virtual base class subobject，将被分隔为两部分：一个不变局部和一个共享局部。不变局部中的数据，不管后继如何衍化，总是拥有固定的offset，所以这一部分数据可以被直接存取。至于共享局部，所表现的就是virtual base class subobject。这一部分的数据，其位置会因为每次的派生操作而变化，所以它们只可以被间接存取。
+间接存取主要有以下三种主流策略：</p>
+
+<ol>
+  <li>在每一个derived class object中安插一些指针，每个指针指向一个virtual base class。要存取继承得来的virtual base class members，可以使用相关指针间接完成。由于虚拟继承串链得加长，导致间接存取层次的增加。</li>
+  <li>在上一个的基础上，为了解决每一个对象必须针对每一个virtual base class背负一个额外的指针的问题，Micorsoft编译器引入所谓的virtual base class table。每一个class object如果有一个或多个virtual base classes，就会由编译器安插一个指针，指向virtual base class table。这样一来，就可以保证class object有固定的负担，不因为其virtual base classes的数目而有所变化。</li>
+  <li>在virtual function table中放置virtual base class的offset。新近的Sun编译器采取这样的索引方法，若为正值，就索引到virtual functions，若为负值，则索引到virtual base class offsets。</li>
+</ol>
+
+<p><strong>小结：一般而言，virtual base class最有效的一种运用方式就是：一个抽象的virtual base class，没有任何data members。</strong></p>
+
+<h3 id="data-members">指向Data Members的指针</h3>
+
+<pre><code>class Point3d {
+public:
+	virtual ~Point3d();
+protected:
+	static Point3d origin;
+	float x, y, z;
+} 
+</code></pre>
+
+<p>如果你去取class中某个data member的地址时，得到的都是data member在class object中的实际偏移量加1。例如<code>&amp;Point3d::z</code>得到9或13，根据vptr放在对象头还是对象尾确定。为什么要这么做呢？主要是为了区分一个“没有指向任何data member”的指针和一个指向“的第一个data member”的指针。即，区分一下情况：</p>
+
+<pre><code>float Point3d::*p1 = 0;
+float Point3d::*p2 = &amp;Point3d::x;
+</code></pre>
+
+<p>为了区分<code>p1</code>和<code>p2</code>每一个真正的member offset值都被加上1。因此，无论编译器或使用者都必须记住，在真正使用该值以指出一个member之前，请先减掉1。</p>
+
+<p>另外正确区分<code>&amp; Point3d::z</code>和<code>&amp;origin.z</code>：取一个nonstatic data member的地址将会得到它在class中的offset，取一个绑定于真正class object身上的data member的地址将会得到该member在内存中的真正地址。</p>
+
+<p>在多重继承之下，若要将第二个（或后继）base class的指针和一个与derived class object绑定之member结合起来那么将会因为需要加入offset值而变得相当复杂。</p>
+
+<pre><code>struct Base1 { int val1; };
+struct Base2 { int val2; };
+struct Derived : Base1, Base2 { ... };
+
+void func1(int Derived::*dmp, Derived *pd)
+{
+	// 期望第一个参数得到的是一个“指向derived class之member”的指针
+	// 如果传来的却是一个“指向base class之member”的指针，会怎样呢
+	pd-&gt;*dmp;
+}
+
+void func2(Derived *pd)
+{
+	// bmp将成为1
+	int Base2::*bmp = &amp;Base2::val2;
+	// bmp == 1
+	// 但是在Derived中，val2 == 5
+	func1(bmp,pd);
+}
+</code></pre>
+
+<p>也就是说<code>pd-&gt;*dmp</code>将存取到<code>Base1::val1</code>，为解决这个问题，当bmp被作为func1()的第一个参数时，它的值必须因介入的Base1 class的大小而调整：</p>
+
+<pre><code>// 内部转换，防止bmp == 0
+func1(bmp ? bmp + sizeof(Base1) : 0, pd);
+</code></pre>
+
+<h2 id="functions">Functions</h2>
+
+<h3 id="nonstatic-member-functions">非静态成员函数（Nonstatic Member Functions）</h3>
+
+<p>C++的设计准则之一就是：nonstatic member function至少必须和一般的nonmember function有相同的效率。因为编译器内部已将“member函数实体”转化为对等的“nonmember函数实体”。下面是magnitude()的一个nonmember定义：</p>
+
+<pre><code>loat Pointer3d::magnitude() const
+{
+	return sqrt(_x*_x + _y*_y + _z*_z);
+}
+// 内部转化为
+float magnitude_7Point3dFv(const Point3d *this)  //已对函数名称进行“mangling”处理
+{
+	return sqrt(this-&gt;_x*this-&gt;_x + this-&gt;_y*this-&gt;_y + this-&gt;_z*this-&gt;_z);
+}
+</code></pre>
+
+<p>现在，对该函数的每一个调用操作也都必须转换：</p>
+
+<pre><code>obj.magnitude();
+// 转换为
+magnitude_7Point3dFv(&amp;obj);
+</code></pre>
+
+<p>mangling手法可在链接时期检查出任何不正确的调用操作，但由于编码时未考虑返回类型，故<strong>如果返回类型声明错误，就无法检查出来</strong>。</p>
+
+<h3 id="virtual-member-functions">虚拟成员函数（Virtual Member Functions）</h3>
+
+<p>一个class只会有一个virtual table，其中内含其对应的class object中所有active virtual functions函数实体的地址，具体包括：</p>
+
+<ol>
+  <li>
+    <p>这个class所定义的函数实体</p>
+
+    <p>它会改写一个可能存在的base class virtual function函数实体。若base class中不存在相应的函数，则会在derived class的virtual table增加相应的slot。</p>
+  </li>
+  <li>
+    <p>继承自base class的函数实体</p>
+
+    <p>这是在derived class决定不改写virtual function时才会出现的情况。具体来说，base class中的函数实体的地址会被拷贝到derived class的virtual table相对应的slot之中。</p>
+  </li>
+  <li>
+    <p>pure_virtual_called函数实体</p>
+  </li>
+</ol>
+
+<p>对于那些不支持多态的对象，经由一个class object调用一个virtual function，这种操作应该总是被编译器像对待一般的nonstatic member function一样地加以决议：</p>
+
+<pre><code>// Point3d obj
+obj.normalize();
+// 不会转化为
+(*obj.vptr[1])(&amp;obj);
+// 而会被转化未
+normalize_7Point3dFv(&amp;obj);
+</code></pre>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/virtualtable_zpsc5065cda.png" alt="" /></p>
+
+<h3 id="static-member-functions">静态成员函数（Static Member Functions）</h3>
+
+<p>编译器的开发者针对static member functions，分别从编译层面和语言层面对其进行了支持：</p>
+
+<p><strong>编译层面</strong>：当class设计者希望支持“没有class object存在”的情况时，可把0强制转型为一个class指针，因而提供出一个this指针实体：</p>
+
+<pre><code>// 函数调用的内部转换
+object_count((Point3d*)0);
+</code></pre>
+
+<p><strong>语言层面</strong>：static member function的最大特点是没有this指针，如果取一个static member function的地址，获得的将是其在内存中的位置，其地址类型并不是一个“指向class member function的指针”，而是一个“nonmember函数指针”：</p>
+
+<pre><code>unsigned int Point3d::object_count() { return _object_count; }
+&amp;Point3d::object_count();
+// 会得到一个地址，其类型不是
+unsigned int (Point3d::*)();
+// 而是
+unsigned int (*)();
+</code></pre>
+
+<ul>
+  <li>它不能够直接存取其class的nonstatic members。</li>
+  <li>它不能够被声明为const、volatile或virtual。</li>
+  <li>它不需要经由class object才被调用。</li>
+</ul>
+
+<p>static member function经常被用作回调（callback）函数。</p>
+
+<h3 id="virtual-functions">多重继承下的Virtual Functions</h3>
+
+<p>在多重继承中支持virtual functions，其复杂度围绕在第二个及后继的base classes身上，以及“必须在执行期调整this指针”这一点。</p>
+
+<p><strong>多重继承到来的问题：</strong></p>
+
+<ol>
+  <li>
+    <p>经由指向“第二或后继之base class”的指针（或reference）来调用derived class virtual function，该调用操作连带的“必要的this指针调整”操作，必须在执行期完成；</p>
+
+    <pre><code> Base2 *pbase2 = new Derived;
+ //会被内部转化为：
+ Derived *temp = new Derived;
+ Base2 *pbase2 = temp ? temp + sizeof(Base1) : 0;
+ // 必须调用正确的virtual destructor函数实体
+ // pbase2需要调整，以指出完整对象的起始点
+ delete pbase2;
+</code></pre>
+
+    <p>上述的offset加法却不能够在编译时期直接设定，因为pbase2所指的真正对象只有在执行期才能确定。自此，我们明白了在多重继承下所面临的独特问题：经由指向“第二或后继之base class”的指针（或reference）来调用derived class virtual function，该调用操作所连带的“必要的this指针调整”操作，必须在执行期完成。有两种方法来解决这个问题：</p>
+
+    <ol>
+      <li>将virtual table加大，每一个virtual table slot不再只是一个指针，而是一个聚合体，内含可能的offset以及地址。</li>
+      <li>利用Thunk技术，允许virtual table slot继续内含一个简单的指针，slot中的地址可以直接指向virtual function，也可以指向一个相关的thunk。于是，对于那些不需要调整this指针的virtual function而言，也就不需要承载效率上的额外负担。</li>
+    </ol>
+  </li>
+  <li>
+    <p>由于两种不同的可能：（a）经由derived class（或第一个base class）调用；（b）经由第二个（或其后继）base class调用，同一函数在virtual table中可能需要多笔对应的slot；</p>
+
+    <pre><code> Base1 *pbase1 = new Derived;
+ Base2 *pbase2 = new Derived;
+	
+ delete pbase1;
+ delete pbase2;
+</code></pre>
+
+    <p>虽然两个delete操作导致相同的Derived destructor，但它们需要两个不同的virtual table slots：</p>
+
+    <p><strong>解决方法：</strong>在多重继承下，一个derived class内含n-1个额外的virtual tables，n表示其上一层base classes的数目。按此手法，Derived将内含以下两个tables：vtbl_Derived和vtbl_Base2_Derived。</p>
+  </li>
+  <li>
+    <p>允许一个virtual function的返回值类型有所变化，可能是base type，可能是publicly derived type，这一点可以通过Derived::clone()函数实体来说明。</p>
+
+    <pre><code> Base2 *pb1 = new Derived;
+
+ // 调用Derived::clone()
+ // 返回值必须被调整，以指向Base2 subobject
+ Base2 *pb2 = pb1-&gt;clone();
+</code></pre>
+
+    <p>当运行pb1-&gt;clone()时，pb1会被调整指向Derived对象的起始地址，于是clone()的Derived版会被调用：它会传回一个指针，指向一个新的Derived对象；该对象的地址在被指定给pb2之前，必须先经过调整，以指向Base2 subobject。</p>
+  </li>
+</ol>
+
+<p>virtual table多重继承内存布局图：</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/virtualtable_zps7dae0fad.png" alt="多重继承" /></p>
+
+<p>virtual table虚拟继承内存布局图：</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/virtualtable_zpsb4d94533.png" alt="" /></p>
+
+<h2 id="section-1">其他</h2>
+
+<h3 id="section-2">纯虚函数</h3>
+
+<p>在设计抽象基类时，需要注意以下几点：</p>
+
+<ol>
+  <li>
+    <p>不要将destructor声明为pure virtual function；</p>
+
+    <p>如果将destructor声明为pure virtual function，则设计者一定得定义它。因为每一个derived class destructor会被编译器加以扩展，以静态调用得方式调用其“每一个virtual base class”以及“上一层base class”的destructor。</p>
+  </li>
+  <li>不要将那些函数定义内容并不与类型有关的函数设计为virtual function，因为其几乎不会被后继的derived class改写。</li>
+  <li>对于其derived class可能修改某一个data member的函数，不应被声明为const。</li>
+</ol>
+
+<h3 id="section-3">对象构造</h3>
+
+<p><strong>必须在构造函数初始化列表初始化的类型</strong>：</p>
+
+<ul>
+  <li>没有默认构造函数的类型成员</li>
+  <li>const成员（整数型的可以申明时赋值）</li>
+  <li>
+    <p>引用类型的成员</p>
+
+    <p>class Point {
+  public:
+      Point(float x = 0.0, float y = 0.0) : _x(x),_y(y) {}
+      virtual float z();
+  protected:
+      float _x,_y;
+  };</p>
+  </li>
+</ul>
+
+<p>不能小看z()这个virtual function给class Point带来的巨大变化。virtual function的引入促使每一个class Point拥有一个vtpr，这样一来，编译器在constructor中添加了对vptr进行初始化的代码，而copy constructor和copy assignment operator也会对vptr进行设定，而不再是原先简单的bitwise操作了。</p>
+
+<p>一般而言，如果你的设计之中有很多函数都需要以传值方式（by value）传回一个local class object，那么提供一个copy constructor就比较合理。</p>
+
+<p><strong>constructor的执行算法通常如下：</strong></p>
+
+<ul>
+  <li>在derived class constructor中，所有virtual base classes的constructor会被调用；</li>
+  <li>在derived class constructor中，上一层base class的constructor会被调用；</li>
+  <li>上述完成之后，对象的vptr(s)被初始化，指向相关的virtual table(s)；</li>
+  <li>如果class有member class object，而后者拥有constructor，那么它们会以其声明顺序的相反顺序被调用；</li>
+  <li>用户所定义的代码。</li>
+</ul>
+
+<h3 id="section-4">析构函数</h3>
+
+<p>如果class没有定义destructor，那么只有在class内含的member object（或是class自己的base class）拥有destructor的情况下，编译器才会自动合成出一个来。
+其解构顺序与建构顺序正好相反。</p>
+
+<p>一般而言，我们会把object尽可能放置在使用它的那个程序区段附近，这样做可以节省不必要的对象产生操作和销毁操作。</p>
+
+<h3 id="section-5">全局对象</h3>
+
+<p>全局对象的静态初始化策略包括以下几个步骤：</p>
+
+<ol>
+  <li>为每一个需要静态初始化的对象产生一个<code>_sti_...()</code>函数，内含必要的constructor调用操作或inline expansions；</li>
+  <li>为每一个需要静态的内存释放操作的对象产生一个<code>_std_...()</code>函数，内含必要的destructor调用操作或inline expansions；</li>
+  <li>在main()函数的首尾分别添加一个<code>_main()</code>函数（用以调用可执行文件中的所有<code>_sti()</code>函数）和一个<code>_exit()</code>函数（用以调用可执行文件中的所有<code>_std()</code>函数）。</li>
+</ol>
+
+<p><strong>建议根本不要用那些需要静态初始化的全局对象。</strong> </p>
+
+<h3 id="section-6">局部静态对象</h3>
+
+<pre><code>const Matrix&amp; identity() {
+	static Matrix mat_identity;
+	// ...
+	return mat_identity;
+}
+</code></pre>
+
+<p>此处的local static class object保证了以下语意：</p>
+
+<ul>
+  <li><code>mat_identity</code>的constructor必须只能施行一次，虽然上述函数可能会被调用多次；</li>
+  <li><code>mat_identity</code>的destructor必须只能施行一次，虽然上述函数可能会被调用多次。</li>
+</ul>
+
+<p>编译器的实际做法如下：在第一次调用<code>identity()</code>时把<code>mat_identity</code>构造出来，而在与相应文件关联的静态内存释放函数中将其解构。（局部静态对象的地址在downstream component中将会被转换到程序内用来放置global object的data segment中）</p>
+
+<h3 id="section-7">对象数组</h3>
+
+<p>如何支持以下的语句：<code>complex::complex(double=0.0, double=0.0);</code></p>
+
+<pre><code>complex c_array[10];
+//内部转换
+vec_new(&amp;c_array,sizeof(complex),10,&amp;complex::complex,0);
+</code></pre>
+
+<p>为了解决这个问题，可由编译器产生一个内部的constructor，没有参数，在其函数内调用由程序员提供的constructor，并将default参数值明确地指定过去：</p>
+
+<pre><code>complex::complex() {
+	complex(0.0, 0.0);
+}
+</code></pre>
+
+<h3 id="new--delete">new &amp; delete</h3>
+
+<p>以constructor来配置一个class object：<code>Point3d *origin = new Point3d;</code>
+转为</p>
+
+<pre><code>Point3d *origin;
+if(origin = _new(sizeof(Point3d))) {
+	try {
+		origin = Point3d::Point3d(origin);
+	}
+	catch( ... ) {
+		_delete(origin);  // 释放因new而配置的内存
+		throw;  // 将原来的exception上传
+	}
+}
+</code></pre>
+
+<p>如果我们配置一个数组，内带10个Point3d objects，我们预期Point和Point3d的constructor被调用各10次，每次作用于数组中的一个元素：</p>
+
+<pre><code>// 危险
+Point *ptr = new Point3d[10];
+// 只有Point::~Point被调用
+delete []ptr;
+</code></pre>
+
+<p>由于其触发的<code>vec_delete()</code>是通过迭代走过每一个数组元素，而本例中被传递过去的是Point class object的大小而不是Point3d class object的大小，整个运行过程将会失败。
+解决之道在于程序层面，而非语言层面：</p>
+
+<pre><code>for(int ix = 0; ix &lt; 10; ix++)
+{
+	Point3d *p = &amp;((Point3d*)ptr)[ix];
+	delete p;
+}
+</code></pre>
+
+<p>当然，最好还是<strong>避免以一个base class指针指向一个derived class objects所组成的数组。</strong></p>
+
+<h3 id="template">Template</h3>
+
+<p><strong>member functions只有在member functions被使用的时候，C++ Standard才要求它们被“具现”出来</strong>。这个规则的由来主要有两个原因：</p>
+
+<ol>
+  <li>空间和效率的考虑。对于未使用的函数进行“具现”将会花费大量的时间和空间；</li>
+  <li>尚未实现的功能。并不是一个template具现出来的所有类型一定能够完整支持一组member functions，因而只需具现真正需要的member functions。</li>
+</ol>
+
+<p>举个例子：<code>Point&lt;float&gt; *p = new Point&lt;float&gt;;</code></p>
+
+<p>只有（a）Point template的float实例、（b）new 运算符、（c）default constructor需要被“具现”。</p>
+
+<p><strong>并且所有与类型相关的检验，如果涉及到template参数，都必须延迟到真正的具现操作发生</strong>。</p>
+
+<p>区分以下两种意义：一种是“<strong>scope of the template definition</strong>”，也就是“定义出template”的程序，另一种是“<strong>scope of the template instantiation</strong>”，也就是“具现出template”的程序。</p>
+
+<pre><code>// scope of the template definition
+extern double foo(double);
+
+template &lt;class type&gt;
+class ScopeRules {
+public:
+	void invariant() { _member = foo(_val); }
+	type type_dependent() { return foo(_member); }
+	// ...
+private:
+	int _val;
+	type _member;
+};
+
+// scope of the template instantiation
+extern int foo(int);
+
+ScopeRules&lt;int&gt; sr0;
+</code></pre>
+
+<p>在“scope of the template definition”中，只有一个foo()函数声明位于scope之内；然而在“scope of the template instantiation”中，两个foo()函数声明都位于scope之内。对于以下函数操作：<code>sr0.invariant();</code>，那么，在invariant()中调用的究竟是哪一个foo()函数实体呢？</p>
+
+<p>Template之中，对于一个nonmember name的决议结果是根据这个name的使用是否与“用以具现出该template的参数类型”有关而决定的，如果其使用互不相关，那么就以“scope of the template definition”来决定name，否则就以“scope of the template instantiation”来决定name。</p>
+
+<pre><code>// 因为_val的类型是int，而函数的决议只和函数原型有关，与函数返回值无关
+// 被用来具现这个template的真正类型对于_val的类型没有影响
+_member = foo(_val);
+</code></pre>
+
+<p>故此处的调用操作由“scope of the template definition”来决议。</p>
+
+<p>若是如下的函数调用：<code>sr0.type_dependent();</code>。由于_member的类型与template参数有关，故此处由“scope of the template instantiation”来决议。</p>
+
+<h3 id="section-8">执行期类型识别</h3>
+
+<p><code>dynamic_cast</code>运算符可以在执行期决定真正的类型。如果downcast是安全的（也就是说，一个base type pointer指向一个derived class object），这个运算符会传回被适当转型过的指针；如果downcast不是安全的，这个运算符会传回0。</p>
+
+<pre><code>typedef type *ptype;
+typedef fct *pfct;
+
+simplify_conv_op(ptype pt)
+{
+	if(pfct pf = dynamic_cast&lt;pfct&gt;(pt)) {
+	...
+	}
+	else { ... }
+}
+</code></pre>
+
+<p>什么是<code>dynamic_cast</code>的真正成本？<code>pfct</code>的一个类型描述器会被编译器产生出来，由<code>pt</code>指向之class object类型描述器必须在执行期通过vptr取得。下面是可能的转换：</p>
+
+<pre><code>// 取得pt的类型描述器
+((type_info*)(pt-&gt;vptr[0]))-&gt;_type_description;
+</code></pre>
+
+<p>其中，<code>type_info</code>是C++ Standard所定义的类型描述器的class名称，该class中放置着待索求的类型信息。virtual table的第一个slot内含<code>type_info</code> object的地址，此<code>type_info</code> object与pt所指之class type有关。</p>
+
+<p><code>dynamic_cast</code>运算符也适用于reference身上，然而对于一个non-type-safe-cast，其结果不会与施行于指针的情况一样。一个reference不可以像指针那样“把自己设为0便代表了no object”；若将一个reference设为0，会引起一个临时性对象（拥有被参考到的类型）被产生出来，该临时对象的初值为0，这个reference然后被设定为该临时变量的一个别名。</p>
+
+<p>因而，如果reference并不真正是某一种derived class，那么可通过丢出一个<code>bad_cast exception</code>进行处理：</p>
+
+<pre><code>simplify_conv_op(const type &amp;rt)
+{
+	try {
+		fct &amp;rf = dynamic_cast&lt;fct&amp;&gt;(rt);
+	}
+	catch(bad cast) {
+		// ...
+	}
+}
+</code></pre>
+
+<p>当然，你也可以使用typeid运算符来达到同样的目的：</p>
+
+<pre><code>simplify_conv_op(const type &amp;rt)
+{
+	if(typeid(rt) == typeid(fct))
+	{
+		fct &amp;rf = dynamic_cast&lt;fct&amp;&gt;(rt);
+	}
+	else { ... }
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

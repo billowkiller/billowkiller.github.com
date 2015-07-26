@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: c | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/c/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2014-09-15T12:37:27+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[deep C and C++]]></title>
+    <link href="http://billowkiller.github.io/blog/2013/10/12/deep-c-and-c-plus-plus/"/>
+    <updated>2013-10-12T16:12:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2013/10/12/deep-c-and-c-plus-plus</id>
+    <content type="html"><![CDATA[<p>摘自<a href="http://share.csdn.net/#/detail/1050">CSDN Share</a></p>
+
+<p>花了一个上午的时间看了下这个PPT，觉得收获颇多。
+特别是这个PPT的组织方式，采用两个程序员面试对比的方式，非常的实用，也很有触动和感悟。已经很久没见到这样精彩的PPT了。</p>
+
+<p>本PPT介绍了作为普通的程序员和高级的程序员如何看待C与C++，从编译、链接、运行的角度来介绍，有非常多的干货，也许不是很系统，但确实是非常的实用；特别是在回答面试官的提问上，需要认真思考，从<code>不同的角度</code>、<code>深层次</code>地回答技术官的问话。也许两个程序员的功力差不多，但是在回答技术问题的方法上也许对面试官有很大的影响，最终也就是面试是否成功的关键。</p>
+
+<p><img src="http://www.atmel.com/zh/cn/Images/compiler.jpg" alt="" /></p>
+
+<!--more-->
+
+<p>有一点提示就是，今后在看书的时候，要时常记住一些<code>RULE</code>，语言中更有效的惯用用法(<code>effective conventional language</code>)，特别是深入底层细节的知识，要不断的积累实证，而且得<code>学以致用</code>。一点点细小的差距就是<code>professional programmer</code>与common programmer的区别。最重要的一点是常看优秀的代码，学习与你知识相违背的用例。</p>
+
+<p>&lt;iframe height=620 width=670 scrolling=”no” src=”http://share.csdn.net/#/frame/1050” frameborder=0 allowfullscreen&gt;&lt;/iframe&gt;</p>
+
+<p>截取几张精彩的ppt</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/2_zpsde979321.png" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/_zpsfe2bfd71.png" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/3_zpsc78ac177.png" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/5_zps28849be2.png" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/4_zpsff862edf.png" /></p>
+]]></content>
+  </entry>
+  
+</feed>

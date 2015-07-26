@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: link | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/link/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2014-09-15T12:37:27+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Static and Dynamic Library]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/08/29/static-and-dynamic-library/"/>
+    <updated>2014-08-29T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/08/29/static-and-dynamic-library</id>
+    <content type="html"><![CDATA[<p>库是写好的现有的，成熟的，可以复用的代码。现实中每个程序都要依赖很多基础的底层库。C默认使用的库就是<code>libc.so</code>。</p>
+
+<p>本质上来说库是一种可执行代码的二进制形式，可以被操作系统载入内存执行。库有两种：静态库（.a、.lib）和动态库（.so、.dll）。</p>
+
+<p>所谓静态、动态是指链接。</p>
+
+<!--more-->
+
+<h2 id="section">编译和链接</h2>
+
+<p>将一个程序编译成可执行程序的步骤：</p>
+
+<ol>
+  <li>
+    <p><strong>预处理：</strong>主要是处理源代码中以“#”开始的预编译指令，以及删除注释，添加行号和文件名标识。</p>
+
+    <pre><code> gcc -E hello.c -o hello.i
+</code></pre>
+  </li>
+  <li>
+    <p><strong>编译：</strong> 把预处理完的文件进行一系列<strong>词法分析</strong>、<strong>语法分析</strong>、<strong>语义分析</strong>以及<strong>优化</strong>后<strong>生成相应的汇编代码文件</strong>。</p>
+
+    <pre><code> gcc -S hello.i -o hello.s 
+</code></pre>
+  </li>
+  <li>
+    <p><strong>汇编：</strong>将汇编代码转变为机器代码。</p>
+
+    <pre><code> as hello.s -o hello.o
+ gcc -c hello.s -o hello.o
+</code></pre>
+  </li>
+  <li>
+    <p><strong>链接：</strong>链接过程主要包括了<strong>地址和空间分配</strong>、<strong>符号决议</strong>和<strong>重定位</strong>。</p>
+
+    <p>链接所要做的工作也就是打补丁，将模块中引用其他模块变量或函数的地方由0修改成其他模块中的地址。这个修正的过程叫做重定位，每个要被修正的地方叫一个重定位入口。</p>
+
+    <pre><code> ld a.o b.o -e main -o ab
+</code></pre>
+  </li>
+</ol>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/gcc_zps9691e38f.png" alt="gcc过程分解" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/compile_zps2febeeff.gif" alt="" /></p>
+
+<h2 id="section-1">静态链接</h2>
+
+<p>链接器异步都采用一种叫两步链接的方法。也就是整个链接过程分两步。</p>
+
+<ul>
+  <li>
+    <p>空间与地址分配</p>
+
+    <p>链接器获得所有输入目标文件的段长度，并且将他们合并，计算出输出文件中各个段合并后的长度和位置，并建立映射关系。</p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/compile2_zps2aaa528b.png" alt="" /></p>
+  </li>
+  <li>
+    <p>符号解析与重定位</p>
+
+    <p>通过空间与地址的分配可以得知，链接器在完成空间与地址的分配之后就可以确定所有符号的虚拟地址了，那么链接器就可以根据符号的地址对每个需要重定位的指令进行地址修正。</p>
+  </li>
+</ul>
+
+<p>在ELF文件中，有个叫做<strong>重定位表</strong>的数据结构专门用来保存这些与重定位相关的信息，它在ELF文件中往往是一个或多个段。.text和.data段各有自己的重定位表，包含信息有<strong>重定位入口</strong>以及<strong>偏移</strong>。</p>
+
+<p>重定位过程中，每个重定位的入口都是对一个符号的引用，当链接器需要对某个符号的引用进行重定位时，它就要确定这个符号的目标地址。这时候链接器就会去查找有所有输入目标文件的符号表组成的<strong>全局符号表</strong>，找到相应的符号后进行重定位。</p>
+
+<p>在链接器扫描完所有的输入目标文件之后，所有这些未定义的符号都应该能够在全局符号表中找到，否则连接器就报<strong>符号未定义</strong>错误。</p>
+
+<p><strong>静态库</strong>可以简单地看成一组目标文件的集合，即很多目标文件经过压缩打包后形成的一个文件。人们使用<code>ar</code>压缩程序将这些目标文件压缩到一起，并且对其进行编号和索引，以便于查找和检索。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/compile3_zps21c35794.png" alt="" /></p>
+
+<h2 id="section-2">可执行文件的装载</h2>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load1_zps072482ca.png" alt="" />
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load2_zpscd53f782.png" alt="" />
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load3_zpsf9324209.png" alt="" />
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load4_zpsc3f80dea.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load5_zps5d1477cf.png" alt="" /></p>
+
+<p>ELF文件中，段的权限往往只有为数不多的几种组合，基本上是三种：</p>
+
+<ul>
+  <li>以代码段为代表的权限为可读可执行的段</li>
+  <li>以数据段和.bss段为代表的可读可写段</li>
+  <li>以制度数据段为代表的权限为只读的段</li>
+</ul>
+
+<p>操作系统通过给进程空间划分出一个个VMA来管理进程的虚拟空间，基本原则是将相同权限属性的、有相同映像文件的映射成一个VMA，这样可以减少页面内部碎片，从而节省了内存空间：</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load6_zpsde691d1c.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load7_zps0008209b.png" alt="" /></p>
+
+<p>操作系统堆的最大申请空间会受到操作系统版本、程序本身大小、用到的动态/共享库数量、大小、程序栈数量、大小的等的影响。甚至有可能每次运行的结果都会不同，因为有些操作系统使用了一种叫做随机地址空间分布的技术，使得进程的堆空间变小。</p>
+
+<h3 id="section-3">程序的执行过程</h3>
+
+<p>首先在用户层面，bash进程会调用<code>fork()</code>系统调用创建一个新的进程，新的进程调用<code>execve()</code>系统调用执行指定的ELF，原先的bash进程继续返回等待刚才启动的新进程结束，然后继续等待用户输入命令。</p>
+
+<p>系统通过文件开头的魔数判断是ELF文件后调用<code>load_elf_binary()</code>;</p>
+
+<ol>
+  <li>检测ELF可执行文件格式的有效性</li>
+  <li>寻找动态链接的“.interp”段，设置动态连接器路径</li>
+  <li>根据ELF可执行文件的程序头表的描述，对ELF文件进行映射，比如代码、数据、只读数据。</li>
+  <li>初始化ELF进程环境</li>
+  <li>将系统调用的返回地址修改成ELF可执行文件的入口点，这个入口点取决于程序的连接方式，对于静态连接的ELF可执行文件，这个入口就是ELF文件的文件头中的<code>e_entry</code>所指向的地址；对于动态链接的ELF可执行文件，入口点就是动态链接器。</li>
+</ol>
+
+<p>指令寄存器设置成程序的入口点，启动程序。</p>
+
+<p><strong>系统的动态链接器会将程序所需要的所有动态链接库装载到进程的地址空间，并且将程序中所有未决议的符号绑定到相应的动态链接库中，并进行重定位工作。</strong></p>
+
+<p>我们在静态链接时提到过重定位，那时的重定位叫做<strong>链接时重定位</strong>（Link Time Relocation） ， 而现在这种情况经常被称为<strong>装载时重定位</strong>（Load Time Relocation）。</p>
+
+<p>所以说装载时重定位一个很大的缺点就是指令部分无法在多个进程之间共享，这样就失去了动态链接节省内存的一大优势。 解决方法就是把指令中那些需要被修改的部分分离出来，跟数据部分放在一起，这样指令部分就可以保持不变， 而数据部分可以在进程中拥有一个副本。这种方案被称为 <strong>地址无关代码</strong>（PIC, Position-independent Code）技术。目的是希望程序模块中共享的指令部分在装载时不需要因为装载地址的改变而改变。</p>
+
+<h2 id="section-4">动态链接</h2>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/dl1_zps2e9939ac.png" alt="" /></p>
+
+<p>为什么需要动态库，其实也是静态库的特点导致。</p>
+
+<ul>
+  <li>空间浪费是静态库的一个问题。</li>
+  <li>另一个问题是静态库对程序的更新、部署和发布页会带来麻烦。如果静态库liba.lib更新了，所以使用它的应用程序都需要重新编译、发布给用户（对于玩家来说，可能是一个很小的改动，却导致整个程序重新下载，全量更新）。</li>
+</ul>
+
+<p>动态库在程序编译时并不会被连接到目标代码中，而是等到程序要运行时才进行链接。<strong>不同的应用程序如果调用相同的库，那么在内存里只需要有一份该共享库的实例，规避了空间浪费问题</strong>。动态库在程序运行是才被载入，也解决了静态库对程序的更新、部署和发布页会带来麻烦。用户只需要更新动态库即可，<strong>增量更新</strong>。</p>
+
+<p>动态库特点总结：</p>
+
+<ul>
+  <li>动态库把对一些库函数的链接载入推迟到程序运行的时期。</li>
+  <li>动态链接的方式使得开发过程中各个模块更加独立、耦合度更小，便于不同的开发者和开发组织之间进行独立的开发和测试。</li>
+  <li>程序在运行时可以动态的选择加载各种程序模块，使得插件成为可能。</li>
+</ul>
+
+<p>动态链接过程：</p>
+
+<p><strong>链接时重定位（静态链接）；装载时重定位（动态链接）</strong></p>
+
+<p><strong>地址无关代码</strong>：PIC，Position-independent Code，把指令中那些需要修改的部分分离出来，跟数据部分放在一起，这样指令部分就可以保持不变，而数据部分可以再每个进程中拥有个副本。</p>
+
+<p>对于现代机器来说，产生地址无关的代码并不麻烦。我们首先把共享对象模块中的地址引用按照是否为跨模块分成两类： 模块内部引用和模块外部引用；按照不同的引用方式又可以分为指令引用和数据访问。 这样我们就得到了如下4种情况：</p>
+
+<ol>
+  <li>模块内部的函数调用、跳转等；</li>
+  <li>模块内部的数据访问，比如模块中定义的全局变量、静态变量；</li>
+  <li>模块外部的函数调用、跳转等；</li>
+  <li>模块外部的数据访问，比如其它模块中定义的全局变量；</li>
+</ol>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/dl2_zps9afd4901.png" alt="" /></p>
+
+<p><strong>动态链接比静态链接慢</strong>的主要原因是动态链接下对于全局静态的数据访问要进行复杂的GOT定位,然后间接寻址.</p>
+
+<p><strong>延迟绑定：</strong></p>
+
+<p>由于很多函数在程序执行过程中不一定被用到（错误处理函数，特殊功能模块），ELF采用一种叫做 <strong>延迟绑定（Lazy Binding）</strong>的做法， 基本思想就是当函数第一次被用到时才进行绑定（符号查找、重定位等），如果没有用到则不进行绑定。可以大大加快程序的启动速度。</p>
+
+<p>ELF使用PLT（Procedure Linkage Table）的方法来实现延迟绑定。PLT大致的工作原理如下：每个外部函数在PLT中都有一个相应的项，如果链接器在初始化阶段已经初始化该项，并且将函数地址填入该项，那么直接跳转到这个地址，实现函数的正确调用。否则调用_dl_runtime_resolve()函数，该函数利用重定位表完成符号解析和重定位工作。解析结束后将地址填入对应的项中。</p>
+
+<p><strong>ELF中的字段：</strong></p>
+
+<p>在动态链接的ELF可执行文件中，有一个专门的段叫做“.interp”，该段保存了需要的动态链接器需路径，一般是/lib/ld-linux.so.2。</p>
+
+<p>动态链接ELF中最重要的结构应该是“.dynamic”段，这个段里面保存了动态连接器所需要的基本信息，比如依赖哪些共享对象、动态链接符号表的位置、动态链接重定位表的位置、共享对象初始化代码的地址等。</p>
+
+<p>为了表示动态链接这些模块之间的符号导出与导入关系，ELF专门有一个叫做动态符号表的段用来保存这些信息。这个段叫做“.dynsym”。</p>
+
+<p>动态链接的文件中，也有类似静态链接的重定位表，分别叫做“.rel.dyn”和“.rel.plt”，他们分别相当于“.rel.text”和“.rel.data”。</p>
+
+<p><strong>动态链接的步骤和实现</strong>：</p>
+
+<p>动态链接的步骤基本分为三步：先启动动态连接器本身，然后装载所有需要的共享对象，最后是重定位和初始化。</p>
+
+<p>但是对于动态链接器本身来说，它的重定位工作是由谁来完成的？ 动态连接器本身通过自举（Bootstrap）来完成。完成基本自举之后，动态连接器将可执行文件和连接器本身的符号表都合并到一个符号表当中，我们可以称它为全局符号表（Global Symbol Table）。</p>
+
+<p>动态连接器按照各个模块之间的依赖关系，当有两个不同的模块定义了同一个符号时怎么办？当一个符号需要被加入全局符号表时，如果相同的符号已经存在，则后加入的符号被忽略。</p>
+
+<p><strong>显示运行时链接：</strong></p>
+
+<p>动态库的装载则是通过一些列由动态连接器提供的API，具体是4个函数：打开动态库（<code>dlopen</code>）、查找符号（<code>dlsym</code>）、错误处理（<code>dlerror</code>）、以及关闭动态库（<code>dlclose</code>）。</p>
+
+<p><code>dlopen()</code>函数用来打开动态库，并将其加载到进程的地址空间，完成初始化过程。</p>
+
+<pre><code>void  *dlopen(const char *filename, int flag);
+</code></pre>
+
+<p><code>dlsym()</code>，我们通过该函数找到所需要的符号。</p>
+
+<pre><code>dlsym(void  *handle,  char  *symbol);
+</code></pre>
+
+<h3 id="c">显式调用C++动态库注意点</h3>
+
+<p>对C++来说，情况稍微复杂。显式加载一个C++动态库的困难一部分是因为C++的name mangling；另一部分是因为没有提供一个合适的API来装载类，在C++中，您可能要用到库中的一个类，而这需要创建该类的一个实例，这不容易做到。</p>
+
+<p>name mangling可以通过<code>extern "C"</code>解决。C++有个特定的关键字用来声明采用C binding的函数：<code>extern "C"</code> 。用 <code>extern "C"</code>声明的函数将使用函数名作符号名，就像C函数一样。因此，只有非成员函数才能被声明为<code>extern "C"</code>，并且不能被重载。尽管限制多多，<code>extern "C"</code>函数还是非常有用，因为它们可以象C函数一样被<code>dlopen</code>动态加载。冠以<code>extern "C"</code>限定符后，并不意味着函数中无法使用C++代码了，相反，它仍然是一个完全的C++函数，可以使用任何C++特性和各种类型的参数。</p>
+
+<p><a href="http://www.searchtb.com/2014/05/c%E6%8F%92%E4%BB%B6%E4%B8%AD%E4%BD%BF%E7%94%A8%E9%9D%99%E6%80%81%E6%8C%87%E9%92%88%E5%8F%98%E9%87%8F%E5%BC%95%E8%B5%B7%E7%9A%84%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2%E9%97%AE%E9%A2%98.html">http://www.searchtb.com/2014/05/c%E6%8F%92%E4%BB%B6%E4%B8%AD%E4%BD%BF%E7%94%A8%E9%9D%99%E6%80%81%E6%8C%87%E9%92%88%E5%8F%98%E9%87%8F%E5%BC%95%E8%B5%B7%E7%9A%84%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2%E9%97%AE%E9%A2%98.html</a>这篇文章说的是静态指针变量引起的内存泄露问题，但里面倒是有个C++编译成so的例子，可以参考。</p>
+]]></content>
+  </entry>
+  
+</feed>

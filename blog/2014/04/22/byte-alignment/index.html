@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>C/C++ Byte Alignment - Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2014/04/22/byte-alignment">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-22T02:18:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2014</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        C/C++ Byte Alignment
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><p><strong>字节对齐的细节和编译器实现相关，但一般而言，满足三个准则</strong>：</p>
+
+<ol>
+  <li>结构体变量的首地址能够被其<strong>最宽基本类型</strong>成员的大小所整除；</li>
+  <li>结构体每个成员相对于结构体首地址的偏移量（offset）都是<strong>成员大小的整数倍</strong>，如有需要编译器会在成员之间加上填充字节（internal adding）；</li>
+  <li>结构体的总大小为结构体最宽基本类型成员大小的整数倍，如有需要编译器会在最末一个成员之后加上填充字节（trailing padding）。</li>
+</ol>
+
+<p>需要仔细体会上面的三个准则。</p>
+
+<!--more-->
+
+<ul>
+  <li>
+    <p>结构体某个成员相对于结构体首地址的偏移量可以通过宏offsetof()来获得，这个宏也在stddef.h中定义，如下：</p>
+
+    <pre><code>  #define offsetof(s,m) (size_t)&amp;(((s *)0)-&gt;m)
+</code></pre>
+  </li>
+  <li>
+    <p>基本类型是指前面提到的像char、short、int、float、double这样的内置数据类型。这里所说的“数据宽度”就是指其sizeof的大小。由于结构体的成员可以是复合类型，比如另外一个结构体，所以在寻找最宽基本类型成员时，应当包括复合类型成员的子成员，而不是把复合成员看成是一个整体。但在确定复合类型成员的偏移位置时则是将复合类型作为整体看待。</p>
+
+    <pre><code>  struct S1
+  {
+      char c;
+      int i;
+  };
+
+  struct S3
+  {
+      char c1;
+      S1 s;
+      char c2;
+  };
+</code></pre>
+
+    <p>S1的最宽简单成员的类型为int，S3在考虑最宽简单类型成员时是将S1“打散”看的，所以S3的最宽简单类型为int。这样，通过S3定义的变量，其存储空间首地址需要被4整除，整个sizeof(S3)的值也应该被4整除。</p>
+
+    <p>c1的偏移量为0，s的偏移量呢？这时s是一个整体，它作为结构体变量也满足前面三个准则，所以其大小为8，偏移量为4，c1与s之间便需要3个填充字节，而c2与s之间就不需要了，所以c2的偏移量为12，算上c2的大小为13，13是不能被4整除的，这样末尾还得补上3个填充字节。最后得到sizeof(S3)的值为16。</p>
+  </li>
+</ul>
+
+<h2 id="pragma-pack"><code> #pragma pack</code></h2>
+
+<p><code>#pragma pack</code>规定的对齐长度，实际使用的规则是：</p>
+
+<p>结构，联合，或者类的数据成员，第一个放在偏移为0的地方，以后每个数据成员的对齐，按照<code>#pragma pack</code>指定的数值和这个数据成员自身长度中，比较小的那个进行。也就是说，当<code>#pragma pack</code>的值等于或超过所有数据成员长度的时候，这个值的大小将不产生任何效果。而结构整体的对齐，则按照结构体中最大的数据成员和<code>#pragma pack</code>指定值之间，较小的那个进行。</p>
+
+<pre><code>   #pragma pack(4)
+　　class TestB
+　　{
+　　public:
+　　　　int aa; //第一个成员，放在[0,3]偏移的位置，
+　　　　char a; //第二个成员，自身长为1，#pragma pack(4),取小值，也就是1，所以
+这个成员按一字节对齐，放在偏移[4]的位置。
+　　　　short b; //第三个成员，自身长2，#pragma pack(4)，取2，按2字节对齐，所以
+放在偏移[6,7]的位置。
+　　　　char c; //第四个，自身长为1，放在[8]的位置。
+　　};
+</code></pre>
+
+<p>这个类实际占据的内存空间是9字节类之间的对齐，是按照类内部最大的成员的长度，和<code>#pragma pack</code>规定的值之中较小的一个对齐的。所以这个例子中，类之间对齐的长度是<code>min(sizeof(int),4)</code>，也就是4。9按照4字节圆整的结果是12，所以<code>sizeof(TestB)</code>是12。</p>
+
+<pre><code>	#pragma pack(2)
+    class TestB
+　　{
+　　public:
+　　　　int aa; //第一个成员，放在[0,3]偏移的位置，
+　　　　char a; //第二个成员，自身长为1，#pragma pack(4),取小值，也就是1，所以
+这个成员按一字节对齐，放在偏移[4]的位置。
+　　　　short b; //第三个成员，自身长2，#pragma pack(4)，取2，按2字节对齐，所以
+放在偏移[6,7]的位置。
+　　　　char c; //第四个，自身长为1，放在[8]的位置。
+　　};
+</code></pre>
+
+<p>可以看出，上面的位置完全没有变化，只是类之间改为按2字节对齐，9按2圆整的结果是10。所以<code>sizeof(TestB)</code>是10。</p>
+
+<pre><code>	#pragma pack(4)
+　　class TestC
+　　{
+　　public:
+　　　　char a;//第一个成员，放在[0]偏移的位置，
+　　　　short b;//第二个成员，自身长2，#pragma pack(4)，取2，按2字节对齐，所以
+放在偏移[2,3]的位置。
+　　　　char c;//第三个，自身长为1，放在[4]的位置。
+　　};
+</code></pre>
+
+<p>整个类的大小是5字节，按照<code>min(sizeof(short),4)</code>字节对齐，也就是2字节对齐，结果是6</p>
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-22T02:18:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2014</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/language/'>language</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2014/04/22/byte-alignment/" data-via="" data-counturl="http://billowkiller.github.io/blog/2014/04/22/byte-alignment/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2014/04/17/Effective/" title="Previous Post: Effective C++ Rework">&laquo; Effective C++ Rework</a></li>
+            
+            
+            <li class="next"><a href="/blog/2014/04/23/Template/" title="Next Post: C++ Template">C++ Template &raquo;</a></li>
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item " href="/blog/2014/08/29/static-and-dynamic-library/">Static and Dynamic Library</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/23/classical-sync-problem/">Classical Sync Problem</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/22/design-pattern/">Design Pattern Abstraction</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/14/linux-memory-management/">Linux Memory Management</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/09/quicksort/">QuickSort and Derivatives</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">8</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">10</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">8</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">13</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">12</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">6</span>
+        algorithm
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2014 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2014/04/22/byte-alignment/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2014/04/22/byte-alignment/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>

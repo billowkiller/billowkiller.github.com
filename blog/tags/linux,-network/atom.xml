@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: linux， network | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/linux,-network/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2014-09-15T12:37:27+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Modules in Network Programming]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/08/04/modules-in-network-programming/"/>
+    <updated>2014-08-04T09:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/08/04/modules-in-network-programming</id>
+    <content type="html"><![CDATA[<p>发现自己总喜欢把各种东西混合在一块，所以这又是一篇长文…</p>
+
+<p>本文将会介绍网络编程中的几种模型，包括<strong>I/O模型、服务器编程模型、事件模型、并发模型</strong>。</p>
+
+<hr />
+
+<h2 id="io">I/O模型</h2>
+
+<p>I/O模型包括<strong>阻塞模型、非阻塞模型、信号量驱动模型、多路复用模型、异步模型</strong>。</p>
+
+<p>总体来说包括两大类：</p>
+
+<ol>
+  <li><strong>同步I/O，向程序通知的是I/O就绪事件</strong>，由程序完成读写。包括前四类I/O模型。</li>
+  <li><strong>异步I/O，向程序通知的是I/O完成事件</strong>，读写操作由内核完成。</li>
+</ol>
+
+<!--more-->
+
+<h3 id="section">阻塞模型</h3>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig01_zpsae5d27ed.gif" alt="" /></p>
+
+<p>在这个模型中，用户空间的应用程序执行一个系统调用，这会导致应用程序阻塞。这意味着应用程序会一直阻塞，直到系统调用完成为止（数据传输完成或发生错误）。调用应用程序处于一种不再消费 CPU 而只是简单等待响应的状态，因此从处理的角度来看，这是非常有效的。</p>
+
+<p>其行为非常容易理解，其用法对于典型的应用程序来说都非常有效。在调用 read 系统调用时，应用程序会阻塞并对内核进行上下文切换。然后会触发读操作，当响应返回时（从我们正在从中读取的设备中返回），数据就被移动到用户空间的缓冲区中。然后应用程序就会解除阻塞（read 调用返回）。</p>
+
+<p><strong>阻塞模型在阻塞的时候可能会被信号量中断！！</strong></p>
+
+<h3 id="section-1">非阻塞模型</h3>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig02_zps85e3fe38.gif" alt="" /></p>
+
+<p>非阻塞的实现是I/O命令可能并不会立即满足，需要应用程序调用许多次来等待操作完成。这可能效率不高，因为在很多情况下，当内核执行这个命令时，应用程序必须要进行忙碌等待，直到数据可用为止，或者试图执行其他工作。这个方法可以引入I/O操作的延时，因为数据在内核中变为可用到用户调用 read 返回数据之间存在一定的间隔，这会导致整体数据吞吐量的降低。</p>
+
+<p>当一个应用程序在一个非阻塞的描述符上反复的调用system call的时候，我们称之为<strong>轮询（polling）</strong>。</p>
+
+<h3 id="io-1">I/O复用模型</h3>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig03_zps1ba406e3.gif" alt="" /></p>
+
+<p>I/O复用模型会用到select或者poll函数，这两个函数也会使进程阻塞，但是和阻塞I/O所不同的是，这两个函数可以同时阻塞多个I/O操作。而且可以同时对多个读操作，多个写操作的I/O函数进行检测，直到有数据可读或可写时，才真正调用I/O操作函数。</p>
+
+<h3 id="io-2">信号驱动I/O模型</h3>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig04_zpsb2f0f6ff.gif" alt="" /></p>
+
+<p>首先我们允许套接口进行信号驱动I/O,并安装一个信号处理函数，进程继续运行并不阻塞。当数据准备好时，进程会收到一个SIGIO信号，可以在信号处理函数中调用I/O操作函数处理数据。</p>
+
+<h3 id="io-3">异步I/O模型</h3>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig05_zps636d96a6.gif" alt="" /></p>
+
+<p>调用<code>aio_read</code>函数，告诉内核描述字，缓冲区指针，缓冲区大小，文件偏移以及通知的方式，然后立即返回。当内核将数据拷贝到缓冲区后，再通知应用程序。</p>
+
+<p>这个操作和信号驱动的区别就是：<strong>异步模式等操作完毕后才通知用户程序而信号驱动模式在数据到来时就通知用户程序。</strong></p>
+
+<h3 id="io-4">几种I/O模型的比较</h3>
+
+<p><img src="http://www.blogjava.net/images/blogjava_net/lihao336/o_untitled6_thumb.png" alt="" /></p>
+
+<h2 id="section-2">服务器编程模型</h2>
+
+<p>有个简单的总结<a href="http://www.cnblogs.com/hnrainll/archive/2011/10/13/2210481.html">http://www.cnblogs.com/hnrainll/archive/2011/10/13/2210481.html</a></p>
+
+<h3 id="section-3">多进程服务器模型</h3>
+
+<p>服务器进程接受连接，fork一个子进程为客户服务，然后等待下一个连接。
+多进程模型<strong>适用于单个客户服务需要消耗较多的CPU资源</strong>，例如需要进行大规模或长时间的数据运算或文件访问。多进程模型具有<strong>较好的安全性</strong>。</p>
+
+<pre><code>pid_t pid;
+int listenfd, connfd;
+
+listenfd = Socket( ... );
+Bind(listenfd, ...);
+Listen(listenfd, LISTENQ)
+
+while(1) {
+	connfd = Accept(listenfd, ...); /* probably blocks */
+	if( (pid = Fork()) == 0 ) {
+		Close(listenfd); /* child closes listenning socket */
+		process(connfd); /* process the request */
+		Close(connfd);   /* done with this client */
+		exit(0);		 /* terminate */
+	}
+	Close(connfd);       /* parent closes connected socket */
+}
+</code></pre>
+
+<p>需要仔细体会下，为什么父进程要加最后一个<code>Close</code>。</p>
+
+<h3 id="section-4">单线程模型</h3>
+
+<p>具体实现方式在UNP3e第30章中。</p>
+
+<p>在高性能的网络程序中，使用得最为广泛的恐怕要数“non-blocking IO + IO multiplexing”这种模型，即 Reactor 模式。</p>
+
+<p>在“non-blocking IO + IO multiplexing”这种模型下，程序的基本结构是一个事件循环 (event loop)。它的优点很明显，编程简单，效率也不错。不仅网络读写可以用，连接的建立（connect/accept）甚至 DNS 解析都可以用非阻塞方式进行，以提高并发度和吞吐量 (throughput)。<strong>对于 IO 密集的应用是个不错的</strong>。</p>
+
+<h3 id="section-5">多线程模型</h3>
+
+<p>和多进程模型类似，服务器进程接受连接，新建一个线程为客户服务，然后等待下一个连接。和多进程相比，由于进程消耗的资源比线程大的多，因此，<strong>在需要为较多客户端服务的时候，优先使用多线程</strong>。</p>
+
+<p>具体大概有这么几种做法：</p>
+
+<ol>
+  <li>每个请求创建一个线程，使用阻塞式 IO 操作。在 Java 1.4 引入 NIO 之前，这是 Java 网络编程的推荐做法。可惜伸缩性不佳。</li>
+  <li>使用线程池，同样使用阻塞式 IO 操作。与 1 相比，这是提高性能的措施。</li>
+  <li>使用 non-blocking IO + IO multiplexing。即 Java NIO 的方式。non-blocking IO + one loop per thread 模式。</li>
+  <li>Leader/Follower 等高级模式</li>
+</ol>
+
+<h2 id="section-6">事件处理模型</h2>
+
+<p>一般地,I/O多路复用机制都依赖于一个<strong>事件多路分离器</strong>(Event Demultiplexer)。<u>分离器对象可将来自事件源的I/O事件分离出来，并分发到对应的read/write事件处理器(Event Handler)</u>。开发人员预先注册需要处理的事件及其<strong>事件处理器</strong>（或回调函数）；事件分离器负责将请求事件传递给事件处理器。两个与事件分离器有关的模式是Reactor和Proactor。Reactor模式采用同步IO，而Proactor采用异步IO。</p>
+
+<p><strong>Reactor框架中用户定义的操作是在实际操作之前调用的</strong>。比如你定义了操作是要向一个SOCKET写数据，那么当该SOCKET可以接收数据的时候，你的操作就会被调用；而<strong>Proactor框架中用户定义的操作是在实际操作之后调用的</strong>。比如你定义了一个操作要显示从SOCKET中读入的数据，那么当读操作完成以后，你的操作才会被调用。</p>
+
+<h3 id="reactor">Reactor</h3>
+
+<p>在Reactor中，事件分离器负责等待文件描述符或socket为读写操作准备就绪，然后将就绪事件传递给对应的处理器，最后由处理器负责完成实际的读写工作。</p>
+
+<p><strong>以读操作为例：</strong></p>
+
+<ul>
+  <li>注册读就绪事件和相应的事件处理器</li>
+  <li>事件分离器等待事件</li>
+  <li>事件到来，激活分离器，分离器调用事件对应的处理器。</li>
+  <li>事件处理器完成实际的读操作，处理读到的数据，注册新的事件，然后返还控制权。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/reactor_zpsc844d1e5.png" alt="" /></p>
+
+<h3 id="proactor">Proactor</h3>
+
+<p>在Proactor模式中，处理器–或者兼任处理器的事件分离器，只负责发起异步读写操作。IO操作本身由操作系统来完成。传递给操作系统的参数需要包括用户定义的数据缓冲区地址和数据大小，操作系统才能从中得到写出操作所需数据，或写入从socket读到的数据。事件分离器捕获IO操作完成事件，然后将事件传递给对应处理器。比如，在windows上，处理器发起一个异步IO操作，再由事件分离器等待IOCompletion事件。典型的异步模式实现，都建立在操作系统支持异步API的基础之上，我们将这种实现称为“系统级”异步或“真”异步，因为应用程序完全依赖操作系统执行真正的IO工作。</p>
+
+<p><strong>以读操作为例：</strong></p>
+
+<ul>
+  <li>处理器发起异步读操作（注意：操作系统必须支持异步IO）。在这种情况下，处理器无视IO就绪事件，它关注的是完成事件。</li>
+  <li>事件分离器等待操作完成事件</li>
+  <li>在分离器等待过程中，操作系统利用并行的内核线程执行实际的读操作，并将结果数据存入用户自定义缓冲区，最后通知事件分离器读操作完成。</li>
+  <li>事件分离器呼唤处理器。</li>
+  <li>事件处理器处理用户自定义缓冲区中的数据，然后启动一个新的异步操作，并将控制权返回事件分离器。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/proactor_zpsc40c6bf2.png" alt="" /></p>
+
+<h3 id="section-7">总结</h3>
+
+<p>可以看出，两个模式的相同点，都是对某个IO事件的事件通知(即告诉某个模块，这个IO操作可以进行或已经完成)。在结构上，两者也有相同点：demultiplexor负责提交IO操作(异步)、查询设备是否可操作(同步)，然后当条件满足时，就回调handler；不同点在于，异步情况下(Proactor)，当回调handler时，表示IO操作已经完成；同步情况下(Reactor)，回调handler时，表示IO设备可以进行某个操作(can read or can write)。</p>
+
+<h3 id="ioproactor">同步I/O模拟Proactor</h3>
+
+<p>原理：主线程执行数据读写操作，读写完成后，主线程向工作线程通知这一“完成事件”。那么从工作线程的角度来看，它们就直接获得了数据读写的结果，接下来要做的知识对读写的结果进行逻辑处理。</p>
+
+<p>使用同步I/O模拟出的Proactor模式的工作流程如下：</p>
+
+<ol>
+  <li>主线程往epoll内核事件表中注册socket上的读就绪事件。</li>
+  <li>主线程调用<code>epoll_wait</code>等待socket上有数据可读。</li>
+  <li>当socket上有数据可读时，<code>epoll_wait</code>通知主线程。主线程从socket循环读取数据，知道没有更多数据可读，然后将读取到的数据封装成一个请求对象并插入请求队列。</li>
+  <li>水木在请求队列上的某个工作线程被唤醒，它获得请求对象并处理客户请求，然后往epoll内核事件表中注册socket上的写就绪事件。</li>
+  <li>主线程调用<code>epoll_wait</code>等待socket可写。</li>
+  <li>当socket可写时，<code>epoll_wait</code>通知主线程，主线程往socket上写入服务器处理客户请求结果。</li>
+</ol>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/aproactor_zps46fafc76.png" alt="" /></p>
+
+<h2 id="section-8">并发模型</h2>
+
+<h3 id="section-9">半异步、半同步</h3>
+
+<p>半异步、半同步模式是reactor模式的一个进化，非完全异步，而是通过队列把reactor分成了2个部分：同步部分，异步部分。</p>
+
+<p>同步，是因为队列是block的，这部分采用多线程，提高吞吐量
+reactor部分是单线程的异步的。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/hahs_zps02b41fb9.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/hahs1_zpsb6c7b413.png" alt="" /></p>
+
+<h3 id="leaderfollower">Leader/Follower</h3>
+
+<p>多线程网络服务最简单的方式就是一个连接一个线程，这种模型当客户端连接数快速增长是就会出现性能瓶颈。当然，这时候，我们理所当然会考虑使用线程池，而任何池的使用，都会带来一个管理和切换的问题。 在java 1.4中引入了NIO编程模型，它采用了Reactor模式，或者说观察者模式，由于它的读写操作都是无阻塞的，使得我们能够只用一个线程处理所有的IO事件，这种处理方式是同步的。为了提高性能，当一个线程收到事件后，会考虑启动一个新的线程去处理，而自己继续等待下一个请求。这里可能会有性能问题，就是把工作交给别一个线程的时候的上下文切换，包括数据拷贝。Leader-Follower模型可以用来解决这个问题。</p>
+
+<p><img src="http://my.csdn.net/uploads/201206/30/1341045549_7751.jpg" alt="" /></p>
+
+<p>所有线程会有三种身份中的一种：leader和follower，以及一个干活中的状态：proccesser。它的基本原则就是，永远最多只有一个leader。而所有follower都在等待成为leader。线程池启动时会自动产生一个Leader负责等待网络IO事件，当有一个事件产生时，Leader线程首先通知一个Follower线程将其提拔为新的Leader，然后自己就去干活了，去处理这个网络事件，处理完毕后加入Follower线程等待队列，等待下次成为Leader。这种方法可以增强CPU高速缓存相似性，及消除动态内存分配和线程间的数据交换。</p>
+
+<p>显然地，通过预先分配一个线程池，Leader/Follower设计避免了动态线程创建和销毁的额外开销。将线程放在一个自组织的池中，而且无需交换数据，这种方式将上下文切换、同步、数据移动和动态内存管理的开销都降到了最低。</p>
+
+<p>不过，这种模式在处理短暂的、原子的、反复的和基于事件的动作上可以取得明显的性能提升，比如接收和分发网络事件或者向数据库存储大量数据记录。事件处理程序所提供的服务越多，其体积也就越大，而处理一个请求所需的时间越长，池中的线程占用的资源也就越多，同时也需要更多的线程。相应的，应用程序中其它功能可用的资源也就越少，从而影响到应用程序的总体性能、吞吐量、可扩展性和可用性。</p>
+
+<p>在大多数LEADER/FOLLOWERS设计中共享的事件源封装在一个分配器组件中。如果在一个设计中联合使用了LEADER/FOLLOWERS和REACTOR事件处理基础设施，由reactor组件进行分发。封装事件源将事件分离和分派机制与事件处理程序隔离开来。每个线程有两个方法：一个是join方法，使用这个方法可以把新初始化的线程加入到池中。新加入的线程将自己的执行挂起到线程池监听者条件(monitor condition)上，并开始等待被提升为新的Leader。在它变成一个Leader之后，它便可以访问共享的事件源，等待执行下一个到来的事件。另一个是promote_new_leader方法，当前的Leader线程使用这个方法可以提升新的Leader，其做法是通过线程池监听者条件通知休眠的Follower。收到通知的Follower继续执行(resume)线程池的join方法，访问共享事件源，并等待下一个事件的到来。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Unix Network Programming Notes]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/07/22/network-programming/"/>
+    <updated>2014-07-22T09:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/07/22/network-programming</id>
+    <content type="html"><![CDATA[<p>记录Linux网络编程中的一些知识点…</p>
+
+<hr />
+
+<h3 id="section">网络编程可能会遇到的三种情况</h3>
+
+<ol>
+  <li>当<code>fork</code>子进程时，必须捕获<code>SIGCHLD</code>信号。</li>
+  <li>当捕获信号时，必须处理被中断的系统调用；</li>
+  <li>
+    <p><code>SIGCHLD</code>的信号处理函数必须正确编写，应使用<code>waitpid</code>函数以免留下僵死进程。</p>
+
+    <p><code>waitpid</code>是可以非阻塞的等待信号终止，因此可以使用循环调用。</p>
+  </li>
+</ol>
+
+<!--more-->
+
+<h3 id="socket">网络socket</h3>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/socket_zpsdcdfab1b.png" alt="" /></p>
+
+<p><strong>对应的TCP分组</strong></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/TCP_zpsb7790efe.png" alt="" /></p>
+
+<h3 id="shutdown">shutdown函数</h3>
+
+<p>终止网络连接的通常方法是调用<code>close</code>函数。不过<code>close</code>有两个限制，可以使用<code>shutdown</code>来避免。</p>
+
+<ol>
+  <li><code>close</code>把描述符的引用计数减1，仅在该计数变为0时才关闭套接字。使用<code>shutdown</code>可以不管引用计数就激发TCP的正常连接终止序列。</li>
+  <li><code>close</code>终止读和写两个方向的数据传送。</li>
+</ol>
+
+<p>说明：</p>
+
+<ul>
+  <li><code>shutdown</code>根本没有关闭socket,任何与socket关联的资源直到调用closesocket才释放。</li>
+  <li>TCP连接的socket是全双工的，也就是说它可以发送和接收数据，但是一个方向上的数据流动和另一个方向上的数据流动是不相关的，shutdown函数的功能也就是体现在这里，它通过设置how选择关闭哪条数据通道(发送通道和接收通道)，如果关闭了发送通道，那么这个socket其实还可以通过接收通道接受数据.</li>
+  <li>当通过以how=1(<code>SHUT_WR</code>)的方式调用<code>shutdown</code>，就可以保证对方收到一个EOF，而不管其他的进程是否已经打开了套接字，而调用<code>close</code>或closesocket就不能保证，因为直到套接字的引用计数减为0时才会发送FIN消息给对方，也就是说，直到所有的进程都关闭了套接字。</li>
+</ul>
+
+<p><strong>为了保证在连接撤销之前，保证双方都能接收到对等方的所有数据，在调用closesocket之前，先调用shutdown关闭发送数据通道。</strong></p>
+
+<h3 id="tcpclosewait">tcp中close_wait状态出现的原因</h3>
+
+<p><code>close_wait</code>出现的原因: 就是某一方在网络连接断开后，对等方没有检测到这个错误（对方断开）而没有调   用 closesocket，导致了这个状态的出现.</p>
+
+<p>模拟这样一个环境:服务器192.168.1.112:4500在接收到一个客户端的连接后，休眠五秒后，服务器关闭与客户 端通讯的socket后正常退出，而客户端在连接服务器后，等待用户输入字符后，发送给客户端。现在有这样几个问题:</p>
+
+<ol>
+  <li>
+    <p>服务器在休眠五秒后，正常退出了，但是由于客户端还在等待用户输入，此时服务器端TCP的状态是什么？(<code>FIN_WAIT_2</code>)，客户端的TCP状态是什么?(<code>CLOSE_WAIT</code>)</p>
+  </li>
+  <li>
+    <p>服务器在休眠五秒后，正常退出了，在服务器退出后，如果客户端异常退出，那么服务器端TCP的状态是什么？客户端的TCP状态是什么?</p>
+  </li>
+</ol>
+
+<pre><code>   在服务器正常退出后，客户端异常退出，那么客户端就会向服务器发送RST标志，然后客户端和服务器端的TCP状态都是`CLOSED`
+</code></pre>
+
+<ol>
+  <li>服务器在休眠五秒后，正常退出了，在服务器退出后,从客户端输入数据后，向服务器发送，此时服务器怎样处理这个数据?</li>
+</ol>
+
+<pre><code>   客户端通过PSH标志向服务器段发送数据，能够发送成功，但因为服务器的TCP处于(`FIN_WAIT_2`)状态，此时服务器会向客户端发送一个RST标示，并且服务器端口状态和客户端的TCP状态都变为`CLOSED`。
+</code></pre>
+
+<ol>
+  <li>在服务器休眠的过程中，杀死服务器进程，服务器端TCP状态是什么?客户端的TCP状态是什么?</li>
+</ol>
+
+<pre><code>在服务器休眠的过程中，杀死服务器进程，此时服务器方会向客户端发送一个RST标志，服务器TCP状态是`CLOSED`，客户端的TCP状态也是`CLOSE`.
+在服务器休眠五秒后，如果不关闭与客户端通讯的Socket直接正常退出，此时，服务器方也向客户端发送了RST标志。
+</code></pre>
+
+<p>对于上面的四个问题，必须注意到服务器正常断开的时候，向客户端发送的FIN根本不能被客户端的所正常处理，因为客户端正处于接收用户的输入。所以由于每次都是服务器主动断开，但是服务器TCP状态却有可能不能进入到<code>Time_Wait</code>状态。</p>
+
+<h3 id="section-1">服务器终止可能出现的情况</h3>
+
+<ol>
+  <li><code>accept、read、write、select、open</code>等慢系统调用中断，系统调用可能返回<code>EINTR</code>错误。需要重启被中断的系统调用。并且编写捕获信号的程序时，必须对慢系统调用返回<code>EINTR</code>有所准备。</li>
+  <li>三路握手完成后，客户TCP发送一个RST。服务器进程在调用<code>accept</code>的时候RST到达。accept返回一个错误给服务器进程，POSIX指出返回的errno值必须是<code>ECONNABORTED</code>（“software caused connection abort.”）。服务器忽略它，再次调用accept。</li>
+  <li>服务器进程终止。服务端调用<code>kill</code>命令杀死服务器子进程。子进程中所有打开的描述符都被关闭，进而会向客户发送一个FIN，客户TCP则响应一个ACK。而客户进程此时阻塞在<code>fgets</code>调用上。由于FIN的接收并没有告知客户服务器进程已经终止，所以客户进程照常发送数据。此时服务端响应RST。客户进程看不到这个RST，因为它在调用<code>writen</code>后立即调用<code>readline</code>，并且由于接收到FIN，<strong>所调用的readline立即返回0（EOF）</strong>。于是以出错信息（“server terminated prematurely”）退出。</li>
+  <li>如果客户不理会<code>readline</code>函数返回的错误，写更多的数据到服务器上。当一个进程向某个已收到RST的套接字执行写操作时，内核向该进程发送一个<code>SIGPIPE</code>信号。该信号的默认行为是终止进程，因此进程必须捕获它以免不情愿地被终止。</li>
+  <li>服务器主机崩溃。客户端到服务端之间网络断掉，或者服务端断电等，物理连接断掉了，这种情况下客户端不会退出（此情况称为<strong>半开连接</strong>），<code>send</code>函数正常执行，不会感觉到自己出错。因为由于物理网络断开，服务端不会给客户端回应错误消息。此时，客户TCP持续重传数据分节，试图从服务器上接收一个ACK。最终返回的错误是<code>ETIMEDOUT</code>。然而如果某个中间路由器判定服务器主机已不可达，从而响应一个“destination unreachable”ICMP消息，那么返回的错误是<code>EHOSTUNREACH</code>或<code>ENETUNREACH</code>。</li>
+  <li>服务器主机崩溃后重启。服务进程对客户端<code>send</code>来的消息会产生RST响应。客户收到RST时，客户正阻塞于<code>read</code>调用，导致该调用返回<code>ECONNESET</code>错误。</li>
+  <li>服务器主机关机。unix系统关机时，<code>init</code>进程通常先给所有进程发送<code>SIGTERM</code>信号（可捕获），等待固定一段时间后，给所有仍在运行的进程发送<code>SIGKILL</code>信号。接下里就和3一样。</li>
+</ol>
+
+<p>下图是检测各种TCP条件的方法</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/2014-08-01183756__zpse1970a67.jpg" alt="" /></p>
+
+<h3 id="solinger">SO_LINGER套接字选项</h3>
+
+<p>在默认情况下，当调用<code>close</code>关闭socket的使用，<code>close</code>会立即返回；但是，如果send buffer中还有数据，系统会试着先把send buffer中的数据发送出去，然后close才返回。</p>
+
+<p><code>SO_LINGER</code>选项则是用来修改这种默认操作的。于SO_LINGER相关联的一个结构体如下:</p>
+
+<pre><code>#include &lt;sys/socket.h&gt;
+struct linger {
+      int l_onoff  //0=off, nonzero=on(开关)
+      int l_linger //linger time(延迟时间)
+}
+</code></pre>
+
+<p>当调用<code>setsockopt</code>之后,该选项产生的影响取决于<code>linger</code>结构体中<code>l_onoff</code>和<code>l_linger</code>的值:</p>
+
+<ul>
+  <li>当<code>l_onoff</code>被设置为0的时候,将会关闭<code>SO_LINGER</code>选项,即TCP或则SCTP保持默认操作:<code>close</code>立即返回、<code>l_linger</code>值被忽略.</li>
+  <li><code>l_lineoff</code>值非0，<code>l_linger</code>为0，那么当<code>close</code>某个连接时TCP将终止该连接。send buffer中未被发送的数据将被丢弃,并向对方发送一个RST信息.值得注意的是，由于这种方式，是非正常的4中握手方式结束TCP链接，所以，TCP连接将不会进入<code>TIME_WAIT</code>状态，这样会导致新建立的可能和就连接的数据造成混乱。</li>
+</ul>
+
+<p>设置<code>SO_LINGER</code>套接字选项后，<code>close</code>的成功返回只是告诉我们先前发送的数据（和FIN）已由对端TCP确认，而不能告诉我们对端应用进程是否已读取数据。如果不设置该套接字选项，那么我们连对断TCP是否确认了数据都不知道。
+让客户知道服务器已读取其数据的一个方法是改为调用<code>shutdown</code>，并设置它的第二个参数为<code>SHUT_WR</code>，而不是调用<code>close</code>。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/1_zps7ad163b0.png" alt="" /></p>
+
+<p>关闭连接的本地端（客户端）时，根据所调用的函数（<code>close</code>和<code>shutdown</code>）以及是否设置了<code>SO_LINGER</code>套接字选项，<strong>可在以下3个不同的时机返回</strong>。</p>
+
+<ol>
+  <li><code>close</code>立即返回，根本不等待（默认情况）。</li>
+  <li><code>close</code>一直拖延到接受了对于客户端FIN的ACK才返回。</li>
+  <li>后跟一个<code>read</code>调用的<code>shutdown</code>一直等到接受对端FIN才返回。</li>
+</ol>
+
+<p><strong>下图汇总了对shutdown的两种可能调用和对close的三种可能调用，以及它们对TCP套接字的影响。</strong>
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/_zps2eb27157.png" alt="" /></p>
+
+<h3 id="soreuseaddr">SO_REUSEADDR套接字选项</h3>
+
+<p>SO_REUSEADDR套接字选项能起到以下功能。</p>
+
+<ol>
+  <li>
+    <p>SO_REUSEADDR允许一个server程序listen监听并bind到一个端口,既是这个端口已经被一个正在运行的连接使用了.</p>
+
+    <p>例如，以下情况：</p>
+
+    <ol>
+      <li>一个监听(listen)server已经启动</li>
+      <li>当有client有连接请求的时候,server产生一个子进程去处理该client的事物.</li>
+      <li>server主进程终止了,但是子进程还在占用该连接处理client的事情.虽然子进程终止了,但是由于子进程没有终止,该socket的引用计数不会为0，所以该socket不会被关闭.</li>
+      <li>server程序重启.</li>
+    </ol>
+
+    <p><strong>所有的TCP server都必须设定此选项,用以应对server重启的现象.</strong></p>
+  </li>
+  <li>
+    <p>SO_REUSEADDR允许多个server绑定到同一个port上,只要这些server指定的IP不同</p>
+
+    <p>SO_REUSEADDR需要在bind调用之前就设定。另外，还可以在绑定IP通配符。但是最好是先绑定确定的IP，最后绑定通配符IP。运行在这些端口上的服务器实例可以相同，也可以不同。在TCP中，不允许建立起一个已经存在的相同的IP和端口的连接。但是在UDP中，是允许的，特别是在多播中。</p>
+  </li>
+</ol>
+]]></content>
+  </entry>
+  
+</feed>

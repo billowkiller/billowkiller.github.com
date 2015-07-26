@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>pandoc example - Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2013/05/14/pandoc-example">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        Pandoc Example
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><p>from <a href="http://johnmacfarlane.net/pandoc/demos.html">pondoc </a></p>
+
+<hr />
+
+<p>To see the output created by each of the commands below, click on the
+name of the output file:</p>
+
+<ol>
+  <li>
+    <p>HTML fragment:</p>
+
+    <pre><code>pandoc README -o example1.html
+</code></pre>
+  </li>
+  <li>
+    <p>Standalone HTML file:</p>
+
+    <pre><code>pandoc -s README -o example2.html
+</code></pre>
+  </li>
+  <li>
+    <p>HTML with smart quotes, table of contents, CSS, and custom footer:</p>
+
+    <pre><code>pandoc -s -S --toc -c pandoc.css -A footer.html README -o example3.html
+</code></pre>
+  </li>
+  <li>
+    <p>LaTeX:</p>
+
+    <pre><code>pandoc -s README -o example4.tex
+</code></pre>
+  </li>
+  <li>
+    <p>From LaTeX to markdown:</p>
+
+    <pre><code>pandoc -s example4.tex -o example5.text
+</code></pre>
+  </li>
+  <li>
+    <p>reStructuredText:<!--more--></p>
+
+    <pre><code>pandoc -s -w rst --toc README -o example6.text
+</code></pre>
+  </li>
+  <li>
+    <p>Rich text format (RTF):</p>
+
+    <pre><code>pandoc -s README -o example7.rtf
+</code></pre>
+  </li>
+  <li>
+    <p>Beamer slide show:</p>
+
+    <pre><code>pandoc -t beamer SLIDES -o example8.pdf
+</code></pre>
+  </li>
+  <li>
+    <p>DocBook XML:</p>
+
+    <pre><code>pandoc -s -S -w docbook README -o example9.db
+</code></pre>
+
+    <p>Chunked XHTML via DocBook
+and <a href="http://cyberelk.net/tim/xmlto/">xmlto</a>:</p>
+
+    <pre><code>xmlto xhtml -m config.xsl example9.db -o example9/
+</code></pre>
+  </li>
+  <li>
+    <p>Man page:</p>
+
+    <pre><code>pandoc -s -w man pandoc.1.md -o example10.1
+</code></pre>
+  </li>
+  <li>
+    <p>ConTeXt:</p>
+
+    <pre><code>pandoc -s -w context README -o example11.tex
+</code></pre>
+
+    <p>PDF via pandoc and ConTeXt’s <code>texexec</code>:</p>
+
+    <pre><code>texexec --pdf example11.tex # produces example11.pdf
+</code></pre>
+  </li>
+  <li>
+    <p>Converting a web page to markdown:</p>
+
+    <pre><code>pandoc -s -r html http://www.gnu.org/software/make/ -o example12.text
+</code></pre>
+  </li>
+  <li>
+    <p>From markdown to PDF:</p>
+
+    <pre><code>pandoc README -o example13.pdf
+</code></pre>
+  </li>
+  <li>
+    <p>PDF with numbered sections and a custom LaTeX header:</p>
+
+    <pre><code>pandoc -N --template=mytemplate.tex --variable mainfont=Georgia --variable sansfont=Arial --variable monofont="Bitstream Vera Sans Mono" --variable fontsize=12pt --variable version=1.9 README --latex-engine=xelatex --toc -o example14.pdf
+</code></pre>
+  </li>
+  <li>
+    <p>A wiki program using <a href="http://happstack.com/">Happstack</a> and
+pandoc: <a href="http://gitit.net/">gitit</a></p>
+  </li>
+  <li>
+    <p>HTML slide shows:</p>
+
+    <pre><code>pandoc -s --mathml -i -t dzslides SLIDES -o example16a.html
+
+pandoc -s --webtex -i -t slidy SLIDES -o example16b.html
+
+pandoc -s --self-contained --webtex -i -t s5 SLIDES -o example16c.html
+
+pandoc -s --mathjax -i -t slideous SLIDES -o example16d.html
+</code></pre>
+  </li>
+  <li>
+    <p>TeX math in HTML:</p>
+
+    <pre><code>pandoc math.text -s -o mathDefault.html
+
+pandoc math.text -s --mathml -o mathMathML.html
+
+pandoc math.text -s --webtex -o mathWebTeX.html
+
+pandoc math.text -s --mathjax -o mathMathJax.html
+
+pandoc math.text -s --latexmathml -o mathLaTeXMathML.html
+</code></pre>
+  </li>
+  <li>
+    <p>Syntax highlighting of delimited code blocks:</p>
+
+    <pre><code>pandoc code.text -s --highlight-style pygments -o example18a.html
+
+pandoc code.text -s --highlight-style kate -o example18b.html
+
+pandoc code.text -s --highlight-style monochrome -o example18c.html
+
+pandoc code.text -s --highlight-style espresso -o example18d.html
+
+pandoc code.text -s --highlight-style haddock -o example18e.html
+
+pandoc code.text -s --highlight-style tango -o example18f.html
+
+pandoc code.text -s --highlight-style zenburn -o example18g.html
+</code></pre>
+  </li>
+  <li>
+    <p>GNU Texinfo, converted to info, HTML, and PDF formats:</p>
+
+    <pre><code>pandoc README -s -o example19.texi
+
+makeinfo example19.texi -o example19.info
+
+makeinfo example19.texi --html -o example19
+
+texi2pdf example19.texi # produces example19.pdf
+</code></pre>
+  </li>
+  <li>
+    <p>OpenDocument XML:</p>
+
+    <pre><code>pandoc README -s -w opendocument -o example20.xml
+</code></pre>
+  </li>
+  <li>
+    <p>ODT (OpenDocument Text, readable by OpenOffice):</p>
+
+    <pre><code>pandoc README -o example21.odt
+</code></pre>
+  </li>
+  <li>
+    <p>MediaWiki markup:</p>
+
+    <pre><code>pandoc -s -S -w mediawiki --toc README -o example22.wiki
+</code></pre>
+  </li>
+  <li>
+    <p>EPUB ebook:</p>
+
+    <pre><code>pandoc -S README -o README.epub
+</code></pre>
+  </li>
+  <li>
+    <p>Markdown citations:</p>
+
+    <pre><code>pandoc -s -S --biblio biblio.bib --csl chicago-author-date.csl CITATIONS -o example24a.html
+
+pandoc -s -S --biblio biblio.bib --csl mhra.csl CITATIONS -o example24b.html
+
+pandoc -s -S --biblio biblio.bib --csl ieee.csl CITATIONS -t man -o example24c.1
+</code></pre>
+  </li>
+  <li>
+    <p>Textile writer:</p>
+
+    <pre><code>pandoc -s -S README -t textile -o example25.textile
+</code></pre>
+  </li>
+  <li>
+    <p>Textile reader:</p>
+
+    <pre><code>pandoc -s -S example25.textile -f textile -t html -o example26.html
+</code></pre>
+  </li>
+  <li>
+    <p>Org-mode:</p>
+
+    <pre><code>pandoc -s -S README -o example27.org
+</code></pre>
+  </li>
+  <li>
+    <p>AsciiDoc:</p>
+
+    <pre><code>pandoc -s -S README -t asciidoc -o example28.txt
+</code></pre>
+  </li>
+  <li>
+    <p>Word docx:</p>
+
+    <pre><code>pandoc -s -S README -o example29.docx
+</code></pre>
+  </li>
+  <li>
+    <p>LaTeX math to docx:</p>
+
+    <pre><code>pandoc -s math.tex -o example30.docx
+</code></pre>
+  </li>
+  <li>
+    <p>DocBook to markdown:</p>
+
+    <pre><code>pandoc -f docbook -t markdown -s howto.xml -o example31.text
+</code></pre>
+  </li>
+</ol>
+
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/tools/'>tools</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2013/05/14/pandoc-example/" data-via="" data-counturl="http://billowkiller.github.io/blog/2013/05/14/pandoc-example/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2013/05/14/p2pliu-mei-ti-shi-pin-dian-bo-xi-tong-de-ge-ren-ji-zhu-bao-gao/" title="Previous Post: P2P流媒体视频点播系统的个人技术报告">&laquo; P2P流媒体视频点播系统的个人技术报告</a></li>
+            
+            
+            <li class="next"><a href="/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan/" title="Next Post: python特殊语法：filter、map、reduce、lambda [转]">python特殊语法：filter、map、reduce、lambda [转] &raquo;</a></li>
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item " href="/blog/2014/08/29/static-and-dynamic-library/">Static and Dynamic Library</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/23/classical-sync-problem/">Classical Sync Problem</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/22/design-pattern/">Design Pattern Abstraction</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/14/linux-memory-management/">Linux Memory Management</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/09/quicksort/">QuickSort and Derivatives</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">8</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">10</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">8</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">13</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">12</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">6</span>
+        algorithm
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2014 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2013/05/14/pandoc-example/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2013/05/14/pandoc-example/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>

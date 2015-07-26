@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Effective C++ Rework - Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2014/04/17/Effective">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-17T02:18:00+08:00" pubdate data-updated="true">Apr 17<span>th</span>, 2014</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        Effective C++ Rework
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><h2 id="c">让自己习惯C++</h2>
+
+<h3 id="item-01-view-c-as-a-federation-of-languages">Item 01： View C++ as a federation of languages</h3>
+
+<p>C++同时支持过程形式、面对对象形式、函数形式、泛型形式、元编程形式。</p>
+
+<p>次语言有</p>
+
+<ul>
+  <li>C</li>
+  <li>Object-Oriented C++</li>
+  <li>Template C++</li>
+  <li>STL</li>
+</ul>
+
+<p>C++高效编程守则视状况而变化，取决于你使用C++的那一部分。</p>
+
+<!--more-->
+
+<h3 id="item-02-prefer-consts-enums-and-inlines-to-defines">Item 02： Prefer consts, enums and inlines to #defines</h3>
+
+<ul>
+  <li><code>#define</code>的变量没有进入记号表。并且没有作用域，不能提供任何封装性。</li>
+  <li><code>#define</code>定义宏，需要为所有实参加上小括号，且不能够使用<code>++</code>和<code>--</code>。</li>
+</ul>
+
+<p><code>#define</code>难以调试、行为无法预料、类型不安全。</p>
+
+<pre><code>class GamePlayer{
+private:
+	static const int NumTurns = 5; //常量申明式
+};
+</code></pre>
+
+<p>通常C++要求你对你所使用的任何东西提供一个定义式，但那如果它是<code>class</code>专属常量又是<code>static</code>且为<strong>整数型</strong>(ints, chars, bools)则需特殊处理。只要是不取它们的地址，你可以申明并使用它们而无需提供定义式。如果需要取址，必须提供定义式：</p>
+
+<pre><code>const int GamePlayer::NumTurns; //申明时获取了初值，定义不必赋值
+</code></pre>
+
+<p>“The enum hack”表示一个属于枚举类型的数值可权充int被使用，于是<code>GamePlayer</code>定义为</p>
+
+<pre><code>class GamePlayer{
+private:
+	enum { NumTurns = 5 };
+	static const int NumTurns = 5;
+};
+</code></pre>
+
+<ul>
+  <li>取一个<code>enum</code>地址是非法的。<code>enum</code>和<code>#define</code>一样不会导致非必要的内存分配。</li>
+  <li><code>enum hack</code>是<code>template metaprogramming</code>的基础技术。</li>
+</ul>
+
+<p><code>template inline</code>可以提供宏带来的效率以及一般函数的所有可预料行为和类型安全。遵守作用域和访问规则。</p>
+
+<h3 id="item-03-use-const-whenever-possible">Item 03： Use const whenever possible</h3>
+
+<p>令函数返回一个常量值，往往可以降低因客户错误而造成的意外，而不至于放弃安全性和高效性。</p>
+
+<pre><code>const Rational operator* (const Rational&amp; lhs, const Rational&amp; rhs);
+Rational a, b, c;
+...
+(a * b) = c;  //错误
+</code></pre>
+
+<p>重载<code>operator[]</code>并对不同的版本给予不同的返回类型，就可以令<code>const</code>和<code>non-const</code>获得不同的处理。返回 <code>char&amp;</code>也是必要的。</p>
+
+<pre><code>const char&amp; operator[](std::size_t position) const; //operator[] for const Object
+char&amp; operator[](std::size_t position); //operator[] for non-const object
+</code></pre>
+
+<ul>
+  <li>成员函数式<code>const</code>有两个流行的概念：<code>bitwise constness</code>, <code>logical constness</code>。</li>
+  <li><code>mutable</code>变量成员可以再const成员函数中改变。</li>
+  <li><code>static_cast</code>将<code>non-const</code>对象转为<code>const</code>对象。<code>const_cast</code>相反。</li>
+</ul>
+
+<h3 id="item-04-make-sure-that-objects-are-initialized-before-theyre-used">Item 04： Make sure that objects are initialized before they’re used</h3>
+
+<ul>
+  <li><code>C++</code>对定义与不同编译单元(文件)内的<code>non-local static</code>对象的初始化次序并无明确定义。</li>
+  <li>函数内的<code>local static</code>对象会在该函数被调用期间首次遇上该对象的定义式时被初始化。</li>
+</ul>
+
+<p>为内置对象进行手工初始化，<code>C++</code>不保证初始化它们。
+构造函数使用<code>成员初值列</code>，不要在函数内使用赋值操作。其排列次序应该和申明次序相同。
+为免除跨编译单元初始化次序问题。以<code>local static</code>对象替代<code>non-local static</code>对象。</p>
+
+<h2 id="constructors-destructors-and-assignment-operators">Constructors, destructors, and Assignment Operators</h2>
+
+<h3 id="item-05-know-what-functions-c-silently-writes-and-calls">Item 05： Know what functions C++ silently writes and calls</h3>
+
+<ul>
+  <li><code>default</code>构造函数和析构函数调用<code>base classes</code>和<code>non-static</code>成员变量的构造函数和析构函数。且只有base是<code>virtual</code>析构时，它才是<code>virtual</code>的。</li>
+  <li>如果类内含<code>reference</code>或<code>const</code>成员，或者<code>base classes</code>将<code>copy assignment</code>操作符申明为<code>private</code>，则需要自己定义<code>copy assignment</code></li>
+</ul>
+
+<h3 id="item-06-explicitly-disallow-the-use-of-compiler-generated-functions-you-do-not-want">Item 06: Explicitly disallow the use of compiler-generated functions you do not want</h3>
+
+<p>不实现<code>copy</code>或<code>copy assignment</code>的方法：</p>
+
+<ol>
+  <li>将成员函数声明为private而且故意不实现它们。</li>
+  <li>设计一个专门为了组织copying动作的<code>base class</code>， 将<code>copy</code>和<code>copy assigment</code>声明为<code>private</code>。接着私有继承base class</li>
+  <li><code>Boost</code>提供的class，<code>nonecopyable</code></li>
+</ol>
+
+<h3 id="item-07-declare-destructors-virtual-in-ploymorphic-base-classes">Item 07: Declare destructors virtual in ploymorphic base classes</h3>
+
+<pre><code>Base *pt = new Derived;
+delete pt;
+</code></pre>
+
+<p><code>derived class</code>对象经由一个<code>base class</code>指针被删除，如果<code>base class</code>有个<code>non-virtual</code>析构函数，则对象的<code>derived</code>成分没被销毁。</p>
+
+<p>无端地将所有classes的析构函数声明为<code>virtual</code>，就像从未声明它们为<code>virtual</code>一样，都是错误的，带来对象体积的增加。只有当class内含有至少一个<code>virtual</code>函数才为它声明<code>virtual</code>析构函数。</p>
+
+<p>为你希望它成为抽象的那个class(polymorphic base classes)声明一个<code>pure virtual</code>析构函数。</p>
+
+<pre><code>class AWOV {
+public:
+	virtual  ~AWOV() = 0;
+};
+AWOV::~AWOV() {}  //pure virtual 析构函数的定义 
+</code></pre>
+
+<p>然而必须为这个<code>pure virtual</code>函数提供一份定义，根据析构函数的运作方式，编译器会在AWOV的<code>derived classes</code>的析构函数中创建一个对~AWOV的调用动作，所以必须为这个函数提供一份定义。否则，连接器会发出抱怨。</p>
+
+<h3 id="item-08-prevent-exceptions-from-leaving-destructors">Item 08: Prevent exceptions from leaving destructors</h3>
+
+<ul>
+  <li>析构函数绝对不要突出异常。如果一个被析构函数调用的函数可能抛出异常，析构函数应该捕捉任何异常，然后吞下它们（不传播）或结束程序。</li>
+  <li>如果客户需要对某个操作函数运行期间抛出的异常作出反应，那么class应该提供一个普通函数（而非在析构函数中）执行该操作。</li>
+</ul>
+
+<h3 id="item-09-never-call-virtual-functions-during-construction-or-destruction">Item 09: Never call virtual functions during construction or destruction</h3>
+
+<p><strong>在base class构造期间，virtual函数不是virtual函数</strong>。因为derived class对象还未构造好，所以base class构造期间virtual函数绝不会下降到derived classes阶层。在derived class对象的base class构造期间，对象类型是base class而不是derived class。</p>
+
+<p>在构造期间，可以借由“令derived classes将必要的构造信息向上传递至base class构造函数”替换之。</p>
+
+<p><strong>同样的道理也适用于析构函数</strong>。一旦derived class析构函数开始执行，对象内的derived class成员变量变成未定义值，所以C++是它们仿佛不再存在。进入base class析构函数后对象就称为一个base class 对象，而C++的任何部分包括virtual函数、<code>dynamic_cast</code>等等也就这么看它。</p>
+
+<p>所以，在构造和析构席间不要调用virtual函数，因为这类调用从不降至derived class（比起当前执行构造函数和析构函数的那层）。</p>
+
+<h3 id="item-10-have-assignment-operators-return-a-reference-to-this">Item 10: Have assignment operators return a reference to *this</h3>
+
+<pre><code>Widget&amp; operator=(const widget &amp;rhs) {
+	...
+	return *this;
+}
+</code></pre>
+
+<h3 id="item-11-handle-assignment-to-self-in-operator">Item 11: Handle assignment to self in operator=</h3>
+
+<p>容易掉进“在停止使用资源之前意外释放了它”的陷阱。</p>
+
+<p>让<code>operator=</code>具备“异常安全性”往往自动获得“自我复制安全”的汇报。</p>
+
+<pre><code>Widget&amp; operator=(const widget &amp;rhs) {
+	Bitmap * pOrig = pb;
+	pb = new Bitmap(*rhs.pb);
+	delete pOrig;
+	return *this;
+}
+</code></pre>
+
+<p>还可以使用<code>copy and swap</code>技术。或利用一下事实：(1)某class的<code>copy assignment</code>操作符可能被声明<code>by value</code>的方式；(2)以<code>by value</code>的方式传递东西会造成一份副本。</p>
+
+<h3 id="item-12-copy-all-parts-of-an-object">Item 12: Copy all parts of an object</h3>
+
+<ul>
+  <li>编写一个copying函数确保(1)复制所有local成员变量，(2)调用所有base classes内的适当的copy函数。</li>
+  <li>不要尝试以某个copying函数实现另一个copying函数。应该讲共同机能放进第三个函数中，并有两个copying函数共同调用。</li>
+</ul>
+
+<h2 id="section">资源管理</h2>
+
+<h3 id="item-13-use-objects-to-manage-resources">Item 13: Use objects to manage resources.</h3>
+
+<ul>
+  <li>获得资源后立即放进资源对象内。<code>RAII</code>–Resource Acquisition Is initialization</li>
+  <li>管理对象运用析构函数确保资源被释放。</li>
+  <li>auto_ptr通过copy构造函数或copy assignment操作符复制它们，它们会变成null，而复制所得到的指针将取得资源的唯一拥有权。</li>
+  <li>动态分配得到的<code>array</code>身上使用auto_ptr或tr1::shared_ptr是个馊主意。两者再析构函数内做delete而不是delete[]动作。</li>
+</ul>
+
+<h3 id="item-14-think-carefully-about-copying-behavior-in-resource-managing-classes">Item 14: Think carefully about copying behavior in resource-managing classes</h3>
+
+<p>当一个RAII对象被复制，考虑两种可能性：</p>
+
+<ul>
+  <li>禁止复制</li>
+  <li>对底层资源采用<code>引用计数法</code>， 
+    <ul>
+      <li><code>shared_ptr</code>的缺省行为是“当引用次数为0时删除其所指之物”，允许制定特定的删除器(<code>deleter</code>)</li>
+    </ul>
+  </li>
+  <li>复制底部资源</li>
+  <li>转移底部资源的拥有权</li>
+</ul>
+
+<h3 id="item-15-provide-access-to-raw-resources-in-resource-managing-classes">Item 15: Provide access to raw resources in resource-managing classes</h3>
+
+<p>智能指针重载了指针取值操作符(operator-&gt; 和 operator*)，它们允许隐式转换至底部原始指针。</p>
+
+<p>隐式转换举例：</p>
+
+<pre><code>class Font {
+public:
+	...
+	operator FontHandle() const //隐式转换函数
+	{ return f; }
+	...
+}
+</code></pre>
+
+<ul>
+  <li>API往往要求访问原始资源，所以每个RAII class应该提供一个取得原始资源的方法。</li>
+  <li>对原始资源的访问可能经由显示转换或隐式转换。一般而言显示转换比较安全，但隐私转换对客户比较方便。</li>
+</ul>
+
+<h3 id="item-16-use-the-same-form-in-corresponding-uses-of-new-and-delete">Item 16: Use the same form in corresponding uses of new and delete</h3>
+
+<p>new对应delete，new[] 对应delete[]</p>
+
+<p>对于typedef,必须要在程序中说明清楚</p>
+
+<pre><code>typedef std::string AddressLines[4];
+std::string * pal = new AddressLines;
+delete [] pal; //delete pal 导致行为未有定义 因此，最好尽量不要对数组形式做typedef动作。
+</code></pre>
+
+<h3 id="item-17-store-newed-objects-in-smart-pointers-in-standalone-statements">Item 17: Store newed objects in smart pointers in standalone statements.</h3>
+
+<p>假设有个函数解释处理程序的优先权，另一个函数用来在某动态分配所得的Widget上进行某些带有优先权的处理：</p>
+
+<pre><code>int priority();
+void processWidget(std::tr1::shared_ptr&lt;Widget&gt; pw, int priority);
+</code></pre>
+
+<p>如果这样调用</p>
+
+<pre><code>processWidget(std::tr1::shared_ptr&lt;Widget&gt;(new Widget), priority()); 编译器创建代码，做以下三件事：
+</code></pre>
+
+<ul>
+  <li>调用priority</li>
+  <li>执行new Widget</li>
+  <li>调用tr1::shared_ptr构造函数。</li>
+</ul>
+
+<p>只能保证new Widget在shared_ptr构造函数之前被调用。如果priority在两者中间被调用，而且导致异常。那么new Widget返回的指针将会遗失。</p>
+
+<h2 id="section-1">设计与声明</h2>
+
+<h3 id="item-18-make-interfaces-easy-to-use-correctly-and-hard-to-use-incorrectly">Item 18: Make interfaces easy to use correctly and hard to use incorrectly</h3>
+
+<ul>
+  <li>好的接口很容易被正确使用，不容易被误用。你应该在你的所有接口中努力达成这些性质。</li>
+  <li>“促进正确使用”的办法包括借口的一致性，以及与内置类型的行为兼容。任何接口如果要求客户必须记得做某些事情，就是有着“不正确使用”的倾向，因为客户可能会忘记做那件事。</li>
+  <li>“阻止误用”的办法包括建立新类型、限制类型上的操作，束缚对象值，以及消除客户的资源管理责任。</li>
+  <li>tr1::shared_ptr支持定制性删除器(custom deleter)。可以防范<code>cross-DLL problem</code>(在一个DLL中被new创建，却在另一个DLL中被delete销毁)，自动解除互斥锁等等。</li>
+</ul>
+
+<h3 id="item-20-prefer-pass-by-reference-to-const-to-pass-by-value">Item 20: Prefer pass-by-reference-to-const to pass-by-value.</h3>
+
+<ul>
+  <li>尽量以<code>pass-by-reference-to-const</code>替换<code>pass-by-value</code>。前者通常比较高效，并可以避免切割问题。</li>
+  <li>以上规则并不适用于<strong>内置类型，以及STL的迭代器和函数对象</strong>。对它们而言，pass-by-value往往比较适当。</li>
+</ul>
+
+<h3 id="item-21-dont-try-to-return-a-reference-when-you-must-return-an-object">Item 21: Don’t try to return a reference when you must return an object</h3>
+
+<p>绝不要返回pointer或reference指向一个local stack对象，或返回reference指向一个heap-allocated对象，或返回pointer或reference指向一个local static对象而有可能同时需要多个这样的对象。</p>
+
+<h3 id="item-22-declare-data-members-private">Item 22: Declare data members private.</h3>
+
+<ul>
+  <li>封装的重要性比你最初见到它时还要重要</li>
+  <li>切记将成员变量声明为private。这可赋予客户访问数据的一致性、可细微划分访问控制、允诺约束条件获得保证，并提供class作者以充分的实现弹性。</li>
+  <li>protected并不比public更具有封装性。</li>
+</ul>
+
+<h3 id="item-23-prefer-non-member-non-friend-functions-to-member-functions">Item 23: Prefer non-member non-friend functions to member functions</h3>
+
+<ul>
+  <li>提供更大的封装性</li>
+  <li>比较自然的做法是让 non-member non-friend函数作为便利函数位于类所在的同一个namespace内。并将同类便利函数声明放在同一头文件中。</li>
+  <li>将所有便利函数放在多个头文件内但隶属于同一个命名空间，意味客户可以轻松扩展这一组便利函数。</li>
+</ul>
+
+<h3 id="item-24-declare-non-member-functions-when-type-conversions-should-apply-to-all-parameters">Item 24: Declare non-member functions when type conversions should apply to all parameters</h3>
+
+<pre><code>class Rational {
+public:
+	const Rational operator* (const Rational &amp;rhs) const;
+};
+
+Rational oneHalf(1, 2);
+result = oneHalf * 2; // oneHalf.operator*(2)，可以执行
+result = 2 * oneHalf; // 2.operator*(oneHalf)，错误
+</code></pre>
+
+<p>所以让函数称为一个<code>non-member</code>函数</p>
+
+<pre><code>const Rational operator* (const Rational &amp;lhs， const Rational &amp;rhs);	 允许编译器在每一个实参身上执行隐私转换类型。
+</code></pre>
+
+<h3 id="item-25-consider-support-for-a-non-throwing-swap">Item 25: Consider support for a non-throwing swap</h3>
+
+<pre><code>namespace std {
+	template&lt;&gt; //全特化
+	void swap&lt;Widget&gt;( Widget &amp;a, Widget &amp;b) {
+		swap(a.pImpl, b.pImpl); //私有变量，编译不通过，需要创建类的成员函数
+	} }
+
+class Widget {
+public:
+	void swap(Widget&amp; other) {
+		using std::swap; //声明是有必要的，下个swap调用std版本的
+		swap(pImpl, other.pImpl);
+</code></pre>
+
+<ul>
+  <li>当<code>std::swap</code>对你的类型效率不高时，提供一个<code>swap</code>成员函数，并确定这个函数不抛出异常</li>
+  <li>如果你提供一个<code>member swap</code>，也应该提供一个<code>non-member swap</code>用来调用前者。对于classes（而非templates），也请特化<code>std::swap</code></li>
+  <li>调用<code>swap</code>时应针对<code>std::swap</code>使用<code>using</code>声明式，然后调用<code>swap</code>并且不带任何“命名空间资格修饰”。</li>
+  <li>为“用户定义类型”进行<code>std templates</code>全特化是好的，但千万不要尝试在<code>std</code>内加入某些对<code>std</code>而言是全新的东西</li>
+</ul>
+
+<h2 id="section-2">实现</h2>
+
+<h3 id="item-26-postpone-variable-definitions-as-long-as-possible">Item 26: Postpone variable definitions as long as possible</h3>
+
+<p>不止应该延后变量的定义，这道非得使用该变量的前一刻为止，甚至应该尝试延后这份定义知道能够给它初值实参为止。</p>
+
+<h3 id="item-27-minimize-casting">Item 27: Minimize casting</h3>
+
+<ul>
+  <li><code>const_cast</code>被用来将对象的常量性转除，也是唯一有此能力的c++ style转型操作符</li>
+  <li><code>dynamic_cast</code>主要用来执行“safe downcasting”，可能需要耗费重大运行成本。</li>
+  <li><code>reinterpret_cast</code>执行低级转型，实际动作及结果可能取决于编译器，也就表示它不可移植。</li>
+  <li><code>static_cast</code>用来强迫隐式转换。例如将non-const转为const对象，将int转为double。</li>
+</ul>
+
+<p>单一对象(例如一个类型为Derived的对象)<code>可能拥有一个以上的地址</code>(例如“以Base* 指向它”时的地址和“以Derived* 指向它”时的地址)。这至少意味着你通常应该避免作出“对象在C++中如何布局”的假设。</p>
+
+<ul>
+  <li>如果可以，尽量避免转型，特别是在注重效率的代码中避免<code>dynamic_cast</code>。如果有个设计需要转向动作，试着发展无需转型的替代设计。</li>
+  <li>如果转型是必要的，试着将它隐藏于某个函数背后。客户随后可以调用该函数，而不需将转型放进他们自己的代码内。</li>
+  <li>宁可使用C++ style转型，不要使用旧式转型。前者很容易辨识出来，而且也比较有着分门别类的职掌。</li>
+</ul>
+
+<h3 id="item-28-avoid-returning-handles-to-object-internals">Item 28: Avoid returning “handles” to object internals</h3>
+
+<p>避免返回handles(包括references、指针、迭代器)指向对象内部。遵守这个条款可增加封装性，帮助const成员函数的行为像个const，并将发生dangling handles的可能性降至最低。</p>
+
+<p>考虑一个例子：</p>
+
+<pre><code>const Point&amp; Rectangle::upperLeft() const { return pData-&gt;ulhc; }	
+
+class GUIObject{};
+const Rectangle boundingBox(const GUIObject &amp;obj);
+
+GUIObject *pgo;
+const Point* pUpperLeft = &amp;(boundingBox(*pgo).upperLeft()); //指向一个不存在的对象
+</code></pre>
+
+<h3 id="item-29-strive-for-exception-safe-code">Item 29: Strive for exception-safe code.</h3>
+
+<ul>
+  <li>异常安全函数即使发生异常也不会泄露资源或允许任何数据结构败坏。这样的函数区分三种可能的保证：基本型、强烈型、不抛异常型。</li>
+  <li>强烈保证往往能够以copy-and-swap实现出来，但强烈保证并非对所有函数都可实现或具备现实意义。</li>
+  <li>函数提供的异常安全保证通常最高只等于其所调用之各个函数的异常安全保证中的最弱者。</li>
+</ul>
+
+<h3 id="item-30-understand-the-ins-and-outs-of-inlining">Item 30: Understand the ins and outs of inlining</h3>
+
+<p><code>inline</code>只是对编译器的一个申请，不是强制命令。这项申请可以隐喻提出，也可以明确提出。隐喻方式是将函数定义于class定义内：</p>
+
+<pre><code>class Person {
+public:
+	int age() const { return theAge; } //隐喻的inline申请
+private:
+	int the Age;
+};
+</code></pre>
+
+<p>这样的函数通常是成员函数，<code>friend</code>函数也可以被定义于class内，这样它们也是被隐喻为<code>inline</code>。</p>
+
+<p><code>inline</code>和<code>template</code>函数通常都被定义于头文件内。</p>
+
+<pre><code>inline void f() {}
+void ( * pf )() = f;
+f(); //这个调用将被inlined
+pf(); //或许不被inlined，因为它通过函数指针达成。
+</code></pre>
+
+<ul>
+  <li><code>inline</code>函数无法随着程序库升级而升级。调用<code>inline</code>函数的程序都必须重新编译。</li>
+  <li>大部分调试器面对<code>inline</code>函数都束手无策。</li>
+</ul>
+
+<h3 id="item-31-minimize-compilation-dependencies-between-files">Item 31: Minimize compilation dependencies between files</h3>
+
+<p>以<code>声明的依存性</code>替换<code>定义的依存性</code>：</p>
+
+<ul>
+  <li>如果使用<code>object reference</code>或<code>object pointers</code>可以完成任务，就不要使用objects。</li>
+  <li>如果能够，尽量以class<code>声明式</code>替换class<code>定义式</code>。 </li>
+  <li>为声明式和定义式提供不同的头文件。这种方法无论是否涉及templates都适用。
+    <ul>
+      <li>
+        <iosfwd>内含iostream各组件的声明式，包括<sstream>, <streambuf>, <fstream>和<iostream>
+
+
+
+</iostream></fstream></streambuf></sstream></iosfwd>
+      </li>
+    </ul>
+  </li>
+</ul>
+<p>##继承和面向对象设计</p>
+
+<h3 id="item-32-make-sure-public-inheritance-models-is-a">Item 32: Make sure public inheritance models “is-a”</h3>
+
+<h3 id="item-33-avoid-hiding-inherited-names">Item 33: Avoid hiding inherited names</h3>
+
+<pre><code>class Base {
+public:
+	virtual void mf1() = 0;
+	virtual void mf1(int);
+	virtual void mf2();
+	void mf3();
+	void mf3(double);
+};
+
+class Derived: public Base {
+public:	
+	using Base::mf1;  //让base class内名为mf1和mf3的所有东西
+	using Base::mf3;  //在Derived作用域内都可见
+	virtual void mf1();
+	void mf3();
+};	
+
+//或者
+class Derived: private Base {
+public:
+	virtual void mf1() { Base::mf1(); }  //转交函数，暗自称为inline
+};
+</code></pre>
+
+<ul>
+  <li>derived class内的名称会遮掩base classes内的名称。在public继承下从来没有人希望如此。
+    <ul>
+      <li>上述规则对不同参数类型也适用，而且不论函数式virtual或non-virtual。</li>
+    </ul>
+  </li>
+  <li>为了让被遮掩的名称再见天日，可使用using声明式或转变函数。</li>
+</ul>
+
+<h3 id="item-34-differentiate-between-inheritance-of-interface-and-inheritance-of-implementation">Item 34: Differentiate between inheritance of interface and inheritance of implementation</h3>
+
+<ul>
+  <li>接口继承和实现继承不同。在public继承之下，derived classes总是继承base class的接口。</li>
+  <li>pure virtual函数只具体指定接口继承。pure virtual函数必须在derived classes中重新声明，但它们也可以拥有自己的实现。</li>
+  <li>简朴的impure virtual函数具体指定接口继承及缺省实现继承。</li>
+  <li>non-virtual函数具体指定接口继承以及强制性实现继承。</li>
+</ul>
+
+<h3 id="item-35-consider-alternatives-to-virtual-functions">Item 35: Consider alternatives to virtual functions</h3>
+
+<p>当你为解决问题而寻找某个设计方法时，不妨考虑virtual函数的替代方案。</p>
+
+<ul>
+  <li>使用non-virtual interface（NVI）手法，那是Template Method设计模式的一种特殊形式。它以public non-virtual成员函数包裹较低访问性(private或protected)的virtual函数, wrapper。</li>
+  <li>将virtual函数替换为函数指针成员变量，这是Strategy设计模式的一种分解表现形式。</li>
+  <li>以tr1::function成员变量替换virtual函数，因而允许使用任何可调用物(callable entity)搭配一个兼容于需求的签名式。这也是Strategy设计模式的某种形式。</li>
+  <li>将继承体系内的virtual函数替换为另一个继承体系内的virtual函数。这是Strategy设计模式的传统实现手法。</li>
+</ul>
+
+<h3 id="item-36-never-redefine-an-inherited-non-virtual-function">Item 36: Never redefine an inherited non-virtual function</h3>
+
+<p>non-virtual是静态绑定，调用的方法是静态类型所拥有的方法，而不是实际类型所拥有的方法。</p>
+
+<h3 id="item-37-never-redefine-a-functions-inherited-default-parameter-value">Item 37: Never redefine a function’s inherited default parameter value</h3>
+
+<p>virtual函数是动态绑定，而缺省参数值确实静态绑定。静态绑定为early binding，动态绑定为late binding。即使子类重新定义了virtual函数的缺省参数，调用还是用了父类的缺省参数。这是为了运行期效率。如果缺省参数值是动态绑定，编译器就必须有某种办法在运行期间为virtual函数决定适当的缺省参数值。</p>
+
+<p>可以使用NVI（non-virtual interface）手法：</p>
+
+<pre><code>class Shape {
+public:
+	enum ShapeColor { Red, Green, Blue};
+	void draw(ShapeColor color = Red) const {
+		doDraw(color);
+	}
+private:
+	virtual void doDraw(ShapeColor color) const = 0;//真正的工作在此处
+}；
+class Rectangle: public Shape {
+public:
+	...
+private:
+	virtual void doDraw(ShapeColor color) const; //不须制定缺省参数值
+};
+</code></pre>
+
+<h3 id="item-39-use-private-inheritance-judiciously">Item 39: Use private inheritance judiciously</h3>
+
+<ul>
+  <li>编译器不会自动将一个derived class对象转换为一个base class对象。</li>
+  <li>由private base class继承而来的所有成员，在derived class 中都会变成private 属性。</li>
+  <li>private继承在软件设计层面没有意义，只有在软件实现层面有意义。</li>
+  <li>Private继承意味is-implemented-in-terms of(根据某物实际出)。它通常比复合的级别低。但是当derived class需要访问protected base class的成员，或需要重新定义继承而来的virtual函数时，这么设计是合理的。
+和</li>
+  <li>复合不同，private继承可以造成empty base最优化。这对致力于对象尺寸最小化的程序库开发者而言，可能很重要。</li>
+</ul>
+
+<p>怎样阻止derived classes重新定义virtual函数？</p>
+
+<pre><code>class Widget {
+private:
+	class WidgetTimer: public Timer {
+	public:
+		virtual void onTick() const;
+	};
+	WidgetTimer timer;
+};
+</code></pre>
+
+<p>私有继承空类并不继承空类的空间</p>
+
+<pre><code>class Empty {}; //sizeof Empty == 1;
+class HoldsAnInt: private Empty { int x; }; //sizeof HoldsAnInt == 4;
+</code></pre>
+
+<h3 id="item-40-use-multiple-inheritance-judiciously">Item 40: Use multiple inheritance judiciously</h3>
+
+<ul>
+  <li>多重继承比单一继承复杂。它可能导致新的歧义性，以及对virtual继承的需要。</li>
+  <li>virtual继承会增加大小、速度、</li>
+  <li>初始化（及赋值）复杂度等等成本。如果virutal base classes不带任何数据，将是最具使用价值的情况。Java和.Net的Interfaces指的注意，它在许多方面兼容于C++的virtual base classes，而且也不允许含有任何数据。</li>
+  <li>多重继承的确有正当用途。其中一个情节涉及public继承某个Interface class和private继承某个协助实现的class的两相结合。</li>
+</ul>
+
+<h2 id="section-3">模版与泛型编程</h2>
+
+<h3 id="item-41-understand-implicit-interfaces-and-compile-time-polymorphism">Item 41: Understand implicit interfaces and compile-time polymorphism</h3>
+
+<ul>
+  <li>classes和templates都支持接口和多态。</li>
+  <li>对classes而言接口是显示的，以数字签名为中心。多态则是通过virtual函数发生于运行期。</li>
+  <li>对template参数而言，接口是隐式的，奠基于<strong>有效表达式</strong>。多态则是通过template具现化和函数重载解析发生于编译器。</li>
+</ul>
+
+<h3 id="item-42-understand-the-two-meanings-of-typename">Item 42: Understand the two meanings of typename.</h3>
+
+<p>在template声明式中，<code>class</code>和<code>typename</code>不一定相同。</p>
+
+<pre><code>template&lt;typename C&gt;
+void print2nd(const C&amp; container) {
+	if(container.size() &gt;= 2) {
+		C::const_iterator iter(container.begin());
+		++iter;
+		int value = *iter;
+	{
+}
+</code></pre>
+
+<p><code>iter</code>的类型是<code>C::const_iterator</code>，实际是什么值取决于<code>template</code>参数<code>C</code>。<code>template</code>内出现的名称如果相依于某个<code>template</code>参数，称之为从属名称。如果从属名称在<code>class</code>内呈嵌套状，我们称它为嵌套从属名称。<code>C::const_iterator</code>就是这样的一个名称。而<code>value</code>的类型<code>int</code>并不依赖<code>template</code>参数的名称，称之为非从属名称。<strong>在缺省情况下，嵌套从属名称不是类型</strong>。</p>
+
+<p>改为<code>typename C::const_iterator iter(container.begin());</code>。</p>
+
+<p>一种特列情况为，<code>typename</code>不可以出现在<code>base classes list</code>内的嵌套从属类型名称之前，也不可以在<code>member initialization list</code>中作为<code>base class</code>修饰符。</p>
+
+<pre><code>template&lt;typename T&gt;
+class Derived: public Base&lt;T&gt;::Nested {
+public:
+	explict Derived(int x): Base&lt;T&gt;::Nested(x) {
+		typename Base&lt;T&gt;::Nested temp;
+	}
+};
+
+最后一个例子：
+template&lt;typename IterT&gt;
+void workWithIterator(IterT iter) {
+	typename std::iterator_traits&lt;IterT&gt;::value_type temp(*iter);
+}
+</code></pre>
+
+<h3 id="item-43-know-how-to-access-names-in-templatized-base-classes">Item 43: Know how to access names in templatized base classes</h3>
+
+<p>当我们从<code>Object Oriented C++</code>进入<code>Template C++</code>，继承就不像以前那般顺利。编译器知道<code>base class templates</code>有可能被特化，而那个特化版本可能不提供和一般性template相同的接口，因而它往往拒绝在<code>templatized base classes</code>内寻找继承而来的名称。</p>
+
+<pre><code>template&lt;typename Company&gt;
+class LoggingMsgSender: public MsgSender&lt;Company&gt; {
+public:
+	void sendClearMsg(const MsgInfo* info) {
+		sendClear(info);  //调用base class函数；这段代码无法通过编译
+	}
+};
+</code></pre>
+
+<p>基类<code>MsgSender&lt;Company&gt;</code>的特化版本，可能不提供<code>sendClear()</code>方法。</p>
+
+<p>解决方法：</p>
+
+<ol>
+  <li>base class函数调用动作之前加上<code>this-&gt;</code></li>
+  <li>在函数前使用using声明式，<code>using MsgSender&lt;Company&gt;::sendClear</code>.</li>
+  <li>直接使用<code>MsgSender&lt;Company&gt;：：sendClear(info)</code>。</li>
+</ol>
+
+<p>第三种做法有缺陷，如果被调用的是<code>virtual</code>函数，上述的做法会关闭<code>virtual绑定行为</code>。</p>
+
+<h3 id="item-44-factor-parameter-independent-code-out-of-templates">Item 44: Factor parameter-independent code out of templates.</h3>
+
+<ul>
+  <li>Templates生成多个classes和多个函数，所以任何template代码都不该与某个造成膨胀的template参数产生相依关系。</li>
+  <li>因非类型模版参数而造成的代码膨胀，往往可消除，做法是以函数参数或class成员变量替换template参数。</li>
+  <li>因类型参数而造成的代码膨胀，往往可降低，做法是让带有完全相同二进制表述的具现类型共享实现码。</li>
+</ul>
+
+<p>template &lt;T*&gt;可以改为<code>tempalte&lt;void*&gt;</code>减少代码膨胀。</p>
+
+<h3 id="item-45-use-member-function-templates-to-accept-all-compatible-types">Item 45: Use member function templates to accept “all compatible types”</h3>
+
+<p>如果以带有<code>base-derived</code>关系的B，D两类型分别具现化某个template，产生出来的两个具现体并不带有<code>base-derived</code>关系。</p>
+
+<pre><code>template&lt;typename T&gt;
+class SmartPtr {
+public:
+	tempalte&lt;typename U&gt; //member template, 为了生成copy构造函数
+	SmartPtr(const SmartPtr&lt;U&gt;&amp; other); 
+};
+</code></pre>
+
+<p>这一类构造函数根据SmartPtr&lt;U&gt;创建一个Smart&lt;T&gt;。未加上<code>explicit</code>是因为原始指针类型之间的转换（例如从derived转化base）是隐式转换。可以在构造模板实现代码中约束行为：</p>
+
+<pre><code>template&lt;typename T&gt;
+class SmartPtr {
+public:
+	tempalte&lt;typename U&gt; //以other的heldPtr初始化this的heldPtr
+	SmartPtr(const SmartPtr&lt;U&gt;&amp; other):heldPtr(other.get()) {}
+	T * get() const { return heldPtr; }
+private:
+	T* heldPtr; 
+};
+</code></pre>
+
+<p>成员函数模板的效用不限于构造函数，它们常扮演的另一个角色是支持赋值操作。</p>
+
+<pre><code>template&lt;typename T&gt;
+class shared_ptr {
+public:
+	template&lt;class Y&gt;
+	explicit shared_ptr(Y* p);
+	template&lt;class Y&gt;
+	shared_ptr(shared_ptr&lt;Y&gt; const&amp; r);
+	template&lt;class Y&gt;
+	explicit shared_ptr(weak_ptr&lt;Y&gt; const&amp; r);
+	template&lt;class Y&gt;
+	explicit shared_ptr(auto_ptr&lt;Y&gt; const&amp; r);
+	template&lt;class Y&gt;
+	shared_ptr&amp; operator=(shared_ptr&lt;Y&gt; const&amp; r);
+	template&lt;class Y&gt;
+	shared_ptr&amp; operator=(auto_ptr&lt;Y&gt; &amp; r);
+};
+</code></pre>
+
+<p>上述函数的<code>explict</code>表示从某个shared_ptr类型隐式转换至另一个shared_ptr类型是被允许的，但从某个内置指针或从其他智能指针类型进行隐式转换则不被认可。auto_ptr不声明const是因为复制一个auto_ptr，它其实被改动了。</p>
+
+<p>在class内声明泛化copy构造函数并不会阻止编译器生成它们自己的copy构造函数。</p>
+
+<h3 id="item-46-define-non-member-functions-inside-templates-when-type-conversions-are-desired">Item 46: Define non-member functions inside templates when type conversions are desired.</h3>
+
+<p>将Item24的例子改为模板：</p>
+
+<pre><code>template&lt;typename T&gt;
+class Rational {
+public:
+	Rational(const T&amp; numerator = 0, const T&amp; denominator = 1);
+	
+	template&lt;typename T&gt;
+	const Rational&lt;T&gt; operator* (const Rational&lt;T&gt; &amp;rhs, const Rational&lt;T&gt; &amp;rhs);
+};
+
+Rational oneHalf(1, 2);
+result = oneHalf * 2; // 无法通过编译，不加模板则可以
+</code></pre>
+
+<p>这是因为template实参推导过程中从不将隐式类型转换函数考虑在内。可以改为如下：</p>
+
+<pre><code>friend const Rational operator* (const Rational &amp;rhs, const Rational &amp;rhs); //省略了&lt;T&gt;
+</code></pre>
+
+<p>当对象oneHalf被声明为一个Rational<int>, 模板被具现化出来，而作为过程的一部分friend函数（接受Rational<int> 参数）也就自动声明出来，后者作为一个函数而非函数模板，因此编译器可以在调用它时使用隐式转换函数。</int></int></p>
+
+<h3 id="item-47-use-traits-classes-for-information-about-types">Item 47: Use traits classes for information about types</h3>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="c1">//define traits&#39; type</span>
+</span><span class="line"><span class="k">struct</span> <span class="nl">bidirectional_iterator_tag:</span> <span class="k">public</span> <span class="n">forward_iterator_tag</span> <span class="p">{</span> <span class="p">};</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">//functional class, contain iterator</span>
+</span><span class="line"><span class="k">template</span><span class="o">&lt;</span><span class="p">...</span><span class="o">&gt;</span>
+</span><span class="line"><span class="k">class</span> <span class="nc">list</span> <span class="p">{</span>
+</span><span class="line"><span class="k">public</span><span class="o">:</span>
+</span><span class="line">    <span class="k">class</span> <span class="nc">iterator</span> <span class="p">{</span>
+</span><span class="line">        <span class="k">typedef</span> <span class="n">bidirectional_iterator_tag</span> <span class="n">iterator_category</span><span class="p">;</span>
+</span><span class="line">    <span class="p">};</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">//partial template specialization</span>
+</span><span class="line"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">IterT</span><span class="o">&gt;</span>
+</span><span class="line"><span class="k">struct</span> <span class="n">iterator_traits</span> <span class="p">{</span>
+</span><span class="line">    <span class="k">typedef</span> <span class="n">IterT</span><span class="o">::</span><span class="n">iterator_category</span> <span class="n">iterator_category</span><span class="p">;</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line">
+</span><span class="line"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">IterT</span><span class="o">*&gt;</span>
+</span><span class="line"><span class="k">struct</span> <span class="n">iterator_traits</span> <span class="p">{</span>
+</span><span class="line">    <span class="k">typedef</span> <span class="n">IterT</span><span class="o">::</span><span class="n">iterator_category</span> <span class="n">iterator_category</span><span class="p">;</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">//overloading to do compiling verdict</span>
+</span><span class="line"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">IterT</span><span class="p">,</span> <span class="k">typename</span> <span class="n">DistT</span><span class="o">&gt;</span>
+</span><span class="line"><span class="n">doAdvance</span><span class="p">(</span><span class="n">IterT</span> <span class="o">&amp;</span><span class="n">iter</span><span class="p">,</span> <span class="n">DistT</span> <span class="n">d</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">bidirectional_iterator_tag</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">    <span class="p">...</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">
+</span><span class="line"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">IterT</span><span class="p">,</span> <span class="k">typename</span> <span class="n">DistT</span><span class="o">&gt;</span>
+</span><span class="line"><span class="n">doAdvance</span><span class="p">(</span><span class="n">IterT</span> <span class="o">&amp;</span><span class="n">iter</span><span class="p">,</span> <span class="n">DistT</span> <span class="n">d</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">forward_iterator_tag</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">    <span class="p">...</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">//specific function for iterator, advance</span>
+</span><span class="line"><span class="c1">//judge the types for information</span>
+</span><span class="line"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">IterT</span><span class="p">,</span> <span class="k">typename</span> <span class="n">DistT</span><span class="o">&gt;</span>
+</span><span class="line"><span class="kt">void</span> <span class="n">advance</span><span class="p">(</span><span class="n">IterT</span> <span class="o">&amp;</span><span class="n">iter</span><span class="p">,</span> <span class="n">DistT</span> <span class="n">d</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">    <span class="n">doAdvance</span><span class="p">(</span><span class="n">iter</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="k">typename</span> <span class="n">iterator_traits</span><span class="o">&lt;</span><span class="n">IterT</span><span class="o">&gt;::</span><span class="n">iterator_category</span><span class="p">());</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="newdelete">定制new和delete</h2>
+
+<h3 id="item-49-understand-the-behavior-of-the-new-handler">Item 49: Understand the behavior of the new-handler.</h3>
+
+<p>set_new_handler允许客户指定一个函数，在内存分配无法获得满足时候被调用。</p>
+
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-17T02:18:00+08:00" pubdate data-updated="true">Apr 17<span>th</span>, 2014</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/book/'>book</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2014/04/17/Effective/" data-via="" data-counturl="http://billowkiller.github.io/blog/2014/04/17/Effective/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2014/04/12/Inside-Object/" title="Previous Post: Inside C++ Object">&laquo; Inside C++ Object</a></li>
+            
+            
+            <li class="next"><a href="/blog/2014/04/22/byte-alignment/" title="Next Post: C/C++ Byte Alignment">C/C++ Byte Alignment &raquo;</a></li>
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item " href="/blog/2014/08/29/static-and-dynamic-library/">Static and Dynamic Library</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/23/classical-sync-problem/">Classical Sync Problem</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/22/design-pattern/">Design Pattern Abstraction</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/14/linux-memory-management/">Linux Memory Management</a>
+    
+    <a class="list-group-item " href="/blog/2014/08/09/quicksort/">QuickSort and Derivatives</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">8</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">10</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">8</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">13</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">12</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">6</span>
+        algorithm
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2014 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2014/04/17/Effective/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2014/04/17/Effective/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>
