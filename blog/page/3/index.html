@@ -136,6 +136,76 @@
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-06-28T02:18:00+08:00" pubdate data-updated="true">Jun 28<span>th</span>, 2014</time>
+        
+           | <a href="/blog/2014/06/28/signal-status-and-lifecycle/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/06/28/signal-status-and-lifecycle/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/28/signal-status-and-lifecycle/">Signal Status and Lifecycle</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p><i><strong>modified from</strong> <a href="http://blog.csdn.net/sunyubo458/article/details/4484957">http://blog.csdn.net/sunyubo458/article/details/4484957</a></i></p>
+
+<p><em>Lost original source</em></p>
+
+<hr />
+
+<h3 id="section">信号状态</h3>
+
+<p>传送一个信号到目的进程是由两个不同步骤组成的：</p>
+
+<ul>
+  <li><strong>发送信号</strong>。 内核通过更新目的进程上下文中的某个状态，发送一个信号给目的进程。两原因：内核进程到一个系统事件，如除零；进程调用<code>kill</code>函数，显示要求内核发送信号。</li>
+  <li><strong>接收信号</strong>。目的进程被内核强迫以某种方式对信号的发送做出反应，目的进程就接收了信号。</li>
+</ul>
+
+<p>一个只发出但没有被接收的信号叫做<strong>待处理信号</strong>（pending signal）。在任何时候，一种类型至多只会有一个待处理信号。一个进程可以选择性地<strong>阻塞</strong>接收某种信号。当一个信号被阻塞时，它仍可以被发送，但是尝试的待处理信号不会被接收，知道进程取消对这种信号的阻塞。</p>
+
+<p>信号的”未决“是一种状态，指的是从信号的产生到信号被处理前的这一段时间；信号的”阻塞“是一个开关动作，指的是阻止信号被处理，但不是阻止信号产生。 </p>
+
+<p>每个进程都有一个信号屏蔽字，它规定了当前要阻塞地送到该进程的信号集，对于每种可能的信号，该屏蔽字中都有一位与之对应。对于某种信号，若其对应为已设定，则它当前是被阻塞的。进程可以调用<code>sigprocmask</code>来检测和更改当前信号屏蔽字。</p>
+
+<p>APUE例题在<code>sleep</code>前用<code>sigprocmask</code>阻塞了退出信号，然后<code>sleep</code>,然后在<code>sleep</code>的过程中产生一个退出信号，但是此时退出信号被阻塞过，（中文的”阻塞”在这里容易被误解为一种状态，实际上是一种类似于开关的动作，所以说“被阻塞过”，而不是“被阻塞”）所以处于“未决”状态，在 <code>sleep</code>后又用<code>sigprocmask</code>关掉退出信号的阻塞开关，因为之前产生的退出信号一直处于未决状态，当关上阻塞开关后，马上退出“未决”状态，得到处理，这一切发生在<code>sigprocmask</code>返回之前。 </p>
+
+<h3 id="section-1">信号生命周期</h3>
+
+<p>对于一个完整的信号生命周期(从信号发送到相应的处理函数执行完毕)来说，可以分为三个重要的阶段，这三个阶段由四个重要事件来刻画：1.信号诞生；2. 信号在进程中注册完毕；3.信号在进程中的注销完毕；4.信号处理函数执行完毕。相邻两个事件的时间间隔构成信号生命周期的一个阶段。</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/06/28/signal-status-and-lifecycle/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-05-01T03:18:00+08:00" pubdate data-updated="true">May 1<span>st</span>, 2014</time>
         
            | <a href="/blog/2014/05/01/code-snippet/#disqus_thread"
@@ -628,53 +698,6 @@
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-12-31T18:07:00+08:00" pubdate data-updated="true">Dec 31<span>st</span>, 2013</time>
-        
-           | <a href="/blog/2013/12/31/gcc-summary/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/12/31/gcc-summary/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/12/31/gcc-summary/">Gcc Summary</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>本文介绍在Linux平台下应用程序的编译过程，以及编译程序<a href="http://gcc.gnu.org/">GCC</a>在编译应用程序的过程的具体用法，同时详细说明了GCC的常用选项、模式和警告选项。</p>
-
-<p><img src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcQkcpI6uyaKSbXltFKcLfpuPyMjC8aw-VZH7x9uUt8bFQMTpsczYg" alt="gcc" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/12/31/gcc-summary/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -698,6 +721,8 @@
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2015/09/18/compression-format-introduction/">Compression Format Introduction</a>
+    
     <a class="list-group-item " href="/blog/2015/07/26/mapreduce-framework/">Mapreduce Framework</a>
     
     <a class="list-group-item " href="/blog/2015/07/26/pid-file-analysis/">PID File Analysis</a>
@@ -705,8 +730,6 @@
     <a class="list-group-item " href="/blog/2015/07/26/java-log4j/">Java Log4j</a>
     
     <a class="list-group-item " href="/blog/2014/08/29/static-and-dynamic-library/">Static and Dynamic Library</a>
-    
-    <a class="list-group-item " href="/blog/2014/08/23/classical-sync-problem/">Classical Sync Problem</a>
     
   </div>
 </section>
@@ -748,7 +771,7 @@
     
     
     <a class="list-group-item " href="/blog/categories/rework/index.html">
-        <span class="badge">13</span>
+        <span class="badge">14</span>
         rework
       </a>
     
