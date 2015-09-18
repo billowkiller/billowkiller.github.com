@@ -1,0 +1,93 @@
+---
+layout: post
+title: "Compression Format Introduction"
+date: 2015-09-18 13:34
+comments: true
+categories: rework
+tags: compression
+---
+
+#压缩格式
+最近在做一个日志的压缩策略，在此就记录下几种不同的压缩算法。本文不涉及每种算法的具体实现，只是用于介绍概念。
+
+<!--more-->
+
+## Gzip
+说到gzip，其实我是不想写的，满满的都是痛苦的回忆啊。在研究生时期曾经写过一个程序，在网关出对用户访问的网页进行hack，在网页的最后加上一个网页跳转的代码。由于网页传输的压缩编码就是gzip，具体做法是获取gzip的头文件后，构造压缩后的数据添加到原始的网页数据上。这里面很有意思的是，gzip是bit-oriented的，所以需要定位去除EOF marker后的数据最后的bit位置，再插入构造好的压缩数据。这里面涉及到的东西比较多，包括对gzip头文件的分析，找到每个单词对应的huffman编码；对压缩数据的反解找到对应的bit位；还有HTTP传输编码替换，所有的编码都改为CHUNKED编码方式。言归正传，那么什么是Gzip压缩编码？
+
+Gzip是基于DEFLATE压缩算法的，它是由LZ77和Huffman编码的组成。LZ77其实很好理解，就是将重复的字符串用数字表示，标记为(length, distance)，相当于建立一个索引，后续出现的数据都可以通过这个索引找到原始的数据。举个简单的例子A A A A A A B A B A A A A A 经过LZ77编码后转化为A A A A A B <2,2> <5,8>, 可以看到A B和A A A A A是重复的，用长度和距离的组合来表示。Huffman编码是一种可变字长编码，依据字符出现概率来构造字符的二进制表示，用于保证了按字符出现概率分配码长，使平均码长最短。
+
+通常我们说的gzip是指gzip文件格式，它的构成如下：
+
+* 10字节的头，包括magic number，版本号和时间戳
+* 可选的附加字段，例如源文件名
+* 正文，也就是经过DEFLATED压缩后的数据
+* 8字节的EOF marker，包括CRC-32校验和和原始未压缩数据的长度。
+
+详细的文件格式如下：
+
+![](http://img-storage.qiniudn.com/15-9-18/30592957.jpg)
+
+## lzo
+
+lzo令人郁闷的一点是压缩算法是定义好的，但是传输和存储的格式并没有定义好。这就导致不同的厂商在lzo文件压缩格式上有不同的解决方案，在查找lzo资料的时候我就曾见过三种不同的传输或存储格式。那么为什么会有这种情况发生呢，原因就在于lzo lib包中只是定义了压缩的算法，且算法有好几十种。lib包关心的是如何将一串文本转成压缩好的字符串数据，而不关心客户端和服务端是否沟通协调好具体的算法，在传输或存储时候是否会有数据损坏的情况，所以在对lzo压缩进行产品化的时候我们需要考虑这些情况。
+
+在hadoop中，lzo所采用的和*lzop*相同的压缩格式，lzop是神马呢，官网简介如下：
+>lzop is a file compressor which is very similar to gzip. lzop uses the LZO data compression library for compression services, and its main advantages over gzip are much higher compression and decompression speed (at the cost of some compression ratio).
+
+lzop定的的头文件包含的信息如下：
+
+    typedef struct {
+        unsigned char magic[9]
+        uint16_t version;
+        uint16_t lib_version;
+        uint16_t version_needed_to_extract;
+        unsigned char method;
+        unsigned char level;                // ignore
+        uint32_t flags;                     
+        uint32_t filter;                    // filter is not supported
+        uint32_t mode;                      // ignore
+        uint32_t mtime_low;                 // ignore
+        uint32_t mtime_high;                // ignore
+        unsigned char filename_len;
+        uint32_t checksum;
+    } header_t;
+ 
+在lzop的头文件格式中中还有定义一些extra fields，filename，这些在hadoop的解压算法中就直接给忽略了，所以这里也就没有添加上去，`header_t`中都是一些必要的占位字段，有些无意义，有些有意义。其中在`flags`中定义了一些是压缩格式实现的细节，例如压缩前数据的校验和算法，压缩后数据的校验和算法，是否有filter，是否是多文件合并等等。`method`字段定义了具体的压缩算法，使用的比较多的是M_LZO1X_1、M_LZO1X_1_15、M_LZO1X_999. 在官方的lib包中又对各种压缩算法的一个比较，通常情况下使用M_LZO1X_1就足够了。
+
+lzo的压缩是面向块的，所以正文部分也就是由一块一块的压缩块构成，每块的压缩格式如下：
+
+    /*
+     * uncompressed block size
+     * compressed block size
+     * uncompressed block checksum
+     * compressed block checksum
+     * compressed block
+     */
+    
+最后写一个EOF marker，也就是4bytes的0.
+
+## snappy
+
+Google开发的一个 C++ 的用来压缩和解压缩的开发包，旨在提供高速压缩速度和合理的压缩率，Snappy 比 zlib 更快，但文件相对要大 20% 到 100%。Snappy特地为64位x86处理器做了优化，在单个Intel Core i7处理器内核上能够达到至少每秒250MB的压缩速率和每秒500MB的解压速率。Snappy的压缩是属于LZ77 体系，不同于gzip，它是byte-oriented，也就是说数据块之间是有严格的字节区分的；而gzip由于最后加入了Huffman编码，所以它是bit-oriented。byte-oriented的好处是处理起来比较简单，不需要记录字节中的位占用情况和加入数据的位迁移。
+
+Snappy的压缩方式有一个frame的概念，这个帧并不是Snappy压缩所必须的，这个帧其实也就是Snappy的压缩文本加上一些必要的其他信息，例如checksum。Snappy中帧与帧之间是相互独立的，也就是说在压缩过程中你可以不关心其他帧的情况，只需要压缩好自己的数据然后发送或存储，解压的过程中会根据帧的粒度进行解压。这就意味着在分布式的环境中，你可以很容易的合并各个节点上的压缩数据，无需和其他节点进行同步，这个在其他算法中是无法办到的。
+
+Snappy文件只由一个个连续的chunk构成，每个chunk的构成包括：1字节的chunk标识符，3字节的chunk长度，接着就是数据。chunk长度可以为0，这就表示该chunk的数据不存在。Snappy文件的第一个chunk是stream chunk，固定的6字节长度，其中数据部分为"sNaPpY"。这个chunk可以理解为Snappy的头文件，但是这个头文件可以出现多次，这也就是每个Snappy frame可以独立的原因之一；另外一个原因是Snappy并没有EOF marker。其他chunk的类型还包括：
+
+* Compressed data
+* Uncompressed data
+* padding
+* Reserved unskippable chunks
+* Reserved skippable chunks
+
+## 对比
+以下是在论文中找到的一些资料。
+
+![](http://img-storage.qiniudn.com/15-9-17/82781797.jpg)
+
+![](http://ww1.sinaimg.cn/large/74311666jw1ew5aeta9loj20w10hfdi2.jpg)
+
+## 其他
+[以上三种压缩格式的c++方法](https://github.com/billowkiller/Codec)
+
