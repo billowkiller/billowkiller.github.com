@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Spark - Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2015/10/27/spark">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-10-27T21:00:00+08:00" pubdate data-updated="true">Oct 27<span>th</span>, 2015</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        Spark
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><p>简单介绍下Spark。Spark是分布式的内存计算模型，对于两类计算形式能够极大地提升处理的效率：迭代计算，和交互式的数据挖掘工具。迭代计算例如PageRank、K-means聚类、逻辑回归等要求计算结果的重新利用，交互式的数据挖掘例如针对一份的数据集进行多次特定查询也要求原始数据的重复利用。对比于MR作业，它不需要外部存储的介入，从而提升处理速度。接下来将会从Spark的数据模型、编程模型和架构来介绍Spark。</p>
+
+<p><img src="https://spark.apache.org/images/spark-logo.png" alt="image" /></p>
+
+<!--more-->
+
+<h3 id="rdd-data-model">RDD Data Model</h3>
+<p>那么如何利用多个节点的内存进行分布式的计算呢，这就是Spark的核心RDD（Resilient Distributed Dataset）。RDD是一个个记录的集合，只读和分片的。它只能通过外部存储或者其他RDD生成。RDD的这些变化操作名称为<em>transformation</em>，在Spark编程中还有另外一个操作需要知道，<em>action</em>，意思是返回一个值或者将数据导出到外部存储，像<code>count</code>、<code>collect</code>、<code>save</code>。一个spark程序往往是从外部存储中定义一个或多个RDD开始的，接着经过各种<em>transformation</em>，最后<em>action</em>。同时<em>action</em>也是计算的开始，在spark中计算是延迟的，各种<em>transformation</em>形成了computation pipeline在<em>action</em>中进行计算。</p>
+
+<p>下表是对RDD中的<em>transformation</em>和<em>action</em>操作：
+<img src="http://ww2.sinaimg.cn/large/74311666jw1ex310kinr3j210c0fujwg.jpg" alt="" /></p>
+
+<p>RDD还有两个操作：<em>persistence</em>和<em>partitioning</em>。其实顾名思义，<em>persistence</em>即RDD的持久化操作，这是为了避免重复计算。<em>partitioning</em>是重新分区，为了得到更好的执行并发度。</p>
+
+<p>合理的分区可以有效减少shuffle的数据量，根据特定的应用场景执行不同的<em>partitioning</em>。例如在PageRank中根据域名来对URL进行Hash，因为很多链接都是内部的。下图表示<em>partitioning</em>的效果。</p>
+
+<p><img src="http://img-storage.qiniudn.com/15-10-16/6543188.jpg" alt="" /></p>
+
+<p>持久化操作是也是为了更高的计算效率。例如在下图中，Spark有两个action，所以产生两个job。两个job各自计算RDD1和RDD2，对于数据量大的RDD无疑会影响性能，所以可以将RDD进行<em>persistence</em>操作，可以存入内存、硬盘或者二者结合。后续缓存的资源可以手动清除或者通过LRU算法自动清除。
+<img src="http://ww2.sinaimg.cn/large/74311666jw1ex30g3zpazj20u60f2tb9.jpg" alt="" /></p>
+
+<p>在上文中我们提到RDD是有<code>transformation</code>和<code>lazy compute</code>的特性的。这两个特性使得RDD不需要一直被实例化，只需要保存这个RDD是如何产生的，在延迟计算的时候便可以通过这些dependence信息进行RDD transformation操作。以上就是RDD lineage，一个RDD的血统关系图。RDD的只读特性也是为了更好地描述这个lineage graph。在上图中两个Output的产生也可以直观地看到RDD的lineage信息。那么这个linage究竟有什么好处呢，RDD可以根据dependency信息直接追踪到在外存中的数据，在发生错误的时候直接通过外存的原始数据计算丢失或错误的RDD分片信息。</p>
+
+<h3 id="rdd-programming-model">RDD Programming Model</h3>
+
+<p>RDD的编程模型需要通过适当的接口来表示RDD是如何经过一系列的transformations来达到现在的状态。在Spark中，RDD的编程模型暴露了5方面的信息：</p>
+
+<ul>
+  <li>dateset中的分片信息</li>
+  <li>父RDD的依赖关系</li>
+  <li>基于其父RDD的计算RDD方法</li>
+  <li>分片的shceme元数据</li>
+  <li>数据存放的位置
+<img src="http://ww3.sinaimg.cn/large/74311666jw1ex32afwa8gj20qq0ds41v.jpg" alt="" /></li>
+</ul>
+
+<p>在第3个方法中，也就是根据父RDD分片计算本RDD的分片有两种情况：每个父RDD分片最多被一个子RDD分片依赖；父RDD分片被多个子RDD分片依赖。这两种情况分别对应<em>narrow dependency</em>和<em>wide dependency</em>。为什么区分这两种依赖关系呢，这和RDD的延迟计算特性有关系。</p>
+
+<ul>
+  <li>在<em>narrow dependency</em>中，一个节点上的RDD分片可以通过pipeline的方式从原始数据开始计算，多个分片可以并行的进行。而对于<em>wide dependency</em>需要所有父RDD的分片可用，而且涉及到data shuffle。</li>
+  <li><em>narrow dependency</em>在节点失效后的恢复的效率更高，因为可以并行地在不同的节点上计算丢失的分片。而在<em>wide dependency</em>中，一个父RDD分片可能被多个子RDD分片使用，所以可能导致这些子RDD的祖先分片都有丢失，所以需要重新完整的计算。</li>
+</ul>
+
+<p>整个spark作业的执行调度也是和这两种dependency有关。当一个用户执行一个<em>action</em>操作的时候，spark的调度器检测RDD的lineage graph，建立一个DAG图来执行，DAG图中的每个节点就是一个<em>stage</em>。在每个<em>stage</em>中包含了多个pipeline的<em>transformation</em>操作，这些RDD的关系全都是
+<em>narrow dependency</em>。每个<em>stage</em>的边界都是由<em>wide dependency</em>的shuffle操作，或者已经计算好的分片。调度器这时候就可以建立执行任务计算每个stage中缺失的<em>partitions</em>，直到得到最终的RDD。</p>
+
+<p>那么如何合理划分 stage，并确定 task 的类型和个数？
+<img src="http://img-storage.qiniudn.com/15-10-16/48846624.jpg" alt="" /></p>
+
+<p>可以看到在上图中，每个stage中的数据都是形成了pipeline计算的，这里的pipeline思想是：<strong>数据用的时候再算，而且数据是流到要计算的位置的</strong>。有两层意思，一是延迟计算，二是计算本地化。比如在第一个 task 中，从 FlatMappedValuesRDD 中的 partition 向前推算，只计算要用的（依赖的） RDDs 及 partitions。在第二个 task 中，从 CoGroupedRDD 到 FlatMappedValuesRDD 计算过程中，不需要存储中间结果（MappedValuesRDD 中 partition 的全部数据）。</p>
+
+<p>在有<em>wide dependency</em>的时候需要Shuffle后无法进行pipeline。那么我们可以<strong>从后往前推算，遇到 <em>wide dependency</em>就断开，遇到<em>narrow dependency</em>就将其加入该stage。每个stage里面task 的数目由该stage最后一个RDD中的partition个数决定</strong>。因此上图中最后一个stage的id是0，stage 1  stage 2都是stage 0的parents。</p>
+
+<p>整个的computing chain也是根据数据依赖关系自后向前建立，遇到<em>wide dependency</em>后形成 stage。computing chain从后到前建立，而实际计算出的数据从前到后流动，那么RDD内部是如何实现计算的呢。在每个stage中，每个RDD中的compute()调用parentRDD.iter()来将parent RDDs中的 records一个个fetch过来。</p>
+
+<blockquote>
+  <p>代码实现：每个 RDD 包含的 getDependency() 负责确立 RDD 的数据依赖，compute() 方法负责接收 parent RDDs 或者 data block 流入的 records，进行计算，然后输出 record。经常可以在 RDD 中看到这样的代码firstParent[T].iterator(split, context).map(f)。firstParent 表示该 RDD 依赖的第一个 parent RDD，iterator() 表示 parentRDD 中的 records 是一个一个流入该 RDD 的，map(f) 表示每流入一个 recod 就对其进行 f(record) 操作，输出 record。为了统一接口，这段 compute() 仍然返回一个 iterator，来迭代 map(f) 输出的 records。</p>
+</blockquote>
+
+<p>在实现中，每个task是基于数据的本地性进行分配的，任务是在该分片的节点上执行的。而对于<em>wide dependecy</em>，会在拥有父分片的节点上计算中间结果，这是为了减少fault recovery的时间。</p>
+
+<h3 id="spark-architecture">Spark Architecture</h3>
+<p>在上一节中我们确定了Spark stage和task的生成和执行方式，那么这些stage和task在整个spark application中又处于什么样的位置呢，上文中我们提到的每个job又是什么意思呢，为什么一个application中又会有好多个job，它们之间的关系又是什么样的呢？</p>
+
+<p><img src="http://spark-internals.books.yourtion.com/markdown/PNGfigures/deploy.png" alt="image" /></p>
+
+<p>从部署图中可以看到</p>
+
+<ul>
+  <li>整个集群分为 Master 节点和 Worker 节点，相当于 Hadoop 的 Master 和 Slave 节点。</li>
+  <li>Master 节点上常驻 Master 守护进程，负责管理全部的 Worker 节点。</li>
+  <li>Worker 节点上常驻 Worker 守护进程，负责与 Master 节点通信并管理 executors。</li>
+  <li>Driver 官方解释是 “The process running the main() function of the application and creating the SparkContext”。Application 就是用户自己写的 Spark 程序（driver program），比如 WordCount.scala。</li>
+  <li>每个 Worker 上存在一个或者多个 ExecutorBackend 进程。每个进程包含一个 Executor 对象，该对象持有一个线程池，每个线程可以执行一个 task。</li>
+  <li>每个 application 包含一个 driver 和多个 executors，每个 executor 里面运行的 tasks 都属于同一个 application。</li>
+</ul>
+
+<p>在最开始的时候我们介绍了RDD的<code>action</code>操作，还提到每个<code>action</code>就是一个job，事实上上表中的<code>action</code>操作其实是论文中的，实际上还有更多的<code>action</code>。如下表：</p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Action</th>
+<th style="text-align:left">finalRDD(records) =&gt; result</th>
+<th style="text-align:left">compute(results)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">reduce(func)</td>
+<td style="text-align:left">(record1, record2) =&gt; result, (result, record i) =&gt; result</td>
+<td style="text-align:left">(result1, result 2) =&gt; result, (result, result i) =&gt; result</td>
+</tr>
+<tr>
+<td style="text-align:left">collect()</td>
+<td style="text-align:left">Array[records] =&gt; result</td>
+<td style="text-align:left">Array[result]</td>
+</tr>
+<tr>
+<td style="text-align:left">count()</td>
+<td style="text-align:left">count(records) =&gt; result</td>
+<td style="text-align:left">sum(result)</td>
+</tr>
+<tr>
+<td style="text-align:left">foreach(f)</td>
+<td style="text-align:left">f(records) =&gt; result</td>
+<td style="text-align:left">Array[result]</td>
+</tr>
+<tr>
+<td style="text-align:left">take(n)</td>
+<td style="text-align:left">record (i&lt;=n) =&gt; result</td>
+<td style="text-align:left">Array[result]</td>
+</tr>
+<tr>
+<td style="text-align:left">first()</td>
+<td style="text-align:left">record 1 =&gt; result</td>
+<td style="text-align:left">Array[result]</td>
+</tr>
+<tr>
+<td style="text-align:left">takeSample()</td>
+<td style="text-align:left">selected records =&gt; result</td>
+<td style="text-align:left">Array[result]</td>
+</tr>
+<tr>
+<td style="text-align:left">takeOrdered(n, [ordering])</td>
+<td style="text-align:left">TopN(records) =&gt; result</td>
+<td style="text-align:left">TopN(results)</td>
+</tr>
+<tr>
+<td style="text-align:left">saveAsHadoopFile(path)</td>
+<td style="text-align:left">records =&gt; write(records)</td>
+<td style="text-align:left">null</td>
+</tr>
+<tr>
+<td style="text-align:left">countByKey()</td>
+<td style="text-align:left">(K, V) =&gt; Map(K, count(K))</td>
+<td style="text-align:left">(Map, Map) =&gt; Map(K, count(K))</td>
+</tr>
+</tbody>
+</table>
+
+<p>用户的 driver 程序中一旦出现 action()，就会生成一个 job，比如 foreach() 会调用sc.runJob(this, (iter: Iterator[T]) =&gt; iter.foreach(f))，向 DAGScheduler 提交 job。如果 driver 程序后面还有 action()，那么其他 action() 也会生成 job 提交。所以，driver 有多少个 action()，就会生成多少个 job。这就是 Spark 称 driver 程序为 application（可能包含多个 job）而不是 job 的原因。</p>
+
+<p>每一个 job 包含 n 个 stage，最后一个 stage 产生 result。。在提交 job 过程中，DAGScheduler 会首先划分 stage，然后先提交无 parent stage 的 stages，并在提交过程中确定该 stage 的 task 个数及类型，并提交具体的 task。无 parent stage 的 stage 提交完后，依赖该 stage 的 stage 才能够提交。从 stage 和 task 的执行角度来讲，一个 stage 的 parent stages 执行完后，该 stage 才能执行。</p>
+
+<p>Spark就先介绍到这里，没有涉及到spark的具体内部实现，包括job的调度，shuffle的过程、文件的管理、cache和broadcast机制等。</p>
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-10-27T21:00:00+08:00" pubdate data-updated="true">Oct 27<span>th</span>, 2015</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/rework/'>rework</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2015/10/27/spark/" data-via="" data-counturl="http://billowkiller.github.io/blog/2015/10/27/spark/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2015/09/18/compression-format-introduction/" title="Previous Post: Compression Format Introduction">&laquo; Compression Format Introduction</a></li>
+            
+            
+            <li class="next"><a href="/blog/2015/10/27/spark-streaming/" title="Next Post: Spark Streaming">Spark Streaming &raquo;</a></li>
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item " href="/blog/2015/10/27/spark-streaming/">Spark Streaming</a>
+    
+    <a class="list-group-item active" href="/blog/2015/10/27/spark/">Spark</a>
+    
+    <a class="list-group-item " href="/blog/2015/09/18/compression-format-introduction/">Compression Format Introduction</a>
+    
+    <a class="list-group-item " href="/blog/2015/07/26/mapreduce-framework/">Mapreduce Framework</a>
+    
+    <a class="list-group-item " href="/blog/2015/07/26/pid-file-analysis/">PID File Analysis</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">8</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">10</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">8</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">14</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">16</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">6</span>
+        algorithm
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/big/index.html">
+        <span class="badge">1</span>
+        big
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/data/index.html">
+        <span class="badge">1</span>
+        data
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2015 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2015/10/27/spark/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2015/10/27/spark/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>

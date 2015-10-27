@@ -138,6 +138,164 @@
 
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
         
+           | <a href="/blog/2013/05/14/grep-example/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/grep-example/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/grep-example/">Grep Example</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p><strong><em>from <a href="http://blog.csdn.net/pan_tian/article/details/7685815">http://blog.csdn.net/pan_tian/article/details/7685815</a></em></strong></p>
+
+<hr />
+
+<h2 id="grephttpwwwlinuxsocomcommandgrephtml-"><a href="http://www.linuxso.com/command/grep.html">grep</a> 语法</h2>
+
+<ul>
+  <li>
+    <p>grep ‘word’ filename</p>
+  </li>
+  <li>
+    <p>grep ‘string1 string2’ filename</p>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>cat otherfile</td>
+          <td>grep ‘something’</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>command</td>
+          <td>grep ‘something’</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>command option1</td>
+          <td>grep ‘data’</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>grep –color ‘data’ fileName</li>
+</ul>
+
+<h2 id="section">基本的用法</h2>
+
+<p>在某个文件里搜索error字符串</p>
+
+<p><code>$ grep "error" log.txt</code>
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/grep-example/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/05/14/googlelun-wen-mapreduce/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-mapreduce/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/googlelun-wen-mapreduce/">google论文：MapReduce</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>论文：<a href="http://static.googleusercontent.com/external_content/untrusted_dlcp/research.google.com/en//archive/mapreduce-osdi04.pdf">英文版</a>，<a href="http://blademaster.ixiezi.com/2010/03/27/google-mapreduce%E4%B8%AD%E6%96%87%E7%89%88/">中文版</a></p>
+
+<hr />
+
+<ol>
+  <li>
+    <h2 id="section">导论</h2>
+  </li>
+</ol>
+
+<h3 id="section-1">1.1 定义</h3>
+
+<p>先给个定义：
+MapReduce是一个编程模型，也是一个处理和生成超大数据集的算法模型的相关实现。用户首先创建一个Map函数处理一个基于key/value
+pair的数据集合，输出中间的基于key/value
+pair的数据集合；然后再创建一个Reduce函数用来合并所有的具有相同中间key值的中间value值。</p>
+
+<p>使用这个抽象模型，我们只要表述我们想要执行的简单运算即可，而不必关心并行计算、容错、数据分布、负载均衡等复杂的细节，这些问题都被封装在了一个库里面。设计这个抽象模型的灵感来自Lisp和许多其他函数式语言的Map和Reduce的原语。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr2_zps9c617225.png" alt="big picture of MapReduce" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/googlelun-wen-mapreduce/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
            | <a href="/blog/2013/05/14/googlelun-wen-gfs/#disqus_thread"
              data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-gfs/">Comments</a>
         
@@ -762,157 +920,6 @@ you say.”
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T00:00:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/an-shi-jian-zong-jie/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/an-shi-jian-zong-jie/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/an-shi-jian-zong-jie/">An Shi Jian Zong Jie</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>﻿—
-layout: post
-title: “《暗时间》总结”
-date: 2013-05-14 01:09
-comments: true
-categories: book
-tags: [manage,time,暗时间,book]
-—</p>
-
-<p>获得的多少并不取决于读了多少，而取决于思考了多少、多深。</p>
-
-<p>学习一个小领域的时候，时时把“最终能够写出一篇漂亮的
-Survey”放在大脑中提醒自己。</p>
-
-<p>&lt;img src=”http://img3.douban.com/lpic/s6586365.jpg” alt=”暗时间”/ &gt;</p>
-
-<p>对付我们强大的习惯的最佳办法是将自己认为正确的（不管是自己经过困难或失败
-而领悟的，还是看到书上或听到别人说的）写下来，并常常拿出来翻看。事实上，我的经验是，在写下来的时候我们的大脑会进入到理性分析模块，进一步检验和推理那些道理，
-我们越是对一个道理审视的详细、深入、全面，大脑中留下的印象深刻，从记忆加工的角度来说，这叫深度加工，带来的结果就是该记忆与更多的提取线索相关联，于是便能够在更多的场景下被唤起（而不是被以往的习惯直接覆盖
-）。
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/an-shi-jian-zong-jie/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-13T03:05:00+08:00" pubdate data-updated="true">May 13<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/13/sublime-text2-shuo-ming/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/13/sublime-text2-shuo-ming/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/13/sublime-text2-shuo-ming/">Sublime Text2 说明</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p><strong><em>Infomation Included：</em></strong></p>
-
-<ol>
-  <li>快捷键</li>
-  <li>插件</li>
-</ol>
-
-<hr />
-
-<p>###  </p>
-
-<h3 id="section">快捷键</h3>
-
-<p><strong>Ctrl+L</strong></p>
-
-<p>选择整行(按住, 继续选择下行)</p>
-
-<p><strong>Ctrl+KK</strong></p>
-
-<p>从光标处删除至行尾</p>
-
-<p><strong>Ctrl+Shift+K</strong></p>
-
-<p>删除整行</p>
-
-<p><strong>Ctrl+Shift+D</strong></p>
-
-<p>复制光标所在整行，插入在该行之前</p>
-
-<p><strong>Ctrl+J</strong></p>
-
-<p>合并行(已选择需要合并的多行时)</p>
-
-<p><strong>Ctrl+KU</strong></p>
-
-<p>改为大写</p>
-
-<p><strong>Ctrl+KL</strong></p>
-
-<p>改为小写</p>
-
-<p><strong>Ctrl+D</strong></p>
-
-<p>选词(按住-继续选择下个相同的字符串)</p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/13/sublime-text2-shuo-ming/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -936,15 +943,15 @@ Survey”放在大脑中提醒自己。</p>
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2015/10/27/spark-streaming/">Spark Streaming</a>
+    
+    <a class="list-group-item " href="/blog/2015/10/27/spark/">Spark</a>
+    
     <a class="list-group-item " href="/blog/2015/09/18/compression-format-introduction/">Compression Format Introduction</a>
     
     <a class="list-group-item " href="/blog/2015/07/26/mapreduce-framework/">Mapreduce Framework</a>
     
     <a class="list-group-item " href="/blog/2015/07/26/pid-file-analysis/">PID File Analysis</a>
-    
-    <a class="list-group-item " href="/blog/2015/07/26/java-log4j/">Java Log4j</a>
-    
-    <a class="list-group-item " href="/blog/2014/08/29/static-and-dynamic-library/">Static and Dynamic Library</a>
     
   </div>
 </section>
@@ -986,7 +993,7 @@ Survey”放在大脑中提醒自己。</p>
     
     
     <a class="list-group-item " href="/blog/categories/rework/index.html">
-        <span class="badge">14</span>
+        <span class="badge">16</span>
         rework
       </a>
     

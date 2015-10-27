@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Spark Streaming - Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2015/10/27/spark-streaming">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-10-27T21:04:00+08:00" pubdate data-updated="true">Oct 27<span>th</span>, 2015</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        Spark Streaming
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><p>流式计算通常是为了满足日益增长的数据的实时获取和低延时计算的需求。通常来说，一个优秀的流式计算引擎需要满足一下的一些需求：</p>
+
+<ol>
+  <li>不重不丢的保证（在节点或计算失败的时候，内存中的计算状态能被正确的恢复）</li>
+  <li>低延迟</li>
+  <li>高吞吐量</li>
+  <li>强大的计算模型</li>
+  <li>容错机制的低开销</li>
+  <li>流控</li>
+</ol>
+
+<p><img src="http://spark.apache.org/images/spark-logo.png" alt="image" />
+<!--more--></p>
+
+<p>介绍完了spark后就可以来说说spark streaming，毕竟spark streaming是完全构建在spark之上，熟悉了spark的RDD原理之后就比较容易理解spark streaming。说白了，spark streaming中的流式计算是伪实时的，之所以是伪实时的是因为它将实时的处理变成时间跨度较小的批量处理。没错，就是将一段时间间隔中的数据变成RDD，然后利用spark原有的架构处理这段时间内的数据，接着在时间维度上对这些处理后的RDD进行迭代计算。也就是将流式计算分解为一系列微小的、原子的批量作业，每个微批量作业如果失败则可以重新计算。这种分解的思想可以应用在批量计算框架、也可以应用在流式计算框架上，例如Storm Trident。</p>
+
+<p>这样的处理带来了几个明显的好处：</p>
+
+<ul>
+  <li>高吞吐量</li>
+  <li>不从不丢的保证</li>
+  <li>快速falut recovery</li>
+  <li>更方便处理慢节点</li>
+  <li>实时和批量统一的编程接口</li>
+</ul>
+
+<p>下面介绍下spark streaming中的具体实现来理解这几点。</p>
+
+<h3 id="section">计算模型</h3>
+
+<p><img src="http://blog.selfup.cn/wp-content/uploads/2014/08/streaming-flow.png" alt="image" /></p>
+
+<p>首先，Spark Streaming把实时输入数据流以时间片（如1秒）为单位切分成块。Spark Streaming会把每块数据作为一个RDD，并使用RDD操作处理每一小块数据。每个块都会生成一个Spark Job处理，最终结果也返回多块。</p>
+
+<p>举个栗子来说明下这个过程：</p>
+
+<pre><code>pageViews = readStream("http://..."， “ls”)
+ones = pageViews.map(event =&gt; (event.url, 1))
+counts = ones.runningReduce((a, b) =&gt; a+b)
+</code></pre>
+
+<p>上述代码的作用是根据URL的数量计算访问次数。处理的过程为首先通过HTTP获取到一个pageview事件的RDD，经过<em>transformation</em>操作变成(URL, 1), 最后的操作计算相同的URL数目。整个streaming过程可以用下图来表示：
+<img src="http://img-storage.qiniudn.com/15-10-18/95269436.jpg" alt="" /></p>
+
+<p>整个的处理过程可以看出，输入流被分成每个都是1秒的batch，经过处理后生成resultRDD，这个resultRDD在每个时间间隔中都会产生一个，并经过reduce迭代计算。在上图中最终的reduce的输入参数就包括上一个时间间隔的resultRDD和这个时间间隔中map操作的结果。上图也可以看出这些RDD的lineage graph，在节点失败的时候，可以根据这个lineage graph以partition的粒度为单位重新执行任务计算丢失的分片，可以看出这些计算的任务都是可以并行执行的。同时，对于慢节点来说，因为计算是无状态的，且每个job的结果是可以确定的，spark streaming可以执行类似于hadoop中的预测模型——在其他节点上计算同样的任务。另外，spark streaming也会有些checkpoint来防止无限制的恢复计算。</p>
+
+<p>对比于其他流式处理的方式，spark streaming在处理失败任务和慢节点上无疑更有效率。它可以从时间和partition两个维度上并行地计算数据来加快恢复速度。而对于像Strom的流式处理来说，往往是通过<strong>上游数据backup</strong>或者<strong>同时复制执行相同的作业</strong>来保证数据处理的可靠性。这两种处理方式对于资源的消耗无疑都是巨大的，且恢复的时间也比较长。</p>
+
+<ul>
+  <li>其中对于前者来说，每个节点都需要保存上一个checkpoing后所发送数据的拷贝，在节点失败时由standby机器重新计算上游节点发送过来的数据，因为这些计算都是有状态的，所以恢复的时间比较长，Storm就只保证“at least once”语义来提高处理速度。Trident之所以能够保证不重不丢是使用了数据库来复制计算状态。</li>
+  <li>对于后者无疑更加消耗资源，并且需要保证两个数据处理操作接受到的上游数据的顺序是一样的。</li>
+</ul>
+
+<p>同spark一样，只有当某个Output Operations原语被调用时，stream才会开始真正的计算过程。现阶段支持的Output方式有以下几种：</p>
+
+<ul>
+  <li>print()</li>
+  <li>foreachRDD(func)</li>
+  <li>saveAsObjectFiles(prefix, [suffix])</li>
+  <li>saveAsTextFiles(prefix, [suffix])</li>
+  <li>saveAsHadoopFiles(prefix, [suffix])</li>
+</ul>
+
+<h3 id="section-1">流式处理中的几点难点</h3>
+
+<p>在流式处理中通常都会有几个难点需要考虑。</p>
+
+<ul>
+  <li>时间窗口问题</li>
+  <li>数据一致性问题</li>
+  <li>内存状态管理问题</li>
+</ul>
+
+<p>我们来看下spark streaming是如何解决的。</p>
+
+<ol>
+  <li>
+    <p><strong>时间窗口问题。</strong>spark streaming是根据数据到达系统的时间将记录放到对应的RDD中，这种时间窗口划分是基于墙上时间的，好处可以保证系统及时产生一个新的batch运行job，并且可以让程序运行在数据生成的地方，不必再进行分发。</p>
+
+    <p>这种基于墙上时间的统计有一个非常严重的问题是不能回放数据流。当数据流是实时产生的时候，“墙上时间”的一分钟也就只会有一分钟的event被产生出来。但是如果统计的数据流是基于历史event的，那么一分钟可以产生消费的event数量只受限于数据处理速度。另外event在分布式采集的时候也遇到有快有慢的问题，一分钟内产生的event未必可以在一分钟内精确到达统计端，这样就会因为采集的延迟波动影响统计数据的准确性。所以产生了另外一种时间窗口划分的方法。</p>
+
+    <p>另一种时间窗口划分的方法是基于外部时间的，例如日志时间。spark streaming提供两种方法来处理这种情况：</p>
+
+    <ul>
+      <li>延迟处理，等待一定时间来处理每个batch。</li>
+      <li>用户的应用程序中保证乱序事件的正确处理。</li>
+    </ul>
+
+    <p>以上也说明在批处理的流式计算模型是受限的，很多情况下只能依靠用户的应用程序来做处理，例如实时的统计5s内的pv；其次这种方式也没有很好的流控技术手段，如果有突发的大量数据产生，会导致结果产生的时间更长，甚至是将系统的JVM撑爆。最后实时性也是受限的，只能达到次秒级的处理延迟，毕竟是要等待一个时间batch的处理完成。</p>
+  </li>
+  <li>
+    <p><strong>数据一致性问题。</strong>什么是数据一致性，举个栗子，要统计网站中来自各个国家的page view，把不同国家的pv统计放在不同的节点上处理。但是现在统计英国的节点处理速度要慢于法国的，这将导致两个节点上数据的时间状态不一致。在流式处理中，数据的一致性的保证同时意味着资源的消耗。流式处理的数据一致性有三种解决思路，在上文中也有提到，这里概括下：</p>
+
+    <ul>
+      <li>上游备份策略：重启的时候重放kafka的历史数据，恢复内存状态</li>
+      <li>中间状态持久化：把统计的状态放到外部的持久的数据库里，不放内存里</li>
+      <li>同时跑两份：同时有两个完全一样的统计任务，重启一个，另外一个还能正常运行。</li>
+    </ul>
+
+    <p>而在spark streaming中，数据一致性天然得到保证的。因为记录根据时间来分片，所以中间的resultRDD反应的是当前时间和之前时间所计算出来的结果，无论计算和结果被分配到哪个节点上都不会有节点间数据不一致的情况。也就是数据的不重不丢可以得到保证。</p>
+  </li>
+  <li>
+    <p><strong>内存状态管理问题。</strong>
+做流式统计的有两种做法：</p>
+
+    <ul>
+      <li>依赖于外部存储管理状态：比如没收到一个event，就往redis里发incr增1</li>
+      <li>纯内存统计：在内存里设置一个counter，每收到一个event就+1</li>
+    </ul>
+
+    <p>第一种会把整个压力全部压到数据库上，造成处理速度下降；第二种的状态相对来说容易管理一些，计算直接是基于这个内存状态做的。如果重启丢失了，重放一段历史数据就可以重建出来。内存的问题是它总是不够用的，解决的方法是input分割和把存储移到外边去。在内存计算中把窗口统计的中间状态落地的好处是显而易见的：重启之后不用通过重算来恢复内存状态。但是这种对外部数据库使用不小心就会导致两个问题：</p>
+
+    <ul>
+      <li>处理速度慢。不用一些批量的操作，数据库操作很快就会变成瓶颈</li>
+      <li>数据库的状态不一致。内存的状态重启了就丢失了，外部的状态重启之后不丢失。重放数据流就可能导致数据的重复统计</li>
+    </ul>
+
+    <p>在spark streaming中支持传统批量计算中的无状态<em>transformation</em>操作，例如<code>map</code>、<code>reduce</code>、<code>groupBy</code>和<code>join</code>。这就避免了普通流式计算中麻烦的状态保存问题。但spark streaming中也支持多个时间间隔中有状态的<em>transformation</em>操作，包括：</p>
+
+    <ol>
+      <li>Windowing: 生成滑动窗口RDD。<code>words.window("5s")</code>将产生一个RDD包含[0,5),[1,6),[2,7)的时间间隔。</li>
+      <li>增量聚合：在滑动窗口的基础上进行RDD的聚合操作，也就是<code>reduceByWindow</code>。在下图的<em>a</em>中对应的代码为<code>pairs.reduceByWindow("5s", (a, b) =&gt; a+b)</code>，也就是计算5s内的计数之后。图<em>b</em>的代码为<code>pairs.reduceByWindow("5s", (a, b) =&gt; a+b, (a, b) =&gt; a-b)</code>。其实很简单，第一个lambda表达式为进入滑动窗口的处理函数，第二个表达式为离开滑动窗口的处理函数。这样也就不用重复求和了。
+ <img src="http://img-storage.qiniudn.com/15-10-18/97873121.jpg" alt="" /></li>
+      <li>状态跟踪：
+ 如下图所示，就是保存上一个时间间隔的RDD与本次的记录进行groupBy加map计算的到状态的变化情况。
+ <img src="http://img-storage.qiniudn.com/15-10-18/91458919.jpg" alt="" /></li>
+    </ol>
+
+    <p>在对这些带状态的操作的处理过程中也就用到了上述的所属的利用外存在保存中间的状态。spark streaming中这只发生在intervel之间，所以整个内存的状态管理会比传统的流式处理简单许多，而且高效，不需要对每一步都进行状态同步，状态恢复的成本也比较低，上文中提到的可以在多个节点上并行计算恢复。</p>
+  </li>
+</ol>
+
+<h3 id="system-architecture">System Architecture</h3>
+<p><img src="http://img-storage.qiniudn.com/15-10-18/82954556.jpg" alt="" /></p>
+
+<p>Spark streaming和Spark的系统结构有些许改动，如上图所示主要包括3个部分：</p>
+
+<ul>
+  <li><em>master</em> that tracks the D-Stream lineage graph and schedules tasks to compute new RDD partitions.</li>
+  <li><em>Worker</em> nodes that receive data, store the partitions of input and computed RDDs, and execute tasks.</li>
+  <li>A <em>client</em> library used to send data into the system.</li>
+</ul>
+
+<p>从上图中可以看出，Spark Streaming和传统的流式系统最大的区别就是Spark Streaming将计算分成小的，无状态的确定性的任务，这些任务会在集群的任意节点上运行。并且相对于传统流式系统的拓扑结构来说，无需消耗大量时间将将任务进行迁移，Spark Streaming可以很好的对机器上的节点进行负载均衡，处理失败任务并且对慢节点进行预测。</p>
+
+<p>对比于Spark的系统，Spark Streaming做了一下的改进：</p>
+
+<ul>
+  <li>网络传输。使用异步I/O获取远端数据。</li>
+  <li>TimeStep pipelining。Spark的调度器可以在当前任务还未完成的时候可以提交下一个时间分片的任务。</li>
+  <li>任务调度：优化任务调度器，例如调整控制消息的大小，可以在每隔几百毫秒时间内启动几百个并行任务。</li>
+  <li>存储层：支持异步的RDD checkpoint，RDD是不可变的，所以异步存储不会阻塞现有的计算。</li>
+  <li>Lineage切割：控制RDD linage graph的大小，在checkpoint之前的lineage便可以删除。</li>
+</ul>
+
+<p>当master fail的时候可以进行HA，所有的worker重新连接到新的master上，将原来的checkpoint和原始数据重新计算。因为所有的操作都是确定性的，所以RDD是可以重复计算，也就是说在HA的时候丢失一些正在运行的计算任务不会对最终结果造成什么影响。所有的元数据都是存储在HDFS上的，包括：</p>
+
+<ol>
+  <li>RDD的lineage graph，代表用户代码的Scala函数对象。</li>
+  <li>上一个checkpoint的时间</li>
+  <li>RDD的ID。因为HDFS的checkpoint文件会在每个时间片重新命名。</li>
+</ol>
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-10-27T21:04:00+08:00" pubdate data-updated="true">Oct 27<span>th</span>, 2015</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/rework/'>rework</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2015/10/27/spark-streaming/" data-via="" data-counturl="http://billowkiller.github.io/blog/2015/10/27/spark-streaming/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2015/10/27/spark/" title="Previous Post: Spark">&laquo; Spark</a></li>
+            
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item active" href="/blog/2015/10/27/spark-streaming/">Spark Streaming</a>
+    
+    <a class="list-group-item " href="/blog/2015/10/27/spark/">Spark</a>
+    
+    <a class="list-group-item " href="/blog/2015/09/18/compression-format-introduction/">Compression Format Introduction</a>
+    
+    <a class="list-group-item " href="/blog/2015/07/26/mapreduce-framework/">Mapreduce Framework</a>
+    
+    <a class="list-group-item " href="/blog/2015/07/26/pid-file-analysis/">PID File Analysis</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">8</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">10</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">8</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">14</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">16</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">6</span>
+        algorithm
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/big/index.html">
+        <span class="badge">1</span>
+        big
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/data/index.html">
+        <span class="badge">1</span>
+        data
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2015 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2015/10/27/spark-streaming/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2015/10/27/spark-streaming/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>
