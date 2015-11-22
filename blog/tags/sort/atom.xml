@@ -4,7 +4,7 @@
   <title><![CDATA[tags: sort | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/sort/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2015-10-27T21:13:49+08:00</updated>
+  <updated>2015-11-22T17:44:17+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,166 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Hadoop Secondary Sorting]]></title>
+    <link href="http://billowkiller.github.io/blog/2015/11/22/hadoop-secondary-sorting/"/>
+    <updated>2015-11-22T17:27:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/11/22/hadoop-secondary-sorting</id>
+    <content type="html"><![CDATA[<p>Hadoop MapReduce的神奇之处发生在mapper和reducer之间，将所有相同key的map输出记录聚集在一块，使得用户可以方便的处理聚合在一起的数据。Hadoop内部使用了partition、sort和merge（shuffle的一部分），在每个reducer中流式地得到排序后的key和value集合。在MapReduce Sorting中有个特别的部分是secondary sort，也就是对value进行排序。</p>
+
+<p>Secondary sort在两种情况下特别有用：</p>
+
+<ul>
+  <li>需要某一部分的数据比其他数据更快的到达reducer。</li>
+  <li>希望job的输出按照两个key进行排序。</li>
+</ul>
+
+<p>实现Secondary sort需要对MapReduce中的数据流和处理有一定的了解，下图展示了对reducer中出现的数据有影响的三个部分。</p>
+
+<p><img src="http://i5.tietuku.com/7ad3ad872415c4b6.png" width="600px" /></p>
+
+<p><code>partitioner</code>决定哪个reducer接收该mapper数据记录；<code>sorting RawComparator</code>用于在各自的分片中排序输出的结果，map和reduce阶段都有它，其中map阶段的sorting是对reduce阶段sorting的一个优化，让reducer的sorting更高效；最后，<code>grouping RawComparator</code>用于决定reducer处理排序后记录的边界，发生在reducer从本地磁盘读取数据的时候，也就是说，你可以用这个方法决定数据记录是如何聚集起来调用一个reduce方法的。MapReduce默认把这个三个方法作用于map方法输出的key上。</p>
+
+<p>要实现Secondary sorting，我们需要重写partitioner、sort comparator和grouping comparator。</p>
+
+<p>下面，通过对人名的排序来说明如何使用Secondary sorting。使用primary sort排序last name，secondary sort排序first name。</p>
+
+<p>我们需要构建一个由map方法输出的Composite key，这个key由两部分组成：</p>
+
+<ul>
+  <li>Natural Key</li>
+  <li>Secondary Key</li>
+</ul>
+
+<p><img src="http://i5.tietuku.com/25eedf0319e92775.png" width="430px" /></p>
+
+<p>``` java
+public class Person implements WritableComparable<person> {</person></p>
+
+<p>private String firstName;
+  private String lastName;</p>
+
+<p>@Override
+  public void readFields(DataInput in) throws IOException {
+    this.firstName = in.readUTF();
+    this.lastName = in.readUTF();
+  }</p>
+
+<p>@Override
+  public void write(DataOutput out) throws IOException {
+    out.writeUTF(firstName);
+    out.writeUTF(lastName);
+  }
+…
+```</p>
+
+<p>下图说明hadoop框架配置中用于设置partitioning、sorting和grouping类的名字和方法。</p>
+
+<p><img src="http://i5.tietuku.com/520e7242cd6ecc43.png" width="530px" /></p>
+
+<h3 id="partitioner">Partitioner</h3>
+
+<p>默认的partitioner使用对key进行hash后取reducer个数的模。但是默认的partitioner使用整个key，会导致相同的natural key发往不同的reducer。所以需要实现自己的partitioner。</p>
+
+<p>``` java
+public class PersonNamePartitioner extends
+    Partitioner&lt;Person, Text&gt; {</p>
+
+<p>@Override
+  public int getPartition(Person key, Text value, int numPartitions) {
+    return Math.abs(key.getLastName().hashCode() * 127) %
+        numPartitions;
+  }
+} 
+```</p>
+
+<h3 id="sorting">Sorting</h3>
+
+<p>``` java
+public class PersonComparator extends WritableComparator {
+  protected PersonComparator() {
+    super(Person.class, true);
+  }</p>
+
+<p>@Override
+  public int compare(WritableComparable w1, WritableComparable w2) {</p>
+
+<pre><code>Person p1 = (Person) w1;
+Person p2 = (Person) w2;
+
+
+int cmp = p1.getLastName().compareTo(p2.getLastName());
+if (cmp != 0) {
+  return cmp;
+}
+
+return p1.getFirstName().compareTo(p2.getFirstName());   } } ```
+</code></pre>
+
+<h3 id="grouping">grouping</h3>
+
+<p>grouping阶段所有的数据记录已经是secondary sort了，grouping comparator需要将相同的last name聚合在一起。</p>
+
+<p>``` java
+public class PersonNameComparator extends WritableComparator {</p>
+
+<p>protected PersonNameComparator() {
+    super(Person.class, true);
+  }</p>
+
+<p>@Override
+  public int compare(WritableComparable o1, WritableComparable o2) {</p>
+
+<pre><code>Person p1 = (Person) o1;
+Person p2 = (Person) o2;
+
+return p1.getLastName().compareTo(p2.getLastName());
+</code></pre>
+
+<p>}
+}
+```</p>
+
+<h3 id="mapreduce">MapReduce</h3>
+
+<p>最后在driver中，需要设置上文提到的三个类：</p>
+
+<p>``` java
+job.setPartitionerClass(PersonNamePartitioner.class);
+job.setSortComparatorClass(PersonComparator.class);
+job.setGroupingComparatorClass(PersonNameComparator.class);</p>
+
+<p>public static class Map extends Mapper&lt;Text, Text, Person, Text&gt; {
+  private Person outputKey = new Person();</p>
+
+<p>@Override
+  protected void map(Text lastName, Text firstName, Context context)
+      throws IOException, InterruptedException {
+    outputKey.set(lastName.toString(), firstName.toString());
+    context.write(outputKey, firstName);
+  }
+}</p>
+
+<p>public static class Reduce extends Reducer&lt;Person, Text, Text, Text&gt; {</p>
+
+<p>Text lastName = new Text();
+  @Override
+  public void reduce(Person key, Iterable<text> values,
+                     Context context)
+      throws IOException, InterruptedException {
+    lastName.set(key.getLastName());
+    for (Text firstName : values) {
+      context.write(lastName, firstName);
+    }
+  }
+}   
+```</text></p>
+
+<p>Secondary sort涉及到的自定义的partitioner、sorter和grouper，还是比较复杂的。可以考虑<a href="http://htuple.org">htuple</a>对简单类型进行secondary sort。</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[python dict sorted]]></title>
@@ -30,76 +190,89 @@
 
 <p>#最简单的方法，这个是按照key值排序： </p>
 
-<p>{% codeblock lang:python %}
-def sortedDictValues1(adict):
-    items = adict.items()
-    items.sort()
-    return [value for key, value in items] 
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">sortedDictValues1</span><span class="p">(</span><span class="n">adict</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">items</span> <span class="o">=</span> <span class="n">adict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">items</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">[</span><span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>#又一个按照key值排序，貌似比上一个速度要快点 </p>
 
-<p>{% codeblock lang:python %}
-def sortedDictValues2(adict):
-    keys = adict.keys()
-    keys.sort()
-    return [dict[key] for key in keys] 
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">sortedDictValues2</span><span class="p">(</span><span class="n">adict</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">keys</span> <span class="o">=</span> <span class="n">adict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>#还是按key值排序，据说更快。。。而且当key为tuple的时候照样适用 </p>
 
-<p>{% codeblock lang:python %}
-def sortedDictValues3(adict): 
-    keys = adict.keys() 
-    keys.sort() 
-    return map(adict.get, keys) 
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">sortedDictValues3</span><span class="p">(</span><span class="n">adict</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">keys</span> <span class="o">=</span> <span class="n">adict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nb">map</span><span class="p">(</span><span class="n">adict</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">keys</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>#一行语句搞定： </p>
 
-<p>{% codeblock lang:python %}
-[(k,di[k]) for k in sorted(di.keys())] 
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="p">[(</span><span class="n">k</span><span class="p">,</span><span class="n">di</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">di</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>#来一个根据value排序的，先把item的key和value交换位置放入一个list中，再根据list每个元素的第一个值，即原来的value值，排序： </p>
 
-<p>{% codeblock lang:python %}
-def sort_by_value(d): 
-    items=d.items() 
-    backitems=[[v[1],v[0]] for v in items] 
-    backitems.sort() 
-    return [ backitems[i][1] for i in range(0,len(backitems))] 
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">sort_by_value</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">items</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">backitems</span><span class="o">=</span><span class="p">[[</span><span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span>
+</span><span class='line'>    <span class="n">backitems</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">[</span> <span class="n">backitems</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">backitems</span><span class="p">))]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>#还是一行搞定： </p>
 
-<p>{% codeblock lang:python %}
-[ v for v in sorted(di.values())] 
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="p">[</span> <span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">di</span><span class="o">.</span><span class="n">values</span><span class="p">())]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>#用lambda表达式来排序，更灵活： </p>
 
-<p>{% codeblock lang:python %}
-sorted(d.items(), lambda x, y: cmp(x[1], y[1]))
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="nb">sorted</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">cmp</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>, 或反序： 
-{% codeblock lang:python %}
-sorted(d.items(), lambda x, y: cmp(x[1], y[1]), reverse=True) 
-{% endcodeblock %}</p>
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="nb">sorted</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">cmp</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>#用sorted函数的key= 参数排序： 
 # 按照key进行排序 </p>
 
-<p>{% codeblock lang:python %}
-print sorted(dict1.items(), key=lambda d: d[0]) 
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">print</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">dict1</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p># 按照value进行排序 </p>
 
-<p>{% codeblock lang:python %}
-print sorted(dict1.items(), key=lambda d: d[1]) 
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">print</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">dict1</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>下面给出python内置sorted函数的帮助文档： </p>
 
@@ -116,9 +289,9 @@ list </p>
 
 <p>按照value排序可以用 </p>
 
-<p>{% codeblock lang:python %}
-sorted(d.items, key=lambda d:d[1]) 
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="nb">sorted</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>若版本低不支持sorted </p>
 

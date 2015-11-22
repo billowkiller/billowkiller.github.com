@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Hadoop Secondary Sorting - Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2015/11/22/hadoop-secondary-sorting">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-11-22T17:27:00+08:00" pubdate data-updated="true">Nov 22<span>nd</span>, 2015</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        Hadoop Secondary Sorting
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><p>Hadoop MapReduce的神奇之处发生在mapper和reducer之间，将所有相同key的map输出记录聚集在一块，使得用户可以方便的处理聚合在一起的数据。Hadoop内部使用了partition、sort和merge（shuffle的一部分），在每个reducer中流式地得到排序后的key和value集合。在MapReduce Sorting中有个特别的部分是secondary sort，也就是对value进行排序。</p>
+
+<p>Secondary sort在两种情况下特别有用：</p>
+
+<ul>
+  <li>需要某一部分的数据比其他数据更快的到达reducer。</li>
+  <li>希望job的输出按照两个key进行排序。</li>
+</ul>
+
+<p>实现Secondary sort需要对MapReduce中的数据流和处理有一定的了解，下图展示了对reducer中出现的数据有影响的三个部分。</p>
+
+<p><img src="http://i5.tietuku.com/7ad3ad872415c4b6.png" width="600px" /></p>
+
+<p><code>partitioner</code>决定哪个reducer接收该mapper数据记录；<code>sorting RawComparator</code>用于在各自的分片中排序输出的结果，map和reduce阶段都有它，其中map阶段的sorting是对reduce阶段sorting的一个优化，让reducer的sorting更高效；最后，<code>grouping RawComparator</code>用于决定reducer处理排序后记录的边界，发生在reducer从本地磁盘读取数据的时候，也就是说，你可以用这个方法决定数据记录是如何聚集起来调用一个reduce方法的。MapReduce默认把这个三个方法作用于map方法输出的key上。</p>
+
+<p>要实现Secondary sorting，我们需要重写partitioner、sort comparator和grouping comparator。</p>
+
+<p>下面，通过对人名的排序来说明如何使用Secondary sorting。使用primary sort排序last name，secondary sort排序first name。</p>
+
+<p>我们需要构建一个由map方法输出的Composite key，这个key由两部分组成：</p>
+
+<ul>
+  <li>Natural Key</li>
+  <li>Secondary Key</li>
+</ul>
+
+<p><img src="http://i5.tietuku.com/25eedf0319e92775.png" width="430px" /></p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Person</span> <span class="kd">implements</span> <span class="n">WritableComparable</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">&gt;</span> <span class="o">{</span>
+</span><span class="line">
+</span><span class="line">  <span class="kd">private</span> <span class="n">String</span> <span class="n">firstName</span><span class="o">;</span>
+</span><span class="line">  <span class="kd">private</span> <span class="n">String</span> <span class="n">lastName</span><span class="o">;</span>
+</span><span class="line">
+</span><span class="line">  <span class="nd">@Override</span>
+</span><span class="line">  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">readFields</span><span class="o">(</span><span class="n">DataInput</span> <span class="n">in</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{</span>
+</span><span class="line">    <span class="k">this</span><span class="o">.</span><span class="na">firstName</span> <span class="o">=</span> <span class="n">in</span><span class="o">.</span><span class="na">readUTF</span><span class="o">();</span>
+</span><span class="line">    <span class="k">this</span><span class="o">.</span><span class="na">lastName</span> <span class="o">=</span> <span class="n">in</span><span class="o">.</span><span class="na">readUTF</span><span class="o">();</span>
+</span><span class="line">  <span class="o">}</span>
+</span><span class="line">
+</span><span class="line">  <span class="nd">@Override</span>
+</span><span class="line">  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">write</span><span class="o">(</span><span class="n">DataOutput</span> <span class="n">out</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{</span>
+</span><span class="line">    <span class="n">out</span><span class="o">.</span><span class="na">writeUTF</span><span class="o">(</span><span class="n">firstName</span><span class="o">);</span>
+</span><span class="line">    <span class="n">out</span><span class="o">.</span><span class="na">writeUTF</span><span class="o">(</span><span class="n">lastName</span><span class="o">);</span>
+</span><span class="line">  <span class="o">}</span>
+</span><span class="line"><span class="o">...</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>下图说明hadoop框架配置中用于设置partitioning、sorting和grouping类的名字和方法。</p>
+
+<p><img src="http://i5.tietuku.com/520e7242cd6ecc43.png" width="530px" /></p>
+
+<h3 id="partitioner">Partitioner</h3>
+
+<p>默认的partitioner使用对key进行hash后取reducer个数的模。但是默认的partitioner使用整个key，会导致相同的natural key发往不同的reducer。所以需要实现自己的partitioner。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PersonNamePartitioner</span> <span class="kd">extends</span>
+</span><span class="line">    <span class="n">Partitioner</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">,</span> <span class="n">Text</span><span class="o">&gt;</span> <span class="o">{</span>
+</span><span class="line">
+</span><span class="line">  <span class="nd">@Override</span>
+</span><span class="line">  <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getPartition</span><span class="o">(</span><span class="n">Person</span> <span class="n">key</span><span class="o">,</span> <span class="n">Text</span> <span class="n">value</span><span class="o">,</span> <span class="kt">int</span> <span class="n">numPartitions</span><span class="o">)</span> <span class="o">{</span>
+</span><span class="line">    <span class="k">return</span> <span class="n">Math</span><span class="o">.</span><span class="na">abs</span><span class="o">(</span><span class="n">key</span><span class="o">.</span><span class="na">getLastName</span><span class="o">().</span><span class="na">hashCode</span><span class="o">()</span> <span class="o">*</span> <span class="mi">127</span><span class="o">)</span> <span class="o">%</span>
+</span><span class="line">        <span class="n">numPartitions</span><span class="o">;</span>
+</span><span class="line">  <span class="o">}</span>
+</span><span class="line"><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h3 id="sorting">Sorting</h3>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PersonComparator</span> <span class="kd">extends</span> <span class="n">WritableComparator</span> <span class="o">{</span>
+</span><span class="line">  <span class="kd">protected</span> <span class="nf">PersonComparator</span><span class="o">()</span> <span class="o">{</span>
+</span><span class="line">    <span class="kd">super</span><span class="o">(</span><span class="n">Person</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="kc">true</span><span class="o">);</span>
+</span><span class="line">  <span class="o">}</span>
+</span><span class="line">
+</span><span class="line">  <span class="nd">@Override</span>
+</span><span class="line">  <span class="kd">public</span> <span class="kt">int</span> <span class="nf">compare</span><span class="o">(</span><span class="n">WritableComparable</span> <span class="n">w1</span><span class="o">,</span> <span class="n">WritableComparable</span> <span class="n">w2</span><span class="o">)</span> <span class="o">{</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">Person</span> <span class="n">p1</span> <span class="o">=</span> <span class="o">(</span><span class="n">Person</span><span class="o">)</span> <span class="n">w1</span><span class="o">;</span>
+</span><span class="line">    <span class="n">Person</span> <span class="n">p2</span> <span class="o">=</span> <span class="o">(</span><span class="n">Person</span><span class="o">)</span> <span class="n">w2</span><span class="o">;</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">    <span class="kt">int</span> <span class="n">cmp</span> <span class="o">=</span> <span class="n">p1</span><span class="o">.</span><span class="na">getLastName</span><span class="o">().</span><span class="na">compareTo</span><span class="o">(</span><span class="n">p2</span><span class="o">.</span><span class="na">getLastName</span><span class="o">());</span>
+</span><span class="line">    <span class="k">if</span> <span class="o">(</span><span class="n">cmp</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+</span><span class="line">      <span class="k">return</span> <span class="n">cmp</span><span class="o">;</span>
+</span><span class="line">    <span class="o">}</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">return</span> <span class="n">p1</span><span class="o">.</span><span class="na">getFirstName</span><span class="o">().</span><span class="na">compareTo</span><span class="o">(</span><span class="n">p2</span><span class="o">.</span><span class="na">getFirstName</span><span class="o">());</span>
+</span><span class="line">  <span class="o">}</span>
+</span><span class="line"><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h3 id="grouping">grouping</h3>
+
+<p>grouping阶段所有的数据记录已经是secondary sort了，grouping comparator需要将相同的last name聚合在一起。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PersonNameComparator</span> <span class="kd">extends</span> <span class="n">WritableComparator</span> <span class="o">{</span>
+</span><span class="line">
+</span><span class="line">  <span class="kd">protected</span> <span class="nf">PersonNameComparator</span><span class="o">()</span> <span class="o">{</span>
+</span><span class="line">    <span class="kd">super</span><span class="o">(</span><span class="n">Person</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="kc">true</span><span class="o">);</span>
+</span><span class="line">  <span class="o">}</span>
+</span><span class="line">
+</span><span class="line">  <span class="nd">@Override</span>
+</span><span class="line">  <span class="kd">public</span> <span class="kt">int</span> <span class="nf">compare</span><span class="o">(</span><span class="n">WritableComparable</span> <span class="n">o1</span><span class="o">,</span> <span class="n">WritableComparable</span> <span class="n">o2</span><span class="o">)</span> <span class="o">{</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">Person</span> <span class="n">p1</span> <span class="o">=</span> <span class="o">(</span><span class="n">Person</span><span class="o">)</span> <span class="n">o1</span><span class="o">;</span>
+</span><span class="line">    <span class="n">Person</span> <span class="n">p2</span> <span class="o">=</span> <span class="o">(</span><span class="n">Person</span><span class="o">)</span> <span class="n">o2</span><span class="o">;</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">return</span> <span class="n">p1</span><span class="o">.</span><span class="na">getLastName</span><span class="o">().</span><span class="na">compareTo</span><span class="o">(</span><span class="n">p2</span><span class="o">.</span><span class="na">getLastName</span><span class="o">());</span>
+</span><span class="line">
+</span><span class="line">  <span class="o">}</span>
+</span><span class="line"><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h3 id="mapreduce">MapReduce</h3>
+
+<p>最后在driver中，需要设置上文提到的三个类：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="n">job</span><span class="o">.</span><span class="na">setPartitionerClass</span><span class="o">(</span><span class="n">PersonNamePartitioner</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class="line"><span class="n">job</span><span class="o">.</span><span class="na">setSortComparatorClass</span><span class="o">(</span><span class="n">PersonComparator</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class="line"><span class="n">job</span><span class="o">.</span><span class="na">setGroupingComparatorClass</span><span class="o">(</span><span class="n">PersonNameComparator</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class="line">
+</span><span class="line"><span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">Map</span> <span class="kd">extends</span> <span class="n">Mapper</span><span class="o">&lt;</span><span class="n">Text</span><span class="o">,</span> <span class="n">Text</span><span class="o">,</span> <span class="n">Person</span><span class="o">,</span> <span class="n">Text</span><span class="o">&gt;</span> <span class="o">{</span>
+</span><span class="line">  <span class="kd">private</span> <span class="n">Person</span> <span class="n">outputKey</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Person</span><span class="o">();</span>
+</span><span class="line">
+</span><span class="line">  <span class="nd">@Override</span>
+</span><span class="line">  <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">map</span><span class="o">(</span><span class="n">Text</span> <span class="n">lastName</span><span class="o">,</span> <span class="n">Text</span> <span class="n">firstName</span><span class="o">,</span> <span class="n">Context</span> <span class="n">context</span><span class="o">)</span>
+</span><span class="line">      <span class="kd">throws</span> <span class="n">IOException</span><span class="o">,</span> <span class="n">InterruptedException</span> <span class="o">{</span>
+</span><span class="line">    <span class="n">outputKey</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">lastName</span><span class="o">.</span><span class="na">toString</span><span class="o">(),</span> <span class="n">firstName</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+</span><span class="line">    <span class="n">context</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">outputKey</span><span class="o">,</span> <span class="n">firstName</span><span class="o">);</span>
+</span><span class="line">  <span class="o">}</span>
+</span><span class="line"><span class="o">}</span>
+</span><span class="line">
+</span><span class="line"><span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">Reduce</span> <span class="kd">extends</span> <span class="n">Reducer</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">,</span> <span class="n">Text</span><span class="o">,</span> <span class="n">Text</span><span class="o">,</span> <span class="n">Text</span><span class="o">&gt;</span> <span class="o">{</span>
+</span><span class="line">
+</span><span class="line">  <span class="n">Text</span> <span class="n">lastName</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Text</span><span class="o">();</span>
+</span><span class="line">  <span class="nd">@Override</span>
+</span><span class="line">  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">reduce</span><span class="o">(</span><span class="n">Person</span> <span class="n">key</span><span class="o">,</span> <span class="n">Iterable</span><span class="o">&lt;</span><span class="n">Text</span><span class="o">&gt;</span> <span class="n">values</span><span class="o">,</span>
+</span><span class="line">                     <span class="n">Context</span> <span class="n">context</span><span class="o">)</span>
+</span><span class="line">      <span class="kd">throws</span> <span class="n">IOException</span><span class="o">,</span> <span class="n">InterruptedException</span> <span class="o">{</span>
+</span><span class="line">    <span class="n">lastName</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">key</span><span class="o">.</span><span class="na">getLastName</span><span class="o">());</span>
+</span><span class="line">    <span class="k">for</span> <span class="o">(</span><span class="n">Text</span> <span class="n">firstName</span> <span class="o">:</span> <span class="n">values</span><span class="o">)</span> <span class="o">{</span>
+</span><span class="line">      <span class="n">context</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">lastName</span><span class="o">,</span> <span class="n">firstName</span><span class="o">);</span>
+</span><span class="line">    <span class="o">}</span>
+</span><span class="line">  <span class="o">}</span>
+</span><span class="line"><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Secondary sort涉及到的自定义的partitioner、sorter和grouper，还是比较复杂的。可以考虑<a href="http://htuple.org">htuple</a>对简单类型进行secondary sort。</p>
+
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-11-22T17:27:00+08:00" pubdate data-updated="true">Nov 22<span>nd</span>, 2015</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/rework/'>rework</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2015/11/22/hadoop-secondary-sorting/" data-via="" data-counturl="http://billowkiller.github.io/blog/2015/11/22/hadoop-secondary-sorting/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2015/10/27/spark-streaming/" title="Previous Post: Spark Streaming">&laquo; Spark Streaming</a></li>
+            
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item active" href="/blog/2015/11/22/hadoop-secondary-sorting/">Hadoop Secondary Sorting</a>
+    
+    <a class="list-group-item " href="/blog/2015/10/27/spark-streaming/">Spark Streaming</a>
+    
+    <a class="list-group-item " href="/blog/2015/10/27/spark/">Spark</a>
+    
+    <a class="list-group-item " href="/blog/2015/09/18/compression-format-introduction/">Compression Format Introduction</a>
+    
+    <a class="list-group-item " href="/blog/2015/07/26/mapreduce-framework/">Mapreduce Framework</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">8</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">10</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">8</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">14</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">17</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">6</span>
+        algorithm
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/big/index.html">
+        <span class="badge">1</span>
+        big
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/data/index.html">
+        <span class="badge">1</span>
+        data
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2015 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2015/11/22/hadoop-secondary-sorting/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2015/11/22/hadoop-secondary-sorting/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>

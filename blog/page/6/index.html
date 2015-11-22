@@ -138,6 +138,61 @@
 
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
         
+           | <a href="/blog/2013/05/14/p2pliu-mei-ti-shi-pin-dian-bo-xi-tong-de-ge-ren-ji-zhu-bao-gao/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/p2pliu-mei-ti-shi-pin-dian-bo-xi-tong-de-ge-ren-ji-zhu-bao-gao/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/p2pliu-mei-ti-shi-pin-dian-bo-xi-tong-de-ge-ren-ji-zhu-bao-gao/">P2P流媒体视频点播系统的个人技术报告</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><h3 id="section">项目说明</h3>
+
+<p>来源为高等计算机网络的大作业设计。我们组选择的是p2p的流媒体视频点播系统。核心内容的是chord算法。</p>
+
+<h3 id="section-1">系统分析</h3>
+
+<p>局域网内的任何结点既可以发送媒体压缩信息给其他结点，也可以从其他结点接收视频信息。此外流媒体信息是在网内从多源结点获取，而非单源模式。改变传统的需要中央服务器的查询支持，虽然本系统也需要一个中央服务器进行存储数据源以及节点加入的初始化，但是一旦节点加入了p2p网络，那么中央服务器的功能便会弱化很多，客户端peer可以利用其他peer节点已有的信息进行资源查询，而不用经过中央服务器。
+在理论上，chord是一个纯p2p算法，但是在试验中我们发现，在广域网中实现一个完全对等的p2p网络是不大现实的一件事情，因为根据chord算法，节点的加入需要知道一个已知的节点信息，而这个节点信息无法像在局域网中可以通过广播的方式进行查询，也就是说这个已知的节点就是存在的中央服务器，所有的节点加入都需要知道中央服务器在网络中的位置，通过中央服务器加入到chord网络中。而在局域网中，必存在一个初始信息源，对于一个如上所描述的系统来说，这个初始信息源可以当成一个中央服务器，当然这个中央服务器的功能也被弱化很多。</p>
+
+<h4 id="section-2">项目设计与管理</h4>
+
+<p>采用JAVA语言作为实现工具，并利用其UDT传输包实现数据传输、JMF视频播放工具包和openchord开源工具包，在局域网内实现基于P2P的流媒体视频点播系统。系统设计主要涉及的工作量包括：服务器端资源管理、P2P资源查询传输机制、客户端缓冲区管理和视频播放软件。预计的工作时间为1个月，总工作量为4人月。开发采用敏捷开发模型，进行迭代式开发，开发讨论为3天一次的站立会议，有效保障小组成员的信息一致性。会议中根据迭代需求列出一周或者近期的任务，小组成员互相监督管理，提高效率。能够有效的保障在规定的时间内完成项目。
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/p2pliu-mei-ti-shi-pin-dian-bo-xi-tong-de-ge-ren-ji-zhu-bao-gao/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
            | <a href="/blog/2013/05/14/linuxxia-shuang-wang-qia-pei-zhi/#disqus_thread"
              data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/linuxxia-shuang-wang-qia-pei-zhi/">Comments</a>
         
@@ -779,74 +834,6 @@ set fileencodings=utf-8,gbk</p>
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/hard-disk-partition/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/hard-disk-partition/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/hard-disk-partition/">Hard Disk Partition</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p><em>
-edited
-from <a href="http://vbird.dic.ksu.edu.tw/linux_basic/0130designlinux.php#partition_name">vbird</a> 
-	All picture
-© <a href="http://vbird.dic.ksu.edu.tw/linux_basic/0130designlinux.php#partition_name">vbird</a>
-</em>
-* * * * *</p>
-
-<p>在windows中我们可以很容易的发现磁盘盘符C，D，E等，这些盘符到底是什么呢，从磁盘管理器中又可以知道有主分区，逻辑分区，扩展分区等分区，这些东东也就是Partition了，那么他们又是一些什么东西呢，记得以前装windows用时，发现给C盘分配的盘符太小了，想要扩大一些C盘，试了好长时间，才发现要从临近的盘符，也就是D盘划分一部分给C盘，其他盘符都不行，而D盘就是所谓的逻辑分区，这个逻辑分区要先变成扩展分区，然后再又扩展分区转化为主分区，接下来这两个主分区也就是C盘和分割下来的一部分空间也就可以合并了。那么又是为什么这么麻烦呢？这就是接下来要说的了。</p>
-
-<p>在磁盘的第一分区中，装载有MBR(Master Boot
-Record)，这是可以安装启动管理程序的地方，有446 bytes；还有分割表(partition
-table)：记录整颗硬盘分割的状态，有64
-bytes。MBR是系统在启动的时候会主动去读取的内容，多系统就是靠这块来选择的；分割表就是系统用来确定分区的，也就是分区地址的索引，它将硬盘进行逻辑上的切割，然后用分割表来记录所包含的逻辑地址。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/partition-1.png" alt="磁盘分区" /></p>
-
-<p>假设上面的硬盘装置档名为/dev/hda时，那么这四个分割槽在Linux系统中的装置档名如下所示:</p>
-
-<ul>
-  <li>P1:/dev/hda1</li>
-  <li>P1:/dev/hda2</li>
-  <li>P1:/dev/hda3</li>
-  <li>
-    <p>P1:/dev/hda4
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/hard-disk-partition/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -870,6 +857,8 @@ bytes。MBR是系统在启动的时候会主动去读取的内容，多系统就
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2015/11/22/hadoop-secondary-sorting/">Hadoop Secondary Sorting</a>
+    
     <a class="list-group-item " href="/blog/2015/10/27/spark-streaming/">Spark Streaming</a>
     
     <a class="list-group-item " href="/blog/2015/10/27/spark/">Spark</a>
@@ -877,8 +866,6 @@ bytes。MBR是系统在启动的时候会主动去读取的内容，多系统就
     <a class="list-group-item " href="/blog/2015/09/18/compression-format-introduction/">Compression Format Introduction</a>
     
     <a class="list-group-item " href="/blog/2015/07/26/mapreduce-framework/">Mapreduce Framework</a>
-    
-    <a class="list-group-item " href="/blog/2015/07/26/pid-file-analysis/">PID File Analysis</a>
     
   </div>
 </section>
@@ -920,7 +907,7 @@ bytes。MBR是系统在启动的时候会主动去读取的内容，多系统就
     
     
     <a class="list-group-item " href="/blog/categories/rework/index.html">
-        <span class="badge">16</span>
+        <span class="badge">17</span>
         rework
       </a>
     
