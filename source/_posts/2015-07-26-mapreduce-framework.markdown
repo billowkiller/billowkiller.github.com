@@ -18,7 +18,27 @@ mapReduce 的输入是hdfs上存储的一系列文件集。在hadoop中，这些
 
 ### Record reader
 
-Record reader会把根据input fromat生成输入分片翻译成records。Record reader的目的是把数据解析成记录，而不是解析数据本身。它把数据以键值对的形式传递给mapper。通常情况下键是偏移量，值是这条记录的整个字节块。自定义record reader 超出本书的范围。我们假设你有了处理数据适合的record reader。
+Record reader会把根据input fromat生成输入分片翻译成records。Record reader的目的是把数据解析成记录，而不是解析数据本身。它把数据以键值对的形式传递给mapper。通常情况下键是偏移量，值是这条记录的整个字节块。从Input file到map的中间过程如下图所示
+
+<img src="http://i12.tietuku.com/691b0fd1648b0497.png" width="450px" />
+
+InputFormat其实做了三件事：
+
+* 校验job的input configuration（比如，查看数据是否存在）。
+* split输入的数据文件为逻辑上分片InputSplit，每个InputSplit给接下来的map task处理。
+* 创建RecordReader从InputSplit中解析出一个个键值对，这个键值对就是Record。
+
+通常在处理文本文件的时候，为了保证记录的完整性，RecorderReader会读取超过InputSplit边界的数据。
+
+![](http://i5.tietuku.com/392e9f9f99737b4d.jpg)
+
+在上图中共有三个InputSplit，在hadoop中默认的InputSplit大小为HDFS中每个Block的大小，所以共产生三个map task，它们读取数据的情况如下：
+
+|   | Start | Actual Start | End | Line(s) |
+| ------------- | ------------- | ------------- | ------------- | ------------- |
+| Mapper1  | B1:0  | B1:0 | B2:150 | L1, L2, L3 |
+| Mapper2  | B2:128  | B2:150 | B3:300 | L4, L5, L6 |
+| Mapper3  | B3:256  | B3:300 | B3:300 | N/A |
 
 ### Map
 

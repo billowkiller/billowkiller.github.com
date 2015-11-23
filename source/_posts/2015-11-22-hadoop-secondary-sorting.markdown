@@ -9,6 +9,8 @@ tags: [hadoop, sort]
 
 Hadoop MapReduce的神奇之处发生在mapper和reducer之间，将所有相同key的map输出记录聚集在一块，使得用户可以方便的处理聚合在一起的数据。Hadoop内部使用了partition、sort和merge（shuffle的一部分），在每个reducer中流式地得到排序后的key和value集合。在MapReduce Sorting中有个特别的部分是secondary sort，也就是对value进行排序。
 
+<!--more-->
+
 Secondary sort在两种情况下特别有用：
 
 * 需要某一部分的数据比其他数据更快的到达reducer。
