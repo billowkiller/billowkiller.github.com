@@ -56,6 +56,34 @@
    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
 
+<style type="text/css">
+    table {
+  padding: 0; }
+  table tr {
+    border-top: 1px solid #cccccc;
+    background-color: white;
+    margin: 0;
+    padding: 0; }
+    table tr:nth-child(2n) {
+      background-color: #f8f8f8; }
+    table tr th {
+      font-weight: bold;
+      border: 1px solid #cccccc;
+      text-align: left;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr td {
+      border: 1px solid #cccccc;
+      text-align: left;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr th :first-child, table tr td :first-child {
+      margin-top: 0; }
+    table tr th :last-child, table tr td :last-child {
+      margin-bottom: 0; }
+    }
+</style>
+
   <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
   
 
@@ -149,6 +177,8 @@
 
 
 <div class="entry-content clearfix"><p>Hadoop MapReduce的神奇之处发生在mapper和reducer之间，将所有相同key的map输出记录聚集在一块，使得用户可以方便的处理聚合在一起的数据。Hadoop内部使用了partition、sort和merge（shuffle的一部分），在每个reducer中流式地得到排序后的key和value集合。在MapReduce Sorting中有个特别的部分是secondary sort，也就是对value进行排序。</p>
+
+<!--more-->
 
 <p>Secondary sort在两种情况下特别有用：</p>
 
@@ -464,7 +494,7 @@
     
     <a class="list-group-item " href="/blog/2015/10/27/spark-streaming/">Spark Streaming</a>
     
-    <a class="list-group-item " href="/blog/2015/10/27/spark/">Spark</a>
+    <a class="list-group-item " href="/blog/2015/10/27/spark-introduction/">Spark Introduction</a>
     
     <a class="list-group-item " href="/blog/2015/09/18/compression-format-introduction/">Compression Format Introduction</a>
     

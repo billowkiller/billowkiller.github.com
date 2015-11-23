@@ -56,6 +56,34 @@
    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
 
+<style type="text/css">
+    table {
+  padding: 0; }
+  table tr {
+    border-top: 1px solid #cccccc;
+    background-color: white;
+    margin: 0;
+    padding: 0; }
+    table tr:nth-child(2n) {
+      background-color: #f8f8f8; }
+    table tr th {
+      font-weight: bold;
+      border: 1px solid #cccccc;
+      text-align: left;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr td {
+      border: 1px solid #cccccc;
+      text-align: left;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr th :first-child, table tr td :first-child {
+      margin-top: 0; }
+    table tr th :last-child, table tr td :last-child {
+      margin-bottom: 0; }
+    }
+</style>
+
   <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
   
 
@@ -151,244 +179,12 @@
 
   <div class="entry-content clearfix"><p>Hadoop MapReduce的神奇之处发生在mapper和reducer之间，将所有相同key的map输出记录聚集在一块，使得用户可以方便的处理聚合在一起的数据。Hadoop内部使用了partition、sort和merge（shuffle的一部分），在每个reducer中流式地得到排序后的key和value集合。在MapReduce Sorting中有个特别的部分是secondary sort，也就是对value进行排序。</p>
 
-<p>Secondary sort在两种情况下特别有用：</p>
-
-<ul>
-  <li>需要某一部分的数据比其他数据更快的到达reducer。</li>
-  <li>希望job的输出按照两个key进行排序。</li>
-</ul>
-
-<p>实现Secondary sort需要对MapReduce中的数据流和处理有一定的了解，下图展示了对reducer中出现的数据有影响的三个部分。</p>
-
-<p><img src="http://i5.tietuku.com/7ad3ad872415c4b6.png" width="600px" /></p>
-
-<p><code>partitioner</code>决定哪个reducer接收该mapper数据记录；<code>sorting RawComparator</code>用于在各自的分片中排序输出的结果，map和reduce阶段都有它，其中map阶段的sorting是对reduce阶段sorting的一个优化，让reducer的sorting更高效；最后，<code>grouping RawComparator</code>用于决定reducer处理排序后记录的边界，发生在reducer从本地磁盘读取数据的时候，也就是说，你可以用这个方法决定数据记录是如何聚集起来调用一个reduce方法的。MapReduce默认把这个三个方法作用于map方法输出的key上。</p>
-
-<p>要实现Secondary sorting，我们需要重写partitioner、sort comparator和grouping comparator。</p>
-
-<p>下面，通过对人名的排序来说明如何使用Secondary sorting。使用primary sort排序last name，secondary sort排序first name。</p>
-
-<p>我们需要构建一个由map方法输出的Composite key，这个key由两部分组成：</p>
-
-<ul>
-  <li>Natural Key</li>
-  <li>Secondary Key</li>
-</ul>
-
-<p><img src="http://i5.tietuku.com/25eedf0319e92775.png" width="430px" /></p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Person</span> <span class="kd">implements</span> <span class="n">WritableComparable</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">&gt;</span> <span class="o">{</span>
-</span><span class="line">
-</span><span class="line">  <span class="kd">private</span> <span class="n">String</span> <span class="n">firstName</span><span class="o">;</span>
-</span><span class="line">  <span class="kd">private</span> <span class="n">String</span> <span class="n">lastName</span><span class="o">;</span>
-</span><span class="line">
-</span><span class="line">  <span class="nd">@Override</span>
-</span><span class="line">  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">readFields</span><span class="o">(</span><span class="n">DataInput</span> <span class="n">in</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{</span>
-</span><span class="line">    <span class="k">this</span><span class="o">.</span><span class="na">firstName</span> <span class="o">=</span> <span class="n">in</span><span class="o">.</span><span class="na">readUTF</span><span class="o">();</span>
-</span><span class="line">    <span class="k">this</span><span class="o">.</span><span class="na">lastName</span> <span class="o">=</span> <span class="n">in</span><span class="o">.</span><span class="na">readUTF</span><span class="o">();</span>
-</span><span class="line">  <span class="o">}</span>
-</span><span class="line">
-</span><span class="line">  <span class="nd">@Override</span>
-</span><span class="line">  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">write</span><span class="o">(</span><span class="n">DataOutput</span> <span class="n">out</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{</span>
-</span><span class="line">    <span class="n">out</span><span class="o">.</span><span class="na">writeUTF</span><span class="o">(</span><span class="n">firstName</span><span class="o">);</span>
-</span><span class="line">    <span class="n">out</span><span class="o">.</span><span class="na">writeUTF</span><span class="o">(</span><span class="n">lastName</span><span class="o">);</span>
-</span><span class="line">  <span class="o">}</span>
-</span><span class="line"><span class="o">...</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>下图说明hadoop框架配置中用于设置partitioning、sorting和grouping类的名字和方法。</p>
-
-<p><img src="http://i5.tietuku.com/520e7242cd6ecc43.png" width="530px" /></p>
-
-<h3 id="partitioner">Partitioner</h3>
-
-<p>默认的partitioner使用对key进行hash后取reducer个数的模。但是默认的partitioner使用整个key，会导致相同的natural key发往不同的reducer。所以需要实现自己的partitioner。</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PersonNamePartitioner</span> <span class="kd">extends</span>
-</span><span class="line">    <span class="n">Partitioner</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">,</span> <span class="n">Text</span><span class="o">&gt;</span> <span class="o">{</span>
-</span><span class="line">
-</span><span class="line">  <span class="nd">@Override</span>
-</span><span class="line">  <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getPartition</span><span class="o">(</span><span class="n">Person</span> <span class="n">key</span><span class="o">,</span> <span class="n">Text</span> <span class="n">value</span><span class="o">,</span> <span class="kt">int</span> <span class="n">numPartitions</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line">    <span class="k">return</span> <span class="n">Math</span><span class="o">.</span><span class="na">abs</span><span class="o">(</span><span class="n">key</span><span class="o">.</span><span class="na">getLastName</span><span class="o">().</span><span class="na">hashCode</span><span class="o">()</span> <span class="o">*</span> <span class="mi">127</span><span class="o">)</span> <span class="o">%</span>
-</span><span class="line">        <span class="n">numPartitions</span><span class="o">;</span>
-</span><span class="line">  <span class="o">}</span>
-</span><span class="line"><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<h3 id="sorting">Sorting</h3>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PersonComparator</span> <span class="kd">extends</span> <span class="n">WritableComparator</span> <span class="o">{</span>
-</span><span class="line">  <span class="kd">protected</span> <span class="nf">PersonComparator</span><span class="o">()</span> <span class="o">{</span>
-</span><span class="line">    <span class="kd">super</span><span class="o">(</span><span class="n">Person</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="kc">true</span><span class="o">);</span>
-</span><span class="line">  <span class="o">}</span>
-</span><span class="line">
-</span><span class="line">  <span class="nd">@Override</span>
-</span><span class="line">  <span class="kd">public</span> <span class="kt">int</span> <span class="nf">compare</span><span class="o">(</span><span class="n">WritableComparable</span> <span class="n">w1</span><span class="o">,</span> <span class="n">WritableComparable</span> <span class="n">w2</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line">
-</span><span class="line">    <span class="n">Person</span> <span class="n">p1</span> <span class="o">=</span> <span class="o">(</span><span class="n">Person</span><span class="o">)</span> <span class="n">w1</span><span class="o">;</span>
-</span><span class="line">    <span class="n">Person</span> <span class="n">p2</span> <span class="o">=</span> <span class="o">(</span><span class="n">Person</span><span class="o">)</span> <span class="n">w2</span><span class="o">;</span>
-</span><span class="line">
-</span><span class="line">
-</span><span class="line">    <span class="kt">int</span> <span class="n">cmp</span> <span class="o">=</span> <span class="n">p1</span><span class="o">.</span><span class="na">getLastName</span><span class="o">().</span><span class="na">compareTo</span><span class="o">(</span><span class="n">p2</span><span class="o">.</span><span class="na">getLastName</span><span class="o">());</span>
-</span><span class="line">    <span class="k">if</span> <span class="o">(</span><span class="n">cmp</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line">      <span class="k">return</span> <span class="n">cmp</span><span class="o">;</span>
-</span><span class="line">    <span class="o">}</span>
-</span><span class="line">
-</span><span class="line">    <span class="k">return</span> <span class="n">p1</span><span class="o">.</span><span class="na">getFirstName</span><span class="o">().</span><span class="na">compareTo</span><span class="o">(</span><span class="n">p2</span><span class="o">.</span><span class="na">getFirstName</span><span class="o">());</span>
-</span><span class="line">  <span class="o">}</span>
-</span><span class="line"><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<h3 id="grouping">grouping</h3>
-
-<p>grouping阶段所有的数据记录已经是secondary sort了，grouping comparator需要将相同的last name聚合在一起。</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PersonNameComparator</span> <span class="kd">extends</span> <span class="n">WritableComparator</span> <span class="o">{</span>
-</span><span class="line">
-</span><span class="line">  <span class="kd">protected</span> <span class="nf">PersonNameComparator</span><span class="o">()</span> <span class="o">{</span>
-</span><span class="line">    <span class="kd">super</span><span class="o">(</span><span class="n">Person</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="kc">true</span><span class="o">);</span>
-</span><span class="line">  <span class="o">}</span>
-</span><span class="line">
-</span><span class="line">  <span class="nd">@Override</span>
-</span><span class="line">  <span class="kd">public</span> <span class="kt">int</span> <span class="nf">compare</span><span class="o">(</span><span class="n">WritableComparable</span> <span class="n">o1</span><span class="o">,</span> <span class="n">WritableComparable</span> <span class="n">o2</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line">
-</span><span class="line">    <span class="n">Person</span> <span class="n">p1</span> <span class="o">=</span> <span class="o">(</span><span class="n">Person</span><span class="o">)</span> <span class="n">o1</span><span class="o">;</span>
-</span><span class="line">    <span class="n">Person</span> <span class="n">p2</span> <span class="o">=</span> <span class="o">(</span><span class="n">Person</span><span class="o">)</span> <span class="n">o2</span><span class="o">;</span>
-</span><span class="line">
-</span><span class="line">    <span class="k">return</span> <span class="n">p1</span><span class="o">.</span><span class="na">getLastName</span><span class="o">().</span><span class="na">compareTo</span><span class="o">(</span><span class="n">p2</span><span class="o">.</span><span class="na">getLastName</span><span class="o">());</span>
-</span><span class="line">
-</span><span class="line">  <span class="o">}</span>
-</span><span class="line"><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<h3 id="mapreduce">MapReduce</h3>
-
-<p>最后在driver中，需要设置上文提到的三个类：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="n">job</span><span class="o">.</span><span class="na">setPartitionerClass</span><span class="o">(</span><span class="n">PersonNamePartitioner</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
-</span><span class="line"><span class="n">job</span><span class="o">.</span><span class="na">setSortComparatorClass</span><span class="o">(</span><span class="n">PersonComparator</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
-</span><span class="line"><span class="n">job</span><span class="o">.</span><span class="na">setGroupingComparatorClass</span><span class="o">(</span><span class="n">PersonNameComparator</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
-</span><span class="line">
-</span><span class="line"><span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">Map</span> <span class="kd">extends</span> <span class="n">Mapper</span><span class="o">&lt;</span><span class="n">Text</span><span class="o">,</span> <span class="n">Text</span><span class="o">,</span> <span class="n">Person</span><span class="o">,</span> <span class="n">Text</span><span class="o">&gt;</span> <span class="o">{</span>
-</span><span class="line">  <span class="kd">private</span> <span class="n">Person</span> <span class="n">outputKey</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Person</span><span class="o">();</span>
-</span><span class="line">
-</span><span class="line">  <span class="nd">@Override</span>
-</span><span class="line">  <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">map</span><span class="o">(</span><span class="n">Text</span> <span class="n">lastName</span><span class="o">,</span> <span class="n">Text</span> <span class="n">firstName</span><span class="o">,</span> <span class="n">Context</span> <span class="n">context</span><span class="o">)</span>
-</span><span class="line">      <span class="kd">throws</span> <span class="n">IOException</span><span class="o">,</span> <span class="n">InterruptedException</span> <span class="o">{</span>
-</span><span class="line">    <span class="n">outputKey</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">lastName</span><span class="o">.</span><span class="na">toString</span><span class="o">(),</span> <span class="n">firstName</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
-</span><span class="line">    <span class="n">context</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">outputKey</span><span class="o">,</span> <span class="n">firstName</span><span class="o">);</span>
-</span><span class="line">  <span class="o">}</span>
-</span><span class="line"><span class="o">}</span>
-</span><span class="line">
-</span><span class="line"><span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">Reduce</span> <span class="kd">extends</span> <span class="n">Reducer</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">,</span> <span class="n">Text</span><span class="o">,</span> <span class="n">Text</span><span class="o">,</span> <span class="n">Text</span><span class="o">&gt;</span> <span class="o">{</span>
-</span><span class="line">
-</span><span class="line">  <span class="n">Text</span> <span class="n">lastName</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Text</span><span class="o">();</span>
-</span><span class="line">  <span class="nd">@Override</span>
-</span><span class="line">  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">reduce</span><span class="o">(</span><span class="n">Person</span> <span class="n">key</span><span class="o">,</span> <span class="n">Iterable</span><span class="o">&lt;</span><span class="n">Text</span><span class="o">&gt;</span> <span class="n">values</span><span class="o">,</span>
-</span><span class="line">                     <span class="n">Context</span> <span class="n">context</span><span class="o">)</span>
-</span><span class="line">      <span class="kd">throws</span> <span class="n">IOException</span><span class="o">,</span> <span class="n">InterruptedException</span> <span class="o">{</span>
-</span><span class="line">    <span class="n">lastName</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">key</span><span class="o">.</span><span class="na">getLastName</span><span class="o">());</span>
-</span><span class="line">    <span class="k">for</span> <span class="o">(</span><span class="n">Text</span> <span class="n">firstName</span> <span class="o">:</span> <span class="n">values</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line">      <span class="n">context</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">lastName</span><span class="o">,</span> <span class="n">firstName</span><span class="o">);</span>
-</span><span class="line">    <span class="o">}</span>
-</span><span class="line">  <span class="o">}</span>
-</span><span class="line"><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>Secondary sort涉及到的自定义的partitioner、sorter和grouper，还是比较复杂的。可以考虑<a href="http://htuple.org">htuple</a>对简单类型进行secondary sort。</p>
-
 </div>
   
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2015/11/22/hadoop-secondary-sorting/">Read on &rarr;</a>
+    </footer>
   
 
 
@@ -470,13 +266,13 @@
 
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-10-27T21:00:00+08:00" pubdate data-updated="true">Oct 27<span>th</span>, 2015</time>
         
-           | <a href="/blog/2015/10/27/spark/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2015/10/27/spark/">Comments</a>
+           | <a href="/blog/2015/10/27/spark-introduction/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2015/10/27/spark-introduction/">Comments</a>
         
       </p>
     
     
-      <h1 class="entry-title"><a href="/blog/2015/10/27/spark/">Spark</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/10/27/spark-introduction/">Spark Introduction</a></h1>
     
   </header>
 
@@ -489,7 +285,7 @@
   
   
     <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2015/10/27/spark/">Read on &rarr;</a>
+      <a class="btn btn-default" rel="full-article" href="/blog/2015/10/27/spark-introduction/">Read on &rarr;</a>
     </footer>
   
 
@@ -889,7 +685,7 @@
     
     <a class="list-group-item " href="/blog/2015/10/27/spark-streaming/">Spark Streaming</a>
     
-    <a class="list-group-item " href="/blog/2015/10/27/spark/">Spark</a>
+    <a class="list-group-item " href="/blog/2015/10/27/spark-introduction/">Spark Introduction</a>
     
     <a class="list-group-item " href="/blog/2015/09/18/compression-format-introduction/">Compression Format Introduction</a>
     

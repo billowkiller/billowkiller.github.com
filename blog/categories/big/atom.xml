@@ -4,7 +4,7 @@
   <title><![CDATA[Category: big | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/big/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2015-11-22T17:44:17+08:00</updated>
+  <updated>2015-11-23T13:28:15+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -31,7 +31,58 @@
 
 <h3 id="record-reader">Record reader</h3>
 
-<p>Record reader会把根据input fromat生成输入分片翻译成records。Record reader的目的是把数据解析成记录，而不是解析数据本身。它把数据以键值对的形式传递给mapper。通常情况下键是偏移量，值是这条记录的整个字节块。自定义record reader 超出本书的范围。我们假设你有了处理数据适合的record reader。</p>
+<p>Record reader会把根据input fromat生成输入分片翻译成records。Record reader的目的是把数据解析成记录，而不是解析数据本身。它把数据以键值对的形式传递给mapper。通常情况下键是偏移量，值是这条记录的整个字节块。从Input file到map的中间过程如下图所示</p>
+
+<p><img src="http://i12.tietuku.com/691b0fd1648b0497.png" width="450px" /></p>
+
+<p>InputFormat其实做了三件事：</p>
+
+<ul>
+  <li>校验job的input configuration（比如，查看数据是否存在）。</li>
+  <li>split输入的数据文件为逻辑上分片InputSplit，每个InputSplit给接下来的map task处理。</li>
+  <li>创建RecordReader从InputSplit中解析出一个个键值对，这个键值对就是Record。</li>
+</ul>
+
+<p>通常在处理文本文件的时候，为了保证记录的完整性，RecorderReader会读取超过InputSplit边界的数据。</p>
+
+<p><img src="http://i5.tietuku.com/392e9f9f99737b4d.jpg" alt="" /></p>
+
+<p>在上图中共有三个InputSplit，在hadoop中默认的InputSplit大小为HDFS中每个Block的大小，所以共产生三个map task，它们读取数据的情况如下：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>Start</th>
+      <th>Actual Start</th>
+      <th>End</th>
+      <th>Line(s)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Mapper1</td>
+      <td>B1:0</td>
+      <td>B1:0</td>
+      <td>B2:150</td>
+      <td>L1, L2, L3</td>
+    </tr>
+    <tr>
+      <td>Mapper2</td>
+      <td>B2:128</td>
+      <td>B2:150</td>
+      <td>B3:300</td>
+      <td>L4, L5, L6</td>
+    </tr>
+    <tr>
+      <td>Mapper3</td>
+      <td>B3:256</td>
+      <td>B3:300</td>
+      <td>B3:300</td>
+      <td>N/A</td>
+    </tr>
+  </tbody>
+</table>
 
 <h3 id="map">Map</h3>
 
