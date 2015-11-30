@@ -57,6 +57,15 @@
 </script>
 
 <style type="text/css">
+body {
+  font-family: Helvetica, arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background-color: white;
+  padding: 30px; }
+
     table {
   padding: 0; }
   table tr {
@@ -378,6 +387,10 @@
   <li>每个map任务被分为以下阶段：<code>record reader</code>，<code>mapper</code>，<code>combiner</code>，<code>partitioner</code>。Map任务的输出叫中间数据，包括keys和values，发送到reduce端。</li>
   <li>Reduce任务分为以下阶段：<code>shuffle</code>，<code>sort</code>，<code>reduce</code>，<code>output format</code>。运行map任务的节点会尽量选择数据所在的节点。这种情况下，不会出现网络传输，在本地节点就可以完成计算。</li>
 </ul>
+
+<p>过程如图所示，接下来的章节会一一介绍。</p>
+
+<p><img src="https://farm3.static.flickr.com/2275/3529146683_c8247ff6db_o.png" alt="" /></p>
 
 </div>
   
