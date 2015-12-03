@@ -173,6 +173,74 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-15T06:18:00+08:00" pubdate data-updated="true">Jul 15<span>th</span>, 2014</time>
+        
+           | <a href="/blog/2014/07/15/linux-reentrant-function/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/07/15/linux-reentrant-function/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/15/linux-reentrant-function/">Linux Reentrant Function</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>这种情况出现在多任务系统当中，在任务执行期间捕捉到信号并对其进行处理时，进程正在执行的指令序列就被信号处理程序临时中断。如果从信号处理程序返回，则继续执行进程断点处的正常指令序列，从重新恢复到断点重新执行的过程中，函数所依赖的环境没有发生改变，就说这个函数是可重入的，反之就是不可重入的。简单来说，<strong>可重入函数可以被中断的函数</strong>。</p>
+
+<p>在进程中断期间，系统会保存和恢复进程的上下文，然而恢复的上下文仅限于返回地址，cpu寄存器等之类的少量上下文，而函数内部使用的诸如全局或静态变量，buffer等并不在保护之列，所以如果这些值在函数被中断期间发生了改变，那么当函数回到断点继续执行时，其结果就不可预料了。打个比方，比如<code>malloc</code>，将如一个进程此时正在执行<code>malloc</code>分配堆空间，此时程序捕捉到信号发生中断，执行信号处理程序中恰好也有一个<code>malloc</code>，这样就会对进程的环境造成破坏，因为malloc通常为它所分配的存储区维护一个链接表，插入执行信号处理函数时，进程可能正在对这张表进行操作，而信号处理函数的调用刚好覆盖了进程的操作，造成错误。</p>
+
+<p><strong>基本上下面的函数是不可重入的：</strong></p>
+
+<ul>
+  <li>函数体内使用了静态的数据结构；</li>
+  <li>函数体内调用了malloc()或者free()函数；</li>
+  <li>函数体内调用了标准I/O函数。</li>
+  <li>进行了浮点运算。许多的处理器/编译器中，浮点一般都是不可重入的 （浮点运算大多使用协处理器或者软件模拟来实现）。</li>
+</ul>
+
+<p><strong>两种情况需要考虑：</strong></p>
+
+<ol>
+  <li>信号处理程序A内外都调用了同一个不可重入函数B；B在执行期间被信号打断，进入A (A中调用了B),完事之后返回B被中断点继续执行，这时B函数的环境可能改变，其结果就不可预料了。</li>
+  <li>多线程共享进程内部的资源，如果两个线程A，B调用同一个不可重入函数F，A线程进入F后，线程调度，切换到B，B也执行了F，那么当再次切换到线程A时，其调用F的结果也是不可预料的。</li>
+</ol>
+
+<p><strong>在信号处理程序中即使调用可重入函数也有问题要注意</strong>。作为一个通用的规则，当在信号处理程序中调用可重入函数时，应当在其前保存<code>errno</code>，并在其后恢复<code>errno</code>。（<strong>因为每个线程只有一个errno变量，信号处理函数可能会修改其值，要了解经常被捕捉到的信号是SIGCHLD，其信号处理程序通常要调用一种wait函数，而各种wait函数都能改变errno。</strong>）</p>
+
+<p>如果一个函数对多个线程来说是可重入的，则说这个函数是<strong>线程安全的</strong>。但这并不能说明对信号处理程序来说该函数也是可重入的。如果函数对异步信号处理程序的重入是安全的，那么就可以说函数式<strong>异步-信号安全的</strong>。</p>
+
+<p>一下是来自<em>《深入理解计算机系统》</em>的摘抄：</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/threadsafe1_zps14eaee56.png" alt="" />
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/threadsafe2_zpsb753bebc.png" alt="" />
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/threadsafe3_zps6a9ec8f8.png" alt="" /></p>
+</div>
+  
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-15T02:18:00+08:00" pubdate data-updated="true">Jul 15<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/07/15/linux-epoll-module/#disqus_thread"
@@ -660,68 +728,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-12T02:18:00+08:00" pubdate data-updated="true">Apr 12<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/04/12/Inside-Object/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/04/12/Inside-Object/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/12/Inside-Object/">Inside C++ Object</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>modified from <a href="http://blog.csdn.net/eroswang/article/details/1749609">http://blog.csdn.net/eroswang/article/details/1749609</a></p>
-
-<hr />
-
-<h2 id="ooob">面对对象（OO）和基于对象（OB）</h2>
-
-<p>基于对象的数据类型可以展示封装的非多态形式，但是不支持类型的扩充。一个OB设计可能比一个对等的OO设计速度更快而且空间更紧凑。速度快是因为所有的函数引发操作都在编译时期解析完成，对象建构起来时不需要设置virtual机制；空间紧凑则是因为每一个class object不需要负担传统上为了支持virtual机制而需要的额外符合。不过，OB设计比较没有弹性。 </p>
-
-<h2 id="c">C++对象模型</h2>
-
-<p>在C++中，有两种<strong>class data members：static和nonstatic</strong>，以及三种<strong>class member functions：static、nonstatic和virtual</strong>。</p>
-
-<p>Nonstatic data members被配置于每一个class object之内，static data members则被存放在所有的class object之外。Static和nonstatic function members也被放在所有的class object之外，Virtual functions则以两个步骤支持之：</p>
-
-<ul>
-  <li>每一个class产生出一堆指向virtual functions的指针，放在表格之中，这个表格被称为<strong>virtual table（vtbl）</strong>。每一个class所关联的type_info object（用以支持<strong>runtime type identification，RTTI</strong>）也经由virtual table被指出来，通常是放在表格的第一个slot处。</li>
-  <li>每一个class object被添加了一个指针，指向相关的virtual table。通常这个指针被称为<strong>vptr</strong>。</li>
-</ul>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/04/12/Inside-Object/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -745,6 +751,8 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2015/12/01/hadoop-tunning/">Hadoop Tunning</a>
+    
     <a class="list-group-item " href="/blog/2015/11/22/hadoop-secondary-sorting/">Hadoop Secondary Sorting</a>
     
     <a class="list-group-item " href="/blog/2015/10/27/spark-streaming/">Spark Streaming</a>
@@ -752,8 +760,6 @@ body {
     <a class="list-group-item " href="/blog/2015/10/27/spark-introduction/">Spark Introduction</a>
     
     <a class="list-group-item " href="/blog/2015/09/18/compression-format-introduction/">Compression Format Introduction</a>
-    
-    <a class="list-group-item " href="/blog/2015/07/26/mapreduce-framework/">Mapreduce Framework</a>
     
   </div>
 </section>

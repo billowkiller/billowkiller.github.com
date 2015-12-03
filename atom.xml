@@ -4,7 +4,7 @@
   <title><![CDATA[Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2015-11-30T11:15:19+08:00</updated>
+  <updated>2015-12-03T11:35:14+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,280 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Hadoop Tunning]]></title>
+    <link href="http://billowkiller.github.io/blog/2015/12/01/hadoop-tunning/"/>
+    <updated>2015-12-01T09:50:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/12/01/hadoop-tunning</id>
+    <content type="html"><![CDATA[<p>Hadoop的调优涉及到整个MapReduce的各个过程，并且要对每个参数的意义和Counter信息有一定的了解。也就是说，根据Counter的信息推测哪些MapReduce阶段可能存在性能瓶颈，并且根据这个瓶颈理解对应的Hadoop 框架中的处理逻辑，进而可以调整相关参数的大小或程序的行为。</p>
+
+<p>从大面上来看，MapReduce的瓶颈可能存在以下图中的各个部分。</p>
+
+<p><img src="http://ww2.sinaimg.cn/large/74311666jw1eyjx8zpfz2j20rq0cegna.jpg" width="500px" /></p>
+
+<!--more-->
+
+<p>在开始调优之旅前，先来个开胃小菜。进行调优的过程中，我们首先要知道整个job的运行情况。</p>
+
+<p>Hadoop 2中的JobHistory是能够提供作业运行时各个参数指标的展示工具，可以通过这个UI界面查看所有的Counter。另一方面如果不方便通过界面的方式查看，则可以利用Hadoop自带的命令行工具查看，方法是<code>hadoop job -history &lt;history file&gt;</code>, 这个history file的位置通常是在mapreduce.jobhistory.done-dir目录下，可以用如下方式查找<code>hadoop fs -lsr &lt;done-dir&gt; | grep job_1398974791337_0037</code>。</p>
+
+<h2 id="map-optimizations">Map Optimizations</h2>
+
+<p>在Map端的优化通常会涉及到输入的数据和它的处理过程，以及你的应用程序代码。Mapper需要读取作业的输入，输入文件的不同也会影响到作业运行的效率，例如文件是否是splittable，数据的本地性和input split的数量等等。</p>
+
+<h3 id="data-locality">Data Locality</h3>
+
+<p>在分布式计算中有条著名的准则<strong>Pushing compute to the data</strong>，map的task应该尽可能的被安排在数据存放的节点上。可以用Counter来判断作业是否符合这条准则:</p>
+
+<ul>
+  <li>HDFS_BYTES_READ：这个值应当不大于input file的block size</li>
+  <li>DATA_LOCAL_MAPS：这个值应当为1</li>
+  <li>RACK_LOCAL_MAPS：这个值应当为0</li>
+</ul>
+
+<p>以下几种情况可能会发生non-local read:</p>
+
+<ul>
+  <li>不能分割的大文件，这样mapper就必须从不同的节点中读取blocks。</li>
+  <li>文件格式支持split，但是用的input format不对。典型的情况是LZOP格式，需要先建立索引后再进行读取。</li>
+  <li>Yarn的调度器不能在某个节点上产生map container，通常是由于集群under lode。</li>
+</ul>
+
+<p>解决方法是：</p>
+
+<ul>
+  <li>尽量保持unsplittable文件的大小接近一个block的大小。</li>
+  <li>设置yarn的<code>scheduler.capacity.node-locality-delay</code>，引入调度延迟来增加map task分配到数据节点上的概率。</li>
+  <li>使用Twitter提供的LZO Input Format来处理lzop数据，或者使用bzip2格式的文件。</li>
+</ul>
+
+<h3 id="map-number-overwhelm">Map Number Overwhelm</h3>
+
+<p>当输入有很多的input split的时候，每个input split都需要一个mapper来执行，而每个mapper都是一个单独的进程。这样会给调度器和集群带来极大的压力。原因通常有两个：</p>
+
+<ul>
+  <li>input data由很多的小文件组成，Hadoop会为每个小文件生成一个mapper，最终时间会大量消耗在启动进程上。</li>
+  <li>每个文件并不是很小（和block size相当），但总体的数据量很大，横跨上千个HDFS的blocks。这样每个block也会分配给单独的mapper。</li>
+</ul>
+
+<p>如果是第一种情况，可以先聚合这个小文件，或者使用类似avro的文件格式来存储。或者直接用<code>CombineFileInputFormat</code>来处理以上这两种情况，它可以在一个mapper里处理多个HDFS block的数据。<code>CombineFileInputFormat</code>会首先检查input files的所有blocks，简历每个block到data nodes的映射关系，接着将同一个节点上的blocks聚合到一个input split中以保持data locality。它有三个配置项来调整：</p>
+
+<ul>
+  <li>mapreduce.input.fileinputformat.split.minsize.per.node</li>
+  <li>mapreduce.input.fileinputformat.split.minsize.per.rac</li>
+  <li>mapreduce.input.fileinputformat.split.maxsize</li>
+</ul>
+
+<p>以上的默认配置会造成每个节点上尽量形成一个最大的input split，影响作业的并行性，可以用以上几个配置来调整。<code>CombineFileInputFormat</code>还包括两个具体的类：</p>
+
+<ul>
+  <li><code>CombineTextInputFormat</code></li>
+  <li><code>CombineSequenceFileInputFormata</code></li>
+</ul>
+
+<h3 id="input-split-computation">Input Split Computation</h3>
+
+<p>如果提交作业的client是在集群局域网之外，那么input split的计算可能带来高成本。</p>
+
+<p>当输入的数据源是HDFS时，client需要做如下事情，包括file listing, file status retrieving，input files数量比较多的时候，整个过程带来数据传输的延迟是比较可观的。</p>
+
+<p>可以通过设置<code>yarn.app.mapreduce.am.compute-splits-in-cluster</code>将input split的计算交给AppMaster处理，这是在集群内部进行的。</p>
+
+<h2 id="shuffle-optimizations">Shuffle Optimizations</h2>
+
+<h3 id="using-the-combiner">Using the Combiner</h3>
+
+<p>combiner可以有效的减少mapper和reducer之间通信的数据量。</p>
+
+<h3 id="using-binary-comparators">Using Binary Comparators</h3>
+
+<p>MapReduce在做sorting或者merging的时候，使用<code>RawComparator</code>比较map output key。内置的<code>Writable</code> classes（<code>Text</code>、<code>IntWritable</code>）有byte-level的比较器，无需将二进制的数据重新组装成实际的对象，所以能够快速进行序列化对象的比较。</p>
+
+<p>用户可以在自己构造的<code>Writable</code>对象里面实现<code>WritableComparable</code>接口，这处理起来会比较容易，但是另一方面要注意MapReduce中map output data是以byte的形式存储的，这会导致在shuffle和sort的阶段需要从byte到object的转化才可以完成对象的比较。</p>
+
+<p>可以看到在Hadoop的内置<code>Writable</code>对象不仅实现了<code>WritableComparable</code>接口，还自定义继承自<code>WritableComparator</code>的比较器。<code>WritableComparator</code>有什么作用呢，可以看下它的一些方法申明。</p>
+
+<pre><code>public class WritableComparator implements RawComparator {
+    public int compare(byte[] b1, int s1, int l1,
+                       byte[] b2, int s2, int l2); 
+}
+</code></pre>
+
+<p>可以看到这是byte-level的Comparator，<code>Writable</code>对象正是覆盖了这里面的compare方法。在内置的<code>Writable</code>对象中都实现了<code>WritableComparator</code>，所以无需担心内置对象的效率。但是自己所构造的对象也可以实现<code>WritableComparator</code>方法来提高效率。</p>
+
+<p>例如一个拥有firstName和lastName的Person对象：</p>
+
+<pre><code>private String firstName;
+private String lastName;
+
+@Override
+public void write(DataOutput out) throws IOException {
+    out.writeUTF(lastName);
+    out.writeUTF(firstName);
+}
+</code></pre>
+
+<p><img src="http://i5.tietuku.com/e5eba32886b5773d.png" width="600px" /></p>
+
+<pre><code>public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2,
+                     int l2) {
+    int lastNameResult = compare(b1, s1, b2, s2);
+    if (lastNameResult != 0) {
+        return lastNameResult;
+    }
+    int b1l1 = readUnsignedShort(b1, s1);
+    int b2l1 = readUnsignedShort(b2, s2);
+    return compare(b1, s1 + b1l1 + 2, b2, s2 + b2l1 + 2);
+}
+
+public static int compare(byte[] b1, int s1, byte[] b2, int s2) {
+    int b1l1 = readUnsignedShort(b1, s1);
+    int b2l1 = readUnsignedShort(b2, s2);
+    return compareBytes(b1, s1 + 2, b1l1, b2, s2 + 2, b2l1);
+}
+
+public static int readUnsignedShort(byte[] b, int offset) {
+    int ch1 = b[offset];
+    int ch2 = b[offset + 1];
+    return (ch1 &lt;&lt; 8) + (ch2);
+}
+</code></pre>
+
+<h3 id="tunning-the-shuffle-internals">Tunning the shuffle internals</h3>
+
+<p>在mapper中，output record首先被存储在一个内存buffer中，当这个buffer增长到一定大小的时候，数据被spill到磁盘中的一个文件。整个过程持续到mapper完成所有的output record生成。过程如下：</p>
+
+<p><img src="http://i5.tietuku.com/952140624345e77f.png" width="500px" /></p>
+
+<p>在整个阶段中，I/O相关的splling和merging是最耗时的，所以理想状况应该是所有的output数据都可以装入buffer中，这样只有一个文件被spill到磁盘。这对所有的作业来说自然是不大可能，但是如果mapper可以通过filter或者project的方法减少input data，那么可以好好调整下<code>mapreduce.task.io.sort.mb</code>的大小，因为这个数据直接关系buffer的大小。可以通过检查下面的Counters来调整map端的shuffle：</p>
+
+<ul>
+  <li>MAP_OUTPUT_BYTES  用这个数据来估计是否可以调整<code>mapreduce.task.io.sort.mb</code>来装入map的output record</li>
+  <li>SPILLED_RECORDS/MAP_OUTPUT_RECORDS  这两个数据的理想情况是一致的，表示只有一个spill发生。</li>
+  <li>FILE_BYTES_READ/FILE_BYTES_WRITTEN  比较这两个数据和MAP_OUTPUT_BYTES可以理解在splling和merging阶段发生的读写副作用</li>
+</ul>
+
+<p>在reduce方面，map的output通过每个节点上运行的shuffle service进程被发送到对应的reducer。在reducer中，map output是被写入到一个内存buffer中，在数据接收的过程中buffer中的数据被排好序，并在到达一定数据量的时候写入磁盘。同时有一个后台进程负责不断merge这个小的spllied file到merged files中，当所有的fetcher获取了所有的outputs，会有一个最终的merging发生，这时候数据也就从merged files到reducer了。也就是如下图的这个过程：</p>
+
+<p><img src="http://i5.tietuku.com/d11419d045f44d9a.png" width="500px" /></p>
+
+<p>通map端的调优一样，reduce端也是尽量将数据存入内存中，减少splling和merging发生的次数，但是这个过程并不如map端一样明显，因为数据是在边接收边merging的。默认情况下，无论数据是否可以装入内存中，splling总会发生，所以可以调整<code>mapreduce.reduce.merge.memtomem.enabled</code>为true启动memory-to-memory的merge。map端的Counter同样适用于reduce。</p>
+
+<p>以下的参数可以用来调整Hadoop的shuffle行为：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Default</th>
+      <th>Map or Reduce</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>mapreduce.task.io.sort.mb</td>
+      <td>100 (MB)</td>
+      <td>Map</td>
+      <td>The total amount of buffer memory in megabytes to use when buffering map outputs. This should be approximately 70% of the map task’s heap size.</td>
+    </tr>
+    <tr>
+      <td>mapreduce.map.sort.spill.percent</td>
+      <td>0.8</td>
+      <td>Map</td>
+      <td>Note that collection will not block if this threshold is exceeded while a spill is already in progress, so spills may be larger than this threshold when it is set to less than 0.5.</td>
+    </tr>
+    <tr>
+      <td>mapreduce.task.io.sort.factor</td>
+      <td>10</td>
+      <td>Map and Reduce</td>
+      <td>The number of streams to merge at once while sorting files. This determines the number of open file handles. Larger clusters with 1,000 or more nodes can bump this up to 100.</td>
+    </tr>
+    <tr>
+      <td>mapreduce.reduce.shuffle.parallelcopies</td>
+      <td>5</td>
+      <td>Reduce</td>
+      <td>The default number of parallel transfers run on the reduce side during the copy (shuffle) phase. Larger clusters with 1,000 or more nodes can bump this up to 20.</td>
+    </tr>
+    <tr>
+      <td>mapreduce.reduce.shuffle.input.buffer.percent</td>
+      <td>0.7</td>
+      <td>Reduce</td>
+      <td>The percentage of memory to be allocated from the maximum heap size to store map outputs during the shuffle.</td>
+    </tr>
+    <tr>
+      <td>mapreduce.reduce.shuffle.merge.percent</td>
+      <td>0.66</td>
+      <td>Reduce</td>
+      <td>The usage threshold at which an in-memory merge will be initiated, expressed as a percentage of the total memory allocated to storing in-memory map outputs, as defined by mapreduce.reduce.shuffle.input.buffer.percent.</td>
+    </tr>
+    <tr>
+      <td>mapreduce.reduce.merge.memtomem.enabled</td>
+      <td>false</td>
+      <td>Reduce</td>
+      <td>If all the map outputs for each reducer can be stored in memory, then set this property to true.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Shuffle的原则是使用filter和project减少数据量，使用combiner以及压缩map的output，尽可能的减少mapper和reducer质检传递的数据，减低IO带来的开销。这样之后再利用上述提到的参数来调整Shuffle的过程。</p>
+
+<h2 id="recuder-optimizations">Recuder Optimizations</h2>
+
+<h3 id="the-number-of-reducers">The Number of Reducers</h3>
+
+<p>大多数情况下map端的并行度是由框架根据input files和input format来自动决定的，但在Reduce端，reducer的数量是由用户自行决定的。太少的reducers意味着没能充分利用集群的资源，太多的reducer则会让调度器疲于奔命，如果没有太多的资源供所有reducer运行则会拖累reducer的执行效率。在一些使用场景中，不能避免的需要使用少量的reducer来运行作业，例如数据写入DB系统中。另外一些场景中需要确认数据是否会发生倾斜，以及如何partition的，数据量是否会让reducer发生OOM的情况。</p>
+
+<h2 id="general-tunning-tips">General tunning tips</h2>
+
+<ul>
+  <li>压缩</li>
+  <li>使用类似于Avro或Parquet的数据格式存储数据，带来的好处是空间利用率，序列化和反序列化更加有效。
+    <ul>
+      <li>在Hadoop中，text并不是一个有效的数据格式，空间利用率低，解析成本高，特别是用到正则的时候。</li>
+      <li>尽可能考虑使用二进制的文件存储格式。</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="tunning-tools">Tunning tools</h2>
+
+<h3 id="stack-dumps">stack dumps</h3>
+
+<p>ssh到task运行的机器上，执行下面的命令：</p>
+
+<pre><code>ps aux | grep container_1393242034820_0001_01_000002
+kill -s SIGQUIT 554284
+kill -s SIGQUIT 554284
+kill -s SIGQUIT 554284
+</code></pre>
+
+<p><code>SIGQUIT</code>信号的发送应该要间隔几秒，当JVM收到这个信号的时候会执行stack dump，这样可以了解到程序在这段时间内的运行情况。最后可以在task 的output file中查看dump出来的栈信息。</p>
+
+<h3 id="profiling-map-and-reduce-task">Profiling Map and Reduce Task</h3>
+
+<p>可以使用HPROF结合一些Mapreduce job method来进行Profiling。HPROF是JVM内置的java profiling工具，Hadoop内置了对HPROF的支持。可以在driver中加入如下的代码：</p>
+
+<pre><code>job.setProfileEnabled(true);
+job.setProfileParams(
+    "-agentlib:hprof=depth=8,cpu=samples,heap=sites,force=n," +
+        "thread=y,verbose=n,file=%s");
+job.setProfileTaskRange(true, "0,1,5-10");
+job.setProfileTaskRange(false, "");
+</code></pre>
+
+<p>在<code>setProfileParams</code>方法中设置的参数会在每个container中建立一个名为profile.out的文件，这个文件可以很容易被解析。可以通过ssh到目标机器查看或者通过JobHistory UI界面查看。</p>
+
+<p>profile.out包括一些stack traces，还包括内存和CPU时间的信息。以下是一个profile.out文件：</p>
+
+<p><img src="http://i5.tietuku.com/ba1dcbebf426b1a8.png" width="600px" /></p>
+
+<p>可以看出来第一个问题是在<code>String.split</code>这个方法的使用上，它采用正则表达式来分割字符串，这个是相当耗时的一个举措，可以用Apache Commons Lang library的<code>StringUtils.split</code>来替换。另外一个是发生在Text的构造上，可以只构造一个Text实例，采用<code>set</code>方法进行设置，这样会更加有效率。</p>
+
+<p>需要注意，使用HPROF会给程序的执行带来额外的负担，需要持续的收集profiling的信息，所以在正常的运行过程中不应该加上。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Hadoop Secondary Sorting]]></title>
@@ -3243,43 +3517,6 @@ RARP以与ARP相反的方式工作。<strong>RARP发出要反向解析的物理�
   <li>一种是不支持原子操作，这是是使用文件锁来实现。 </li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Linux reentrant function]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/07/15/linux-reentrant-function/"/>
-    <updated>2014-07-15T06:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/07/15/linux-reentrant-function</id>
-    <content type="html"><![CDATA[<p>这种情况出现在多任务系统当中，在任务执行期间捕捉到信号并对其进行处理时，进程正在执行的指令序列就被信号处理程序临时中断。如果从信号处理程序返回，则继续执行进程断点处的正常指令序列，从重新恢复到断点重新执行的过程中，函数所依赖的环境没有发生改变，就说这个函数是可重入的，反之就是不可重入的。简单来说，<strong>可重入函数可以被中断的函数</strong>。</p>
-
-<p>在进程中断期间，系统会保存和恢复进程的上下文，然而恢复的上下文仅限于返回地址，cpu寄存器等之类的少量上下文，而函数内部使用的诸如全局或静态变量，buffer等并不在保护之列，所以如果这些值在函数被中断期间发生了改变，那么当函数回到断点继续执行时，其结果就不可预料了。打个比方，比如<code>malloc</code>，将如一个进程此时正在执行<code>malloc</code>分配堆空间，此时程序捕捉到信号发生中断，执行信号处理程序中恰好也有一个<code>malloc</code>，这样就会对进程的环境造成破坏，因为malloc通常为它所分配的存储区维护一个链接表，插入执行信号处理函数时，进程可能正在对这张表进行操作，而信号处理函数的调用刚好覆盖了进程的操作，造成错误。</p>
-
-<p><strong>基本上下面的函数是不可重入的：</strong></p>
-
-<ul>
-  <li>函数体内使用了静态的数据结构；</li>
-  <li>函数体内调用了malloc()或者free()函数；</li>
-  <li>函数体内调用了标准I/O函数。</li>
-  <li>进行了浮点运算。许多的处理器/编译器中，浮点一般都是不可重入的 （浮点运算大多使用协处理器或者软件模拟来实现）。</li>
-</ul>
-
-<p><strong>两种情况需要考虑：</strong></p>
-
-<ol>
-  <li>信号处理程序A内外都调用了同一个不可重入函数B；B在执行期间被信号打断，进入A (A中调用了B),完事之后返回B被中断点继续执行，这时B函数的环境可能改变，其结果就不可预料了。</li>
-  <li>多线程共享进程内部的资源，如果两个线程A，B调用同一个不可重入函数F，A线程进入F后，线程调度，切换到B，B也执行了F，那么当再次切换到线程A时，其调用F的结果也是不可预料的。</li>
-</ol>
-
-<p><strong>在信号处理程序中即使调用可重入函数也有问题要注意</strong>。作为一个通用的规则，当在信号处理程序中调用可重入函数时，应当在其前保存<code>errno</code>，并在其后恢复<code>errno</code>。（<strong>因为每个线程只有一个errno变量，信号处理函数可能会修改其值，要了解经常被捕捉到的信号是SIGCHLD，其信号处理程序通常要调用一种wait函数，而各种wait函数都能改变errno。</strong>）</p>
-
-<p>如果一个函数对多个线程来说是可重入的，则说这个函数是<strong>线程安全的</strong>。但这并不能说明对信号处理程序来说该函数也是可重入的。如果函数对异步信号处理程序的重入是安全的，那么就可以说函数式<strong>异步-信号安全的</strong>。</p>
-
-<p>一下是来自<em>《深入理解计算机系统》</em>的摘抄：</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/threadsafe1_zps14eaee56.png" alt="" />
-<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/threadsafe2_zpsb753bebc.png" alt="" />
-<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/threadsafe3_zps6a9ec8f8.png" alt="" /></p>
 ]]></content>
   </entry>
   
