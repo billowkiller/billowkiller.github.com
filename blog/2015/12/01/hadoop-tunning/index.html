@@ -216,14 +216,14 @@ body {
 <ul>
   <li>不能分割的大文件，这样mapper就必须从不同的节点中读取blocks。</li>
   <li>文件格式支持split，但是用的input format不对。典型的情况是LZOP格式，需要先建立索引后再进行读取。</li>
-  <li>Yarn的调度器不能在某个节点上产生map container，通常是由于集群under lode。</li>
+  <li>Yarn的调度器不能在某个节点上产生map container，通常是由于集群under load。</li>
 </ul>
 
 <p>解决方法是：</p>
 
 <ul>
   <li>尽量保持unsplittable文件的大小接近一个block的大小。</li>
-  <li>设置yarn的<code>scheduler.capacity.node-locality-delay</code>，引入调度延迟来增加map task分配到数据节点上的概率。</li>
+  <li>设置yarn的<code>scheduler.capacity.node-locality-delay</code>，引入跳过的调度次数，来增加map task分配到数据节点上的概率。</li>
   <li>使用Twitter提供的LZO Input Format来处理lzop数据，或者使用bzip2格式的文件。</li>
 </ul>
 
