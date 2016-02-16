@@ -451,6 +451,7 @@ job.setProfileTaskRange(false, "");
 <p>可以看出来第一个问题是在<code>String.split</code>这个方法的使用上，它采用正则表达式来分割字符串，这个是相当耗时的一个举措，可以用Apache Commons Lang library的<code>StringUtils.split</code>来替换。另外一个是发生在Text的构造上，可以只构造一个Text实例，采用<code>set</code>方法进行设置，这样会更加有效率。</p>
 
 <p>需要注意，使用HPROF会给程序的执行带来额外的负担，需要持续的收集profiling的信息，所以在正常的运行过程中不应该加上。</p>
+
 </div>
 
 
@@ -477,6 +478,13 @@ job.setProfileTaskRange(false, "");
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-12-01T09:50:00+08:00" pubdate data-updated="true">Dec 1<span>st</span>, 2015</time>
           
 
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/big-data/'>Big Data</a>
+  
+</span>
+
 
         </p>
         
@@ -494,6 +502,8 @@ job.setProfileTaskRange(false, "");
             
             <li class="previous"><a href="/blog/2015/11/22/hadoop-secondary-sorting/" title="Previous Post: Hadoop Secondary Sorting">&laquo; Hadoop Secondary Sorting</a></li>
             
+            
+            <li class="next"><a href="/blog/2016/02/15/gradient-descent-and-newton-method/" title="Next Post: Gradient Descent and Newton Method">Gradient Descent and Newton Method &raquo;</a></li>
             
           </ul>
         
@@ -518,6 +528,8 @@ job.setProfileTaskRange(false, "");
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/02/15/gradient-descent-and-newton-method/">Gradient Descent and Newton Method</a>
+    
     <a class="list-group-item active" href="/blog/2015/12/01/hadoop-tunning/">Hadoop Tunning</a>
     
     <a class="list-group-item " href="/blog/2015/11/22/hadoop-secondary-sorting/">Hadoop Secondary Sorting</a>
@@ -525,8 +537,6 @@ job.setProfileTaskRange(false, "");
     <a class="list-group-item " href="/blog/2015/10/27/spark-streaming/">Spark Streaming</a>
     
     <a class="list-group-item " href="/blog/2015/10/27/spark-introduction/">Spark Introduction</a>
-    
-    <a class="list-group-item " href="/blog/2015/09/18/compression-format-introduction/">Compression Format Introduction</a>
     
   </div>
 </section>
@@ -585,15 +595,15 @@ job.setProfileTaskRange(false, "");
       </a>
     
     
-    <a class="list-group-item " href="/blog/categories/big/index.html">
-        <span class="badge">1</span>
-        big
+    <a class="list-group-item " href="/blog/categories/big-data/index.html">
+        <span class="badge">2</span>
+        Big Data
       </a>
     
     
-    <a class="list-group-item " href="/blog/categories/data/index.html">
+    <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
         <span class="badge">1</span>
-        data
+        Machine Learning
       </a>
     
   </div>
@@ -633,7 +643,7 @@ job.setProfileTaskRange(false, "");
     </div>
     <footer role="contentinfo"><div class="container">
     <p class="text-muted credits">
-  Copyright &copy; 2015 - wutao<br>
+  Copyright &copy; 2016 - wutao<br>
   <small>
       <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
       <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.

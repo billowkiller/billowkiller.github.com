@@ -173,6 +173,58 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-10-12T16:12:00+08:00" pubdate data-updated="true">Oct 12<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/10/12/deep-c-and-c-plus-plus/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/10/12/deep-c-and-c-plus-plus/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/10/12/deep-c-and-c-plus-plus/">Deep C and C++</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>摘自<a href="http://share.csdn.net/#/detail/1050">CSDN Share</a></p>
+
+<p>花了一个上午的时间看了下这个PPT，觉得收获颇多。
+特别是这个PPT的组织方式，采用两个程序员面试对比的方式，非常的实用，也很有触动和感悟。已经很久没见到这样精彩的PPT了。</p>
+
+<p>本PPT介绍了作为普通的程序员和高级的程序员如何看待C与C++，从编译、链接、运行的角度来介绍，有非常多的干货，也许不是很系统，但确实是非常的实用；特别是在回答面试官的提问上，需要认真思考，从<code>不同的角度</code>、<code>深层次</code>地回答技术官的问话。也许两个程序员的功力差不多，但是在回答技术问题的方法上也许对面试官有很大的影响，最终也就是面试是否成功的关键。</p>
+
+<p><img src="http://www.atmel.com/zh/cn/Images/compiler.jpg" alt="" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/10/12/deep-c-and-c-plus-plus/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-06-02T13:49:00+08:00" pubdate data-updated="true">Jun 2<span>nd</span>, 2013</time>
         
            | <a href="/blog/2013/06/02/probabilistic-graphical-models/#disqus_thread"
@@ -712,93 +764,6 @@ Smile》，这是一部小成本电影。整部影片从头到尾没有任何异
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan/">Python特殊语法：filter、map、reduce、lambda [转]</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p><i><strong>from</strong> <a href="http://www.cnblogs.com/longdouhzt/archive/2012/05/19/2508844.html">http://www.cnblogs.com/longdouhzt/archive/2012/05/19/2508844.html</a></i></p>
-
-<hr />
-
-<p>Python内置了一些非常有趣但非常有用的函数，充分体现了Python的语言魅力！</p>
-
-<p><strong>filter(function,
-sequence)</strong> ：对sequence中的item依次执行function(item)，将执行结果为True的item组成一个List/String/Tuple（取决于sequence的类型）返回：</p>
-
-<p>&gt;&gt;&gt; def f(x): return x % 2 != 0 and x % 3 != 0 </p>
-
-<p>&gt;&gt;&gt; filter(f, range(2, 25)) 
-[5, 7, 11, 13, 17, 19, 23]</p>
-
-<p>&gt;&gt;&gt; def f(x): return x != ‘a’ </p>
-
-<p>&gt;&gt;&gt; filter(f, “abcdef”) </p>
-
-<p>‘bcdef’</p>
-
-<p><strong>map(function,
-sequence)</strong> ：对sequence中的item依次执行function(item)，见执行结果组成一个List返回：</p>
-
-<p>&gt;&gt;&gt; def cube(x): return x<em>x</em>x </p>
-
-<p>&gt;&gt;&gt; map(cube, range(1, 11)) </p>
-
-<p>[1, 8, 27, 64, 125, 216, 343, 512, 729, 1000]</p>
-
-<p>&gt;&gt;&gt; def cube(x) : return x + x </p>
-
-<p>… </p>
-
-<p>&gt;&gt;&gt; map(cube , “abcde”) </p>
-
-<p>[‘aa’, ‘bb’, ‘cc’, ‘dd’, ‘ee’]</p>
-
-<p>另外map也支持多个sequence，这就要求function也支持相应数量的参数输入：
-&gt;&gt;&gt; def add(x, y): return x+y </p>
-
-<p>&gt;&gt;&gt; map(add, range(8), range(8))</p>
-
-<p>[0, 2, 4, 6, 8, 10, 12, 14]</p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -822,6 +787,8 @@ sequence)</strong> ：对sequence中的item依次执行function(item)，见执�
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/02/15/gradient-descent-and-newton-method/">Gradient Descent and Newton Method</a>
+    
     <a class="list-group-item " href="/blog/2015/12/01/hadoop-tunning/">Hadoop Tunning</a>
     
     <a class="list-group-item " href="/blog/2015/11/22/hadoop-secondary-sorting/">Hadoop Secondary Sorting</a>
@@ -829,8 +796,6 @@ sequence)</strong> ：对sequence中的item依次执行function(item)，见执�
     <a class="list-group-item " href="/blog/2015/10/27/spark-streaming/">Spark Streaming</a>
     
     <a class="list-group-item " href="/blog/2015/10/27/spark-introduction/">Spark Introduction</a>
-    
-    <a class="list-group-item " href="/blog/2015/09/18/compression-format-introduction/">Compression Format Introduction</a>
     
   </div>
 </section>
@@ -889,15 +854,15 @@ sequence)</strong> ：对sequence中的item依次执行function(item)，见执�
       </a>
     
     
-    <a class="list-group-item " href="/blog/categories/big/index.html">
-        <span class="badge">1</span>
-        big
+    <a class="list-group-item " href="/blog/categories/big-data/index.html">
+        <span class="badge">2</span>
+        Big Data
       </a>
     
     
-    <a class="list-group-item " href="/blog/categories/data/index.html">
+    <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
         <span class="badge">1</span>
-        data
+        Machine Learning
       </a>
     
   </div>
@@ -937,7 +902,7 @@ sequence)</strong> ：对sequence中的item依次执行function(item)，见执�
     </div>
     <footer role="contentinfo"><div class="container">
     <p class="text-muted credits">
-  Copyright &copy; 2015 - wutao<br>
+  Copyright &copy; 2016 - wutao<br>
   <small>
       <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
       <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.

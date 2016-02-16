@@ -4,7 +4,7 @@
   <title><![CDATA[Category: rework | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/rework/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2015-12-03T12:08:28+08:00</updated>
+  <updated>2016-02-16T19:29:04+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -342,6 +342,23 @@ counts = ones.runningReduce((a, b) =&gt; a+b)
   <li>上一个checkpoint的时间</li>
   <li>RDD的ID。因为HDFS的checkpoint文件会在每个时间片重新命名。</li>
 </ol>
+
+<h3 id="faq">FAQ</h3>
+<ol>
+  <li>
+    <p>Dstream与RDD之间的关系</p>
+
+    <p>首先来看下Spark streaming的代码<code>val ssc = new StreamingContext(sc, Seconds(2))</code>。在这句的作用是定义Dstream生成的时间间隔，<code>2s</code>就是这个时间间隔，也叫<code>batch interval</code>。具体说来<strong>一个streaming batch对应一个RDD</strong>，也就是这个batch interval里产生的数据。</p>
+
+    <p>在这个RDD中，有n个partition，n = batch interval / block interval。 <code>block interval</code>是spark steaming内部定义的一个变量<code>spark.streaming.blockInterval</code>，通常是200ms。上述例子就产生10个partitions。</p>
+
+    <p>Blocks由一个receiver产生，receiver就是流式数据的接收端，每个receiver被分配到一个host上，所以上述的1-个partitions就由一个node产生，同时被复制到第二个节点上做容错。注意，这里产生了data locality的问题。好的做法是，分配多个receivers接收数据，最后使用union合并数据做processing。当然还可以对Dstream做<code>repartition</code>操作提高并行度。</p>
+  </li>
+  <li>
+    <p>时间窗口和job的关系</p>
+  </li>
+</ol>
+
 ]]></content>
   </entry>
   

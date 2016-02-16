@@ -173,6 +173,55 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-02-15T14:00:00+08:00" pubdate data-updated="true">Feb 15<span>th</span>, 2016</time>
+        
+           | <a href="/blog/2016/02/15/gradient-descent-and-newton-method/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2016/02/15/gradient-descent-and-newton-method/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2016/02/15/gradient-descent-and-newton-method/">Gradient Descent and Newton Method</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>梯度下降和牛顿法都是最优化算法，二者都是求解无约束优化问题的方法，通过递归地逼近最优值来达到求解值。区别在于梯度下降是一阶收敛，而牛顿法是二阶收敛的，所以牛顿法通常会更快，因为牛顿法是用一个二次曲面去拟合当前所处位置的局部曲面，而梯度下降法是用一个平面去拟合当前的局部曲面。wiki上有张图形象地说明了这个问题：</p>
+
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/d/da/Newton_optimization_vs_grad_descent.svg" width="200px" /></p>
+
+<p>下面给出两种方法的具体推导。</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2016/02/15/gradient-descent-and-newton-method/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-12-01T09:50:00+08:00" pubdate data-updated="true">Dec 1<span>st</span>, 2015</time>
         
            | <a href="/blog/2015/12/01/hadoop-tunning/#disqus_thread"
@@ -599,57 +648,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-23T02:18:00+08:00" pubdate data-updated="true">Aug 23<span>rd</span>, 2014</time>
-        
-           | <a href="/blog/2014/08/23/classical-sync-problem/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/08/23/classical-sync-problem/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/23/classical-sync-problem/">Classical Sync Problem</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>简单的记录下，后期再整理吧。</p>
-
-<hr />
-
-<h2 id="section">生产者、消费者</h2>
-
-<h3 id="section-1">多个生产者，单个消费者</h3>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/08/23/classical-sync-problem/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -673,6 +671,8 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/02/15/gradient-descent-and-newton-method/">Gradient Descent and Newton Method</a>
+    
     <a class="list-group-item " href="/blog/2015/12/01/hadoop-tunning/">Hadoop Tunning</a>
     
     <a class="list-group-item " href="/blog/2015/11/22/hadoop-secondary-sorting/">Hadoop Secondary Sorting</a>
@@ -680,8 +680,6 @@ body {
     <a class="list-group-item " href="/blog/2015/10/27/spark-streaming/">Spark Streaming</a>
     
     <a class="list-group-item " href="/blog/2015/10/27/spark-introduction/">Spark Introduction</a>
-    
-    <a class="list-group-item " href="/blog/2015/09/18/compression-format-introduction/">Compression Format Introduction</a>
     
   </div>
 </section>
@@ -740,15 +738,15 @@ body {
       </a>
     
     
-    <a class="list-group-item " href="/blog/categories/big/index.html">
-        <span class="badge">1</span>
-        big
+    <a class="list-group-item " href="/blog/categories/big-data/index.html">
+        <span class="badge">2</span>
+        Big Data
       </a>
     
     
-    <a class="list-group-item " href="/blog/categories/data/index.html">
+    <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
         <span class="badge">1</span>
-        data
+        Machine Learning
       </a>
     
   </div>
@@ -788,7 +786,7 @@ body {
     </div>
     <footer role="contentinfo"><div class="container">
     <p class="text-muted credits">
-  Copyright &copy; 2015 - wutao<br>
+  Copyright &copy; 2016 - wutao<br>
   <small>
       <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
       <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.

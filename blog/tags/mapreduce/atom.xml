@@ -4,7 +4,7 @@
   <title><![CDATA[tags: mapreduce | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/mapreduce/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2015-12-03T12:08:28+08:00</updated>
+  <updated>2016-02-16T19:29:04+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -95,6 +95,23 @@
   </tbody>
 </table>
 
+<p>现有的InputFormat包括：</p>
+
+<ul>
+  <li>TextInputFormat，Hadoop中默认的InputFormat，每行都是一个record，以偏移量为key</li>
+  <li>KeyValueTextInputFormat， 可以指定key value分割符的TextInputFormat</li>
+  <li>NLineInputFormat, mapper接受固定行数的记录</li>
+  <li>SequenceFileInputFormat，二进制的KV
+    <ul>
+      <li>SequenceFileAsTextInputFormat，文本形式的KV</li>
+      <li>SequenceFileAsBinaryInputFormat</li>
+      <li>FixedLengthInputFormat</li>
+    </ul>
+  </li>
+  <li>MultipleInputs</li>
+  <li>DBInputFormat</li>
+</ul>
+
 <h3 id="map">Map</h3>
 
 <p>Map阶段，会对每个从RecordReader读取的Record键值对执行用户代码，这些键值对又叫中间键值对。键和值的选择不是任意的，并且对MapReduce job的成功非常重要。键会用来分组，值是reducer端用来分析的数据。。</p>
@@ -126,6 +143,41 @@
 
 <h3 id="output-format">Output format</h3>
 <p>Output Format会把reduce阶段的输出键值对根据record writer写到文件里。默认用tab分割键值对，用换行分割不同行。这里也可以自定义为更丰富的输出格式，最后，数据被写到hdfs。整个过程类似于InputFormat。</p>
+
+<p><img src="http://i12.tietuku.com/cbdb549a3e19f898.png" width="500px" /></p>
+
+<p>LazyOutputFormat 用来保证output (part-r-nnnnn) files有数据，不会存在空文件。</p>
+
+<h3 id="output-commiter">Output Commiter</h3>
+
+<p>Hadoop使用<code>OutputCommitter</code>来保证作业和任务的事务性。在旧的API中需要显示的使用<code>setOutputCommitter</code>或者设置<code>mapred.output.committer.class</code>。
+而在新的API中，<code>OutputCommitter</code>是由<code>OutputFormat</code>通过<code>getOutputCommitter()</code>方法决定的。默认的是<code>FileOutputCommitter</code>，它适用于所有的基于文件的MapReduce。</p>
+
+<p><code>OutputCommitter</code>API如下：</p>
+
+<pre><code>public abstract class OutputCommitter {
+	public abstract void setupJob(JobContext jobContext) throws IOException; 
+	public void commitJob(JobContext jobContext) throws IOException { } 
+	public void abortJob(JobContext jobContext, JobStatus.State state) throws IOException { }
+	public abstract void setupTask(TaskAttemptContext taskContext) throws IOException;
+	public abstract boolean needsTaskCommit(TaskAttemptContext taskContext) throws IOException;
+	public abstract void commitTask(TaskAttemptContext taskContext) throws IOException;
+	public abstract void abortTask(TaskAttemptContext taskContext) throws IOException;
+}
+</code></pre>
+
+<p><code>setupJob</code>方法在job运行前就被调用，用来服务于作业的初始化，类似创建作业和task的临时目录。</p>
+
+<p>job成功后会调用<code>commitJob()</code>方法，用于删除临时目录和创建<em>_SUCCESS</em>文件。如果job失败，则调用<code>abortJob()</code>方法
+表示作业失败或者被kill，默认情况下会删除临时目录。</p>
+
+<p>在task级别的操作类似。Hadoop框架会保证在一个task中的多个task attempt中，只有一个会commit，其他abort。有两种情况：</p>
+
+<ul>
+  <li>第一个attempt失败的时候会abort，第二个attempt如果成功则会commit。</li>
+  <li>对于预测任务，只要有一个首先成功的话会commit，另外一个则abort。</li>
+</ul>
+
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2015-12-03T12:08:28+08:00</updated>
+  <updated>2016-02-16T19:29:04+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,95 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Gradient Descent and Newton Method]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/02/15/gradient-descent-and-newton-method/"/>
+    <updated>2016-02-15T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/02/15/gradient-descent-and-newton-method</id>
+    <content type="html"><![CDATA[<p>梯度下降和牛顿法都是最优化算法，二者都是求解无约束优化问题的方法，通过递归地逼近最优值来达到求解值。区别在于梯度下降是一阶收敛，而牛顿法是二阶收敛的，所以牛顿法通常会更快，因为牛顿法是用一个二次曲面去拟合当前所处位置的局部曲面，而梯度下降法是用一个平面去拟合当前的局部曲面。wiki上有张图形象地说明了这个问题：</p>
+
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/d/da/Newton_optimization_vs_grad_descent.svg" width="200px" /></p>
+
+<p>下面给出两种方法的具体推导。</p>
+
+<!--more-->
+
+<h2 id="gradient-descent">Gradient Descent</h2>
+
+<p>假设 $f(x)$ 是 $R^n$ 上具有一阶连续偏导数的函数，要求解无约束最优化问题 $min f(x)$.</p>
+
+<p>由于 $f(x)$ 具有一阶连续偏导数，$k$ 次迭代后在 $x^{(k)}$ 附近进行一阶泰勒展开：</p>
+
+<script type="math/tex; mode=display"> f(x) = f(x^{(k)}) + \nabla f(x^{(k)})^T (x - x^{(k)}) </script>
+
+<p>第 $k+1$ 次迭代值 $x^{(k+1)} \gets x^{(k)} - \lambda \nabla f(x^{(k)})$, 其中 $-\nabla f(x^{(k)})$是负梯度方向，$\lambda$是步长。</p>
+
+<p>在上述公式中，$\lambda$ 的每次迭代都可以由一维搜索得到结果，这时的梯度搜索方法叫<code>Exact line search</code>。它形成的搜索路径很有意思，相邻的搜索路径是正交的，形状是 zig-zagging，如图：</p>
+
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/d/db/Gradient_ascent_%28contour%29.png" width="300px" /></p>
+
+<p>很容易证明：
+<script type="math/tex"> \varphi(\lambda) = f(x^{(k)}) + \lambda d^{(k)}, d^{(k)} = -\nabla f(x^{(k)}) </script>
+为求出从 $x^{(k)}$ 出发沿着负梯度方向的极小值，令
+<script type="math/tex"> \varphi'(\lambda) = \nabla f(x^{(k)} + \lambda d^{(k)})^T d^{(k)} = 0</script>
+<script type="math/tex">-\nabla f(x^{(k+1)})^T -\nabla f(x^{(k)}) = 0 </script></p>
+
+<p>上述表明 $d^{(k)}$ 与 $d^{(k+1)}$ 正交，搜索路径是锯齿形状的，当接近极小值点的时候，每次迭代移动的步长很小，这样影响了收敛速度。</p>
+
+<p>大多数的梯度搜索方法代用<code>inexact line search</code>，这种方法使用更加的普遍，它不要求每次迭代得到准确的步长值，而是采用估计值。有种搜索方法叫<code>backtracking line search</code>，它依赖两个常量：$\alpha, \beta$, </p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-15/4737593.jpg" width="600px" /></p>
+
+<h2 id="newton-method">Newton Method</h2>
+
+<p>牛顿法用迭代点的梯度和二阶导数对目标函数进行二次逼近，把二次函数的极小点作为新的迭代点，不断重复此过程，直到找到最优点。</p>
+
+<p>假设 $f(x)$ 是 $R^n$ 上具有二阶连续偏导数的函数，要求解无约束最优化问题 $min f(x)$.</p>
+
+<p>由于 $f(x)$ 具有二阶连续偏导数，$k$ 次迭代后在 $x^{(k)}$ 附近进行二阶泰勒展开：</p>
+
+<script type="math/tex; mode=display"> f(x) = f(x^{(k)}) + \nabla f(x^{(k)})^T (x - x^{(k)}) + 1/2 (x - x^{(k)})^T \nabla^2 f(x^{(k)}) (x - x^{(k)})</script>
+
+<p>其中 $\nabla^2 f(x^{(k)})$ 是 $f(x)$ 在 $x^{(k)}$ 处的Hesse矩阵，为了求极值，对二阶泰勒公式求导，得到</p>
+
+<p><script type="math/tex"> \nabla f(x) = \nabla f(x^{(k)}) + \nabla^2 f(x^{(k)})(x - x^{(k)}) = 0 </script>
+<script type="math/tex"> x^{(k+1)} \gets x^{(k)} - \nabla^2 f(x^{(k)})^{-1} \nabla f(x^{(k)}) </script></p>
+
+<p>其中我们假设Hesse矩阵是可逆的，并且对于正定的Hesse矩阵，我们可以确定是迭代方向是下降的，因为 $-\nabla f(x)^T \nabla^2 f(x)^{-1} \nabla f(x) &lt; 0$, $-\nabla^2 f(x)^{-1} \nabla f(x)$就被称为 <em>Newton step</em>. 算法如下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-15/19107554.jpg" width="600px" /></p>
+
+<h3 id="quasi-newton-methods">Quasi-Newton Methods</h3>
+
+<p>Qusi-Newton即拟牛顿法，这是一种“模拟“的牛顿法，它模拟牛顿法中的搜索方向的生成方式。那么为什么要模拟呢？</p>
+
+<p>在牛顿法中，有如下的缺点：</p>
+
+<ul>
+  <li>可能出现Hesse矩阵奇异的情形，因此不能确定后继点；</li>
+  <li>即使矩阵非奇异，也未必正定，因而牛顿方向不一定是下降方向</li>
+  <li>需要计算Hesse矩阵的逆矩阵，计算比较复杂。</li>
+</ul>
+
+<p>我们可以使用另外一个n阶矩阵 $G_k$ 来代替，并且需要确保 $G_k$ 的正定。</p>
+
+<p>在牛顿法中，我们令 $\nabla f(x)$ 中 $x$ 为 $x^{(k+1)}$，得到
+<script type="math/tex"> g_{k+1} - g_k = H_k (x^{(k+1)} - x^{k}), 其中 g_k = \nabla f(x^{(k)}), H_k = \nabla^2 f(x^{(k)})</script></p>
+
+<p>记 $y_k = g_{k+1} - g_k, \delta_k = x^{(k+1)} - x^{k}$, 则有
+<script type="math/tex">y_k = H_k \delta_k 或者 H_k^{-1} y_k = \delta_k </script></p>
+
+<p>拟牛顿法将 $G_k$ 作为 $H_k^{-1}$ 的近似，要求矩阵 $G_k$ 同样满足，每次迭代都是正定，并且 $G<em>{k+1} y_k = \delta_k$。按照拟牛顿条件，每次迭代中可以选择更新矩阵 $G</em>{k+1} = G_k + \nabla G_k$. 由此延伸出来三种算法</p>
+
+<ol>
+  <li>DFP算法使用 $G_k$ 逼近Hesse矩阵的逆矩阵。</li>
+  <li>BFGS算法使用 $B_k$ 逼近Hesse矩阵。</li>
+  <li>Broyden类算法。</li>
+</ol>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Hadoop Tunning]]></title>
@@ -284,6 +373,7 @@ job.setProfileTaskRange(false, "");
 <p>可以看出来第一个问题是在<code>String.split</code>这个方法的使用上，它采用正则表达式来分割字符串，这个是相当耗时的一个举措，可以用Apache Commons Lang library的<code>StringUtils.split</code>来替换。另外一个是发生在Text的构造上，可以只构造一个Text实例，采用<code>set</code>方法进行设置，这样会更加有效率。</p>
 
 <p>需要注意，使用HPROF会给程序的执行带来额外的负担，需要持续的收集profiling的信息，所以在正常的运行过程中不应该加上。</p>
+
 ]]></content>
   </entry>
   
@@ -702,6 +792,23 @@ counts = ones.runningReduce((a, b) =&gt; a+b)
   <li>上一个checkpoint的时间</li>
   <li>RDD的ID。因为HDFS的checkpoint文件会在每个时间片重新命名。</li>
 </ol>
+
+<h3 id="faq">FAQ</h3>
+<ol>
+  <li>
+    <p>Dstream与RDD之间的关系</p>
+
+    <p>首先来看下Spark streaming的代码<code>val ssc = new StreamingContext(sc, Seconds(2))</code>。在这句的作用是定义Dstream生成的时间间隔，<code>2s</code>就是这个时间间隔，也叫<code>batch interval</code>。具体说来<strong>一个streaming batch对应一个RDD</strong>，也就是这个batch interval里产生的数据。</p>
+
+    <p>在这个RDD中，有n个partition，n = batch interval / block interval。 <code>block interval</code>是spark steaming内部定义的一个变量<code>spark.streaming.blockInterval</code>，通常是200ms。上述例子就产生10个partitions。</p>
+
+    <p>Blocks由一个receiver产生，receiver就是流式数据的接收端，每个receiver被分配到一个host上，所以上述的1-个partitions就由一个node产生，同时被复制到第二个节点上做容错。注意，这里产生了data locality的问题。好的做法是，分配多个receivers接收数据，最后使用union合并数据做processing。当然还可以对Dstream做<code>repartition</code>操作提高并行度。</p>
+  </li>
+  <li>
+    <p>时间窗口和job的关系</p>
+  </li>
+</ol>
+
 ]]></content>
   </entry>
   
@@ -1039,6 +1146,23 @@ counts = ones.runningReduce((a, b) =&gt; a+b)
   </tbody>
 </table>
 
+<p>现有的InputFormat包括：</p>
+
+<ul>
+  <li>TextInputFormat，Hadoop中默认的InputFormat，每行都是一个record，以偏移量为key</li>
+  <li>KeyValueTextInputFormat， 可以指定key value分割符的TextInputFormat</li>
+  <li>NLineInputFormat, mapper接受固定行数的记录</li>
+  <li>SequenceFileInputFormat，二进制的KV
+    <ul>
+      <li>SequenceFileAsTextInputFormat，文本形式的KV</li>
+      <li>SequenceFileAsBinaryInputFormat</li>
+      <li>FixedLengthInputFormat</li>
+    </ul>
+  </li>
+  <li>MultipleInputs</li>
+  <li>DBInputFormat</li>
+</ul>
+
 <h3 id="map">Map</h3>
 
 <p>Map阶段，会对每个从RecordReader读取的Record键值对执行用户代码，这些键值对又叫中间键值对。键和值的选择不是任意的，并且对MapReduce job的成功非常重要。键会用来分组，值是reducer端用来分析的数据。。</p>
@@ -1070,6 +1194,41 @@ counts = ones.runningReduce((a, b) =&gt; a+b)
 
 <h3 id="output-format">Output format</h3>
 <p>Output Format会把reduce阶段的输出键值对根据record writer写到文件里。默认用tab分割键值对，用换行分割不同行。这里也可以自定义为更丰富的输出格式，最后，数据被写到hdfs。整个过程类似于InputFormat。</p>
+
+<p><img src="http://i12.tietuku.com/cbdb549a3e19f898.png" width="500px" /></p>
+
+<p>LazyOutputFormat 用来保证output (part-r-nnnnn) files有数据，不会存在空文件。</p>
+
+<h3 id="output-commiter">Output Commiter</h3>
+
+<p>Hadoop使用<code>OutputCommitter</code>来保证作业和任务的事务性。在旧的API中需要显示的使用<code>setOutputCommitter</code>或者设置<code>mapred.output.committer.class</code>。
+而在新的API中，<code>OutputCommitter</code>是由<code>OutputFormat</code>通过<code>getOutputCommitter()</code>方法决定的。默认的是<code>FileOutputCommitter</code>，它适用于所有的基于文件的MapReduce。</p>
+
+<p><code>OutputCommitter</code>API如下：</p>
+
+<pre><code>public abstract class OutputCommitter {
+	public abstract void setupJob(JobContext jobContext) throws IOException; 
+	public void commitJob(JobContext jobContext) throws IOException { } 
+	public void abortJob(JobContext jobContext, JobStatus.State state) throws IOException { }
+	public abstract void setupTask(TaskAttemptContext taskContext) throws IOException;
+	public abstract boolean needsTaskCommit(TaskAttemptContext taskContext) throws IOException;
+	public abstract void commitTask(TaskAttemptContext taskContext) throws IOException;
+	public abstract void abortTask(TaskAttemptContext taskContext) throws IOException;
+}
+</code></pre>
+
+<p><code>setupJob</code>方法在job运行前就被调用，用来服务于作业的初始化，类似创建作业和task的临时目录。</p>
+
+<p>job成功后会调用<code>commitJob()</code>方法，用于删除临时目录和创建<em>_SUCCESS</em>文件。如果job失败，则调用<code>abortJob()</code>方法
+表示作业失败或者被kill，默认情况下会删除临时目录。</p>
+
+<p>在task级别的操作类似。Hadoop框架会保证在一个task中的多个task attempt中，只有一个会commit，其他abort。有两种情况：</p>
+
+<ul>
+  <li>第一个attempt失败的时候会abort，第二个attempt如果成功则会commit。</li>
+  <li>对于预测任务，只要有一个首先成功的话会commit，另外一个则abort。</li>
+</ul>
+
 ]]></content>
   </entry>
   
@@ -3467,56 +3626,6 @@ RARP以与ARP相反的方式工作。<strong>RARP发出要反向解析的物理�
   <li><a href="http://blog.csdn.net/eroswang/article/details/1787456">Unix编程常见问题解答</a></li>
   <li><a href="http://blog.csdn.net/eroswang/article/details/1790351">从程序员角度看ELF</a></li>
 </ul>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Linux thundering herd]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/07/17/thundering-herd/"/>
-    <updated>2014-07-17T09:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/07/17/thundering-herd</id>
-    <content type="html"><![CDATA[<p><em>modified from <a href="http://blog.csdn.net/russell_tao/article/details/7204260">http://blog.csdn.net/russell_tao/article/details/7204260</a></em></p>
-
-<hr />
-
-<h2 id="section">惊群现象</h2>
-
-<p>什么是“惊群”？简单说来，多线程/多进程（linux下线程进程也没多大区别）等待同一个socket事件，当这个事件发生时，这些线程/进程被同时唤醒，就是惊群。可以想见，效率很低下，许多进程被内核重新调度唤醒，同时去响应这一个事件，当然只有一个进程能处理事件成功，其他的进程在处理该事件失败后重新休眠（也有其他选择）。这种性能浪费现象就是惊群。</p>
-
-<p>惊群通常发生在server 上，当父进程绑定一个端口监听socket，然后fork出多个子进程，子进程们开始循环处理（比如accept）这个socket。每当用户发起一个TCP连接时，多个子进程同时被唤醒，然后其中一个子进程accept新连接成功，余者皆失败，重新休眠。</p>
-
-<p>那么，我们不能只用一个进程去accept新连接么？然后通过消息队列等同步方式使其他子进程处理这些新建的连接，这样惊群不就避免了？没错，惊群是避免了，但是效率低下，因为这个进程只能用来accept连接。对多核机器来说，仅有一个进程去accept，这也是程序员在自己创造accept瓶颈。所以，我仍然坚持需要多进程处理accept事件。</p>
-
-<h2 id="linux">linux解决的惊群</h2>
-
-<p>其实，在linux2.6内核上，<strong>accept系统调用已经不存在惊群了</strong>（至少我在2.6.18内核版本上已经不存在）。大家可以写个简单的程序试下，在父进程中bind,listen，然后fork出子进程，所有的子进程都accept这个监听句柄。这样，当新连接过来时，大家会发现，仅有一个子进程返回新建的连接，其他子进程继续休眠在accept调用上，没有被唤醒。</p>
-
-<p>对于一些已知的惊群问题，内核开发者增加了一个“<strong>互斥等待</strong>”选项。一个互斥等待的行为与睡眠基本类似，主要的不同点在于：</p>
-
-<ul>
-  <li>当一个等待队列入口有 WQ_FLAG_EXCLUSEVE 标志置位, 它被添加到等待队列的尾部. 没有这个标志的入口项, 相反, 添加到开始.</li>
-  <li>当 wake_up 被在一个等待队列上调用时, 它在唤醒第一个有 WQ_FLAG_EXCLUSIVE 标志的进程后停止。也就是说，对于互斥等待的行为，比如如对一个listen后的socket描述符，多线程阻塞accept时，系统内核只会唤醒所有正在等待此时间的队列的第一个，队列中的其他人则继续等待下一次事件的发生，这样就避免的多个线程同时监听同一个socket描述符时的惊群问题。</li>
-</ul>
-
-<h2 id="nginx">nginx解决惊群</h2>
-
-<p>但是很不幸，通常我们的程序没那么简单，不会愿意阻塞在accept调用上，我们还有许多其他网络读写事件要处理，linux下我们爱用epoll解决非阻塞socket。所以，即使accept调用没有惊群了，我们也还得处理惊群这事，因为epoll有这问题。上面说的测试程序，如果我们在子进程内不是阻塞调用accept，而是用<code>epoll_wait</code>，就会发现，新连接过来时，多个子进程都会在<code>epoll_wait</code>后被唤醒！</p>
-
-<p>nginx就是这样，master进程监听端口号（例如80），所有的nginx worker进程开始用<code>epoll_wait</code>来处理新事件（linux下），如果不加任何保护，一个新连接来临时，会有多个worker进程在<code>epoll_wait</code>后被唤醒，然后发现自己accept失败。</p>
-
-<p>nginx在同一时刻只允许一个nginx worker在自己的epoll中处理监听句柄。它的负载均衡也很简单，当达到最大connection的7/8时，本worker不会去试图拿accept锁，也不会去处理新连接，这样其他nginx worker进程就更有机会去处理监听句柄，建立新连接了。而且，由于timeout的设定，使得没有拿到锁的worker进程，去拿锁的频繁更高。</p>
-
-<h2 id="nginx-1">nginx的锁</h2>
-
-<p>在用户空间进程间锁实现的原理很简单，就是能弄一个让所有进程共享的东西，比如mmap的内存，比如文件，然后通过这个东西来控制进程的互斥。</p>
-
-<p>nginx的实现分为两种情况：</p>
-
-<ul>
-  <li>一种是支持原子操作的情况，也就是由mmap的内存区域来进行控制的</li>
-  <li>一种是不支持原子操作，这是是使用文件锁来实现。 </li>
-</ul>
-
 ]]></content>
   </entry>
   
