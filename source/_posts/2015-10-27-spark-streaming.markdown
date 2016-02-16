@@ -137,3 +137,16 @@ Spark streaming和Spark的系统结构有些许改动，如上图所示主要包
 1. RDD的lineage graph，代表用户代码的Scala函数对象。
 2. 上一个checkpoint的时间
 3. RDD的ID。因为HDFS的checkpoint文件会在每个时间片重新命名。
+
+###FAQ
+1. Dstream与RDD之间的关系
+
+	首先来看下Spark streaming的代码`val ssc = new StreamingContext(sc, Seconds(2))`。在这句的作用是定义Dstream生成的时间间隔，`2s`就是这个时间间隔，也叫`batch interval`。具体说来**一个streaming batch对应一个RDD**，也就是这个batch interval里产生的数据。
+	
+	在这个RDD中，有n个partition，n = batch interval / block interval。 `block interval`是spark steaming内部定义的一个变量`spark.streaming.blockInterval`，通常是200ms。上述例子就产生10个partitions。
+	
+	Blocks由一个receiver产生，receiver就是流式数据的接收端，每个receiver被分配到一个host上，所以上述的1-个partitions就由一个node产生，同时被复制到第二个节点上做容错。注意，这里产生了data locality的问题。好的做法是，分配多个receivers接收数据，最后使用union合并数据做processing。当然还可以对Dstream做`repartition`操作提高并行度。
+
+2. 时间窗口和job的关系
+
+

@@ -3,7 +3,7 @@ layout: post
 title: "mapreduce framework"
 date: 2015-07-26 17:23
 comments: true
-categories: big data
+category: Big Data
 tags: [mapreduce]
 ---
 
@@ -49,6 +49,18 @@ InputFormat其实做了三件事：
 | Mapper2  | B2:128  | B2:150 | B3:300 | L4, L5, L6 |
 | Mapper3  | B3:256  | B3:300 | B3:300 | N/A |
 
+现有的InputFormat包括：
+
+* TextInputFormat，Hadoop中默认的InputFormat，每行都是一个record，以偏移量为key
+* KeyValueTextInputFormat， 可以指定key value分割符的TextInputFormat
+* NLineInputFormat, mapper接受固定行数的记录
+* SequenceFileInputFormat，二进制的KV
+	* SequenceFileAsTextInputFormat，文本形式的KV
+	* SequenceFileAsBinaryInputFormat
+	* FixedLengthInputFormat
+* MultipleInputs
+* DBInputFormat
+
 ### Map
 
 Map阶段，会对每个从RecordReader读取的Record键值对执行用户代码，这些键值对又叫中间键值对。键和值的选择不是任意的，并且对MapReduce job的成功非常重要。键会用来分组，值是reducer端用来分析的数据。。
@@ -80,3 +92,35 @@ Reduce 任务会把分组的数据作为输入并对每个key组执行reduce方�
 
 ### Output format
 Output Format会把reduce阶段的输出键值对根据record writer写到文件里。默认用tab分割键值对，用换行分割不同行。这里也可以自定义为更丰富的输出格式，最后，数据被写到hdfs。整个过程类似于InputFormat。
+
+<img src="http://i12.tietuku.com/cbdb549a3e19f898.png" width="500px" />
+
+LazyOutputFormat 用来保证output (part-r-nnnnn) files有数据，不会存在空文件。
+
+### Output Commiter
+
+Hadoop使用`OutputCommitter`来保证作业和任务的事务性。在旧的API中需要显示的使用`setOutputCommitter`或者设置`mapred.output.committer.class`。
+而在新的API中，`OutputCommitter`是由`OutputFormat`通过`getOutputCommitter()`方法决定的。默认的是`FileOutputCommitter`，它适用于所有的基于文件的MapReduce。
+
+`OutputCommitter`API如下：
+
+	public abstract class OutputCommitter {
+		public abstract void setupJob(JobContext jobContext) throws IOException; 
+		public void commitJob(JobContext jobContext) throws IOException { } 
+		public void abortJob(JobContext jobContext, JobStatus.State state) throws IOException { }
+		public abstract void setupTask(TaskAttemptContext taskContext) throws IOException;
+		public abstract boolean needsTaskCommit(TaskAttemptContext taskContext) throws IOException;
+		public abstract void commitTask(TaskAttemptContext taskContext) throws IOException;
+		public abstract void abortTask(TaskAttemptContext taskContext) throws IOException;
+	}
+	
+`setupJob`方法在job运行前就被调用，用来服务于作业的初始化，类似创建作业和task的临时目录。
+
+job成功后会调用`commitJob()`方法，用于删除临时目录和创建*_SUCCESS*文件。如果job失败，则调用`abortJob()`方法
+表示作业失败或者被kill，默认情况下会删除临时目录。
+
+在task级别的操作类似。Hadoop框架会保证在一个task中的多个task attempt中，只有一个会commit，其他abort。有两种情况：
+
+* 第一个attempt失败的时候会abort，第二个attempt如果成功则会commit。
+* 对于预测任务，只要有一个首先成功的话会commit，另外一个则abort。
+

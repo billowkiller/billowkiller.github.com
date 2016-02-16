@@ -3,7 +3,7 @@ layout: post
 title: "Hadoop Tunning"
 date: 2015-12-01 09:50
 comments: true
-categories: 
+category: Big Data
 tags: 
 ---
 
@@ -207,3 +207,5 @@ profile.out包括一些stack traces，还包括内存和CPU时间的信息。以
 可以看出来第一个问题是在`String.split`这个方法的使用上，它采用正则表达式来分割字符串，这个是相当耗时的一个举措，可以用Apache Commons Lang library的`StringUtils.split`来替换。另外一个是发生在Text的构造上，可以只构造一个Text实例，采用`set`方法进行设置，这样会更加有效率。
 
 需要注意，使用HPROF会给程序的执行带来额外的负担，需要持续的收集profiling的信息，所以在正常的运行过程中不应该加上。
+
+
