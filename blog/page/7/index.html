@@ -175,6 +175,139 @@ body {
 
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
         
+           | <a href="/blog/2013/05/14/linux-kvmdai-ma-zhi-mei/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/linux-kvmdai-ma-zhi-mei/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/linux-kvmdai-ma-zhi-mei/">Linux KVM代码之美</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p><em>*edited as an essey for *程序语言设计原理</em> **</p>
+
+<hr />
+
+<p>在程序的编写上，我认为编程的难度，也就是可写性是一个次要的角色，而代码的可读性，可维护性一直软件生命周期中的主要部分，尤其是对于大型项目而言，软件的维护绝对是项目管理人员首先要考虑的问题，成本的控制，人月量的降低。在这一点上更为突出表现的我想应该是对于开源项目来说，人员的流动性大，项目时间的不确定性，还有对开发人员的吸引力。开源项目应该关注的不止是软件功能性的强大，思维理念的超前，更应该是代码的可读性，可维护性。毕竟没有人愿意在垃圾场上重新盖一栋漂亮的大楼。所以开源项目应该从一开始就在可读性，可维护性上下工夫，并且需要有一些自己的理念，开发标准在里面，这样可以引导后来的开发人员遵循这些原则，保证代码的可读性，可维护性，避免出现破窗效应。</p>
+
+<p>那么如此看来，代码之美又应该包括哪些方面呢，我想应该需要有程序的可读性，可维护性，另外还需要有一些设计准则。这里就以Linux内核中的KVM代码部分为例，谈谈这些原则。</p>
+
+<h2 id="section">一、可读性、可维护性</h2>
+
+<p>在Github上打开Linux内核代码，涉及KVM的主要有两个目录，virt和arch/x86/kvm，我们主要研究的是arch/x86/kvm。文件夹下的Makefile和Kconfig文件可以将程序的脉络显得极为的清晰。</p>
+
+<p>现在查看的是emulate.c文件，程序大概有4000多行，这也是C语言代码中值得诟病的地方，因为程序代码超过2页屏幕大小后，会影响人们对程序的理解，难于找到需要注意的地方，并且纠结于大量的方法和结构体之间。</p>
+
+<p>emulate.c的文件头注释表明只是一个X86架构（32位或者64位）指令的译码器和模拟器，并且表明程序的作者，来源，程序具体涉及的方面。代码是遵循Linux编码规范的。
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/linux-kvmdai-ma-zhi-mei/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/05/14/ji-ge-linuxming-ling/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/ji-ge-linuxming-ling/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/ji-ge-linuxming-ling/">几个linux命令</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>转换文件到pdf </p>
+
+<pre><code>unoconv -f pdf mydocument.odt
+</code></pre>
+
+<p>zip乱码解压 </p>
+
+<pre><code>unzip -O CP936 xx.zip
+</code></pre>
+
+<p>mp3 乱码 </p>
+
+<pre><code>mid3iconv -e gbk \*.mp3 //当前目录下的mp3文件
+</code></pre>
+
+<p>视频转码 </p>
+
+<pre><code>mencoder \*.rmvb -o output.avi -oac mp3lame -lameopts cbr:br=32 -ovc x264 -x264encopts bitrate=440 -vf scale=320:-3
+</code></pre>
+
+<p>linux 声音调节  alsamixer</p>
+
+<p>gedit 乱码：</p>
+
+<pre><code>gsettings set org.gnome.gedit.preferences.encodings auto-detected "['UTF-8','CURRENT','GB18030','ISO-8859-15','UTF-16']"
+</code></pre>
+
+<p>SSH 远程登录：</p>
+
+<pre><code>ssh -l root 192.168.0.150
+</code></pre>
+
+<p>vim 中文乱码：</p>
+
+<p>let &amp;termencoding=&amp;encoding\
+set fileencodings=utf-8,gbk</p>
+</div>
+  
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
            | <a href="/blog/2013/05/14/hugo/#disqus_thread"
              data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/hugo/">Comments</a>
         
@@ -701,237 +834,6 @@ Page的说法，一个网页的重要性不仅仅包括他们自身的重要程�
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/design-pattern-principle/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/design-pattern-principle/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/design-pattern-principle/">Design Pattern&#8211;Principle</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>Head First Design Patterns</p>
-
-<hr />
-
-<p>​1. Identify the aspects of your application that vary and separate them
-from what stays the same.</p>
-
-<p>　　Take the parts that vary and encapsulate them, so that later you can
-alter or extend the parts that vary without affecting those that don’t.</p>
-
-<p>​2. Program to an interface, not an implementation.</p>
-
-<p>　　Our intuition to solve problems is relying on an implementation,
-either in the superclass or in the subclass itself. We were locked into
-using that specific implementation and there was no room for changing
-out the behavior other than writing more code.</p>
-
-<p>　　With a new design, the subclasses will use a behavior represented by
-an interface, so that the actual implementation of the behavior won’t be
-locked.</p>
-
-<p>　　ps: *program to an interface *really means *program to a
-supertype. *In JAVA, it means interface or abstract class.</p>
-
-<p>　　　　Even better, you can assign the concrete implementation object
-at runtime.</p>
-
-<p></div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/design-pattern-principle/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/cheng-xu-yuan-de-shi-jian-huan-suan-biao/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/cheng-xu-yuan-de-shi-jian-huan-suan-biao/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/cheng-xu-yuan-de-shi-jian-huan-suan-biao/">程序员的时间换算表</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><div class="Section0">
-<p class="p0">&nbsp;<i>摘自<a href="http://www.ituring.com.cn/">图灵社区</a></i></p>
-<hr />
-<p class="p0" style="text-align: center;">&nbsp;</p>
-<table>
-<tbody>
-<tr style="background-color: #d6e5fe;">
-<td valign="center" width="85">
-<p class="p17">估算时间</p>
-</td>
-<td valign="center" width="209">
-<p class="p17">程序员所想象的</p>
-</td>
-<td valign="center" width="269">
-<p class="p17">程序员所忘记的</p>
-</td>
-<td valign="center" width="100">
-<p class="p17">实际时间</p>
-</td>
-</tr>
-<tr>
-<td valign="center" width="85">
-<p class="p16">30<span style="font-family: 'WenQuanYi Zen Hei';">秒</span></p>
-</td>
-<td valign="center" width="209">
-<p class="p16">只需要做一个很小的代码改动。我准确地知道怎么改，在哪里改。花费<span style="font-family: 'Liberation Serif';">30</span><span style="font-family: 'WenQuanYi Zen Hei';">秒敲键盘即可。</span></p>
-</td>
-<td valign="center" width="269">
-<p class="p16">启动计算机，开发环境和获取正确源码的时间。用于构件，测试，检查和文档修复的时间。</p>
-</td>
-<td valign="center" width="100">
-<p class="p16">1<span style="font-family: 'WenQuanYi Zen Hei';">小时</span></p>
-</td>
-</tr>
-<tr>
-<td valign="center" width="85">
-<p class="p16">5<span style="font-family: 'WenQuanYi Zen Hei';">分钟</span></p>
-</td>
-<td valign="center" width="209">
-<p class="p16">小事一桩，我只要上谷歌查一下语法就可以修复它了。</p>
-</td>
-<td valign="center" width="269">
-<p class="p16">很少有一次就能找到完全正确的信息。即使找到，在它能工作前，也需要做一些调整。外加构件，测试等等时间。</p>
-</td>
-<td valign="center" width="100">
-<p class="p16">2<span style="font-family: 'WenQuanYi Zen Hei';">小时</span></p>
-</td>
-</tr>
-<tr>
-<td valign="center" width="85">
-<p class="p16">1&nbsp;<span style="font-family: 'WenQuanYi Zen Hei';">小时</span></p>
-</td>
-<td valign="center" width="209">
-<p class="p16">我知道怎么做，但是写这些代码需要花费一些时间。</p>
-</td>
-<td valign="center" width="269">
-<p class="p16">面对未来可能发生的问题，<span style="font-family: 'Liberation Serif';">1</span><span style="font-family: 'WenQuanYi Zen Hei';">小时稍纵即逝。有些东西总是会出错。</span></p>
-</td>
-<td valign="center" width="100">
-<p class="p16">2<span style="font-family: 'WenQuanYi Zen Hei';">小时</span></p>
-</td>
-</tr>
-<tr>
-<td valign="center" width="85">
-<p class="p16">4<span style="font-family: 'WenQuanYi Zen Hei';">小时</span></p>
-</td>
-<td valign="center" width="209">
-<p class="p16">需要写一些代码，但是我粗略地知道步骤。我知道标准框架中的<span style="font-family: 'Liberation Serif';">Wizzabanga</span><span style="font-family: 'WenQuanYi Zen Hei';">模块可以做到，不过我得查看文档，了解它的准确地调用方式。</span></p>
-</td>
-<td valign="center" width="269">
-<p class="p16">这个大概是唯一现实的估算。它为意外的错误留下了足够大的余地，而这个任务也小到足以把握。</p>
-</td>
-<td valign="center" width="100">
-<p class="p16">4<span style="font-family: 'WenQuanYi Zen Hei';">小时</span></p>
-</td>
-</tr>
-<tr>
-<td valign="center" width="85">
-<p class="p16">8&nbsp;<span style="font-family: 'WenQuanYi Zen Hei';">小时</span></p>
-</td>
-<td valign="center" width="209">
-<p class="p16">我先要把<span style="font-family: 'Liberation Serif';">Balunga</span><span style="font-family: 'WenQuanYi Zen Hei';">类重构成</span><span style="font-family: 'Liberation Serif';">2</span><span style="font-family: 'WenQuanYi Zen Hei';">个，然后为</span><span style="font-family: 'Liberation Serif';">Wizzabanga</span><span style="font-family: 'WenQuanYi Zen Hei';">模块加一个调用，最后为</span><span style="font-family: 'Liberation Serif';">GUI</span><span style="font-family: 'WenQuanYi Zen Hei';">加一些字段。</span></p>
-</td>
-<td valign="center" width="269">
-<p class="p16">总会有许多系统的不同部分依赖着<span style="font-family: 'Liberation Serif';">Balunga</span><span style="font-family: 'WenQuanYi Zen Hei';">类。大概有</span><span style="font-family: 'Liberation Serif';">40</span><span style="font-family: 'WenQuanYi Zen Hei';">个不同的文件需要修改。为</span><span style="font-family: 'Liberation Serif';">GUI</span><span style="font-family: 'WenQuanYi Zen Hei';">新加的字段，同样也需要加到数据库中。</span><span style="font-family: 'Liberation Serif';">8</span><span style="font-family: 'WenQuanYi Zen Hei';">小时太长，无法完全把握。总会有比程序员估算时更多的步骤出现。</span></p>
-</td>
-<td valign="center" width="100">
-<p class="p16">12-16<span style="font-family: 'WenQuanYi Zen Hei';">小时</span></p>
-</td>
-</tr>
-<tr>
-<td valign="center" width="85">
-<p class="p16">2&nbsp;<span style="font-family: 'WenQuanYi Zen Hei';">天</span></p>
-</td>
-<td valign="center" width="209">
-<p class="p16">真的有一大堆代码要写。我需要往数据库里加一些新<span style="font-family: 'Liberation Serif';">table</span><span style="font-family: 'WenQuanYi Zen Hei';">，显示</span><span style="font-family: 'Liberation Serif';">table</span><span style="font-family: 'WenQuanYi Zen Hei';">的</span><span style="font-family: 'Liberation Serif';">GUI</span><span style="font-family: 'WenQuanYi Zen Hei';">，还有读写</span><span style="font-family: 'Liberation Serif';">table</span><span style="font-family: 'WenQuanYi Zen Hei';">的代码逻辑。</span></p>
-</td>
-<td valign="center" width="269">
-<p class="p16">对于大多数开发者来说，两天的工作量已经大到难以估算了。肯定会有什么东西被遗漏掉。不仅仅是一些小事情，而是整个一大块主要功能会被遗忘在估算中。</p>
-</td>
-<td valign="center" width="100">
-<p class="p16">5&nbsp;<span style="font-family: 'WenQuanYi Zen Hei';">天</span></p>
-</td>
-</tr>
-<tr>
-<td valign="center" width="85">
-<p class="p16">1&nbsp;<span style="font-family: 'WenQuanYi Zen Hei';">周</span></p>
-</td>
-<td valign="center" width="209">
-<p class="p16">哎哟，这真是一项艰巨的任务。虽然我还没有思路，但我不能说我不知道。一周应该够了，我希望，我真心希望，但是我不能要求更多了，否则他们会认为我不够称职。</p>
-</td>
-<td valign="center" width="269">
-<p class="p16">这个任务已经大到超过大多数程序员的理解了。它应该被发回给架构师，帮忙将它划分成更小的部分，然后提供一些解决问题的方向。架构师可能会发现一种更简单的方法来完成它，或者发现其实有更多超乎想象的工作。。。</p>
-</td>
-<td valign="center" width="100">
-<p class="p16">2-20&nbsp;<span style="font-family: 'WenQuanYi Zen Hei';">天</span></p>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="p15">&nbsp;</p>
-</div>
-</div>
-  
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -955,15 +857,15 @@ at runtime.</p>
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/02/18/ensemble/">Ensemble Methods</a>
+    
+    <a class="list-group-item " href="/blog/2016/02/17/lr-and-lda/">Logistic Regression and Linear Discriminant Analysis</a>
+    
     <a class="list-group-item " href="/blog/2016/02/15/gradient-descent-and-newton-method/">Gradient Descent and Newton Method</a>
     
     <a class="list-group-item " href="/blog/2015/12/01/hadoop-tunning/">Hadoop Tunning</a>
     
     <a class="list-group-item " href="/blog/2015/11/22/hadoop-secondary-sorting/">Hadoop Secondary Sorting</a>
-    
-    <a class="list-group-item " href="/blog/2015/10/27/spark-streaming/">Spark Streaming</a>
-    
-    <a class="list-group-item " href="/blog/2015/10/27/spark-introduction/">Spark Introduction</a>
     
   </div>
 </section>
@@ -1029,7 +931,7 @@ at runtime.</p>
     
     
     <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
-        <span class="badge">1</span>
+        <span class="badge">3</span>
         Machine Learning
       </a>
     

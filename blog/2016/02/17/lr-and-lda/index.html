@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Logistic Regression and Linear Discriminant Analysis - Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2016/02/17/lr-and-lda">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<style type="text/css">
+body {
+  font-family: Helvetica, arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background-color: white;
+  padding: 30px; }
+
+    table {
+  padding: 0; }
+  table tr {
+    border-top: 1px solid #cccccc;
+    background-color: white;
+    margin: 0;
+    padding: 0; }
+    table tr:nth-child(2n) {
+      background-color: #f8f8f8; }
+    table tr th {
+      font-weight: bold;
+      border: 1px solid #cccccc;
+      text-align: left;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr td {
+      border: 1px solid #cccccc;
+      text-align: left;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr th :first-child, table tr td :first-child {
+      margin-top: 0; }
+    table tr th :last-child, table tr td :last-child {
+      margin-bottom: 0; }
+    }
+</style>
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-02-17T14:00:00+08:00" pubdate data-updated="true">Feb 17<span>th</span>, 2016</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        Logistic Regression and Linear Discriminant Analysis
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><p>在回归方法中，我们找一个超平面作为类与类之间的decision boundary。回归方法为每个分类建立一个判别函数 $\sigma_k (x)$, 对任意的 $x$，选出得到最大值的判别函数最为归属类。对于后验概率模型 $Pr(G = k|X = x)$ 也是使用同样的方法。对于$\sigma_k (x) 和 Pr(G = k|X = x)$ 来说，只要它们是线性的，那么得到的decision boundary也是线性的。</p>
+
+<p>虽然无法直接使得 $\sigma_k (x) 和 Pr(G = k|X = x)$ 是线性的，但是如果有一个单调的转化函数能够使得是线性的，那么我们也可以得到一个超平面分割数据点。</p>
+
+<p>Logistic Regression 和 Linear Discriminant Analysis就是基于这样的需求构造的模型。</p>
+
+<!--more-->
+
+<h2 id="logistic-regression">Logistic Regression</h2>
+
+<p>逻辑回归的模型也是源于通过 $x$ 的线性函数建立 $K$ 个类的后验概率模型，同时保证它们在[0,1]之间以及和为1。</p>
+
+<script type="math/tex; mode=display"> log {Pr(G = 1 \vert X = x) \over Pr(G = K \vert X = x)} = \beta_{10} + \beta_1^Tx </script>
+
+<script type="math/tex; mode=display"> log {Pr(G = 2 \vert X = x) \over Pr(G = K \vert X = x)} = \beta_{20} + \beta_2^Tx </script>
+
+<script type="math/tex; mode=display"> log {Pr(G = K-1 \vert X = x) \over Pr(G = K \vert X = x)} = \beta_{(K-1)0} + \beta_{K-1}^Tx </script>
+
+<p>这个转换函数称为 logit transformation, 概率称为 log-odds。得到</p>
+
+<script type="math/tex; mode=display"> Pr(G = k \vert X = x) = {exp(\beta_{k0} + \beta_k^Tx) \over {1 + \sum_{l=1}^{K-1} exp(\beta_{l0} + \beta_l^Tx) }} </script>
+
+<script type="math/tex; mode=display"> Pr(G = K \vert X = x) = {1 \over {1 + \sum_{l=1}^{K-1} exp(\beta_{l0} + \beta_l^Tx) }} </script>
+
+<p>当 $K=2$ 的时候，输出设为0/1, 输出结果就是一个伯努利过程。可以使用maximum likelihood来对模型进行参数估计。</p>
+
+<p>假设 $y_i = 1\ when\ g_i = 1,\ y_i = 0\ when\ g_i = 2$, 那么不妨设 $p(x_i; \beta) = Pr(G = 1|X = x) = {\beta^Tx \over {1 + exp(\beta^Tx)}}$，这时的 $p(x_i; \beta) = {1 \over {1 + exp(-\beta^Tx)}}$, 也成为<code>sigmoid function</code>。</p>
+
+<p>log-likelihood得到结果为</p>
+
+<script type="math/tex; mode=display"> \ell(\beta) = \sum {y_i log p(x_i; \beta) + (1 - y_i)log(1-p(x_i, \beta))} 
+        = \sum {y_i\beta^Tx_i - log(1 + exp(\beta^Tx_i))}, </script>
+
+<script type="math/tex; mode=display">其中\beta = \{\beta_{10}, \beta_1\}, x_i$ 的第一个元素为截距1.</script>
+
+<script type="math/tex; mode=display"> 求导后得到\frac{\partial \ell (\beta)}{\partial \beta} = \sum_{i=1}^N {x_i(y_i - p(x_i; \beta))} = 0 </script>
+
+<p>此时，可以使用梯度下降法或者牛顿法求解 $\beta$。下面使用牛顿法求解。</p>
+
+<p>$$ \frac{\partial^2 \ell (\beta)}{\partial \beta \partial \beta^T} = 
+    - \sum_{i=1}^N  {x_i x_i^T p(x_i; \beta)(1 - p(x_i; \beta))} $$
+于是牛顿迭代即为
+<script type="math/tex"> \beta^{new} = \beta^{old} - (\frac{\partial^2 \ell (\beta)}{\partial \beta \partial \beta^T})^{-1} \frac{\partial \ell (\beta)}{\partial \beta}, 其中所有的倒数都是在\beta^{old}的时候计算的 </script></p>
+
+<p>下面说明这个问题就是加权最小二乘问题，可以变换得到
+<script type="math/tex">\frac{\partial \ell (\beta)}{\partial \beta} = X^T(Y-P),\ \frac{\partial^2 \ell (\beta)}{\partial \beta \partial \beta^T} = -X^TWX </script>
+其中 $Y$ 是 $y_i$的向量，$X$ 为 $N * (p+1)$ 的矩阵，$W$ 是一个 $N*N$ 的对角矩阵，元素为 $p(x_i; \beta^{old})(1 - p(x_i; \beta^{old}))$</p>
+
+<p>可以得到 <script type="math/tex">\beta^{new} = (X^TWX)^{-1}X^TWz,\ z = X\beta^{old} + W^{-1}(Y-P)</script>, 这个表达式得到的就是weighted least squares step. $z$ 称为 response，或者说是 <em>adjusted response</em>。每个迭代$p$都会变，所以$W 和 z$也都会变，可以用<em>iteratively reweighted least squares</em>或者IRLS算法来计算，每个迭代就是解决一个weighted least squares问题：</p>
+
+<script type="math/tex; mode=display">\beta^{new} \gets arg min_\beta (z - X\beta)^TW(z - X\beta)</script>
+
+<p><em>注：weighted linear least squares</em></p>
+
+<script type="math/tex; mode=display"> arg min_\beta \sum_{i=1}^m w_i \|y_i - \sum_{j=1}^n x_{ij}\beta_j\|^2 = arg min_\beta \vert W^{1 \over 2}(Y - X\beta) \vert ^2 </script>
+
+<script type="math/tex; mode=display"> \hat{\beta} = (X^TWX)^{-1}X^TWY </script>
+
+<h2 id="linear-discriminant-analysis">Linear Discriminant Analysis</h2>
+
+<p>接下来我们给出另外一个模型，它的后验概率的logit也同样是一个线性模型。</p>
+
+<p>假设 $f_k(x)$ 是类 $G=k$ 的输入的条件密度函数，$\pi_k$ 是类 $k$ 的先验概率，有 $\sum_{k=1}^K \pi_k = 1$。那么依据贝叶斯公式得到</p>
+
+<script type="math/tex; mode=display"> Pr(G=k \vert X=x) = \frac{f_k(x) \pi_k}{\sum_{i=1}^K f_i(x) \pi_i} </script>
+
+<p>假设每个类服从multivariate Guassian分布， 那么</p>
+
+<script type="math/tex; mode=display">f_k(x) = \frac{e^{-1/2(x-\mu_k)^T\Sigma_k^{-1}(x-\mu_k)}}{(2\pi)^{p/2} \vert \Sigma_k \vert ^{1/2}}</script>
+
+<p>当每个类都有一个相同的协方差矩阵 $\Sigma$ 的时候，我们有以下推导</p>
+
+<script type="math/tex; mode=display"> log {Pr(G = k \vert X = x) \over Pr(G = \ell \vert X = x)} = log{\pi_k \over \pi_\ell} - \frac{1}{2}(\mu_k + \mu_\ell)^T\Sigma^{-1}(\mu_k - \mu_\ell) + x^T\Sigma^{-1}(\mu_k - \mu_\ell) </script>
+
+<p>注意到这个式子也就是 $\alpha_{k0} + \alpha_k^Tx$，也就是和logistic regression一样的模型。</p>
+
+<p>并且这个式子可以推出线性判别函数为 </p>
+
+<script type="math/tex; mode=display"> \delta_k(x) = x^T\Sigma^{-1}\mu_k - \frac{1}{2}\mu_k^T\Sigma^{-1}\mu_k + log\pi_k</script>
+
+<script type="math/tex; mode=display"> G(x) = argmax_k \delta_k(x) </script>
+
+<p>实际上，高斯分布的参数可以从训练集中估计：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-16/18265816.jpg" width="400px" /></p>
+
+<p>可以看出来LDA做了一下的假设：</p>
+
+<ul>
+  <li>类的分布是高斯函数</li>
+  <li>每个类都有一个共同的协方差矩阵</li>
+</ul>
+
+<p>看起来LDA和logistic regression模型是一样的，它们的区别是对线性参数估计的方法不同。
+$X$ 和 $G$ 的联合概率如下</p>
+
+<script type="math/tex; mode=display"> Pr(X, G=k) = Pr(X)Pr(G=k \vert X) </script>
+
+<p>对于LDA和logistic regression，公式的后半部分都是一样的。LR模型也是忽略了前半部分的边际概率，直接对条件概率进行最大似然估计。但是LDA的参数估计是基于整个联合概率分布的</p>
+
+<p><script type="math/tex"> Pr(X, G=k) = \phi(X; \mu_k, \Sigma)\pi_k, \phi是高斯密度函数 </script>
+<script type="math/tex"> Pr(X) = \sum_{k=1}^K\phi(X; \mu_k, \Sigma)\pi_k</script></p>
+
+<p>这个边际概率有什么用呢，总的来说是提供参数估计的更多信息，减少参数估计的方差。但是在LDA中，由于outliers会对协方差矩阵做出一定贡献，所以LDA对outliers会比较敏感。如果我们忽略这些假设，而Input确实是高斯分布的，那么根据Efrom的论文，会有”in the worst case ignoring this marginal part of the likelihood constitutes a loss of efficiency of about 30% asymptotically in the error rate”.</p>
+
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-02-17T14:00:00+08:00" pubdate data-updated="true">Feb 17<span>th</span>, 2016</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/machine-learning/'>Machine Learning</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2016/02/17/lr-and-lda/" data-via="" data-counturl="http://billowkiller.github.io/blog/2016/02/17/lr-and-lda/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2016/02/15/gradient-descent-and-newton-method/" title="Previous Post: Gradient Descent and Newton Method">&laquo; Gradient Descent and Newton Method</a></li>
+            
+            
+            <li class="next"><a href="/blog/2016/02/18/ensemble/" title="Next Post: Ensemble Methods">Ensemble Methods &raquo;</a></li>
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item " href="/blog/2016/02/18/ensemble/">Ensemble Methods</a>
+    
+    <a class="list-group-item active" href="/blog/2016/02/17/lr-and-lda/">Logistic Regression and Linear Discriminant Analysis</a>
+    
+    <a class="list-group-item " href="/blog/2016/02/15/gradient-descent-and-newton-method/">Gradient Descent and Newton Method</a>
+    
+    <a class="list-group-item " href="/blog/2015/12/01/hadoop-tunning/">Hadoop Tunning</a>
+    
+    <a class="list-group-item " href="/blog/2015/11/22/hadoop-secondary-sorting/">Hadoop Secondary Sorting</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">8</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">10</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">8</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">14</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">17</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">6</span>
+        algorithm
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/big-data/index.html">
+        <span class="badge">2</span>
+        Big Data
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
+        <span class="badge">3</span>
+        Machine Learning
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2016 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2016/02/17/lr-and-lda/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2016/02/17/lr-and-lda/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>

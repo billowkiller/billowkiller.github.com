@@ -4,7 +4,7 @@
   <title><![CDATA[Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-02-16T19:29:04+08:00</updated>
+  <updated>2016-02-21T00:31:59+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,348 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ensemble Methods]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/02/18/ensemble/"/>
+    <updated>2016-02-18T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/02/18/ensemble</id>
+    <content type="html"><![CDATA[<p>Ensemble<code>|ɒnˈsɒmbl|</code> Methods 称为集成方法，它还有其他类似的名字，meta-algorithm、aggregation model，这些都代表这同一个意思，就是不同弱分类器的组合成一个强分类器。这里的弱分类器要比随机猜测的结果好，错误率小于50%；弱分类器可以是决策树、逻辑回归、朴素贝叶斯等算法。Ensemble的形式有很多种：</p>
+
+<ul>
+  <li>不同算法的集成;</li>
+  <li>同一算法在不同设置下的集成;</li>
+  <li>数据集不同部分分配给不同分类器之后的集成。</li>
+</ul>
+
+<p>那么这多个弱分类器又是如何组合的呢，下面给出一个big picture，后面的文章也是对其的阐述。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-18/38802537.jpg" width="450px" /></p>
+
+<!--more-->
+
+<p>弱分类的组合可以是linear或者stacking的，linear又可以是uniform或者non-uniform.
+stacking或者stacked generalization的大意是non-linear combining. 通常stacking的组合算法有LR，GBM, KNN, NN, RF 和 ET，可以参考<a href="http://mlwave.com/kaggle-ensembling-guide/">http://mlwave.com/kaggle-ensembling-guide/</a>. 作者Wolpert是这样形容的：</p>
+
+<blockquote>
+  <p>stacked generalization is a means of non-linearly combining generalizers to make a new generalizer, to try to optimally integrate what each of the original generalizers has to say about the learning set. The more each generalizer has to say (which isn’t duplicated in what the other generalizer’s have to say), the better the resultant stacked generalization. </p>
+</blockquote>
+
+<p>那么为什么要把这些分类器进行组合呢？组合之后是否能获得更好的效果？可以看下下面的例子。</p>
+
+<p>假设我们有10个samples的测试集，正确的结果是<code>1111111111</code>。现在有三个分类器，它们只有70%的正确率，那么三个分类器进行majority vote，可以得到如下的正确率：</p>
+
+<script type="math/tex; mode=display">0.7 * 0.7 * 0.7 + \binom{3}{2}0.7 * 0.7 * 0.3 = 0.784</script>
+
+<p>也就是由原来的70%提升到了78%。正确率会随着分类器的增加而增加。5个分类器的正确率大约为83%。这个在统计学上就是“Wisdom of Crowds”。但是这个结果提高的前提在于sample的diversity，也就是减少sample之间的correlation。例如：</p>
+
+<pre><code>1111111100 = 80% accuracy
+1111111100 = 80% accuracy
+1011111100 = 70% accuracy
+</code></pre>
+
+<p>在这个例子中得到<code>1111111100</code>还是只有80%的正确率，而</p>
+
+<pre><code>1111111100 = 80% accuracy
+0111011101 = 70% accuracy
+1000101111 = 60% accuracy
+</code></pre>
+
+<p>经过Ensemle就可以得到<code>1111111101</code>，90%的正确率。</p>
+
+<p>那么如何证明多个组合会比单个的结果好呢，可以用Uniform Linear的组合进行下面的理论描述。</p>
+
+<script type="math/tex; mode=display"> Let\ G(x) = \frac{1}{T}\sum_{t=1}^T g_t(x)</script>
+
+<script type="math/tex; mode=display">   avg((g_t(x) - f(x))^2) = avg(g_t^2 - 2g_tf + f^2)</script>
+
+<script type="math/tex; mode=display">   =avg(g_t^2) - G^2 + (G-f)^2</script>
+
+<script type="math/tex; mode=display">   =avg((g_t-G)^2) + (G-f)^2</script>
+
+<script type="math/tex; mode=display"> avg(E(g_t)) = avg((g_t-G)^2) + E(G) \ge E(G) </script>
+
+<p>更一般的，有如下的预测模型$\hat{F}(x)^T = [\hat{f}_1(x), \hat{f}_2(x)…\hat{f}_M(x)]$, 用最小二乘法寻找线性最小值</p>
+
+<script type="math/tex; mode=display"> \hat{w} = argmin_w E[Y - \sum_{m=1}^M w_m\hat{f}_m(x)]^2 </script>
+
+<script type="math/tex; mode=display"> \hat{w} = E[\hat{F}(x)\hat{F}(x)^T]^{-1}E[\hat{F}(x)Y] </script>
+
+<script type="math/tex; mode=display"> E[Y - \sum_{m=1}^M w_m\hat{f}_m(x)]^2 \le E[Y-\hat{f}_m(x)]^2 \forall m</script>
+
+<h2 id="bagging">Bagging</h2>
+
+<p>Bagging或者bootstrap aggregation是上文提到的Uniform Linear aggregation。其中用到bootstrapping，这是是一种resample的方法，定义如下</p>
+
+<blockquote>
+  <p>re-sample N examples from original sample <strong>uniformly with replacement</strong> – can also use arbitrary N’ instead of original N</p>
+</blockquote>
+
+<p>有training set $Z$, 对每个bootstrap sample $Z^{*b}, b=1,2…B$，bagging定义如下：</p>
+
+<script type="math/tex; mode=display"> \hat{f}_{bag}(x) = \frac{1}{B} \sum_{b=1}^B \hat{f}^{*b}(x) </script>
+
+<h2 id="adaboost">AdaBoost</h2>
+
+<p>AdaBoost或者Adaptive Boosting中只要弱分类器的正确率优于随机选择，那么通过AdaBoost就会得到非常好的结果。它是一种Boosting方法，所谓Boosting就是改变训练数据的概率分布（权值分布）针对不同的训练数据分布调用弱学习算法学习一系列弱分类器。对应于上面的non-uniform linear model。</p>
+
+<p>AdaBoost强调对错误分类的反复学习，但是最后对错误率较高的分类器赋予低权重。每轮学习中都会重新对分类器赋予不同的权重，这是为了得到更多关于数据的不同假设。如何得到更多的不同假设呢？</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-19/91708853.jpg" width="300px" /></p>
+
+<p>那么我们希望在$t+1$迭代学习的时候，$t$轮的结果尽可能的随机，即有错误率</p>
+
+<script type="math/tex; mode=display"> \epsilon_t = \frac{\sum_{n=1}^N u_n^{(t+1)}I(y_n \ne g_t(x_n))}{\sum_{n=1}^N u_n^{(t+1)}} = \frac{1}{2} </script>
+
+<p>于是可以 multiply incorrect $\propto (1 - \epsilon_t)$; multiply correct $\propto \epsilon_t$</p>
+
+<p>定义scalling factor $\blacklozenge_t = \sqrt{\frac{1 - \epsilon_t}{\epsilon_t}}$</p>
+
+<script type="math/tex; mode=display"> incorrect \gets incorrect \cdot \blacklozenge_t \\ correct \gets correct \div \blacklozenge_t </script>
+
+<p>最后对scalling factor取自然对数作为权值 $\alpha_t$ 将弱分类器线性组合在一块，取自然对数的逻辑如下：</p>
+
+<script type="math/tex; mode=display"> \epsilon_t = 1/2 => \blacklozenge_t = 1 => \alpha_t = 0 \\
+\epsilon_t = 0 => \blacklozenge_t = \infty => \alpha_t = \infty </script>
+
+<p>最后伪代码为</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/40495628.jpg" width="450px" /></p>
+
+<p>比较常见的弱分类器是Decision Stump，和AdaBoost组成<code>AdaBoost-Stump</code>，具有efficient feature selection and efficiency的特点。</p>
+
+<h2 id="random-forest">Random Forest</h2>
+
+<p>Bagging是通过平均带有噪声但是近似无偏的模型来减少variance，而对于足够深的Decision Tree来说，它的bias可以非常少，但是variance非常高。所以自然的想将二者结合，综合他们的优点。Bagged Tree并不能减少bias，但是可以有效的减少variance。这个Boosting正好相反，Boosting通过自适应的变化树的样子来减少bias。Random Forest就是Bagging + Decision Tree(C&amp;RT)。EST给出RF的本质：</p>
+
+<blockquote>
+  <p>The idea in random forests is to improve the variance reduction of bagging by reducing the correlation between the trees, without increasing the variance too much.</p>
+</blockquote>
+
+<p>我们了解到增加hypothesis diversity可以提高最终结果的表现，那么Random Forest就将这种Random性发挥到极致，得到多样的hypothesis。为了增加随机性，可以做了以下的措施：</p>
+
+<ul>
+  <li>re-sample new feature subspace for each b(x) in C&amp;RT, 记得bagging进行data randomness for diversity, 那么在RF中是feature randomness for diversity</li>
+  <li>random low-dimensional projections for each b(x) in C&amp;RT, 这就是对feature进行投影，进行feature combination，在特征空间中随机选择若干特征组投影到若干个方向上。</li>
+</ul>
+
+<p>伪代码如下（只用了第一个Randomness）：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/2671550.jpg" width="500px" /></p>
+
+<p>RF还有的特点是训练的时候可以自带<strong>Model Selection和Feature Selection</strong>。那么RF是如何做到的？</p>
+
+<h3 id="model-selection">Model Selection</h3>
+<p>在RF中使用bagging时，每个bootstrap sample都会有一定的概率没有选择原来sample中的一些数据，这些数据就是out-of-bag (OOB) Samples. 在一个RF中，某个Decision Tree训练没有用到数据 $(x_n, y_n)$的概率为：$(1 - \frac{1}{N}) ^ N$，当N无限大的时候，接近 $\frac{1}{e}$.</p>
+
+<p>可以用OOB来validate G, $E_{oob}G = \frac{1}{N} \sum_{n=1}^N err(y_n, G_n^-(x_n))$, $G_n^-$ 表示 $x_n$在OOB中的Decision Tree。这样可以用 $E_{oob}$ 对bagging/RF进行self-validation。</p>
+
+<p>这有什么用呢，当然是进行模型选择了，可以使用 $E_{oob}$ 进行RF的参数选择，例如feature subspace。下图表示使用Validation中进行的模型选择，可以看到RF中少了re-training的步骤。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/30059076.jpg" width="250px" /></p>
+
+<h3 id="feature-selection">Feature Selection</h3>
+
+<p>在模型训练的时候通常希望能够去掉多余的、无关的特征，这样能够得到的好处有：</p>
+
+<ul>
+  <li><strong>efficiency</strong>: simpler hypothesis and shorter prediction time</li>
+  <li><strong>generalization</strong>: feature noise removed</li>
+  <li><strong>interpretability</strong></li>
+</ul>
+
+<p>通常可以通过特征的重要性来进行特征的选择，对于线性模型来说就是 $w_i$ 的绝对值，也就是特征对于最终结果的影响程度。那么在非线性的RF模型中呢？</p>
+
+<p>所用的方法就是random test，例如特征 $i$ 被选择，那么在特征 $i$ 的数据集中加入随机变量重新训练则会降低模型正确率，而对于不重要的特征，怎么改变数据集当然对模型没有什么影响。</p>
+
+<p>RF中使用的random test就是一种常用的统计学工具permutation test，也就是将特征 $i$ 的数据做重新排列。数据表达也就是：</p>
+
+<script type="math/tex; mode=display"> importance(i) = performance(\mathcal{D}) - performance(\mathcal{D}^{(p)}) </script>
+
+<script type="math/tex; mode=display"> \mathcal{D}^{(p)}\ is\ \mathcal{D}\ with\ \{x_{n,i}\}\ replaced\ by\ permuted\ \{x_{n,i}\}_{n=1}^N </script>
+
+<p>$performance(\mathcal{D}^{(p)})$需要重新训练和评估，那么有什么办法可以避免呢？我们可以重新定义 $importance(i) = E_{oob}(G^-) - E_{oob}^{(p)}(G^-)$，表达式后项就是一个permuted OOB value。</p>
+
+<p>具体过程如下，当 $b$ 个树生成的时候，记录OOB评估的 $G^-$ 的正确率，然后OOB sample中的特征 $i$ 数据重新随机排列后再次评估的 $G^-$ 的正确率，二者相减得到特征 $i$的重要性。</p>
+
+<p>RF的缺点是，如果随机过程表现的不稳定，则需要很多的Decision Tree来支持。所以需要重新检查 $G$ 的稳定性来确保有足够多的树。</p>
+
+<h2 id="gradient-boosted-decision-tree">Gradient Boosted Decision Tree</h2>
+
+<p>回忆下假设AdaBoost的分类器输出是binary的，则权值迭代可以转化为</p>
+
+<script type="math/tex; mode=display"> u_n^{t+1} = \begin{cases}{u_n^t \cdot \blacklozenge_t\ if\ incorrect}\\{u_n^t \div \blacklozenge_t\ if\ correct}\end{cases} = u_n^t \cdot \blacklozenge_t^{-y_ng_t(x_n)} = u_n^t \cdot exp(-y_n\alpha_tg_t(x_n))</script>
+
+<script type="math/tex; mode=display"> u_n^{(T+1)} = u_n^{(1)} \cdot \prod_{t=1}^Texp(-y_n\alpha_tg_t(x_n)) = \frac{1}{N} \cdot exp(-y_n\sum_{t=1}^T\alpha_tg_t(x_n)) </script>
+
+<p>在AdaBoost中 $G(x) = sign(\sum_{t=1}^T\alpha_tg_t(x_n))$ 括号中的表达式也被成为voting score。现在我们想要 $y_n(voting\ score)$ 为正且越大越好，也就是让 $u_n^{(T+1)}$ 越小越好。</p>
+
+<p>所以AdaBoost的过程也就是让 $\sum_{n=1}^N u_n^{(t)}$ 减小，也就是最小化</p>
+
+<script type="math/tex; mode=display"> \sum_{n=1}^Nu_n^{(T+1)} =  \frac{1}{N} \cdot exp(-y_n\sum_{t=1}^T\alpha_tg_t(x_n)) </script>
+
+<p>注意到在gradient descent中第 $t$ 次迭代有：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/31496263.jpg" width="400px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/14307315.jpg" width="400px" /></p>
+
+<p>所以找到一个好的 $h(function\ direction)$ 函数也就是最小化 $\sum_{n=1}^Nu_n^{(t)}(-y_nh(x_n))$。对于二元分类，$y_n, h(x_n) \in {-1, +1}$，有</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/93309458.jpg" width="400px" /></p>
+
+<p>也就是每次迭代都需要最小化其中的hypothesis $E_{in}^{u^{(t)}}(h)$，那么谁最小化 $E_{in}^{u^{(t)}}(h)$呢，当然是AdaBoost中的reweighted sample所对应的 $g_t$ 了。</p>
+
+<p>所以现在需要优化 $\eta_t$ 得到梯度下降方向最佳步长，原来的 $\hat{E}_{ADA}$ 变为 $(\sum_{n=1}^N u_n^{(t)}) \cdot ((1-\epsilon_t)exp(-\eta) + \epsilon_t exp(+\eta))$。微分后容易得到 $\eta_t=ln\sqrt{\frac{1-\epsilon_t}{\epsilon_t}} = \alpha_t$。这和我们上面得到的scaling Factor是一致的。</p>
+
+<p>所以AdaBoost是steepest descent with approximate functional gradient. 我们总结下，AdaBoost的数学表达式：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/16682553.jpg" width="400px" /></p>
+
+<p>Gradient Boost就是把二元分类的假设推广到任意的假设并且损失函数也可以任意的。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/85486720.jpg" width="400px" /></p>
+
+<p>当选择平方损失函数时，有如下的可以看到</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/61222916.jpg" width="460px" /></p>
+
+<p>现在需要对 $h$ 加一些限制，否则 $h(x_n) = -\infty \cdot (s_n - y_n)$</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/34172769.jpg" width="400px" /></p>
+
+<p>最优 $g_t = h$ 就是 $(x_n, y_n-s_n)$ 上的最小二乘回归函数，$y_n - s_n$就是残差。于是原来的Gradient Boost表达式变成：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/37566404.jpg" width="400px" /></p>
+
+<p>最小化 $\eta$ 就是 $(g_t\ transformed\ input,\ residual)$ 上的单变量线性回归。所以GradientBoost for regression 的 $\alpha_t = optimal\ \eta\ by\ g_t\ transformed\ linear\ regression$.</p>
+
+<p>Gradient Boosted Decision Tree也就是使用回归算法为Decision Tree。伪代码如下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/38067174.jpg" width="500px" /></p>
+
+<p>总结下Ensemble Methods的有点：</p>
+
+<ul>
+  <li>cure underfitting, 通过feature transform加强$G(x)$的Bias。</li>
+  <li>cure overfitting, 通过多样化假设的合并达到regularization的目的，减少$G(x)$的variance。</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Logistic Regression and Linear Discriminant Analysis]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/02/17/lr-and-lda/"/>
+    <updated>2016-02-17T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/02/17/lr-and-lda</id>
+    <content type="html"><![CDATA[<p>在回归方法中，我们找一个超平面作为类与类之间的decision boundary。回归方法为每个分类建立一个判别函数 $\sigma_k (x)$, 对任意的 $x$，选出得到最大值的判别函数最为归属类。对于后验概率模型 $Pr(G = k|X = x)$ 也是使用同样的方法。对于$\sigma_k (x) 和 Pr(G = k|X = x)$ 来说，只要它们是线性的，那么得到的decision boundary也是线性的。</p>
+
+<p>虽然无法直接使得 $\sigma_k (x) 和 Pr(G = k|X = x)$ 是线性的，但是如果有一个单调的转化函数能够使得是线性的，那么我们也可以得到一个超平面分割数据点。</p>
+
+<p>Logistic Regression 和 Linear Discriminant Analysis就是基于这样的需求构造的模型。</p>
+
+<!--more-->
+
+<h2 id="logistic-regression">Logistic Regression</h2>
+
+<p>逻辑回归的模型也是源于通过 $x$ 的线性函数建立 $K$ 个类的后验概率模型，同时保证它们在[0,1]之间以及和为1。</p>
+
+<script type="math/tex; mode=display"> log {Pr(G = 1 \vert X = x) \over Pr(G = K \vert X = x)} = \beta_{10} + \beta_1^Tx </script>
+
+<script type="math/tex; mode=display"> log {Pr(G = 2 \vert X = x) \over Pr(G = K \vert X = x)} = \beta_{20} + \beta_2^Tx </script>
+
+<script type="math/tex; mode=display"> log {Pr(G = K-1 \vert X = x) \over Pr(G = K \vert X = x)} = \beta_{(K-1)0} + \beta_{K-1}^Tx </script>
+
+<p>这个转换函数称为 logit transformation, 概率称为 log-odds。得到</p>
+
+<script type="math/tex; mode=display"> Pr(G = k \vert X = x) = {exp(\beta_{k0} + \beta_k^Tx) \over {1 + \sum_{l=1}^{K-1} exp(\beta_{l0} + \beta_l^Tx) }} </script>
+
+<script type="math/tex; mode=display"> Pr(G = K \vert X = x) = {1 \over {1 + \sum_{l=1}^{K-1} exp(\beta_{l0} + \beta_l^Tx) }} </script>
+
+<p>当 $K=2$ 的时候，输出设为0/1, 输出结果就是一个伯努利过程。可以使用maximum likelihood来对模型进行参数估计。</p>
+
+<p>假设 $y_i = 1\ when\ g_i = 1,\ y_i = 0\ when\ g_i = 2$, 那么不妨设 $p(x_i; \beta) = Pr(G = 1|X = x) = {\beta^Tx \over {1 + exp(\beta^Tx)}}$，这时的 $p(x_i; \beta) = {1 \over {1 + exp(-\beta^Tx)}}$, 也成为<code>sigmoid function</code>。</p>
+
+<p>log-likelihood得到结果为</p>
+
+<script type="math/tex; mode=display"> \ell(\beta) = \sum {y_i log p(x_i; \beta) + (1 - y_i)log(1-p(x_i, \beta))} 
+        = \sum {y_i\beta^Tx_i - log(1 + exp(\beta^Tx_i))}, </script>
+
+<script type="math/tex; mode=display">其中\beta = \{\beta_{10}, \beta_1\}, x_i$ 的第一个元素为截距1.</script>
+
+<script type="math/tex; mode=display"> 求导后得到\frac{\partial \ell (\beta)}{\partial \beta} = \sum_{i=1}^N {x_i(y_i - p(x_i; \beta))} = 0 </script>
+
+<p>此时，可以使用梯度下降法或者牛顿法求解 $\beta$。下面使用牛顿法求解。</p>
+
+<p>$$ \frac{\partial^2 \ell (\beta)}{\partial \beta \partial \beta^T} = 
+    - \sum_{i=1}^N  {x_i x_i^T p(x_i; \beta)(1 - p(x_i; \beta))} $$
+于是牛顿迭代即为
+<script type="math/tex"> \beta^{new} = \beta^{old} - (\frac{\partial^2 \ell (\beta)}{\partial \beta \partial \beta^T})^{-1} \frac{\partial \ell (\beta)}{\partial \beta}, 其中所有的倒数都是在\beta^{old}的时候计算的 </script></p>
+
+<p>下面说明这个问题就是加权最小二乘问题，可以变换得到
+<script type="math/tex">\frac{\partial \ell (\beta)}{\partial \beta} = X^T(Y-P),\ \frac{\partial^2 \ell (\beta)}{\partial \beta \partial \beta^T} = -X^TWX </script>
+其中 $Y$ 是 $y_i$的向量，$X$ 为 $N * (p+1)$ 的矩阵，$W$ 是一个 $N*N$ 的对角矩阵，元素为 $p(x_i; \beta^{old})(1 - p(x_i; \beta^{old}))$</p>
+
+<p>可以得到 <script type="math/tex">\beta^{new} = (X^TWX)^{-1}X^TWz,\ z = X\beta^{old} + W^{-1}(Y-P)</script>, 这个表达式得到的就是weighted least squares step. $z$ 称为 response，或者说是 <em>adjusted response</em>。每个迭代$p$都会变，所以$W 和 z$也都会变，可以用<em>iteratively reweighted least squares</em>或者IRLS算法来计算，每个迭代就是解决一个weighted least squares问题：</p>
+
+<script type="math/tex; mode=display">\beta^{new} \gets arg min_\beta (z - X\beta)^TW(z - X\beta)</script>
+
+<p><em>注：weighted linear least squares</em></p>
+
+<script type="math/tex; mode=display"> arg min_\beta \sum_{i=1}^m w_i \|y_i - \sum_{j=1}^n x_{ij}\beta_j\|^2 = arg min_\beta \vert W^{1 \over 2}(Y - X\beta) \vert ^2 </script>
+
+<script type="math/tex; mode=display"> \hat{\beta} = (X^TWX)^{-1}X^TWY </script>
+
+<h2 id="linear-discriminant-analysis">Linear Discriminant Analysis</h2>
+
+<p>接下来我们给出另外一个模型，它的后验概率的logit也同样是一个线性模型。</p>
+
+<p>假设 $f_k(x)$ 是类 $G=k$ 的输入的条件密度函数，$\pi_k$ 是类 $k$ 的先验概率，有 $\sum_{k=1}^K \pi_k = 1$。那么依据贝叶斯公式得到</p>
+
+<script type="math/tex; mode=display"> Pr(G=k \vert X=x) = \frac{f_k(x) \pi_k}{\sum_{i=1}^K f_i(x) \pi_i} </script>
+
+<p>假设每个类服从multivariate Guassian分布， 那么</p>
+
+<script type="math/tex; mode=display">f_k(x) = \frac{e^{-1/2(x-\mu_k)^T\Sigma_k^{-1}(x-\mu_k)}}{(2\pi)^{p/2} \vert \Sigma_k \vert ^{1/2}}</script>
+
+<p>当每个类都有一个相同的协方差矩阵 $\Sigma$ 的时候，我们有以下推导</p>
+
+<script type="math/tex; mode=display"> log {Pr(G = k \vert X = x) \over Pr(G = \ell \vert X = x)} = log{\pi_k \over \pi_\ell} - \frac{1}{2}(\mu_k + \mu_\ell)^T\Sigma^{-1}(\mu_k - \mu_\ell) + x^T\Sigma^{-1}(\mu_k - \mu_\ell) </script>
+
+<p>注意到这个式子也就是 $\alpha_{k0} + \alpha_k^Tx$，也就是和logistic regression一样的模型。</p>
+
+<p>并且这个式子可以推出线性判别函数为 </p>
+
+<script type="math/tex; mode=display"> \delta_k(x) = x^T\Sigma^{-1}\mu_k - \frac{1}{2}\mu_k^T\Sigma^{-1}\mu_k + log\pi_k</script>
+
+<script type="math/tex; mode=display"> G(x) = argmax_k \delta_k(x) </script>
+
+<p>实际上，高斯分布的参数可以从训练集中估计：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-16/18265816.jpg" width="400px" /></p>
+
+<p>可以看出来LDA做了一下的假设：</p>
+
+<ul>
+  <li>类的分布是高斯函数</li>
+  <li>每个类都有一个共同的协方差矩阵</li>
+</ul>
+
+<p>看起来LDA和logistic regression模型是一样的，它们的区别是对线性参数估计的方法不同。
+$X$ 和 $G$ 的联合概率如下</p>
+
+<script type="math/tex; mode=display"> Pr(X, G=k) = Pr(X)Pr(G=k \vert X) </script>
+
+<p>对于LDA和logistic regression，公式的后半部分都是一样的。LR模型也是忽略了前半部分的边际概率，直接对条件概率进行最大似然估计。但是LDA的参数估计是基于整个联合概率分布的</p>
+
+<p><script type="math/tex"> Pr(X, G=k) = \phi(X; \mu_k, \Sigma)\pi_k, \phi是高斯密度函数 </script>
+<script type="math/tex"> Pr(X) = \sum_{k=1}^K\phi(X; \mu_k, \Sigma)\pi_k</script></p>
+
+<p>这个边际概率有什么用呢，总的来说是提供参数估计的更多信息，减少参数估计的方差。但是在LDA中，由于outliers会对协方差矩阵做出一定贡献，所以LDA对outliers会比较敏感。如果我们忽略这些假设，而Input确实是高斯分布的，那么根据Efrom的论文，会有”in the worst case ignoring this marginal part of the likelihood constitutes a loss of efficiency of about 30% asymptotically in the error rate”.</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Gradient Descent and Newton Method]]></title>
@@ -64,8 +406,9 @@
 
 <p>其中 $\nabla^2 f(x^{(k)})$ 是 $f(x)$ 在 $x^{(k)}$ 处的Hesse矩阵，为了求极值，对二阶泰勒公式求导，得到</p>
 
-<p><script type="math/tex"> \nabla f(x) = \nabla f(x^{(k)}) + \nabla^2 f(x^{(k)})(x - x^{(k)}) = 0 </script>
-<script type="math/tex"> x^{(k+1)} \gets x^{(k)} - \nabla^2 f(x^{(k)})^{-1} \nabla f(x^{(k)}) </script></p>
+<script type="math/tex; mode=display"> \nabla f(x) = \nabla f(x^{(k)}) + \nabla^2 f(x^{(k)})(x - x^{(k)}) = 0 </script>
+
+<script type="math/tex; mode=display"> x^{(k+1)} \gets x^{(k)} - \nabla^2 f(x^{(k)})^{-1} \nabla f(x^{(k)}) </script>
 
 <p>其中我们假设Hesse矩阵是可逆的，并且对于正定的Hesse矩阵，我们可以确定是迭代方向是下降的，因为 $-\nabla f(x)^T \nabla^2 f(x)^{-1} \nabla f(x) &lt; 0$, $-\nabla^2 f(x)^{-1} \nabla f(x)$就被称为 <em>Newton step</em>. 算法如下：</p>
 
@@ -73,7 +416,7 @@
 
 <h3 id="quasi-newton-methods">Quasi-Newton Methods</h3>
 
-<p>Qusi-Newton即拟牛顿法，这是一种“模拟“的牛顿法，它模拟牛顿法中的搜索方向的生成方式。那么为什么要模拟呢？</p>
+<p>Quasi-Newton即拟牛顿法，这是一种“模拟“的牛顿法，它模拟牛顿法中的搜索方向的生成方式。那么为什么要模拟呢？</p>
 
 <p>在牛顿法中，有如下的缺点：</p>
 
@@ -91,7 +434,7 @@
 <p>记 $y_k = g_{k+1} - g_k, \delta_k = x^{(k+1)} - x^{k}$, 则有
 <script type="math/tex">y_k = H_k \delta_k 或者 H_k^{-1} y_k = \delta_k </script></p>
 
-<p>拟牛顿法将 $G_k$ 作为 $H_k^{-1}$ 的近似，要求矩阵 $G_k$ 同样满足，每次迭代都是正定，并且 $G<em>{k+1} y_k = \delta_k$。按照拟牛顿条件，每次迭代中可以选择更新矩阵 $G</em>{k+1} = G_k + \nabla G_k$. 由此延伸出来三种算法</p>
+<p>拟牛顿法将 $G_k$ 作为 $H_k^{-1}$ 的近似，要求矩阵 $G_k$ 同样满足，每次迭代都是正定，并且 $G_{k+1} y_k = \delta_k$ . 按照拟牛顿条件，每次迭代中可以选择更新矩阵 $G_{k+1} = G_k + \nabla G_k$ . 由此延伸出来三种算法</p>
 
 <ol>
   <li>DFP算法使用 $G_k$ 逼近Hesse矩阵的逆矩阵。</li>
@@ -3240,392 +3583,6 @@ struct linger {
     <p>SO_REUSEADDR需要在bind调用之前就设定。另外，还可以在绑定IP通配符。但是最好是先绑定确定的IP，最后绑定通配符IP。运行在这些端口上的服务器实例可以相同，也可以不同。在TCP中，不允许建立起一个已经存在的相同的IP和端口的连接。但是在UDP中，是允许的，特别是在多播中。</p>
   </li>
 </ol>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Summary of TCP/IP ILLustrated Volume 1]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/07/18/TCP-IP/"/>
-    <updated>2014-07-18T09:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/07/18/TCP-IP</id>
-    <content type="html"><![CDATA[<p>Modified from several blogs. Sorry for failing to detailed list.</p>
-
-<hr />
-
-<p>要快速学习一本书，最简单的途径是在网上找一些靠谱的读书笔记、总结之类的博文，然后细细研读，再根据重要的或者未详尽描述的知识点在书中阅读。根据这样的学习方法，总结了《TCP/IP详解 卷1：协议》这本书。</p>
-
-<p>介绍是以图为驱动的，接下来就开始吧。</p>
-
-<h2 id="tcpip">tcp/ip协议簇</h2>
-
-<p><img src="http://dl.iteye.com/upload/attachment/598180/ebd73be4-de65-38cc-adde-514a3d486844.jpg" alt="" /></p>
-
-<!--more-->
-
-<p>上图左侧是数据包在各个网络层的状态，右侧是数据包在各个网络层的传递。其中，以太网口通过以太网地址来决定丢弃还是交付通过以太网口的数据包（此时称为以太网帧）；以太网驱动程序通过检验和来决定将其丢弃还是交付给上一层；接着，驱动程序通过以太网首部中的“类型”字段对以太网帧进行分用，确定这是一个ip数据报，还是一个ARP/RARP请求/应答；如果是后者，则通过协议进行应答；如果是ip数据报，则脱去帧头帧尾，将其交付到Ip层。IP层首先进行检验和计算以决定交付还是丢弃报文，然后通过ip首部中的“协议”字段确定其是UDP数据报、TCP段还是ICMP、IGMP报文，从而对IP数据报进行分用。如果是ICMP或IGMP，则根据协议对其进行处理，如果是TCP或UDP，则去其头部，将其交付到运输层；TCP/UDP则是通过端口号将数据分用到对该端口进行监听的应用程序。</p>
-
-<h2 id="section">链路层</h2>
-
-<h3 id="section-1">以太网帧</h3>
-
-<p><img src="http://dl.iteye.com/upload/attachment/598848/99c6503e-20d5-34f3-976f-8c1fc239d179.jpg" alt="" /></p>
-
-<p>上图是以太网帧的封装格式。其中的“类型”字段正是用于IP数据报、ARP报文和RARP报文的分用。可以看到，每个以太网帧有最小长度和最大长度，最小长度为64字节，是为了检测冲突；最大长度是1518，最大传输单元MTU为1500字节。</p>
-
-<h3 id="arp--rarp">ARP &amp; RARP</h3>
-
-<p>当一台主机把以太网数据帧发送到位于同一局域网上的另一台主机时，是根据48bit以太网地址来确定目的接口的。设备驱动程序从不检查IP数据报中的目的IP地址。</p>
-
-<p><strong>ARP</strong>（地址解析协议）是设备<strong>通过自己知道的IP地址来获得自己不知道的物理地址</strong>的协议。假如一个设备不知道它自己的IP地址，但是知道自己的物理地址，网络上的无盘工作站就是这种情况，设备知道的只是网络接口卡上的物理地址。这种情况下应该怎么办呢？RARP（逆地址解析协议）正是针对这种情况的一种协议。
-RARP以与ARP相反的方式工作。<strong>RARP发出要反向解析的物理地址并希望返回其对应的IP地址</strong>，应答包括由能够提供所需信息的RARP服务器发出的IP地址。虽然发送方发出的是广播信息，RARP规定只有RARP服务器能产生应答。许多网络指定多个RARP服务器，这样做既是为了平衡负载也是为了作为出现问题时的备份。</p>
-
-<p>ARP高效运行的关键是由于每个主机上都有一个ARP高速缓存，这个高速缓存存放了最近IP地址到硬件地址之间的映射记录。高速缓存中的每一项的生存时间为20分钟，开始时间从被创建时开始算起。可以使用<code>arp -a</code>来检查ARP高速缓存。下图为ARP的分组格式。</p>
-
-<p><img src="http://dl.iteye.com/upload/attachment/599192/e13ec54f-0994-358e-9772-fcfb934e2741.jpg" alt="" /></p>
-
-<ul>
-  <li>对于arp请求，其以太网帧首部中的<strong>硬件地址为全1</strong>，<strong>代表广播</strong>，请求主机向它所在的网络广播一份arp请求。</li>
-  <li>ARP请求从一个网络发往另一个网络，连接2个网络的路由可以回答该请求，这个过程叫做委托ARP或<strong>代理ARP</strong>。</li>
-  <li>arp请求还有另外一个特性叫<strong>免费arp</strong>，它是指主机发送arp查找自己的ip地址。
-    <ul>
-      <li>一个主机可以通过它来确定另一个主机是否设置了相同的ip地址。检测<strong>网络存在ip冲突</strong>。</li>
-      <li>如果发送免费arp的主机正好改变了硬件地址，那么这个分组就可以使其他主机高速缓存中旧的硬件地址<strong>进行相应的更新</strong>。</li>
-    </ul>
-  </li>
-</ul>
-
-<h2 id="section-2">网络层</h2>
-
-<h3 id="ip">IP协议</h3>
-
-<p><strong>IP提供不可靠、无连接的数据报传送服务</strong>。<strong>不可靠是指它不能保证IP数据报能成功地到达目的地</strong>，如果发生某种错误时（如路由器暂时用完了缓冲区），IP有一个简单的处理算法：丢弃该数据报，然后发送ICMP消息给信源端。<strong>无连接的意思是，IP数据报不维护任务关于后续数据报的状态信息</strong>，每个数据报的处理是相互独立的。首先看一下IP数据报的格式：</p>
-
-<p><img src="http://dl.iteye.com/upload/attachment/598868/830a6b5c-cf71-39e2-bd0f-6b5bfa25e2ab.jpg" alt="" /></p>
-
-<p>特地说明下检验和是怎么产生的。TCP和IP协议中都有校验和字段。IP协议根据IP首部计算的检验和码，它不对首部后面的数据进行计算。为了计算一份数据报的IP检验和，首先把检验和字段置为0，然后对首部中每16bit进行二进制反码求和。而TCP、UDP协议的检验和需要对数据进行计算，并且要伪造一个IP头，包括IP地址、报文长度等数据。</p>
-
-<p>IP协议的协议字段包含了被IP包封装了的协议，这个逆过程称为<strong>分用</strong>。包括TCP、UDP、ICMP及IGMP等。</p>
-
-<h3 id="ip-1">IP路由选择</h3>
-
-<p>路由器与主机的本质区别在于，主机从不把数据报从一个接口转发到另一个接口，而路由器则要转发数据。IP可以从TCP、 UDP、ICMP、IGMP接口数据报（即本地待发送的数据），也可以从一个网络接口接收数据报。IP层在内存中有一个<strong>路由表</strong>，当收到一份数据报并进行发送时，它都要对该表搜索一次。当数据报来自某个网络接口时，IP首先检查目的目的IP地址是否为本机的IP地址之一或者IP广播地址。如果确实是这样，数 据报就被送到由IP首部协议字段所指定的协议模块进行处理。如果数据报的目的不是这些地址，那么（1）主机将丢弃报文；（2）路由器对数据报进行转发。</p>
-
-<p>路由表中的每一项包括：(通过<code>netstat -rn</code>可以查到该路由表）</p>
-
-<ol>
-  <li>目的IP地址，它既可以是一个完整的主机地址，也可以是一个网络地址，主机地址有一个非0的主机号，以指定某一特定的主机，而网络地址中的主机号为0，以指定网络中的主机。</li>
-  <li>下一跳路由器的ip地址，或者有直接连接的网络IP地址。</li>
-  <li>标志。其中一个标志指明目的IP地址是网络地址还是主机地址，另一个标志指明下一站路由是路由器还是一个直接相连的接口。总共有五种不同的标 志：U（该路由可用）、G（该路由是到一个网关）、H（该路由是到一个主机）、D（该路由是由重写向报文创建的）、M（该路由已被重定向报文修改）。</li>
-</ol>
-
-<p>IP路由选择主要完成以下这些功能：</p>
-
-<ol>
-  <li>搜索路由表，寻找能与目的IP地址完全匹配的表目，如果找到，就把报文发往该地址；</li>
-  <li>搜索路由表，寻找能与目的网络号相匹配的表目，如果找到，则把报文发送给该表目指定的下一站路由器直接连接的网络接口；</li>
-  <li>搜索路由表，寻找标为“默认”的表目，如果找到，把报文发送给该表目指定的下一站路由器。</li>
-</ol>
-
-<p>如果上面这些步骤都没有成功，那么该数据报就不能被发送。如果不能传送的数据报来自本机，那么一般会向生成数据报的应用程序返回一个“主机不可达”或“网络不可达”的错误。</p>
-
-<p>下图描述了IP层处理过程的简单流程：</p>
-
-<p><img src="http://dl.iteye.com/upload/attachment/599650/5ba5f055-2428-35fa-8791-c03dae480fce.jpg" alt="" /></p>
-
-<p>系统通过三种途径改变路由表的表项，一个是<strong>route命令</strong>，由管理员手动配置路由，一个是<strong>ICMP重定向报文</strong>，这是一种只能由路由器生成的ICMP差错报文，最后一个则是<strong>路由守护程序</strong>，路由守护程序是一个应用程序，它通过发送ICMP路由器请求报文，接收ICMP路由器通告报文来获知相邻的网络情况。</p>
-
-<h3 id="icmp">ICMP</h3>
-
-<p>ICMP是Internet控制报文协议，用于查询和传输出错报告控制信息。</p>
-
-<p>其中<strong>ICMP查询报文</strong>包括：</p>
-
-<ul>
-  <li>回显应答/请求， <strong>ping程序使用的报文</strong></li>
-  <li>路由器通告/请求，用于IP选路（另一种是RIP路由选择信息协议）</li>
-  <li>时间戳请求/应答，允许系统向另一个系统查询当前的时间</li>
-  <li>子网掩码请求/应答， 用于无盘系统在引导过程中获取自己的子网掩码</li>
-</ul>
-
-<p><strong>ICMP差错报文</strong>：</p>
-
-<ul>
-  <li>不可达报文</li>
-  <li>超时报文</li>
-  <li>重定向差错报文，修改路由表</li>
-  <li>源站抑制差错，系统接收数据报的速度大于数据处理的数据</li>
-</ul>
-
-<p><strong>ICMP超时+ICMP端口不可达+TTL是traceroute程序的工作原理。</strong>traceroute程序发送一份TTL字段为1的IP数据报文给目的主机，处理这份数据报的第一个路由器将其TTL值减1，丢弃该数据报，并发回一份ICMP超时报文，通过报文中的信源地址我们将得到该路由器的地址；接着，traceroute发送一份TTL值为2的IP数据报文给目的主机，这样，第二个路由器将发回一份ICMP超时报文，….，直到最后该报 文到达目的主机并被接收，那么如何判断报文已经到达目的主机了呢？traceroute将选择一个不可能的值作为目的端口号（大于30000），使目的主机的任何一个应用程序都不可能使用该端口，这样，目的主机收到该报文时，将产生一份“ICMP端口不可达”报文给，这样，当traceroute收到的 ICMP报文是“目的端口不可达”时，可以判断已经完成了整个traceroute的过程。记得IP首部中的“选项”部分还可以设置“严格的源站选路”和 “宽松的源站选路”选项，可以在traceroute发送的IP数据报首部中加入该选项，来规划traceroute的路径。</p>
-
-<h3 id="section-3">互联网的地址、广播、多播</h3>
-
-<p><img src="http://dl.iteye.com/upload/attachment/599740/8fca4629-889a-3533-9abe-bd3915fdbb6f.jpg" alt="" /></p>
-
-<ul>
-  <li>A类   0.0.0.0 – 127.255.255.255</li>
-  <li>B类 <strong>128</strong>.0.0.0 – 191.255.255.255</li>
-  <li>C类 <strong>192</strong>.0.0.0 – 223.255.255.255</li>
-  <li>D类 <strong>224</strong>.0.0.0 – 239.255.255.255</li>
-  <li>E类 <strong>240</strong>.0.0.0 – 247.255.255.255</li>
-</ul>
-
-<p>有三类地址：<strong>单播地址，多播地址和广播地址</strong>。主机号为全0代表网络号，主机号为全1代表在该网络的广播。有<strong>四种广播地址</strong>：</p>
-
-<ol>
-  <li>受限的广播地址255.255.255.255.该地址用于主机配置过程中IP数据报的目的地址，在任何情况下，路由器都不转发目的地址为受限的广播地址的数据报，这样数据报仅出现在地址网络中。</li>
-  <li>指向网络的广播地址，主机号为全1.如A类广播地址为netid.255.255.255，一个路由器必须转发指向网络的广播。</li>
-  <li>指向子网的广播。指向子网的广播地址为主机号为全1且有特定子网号的地址。作为子网直接广播地址的IP地址需要了解子网的掩码，例如，如果路由 器收到发往128.1.2.255的数据报，当B类网络128.1的子网掩码为255.255.255.0时，该地址就是指向子网的广播地址；但如果该子 网的掩码为255.255.254.0，该地址就不是指向子网的广播地址。</li>
-  <li>指向所有子网的广播。指向所有子网的广播也需要了解目的网络的子网掩码，以便与指向网络的广播地址区分开来，指向所有子网的广播地址的子网号和主机号全为1。例如，如果目的子网掩码为255.255.255.0，那么IP地址128.1.255.255就是一个指向所有子网的广播地址，然而，如 果网络没有划分子网，这就是一个指向网络的广播。</li>
-</ol>
-
-<p>广播给网络中的主机产生了很多负担，<strong>广播的数据报要直到UDP层才被确定是否为主机所需要</strong>（没有监听的端口）然后才会被丢弃。多播是介于单播与广播之间的一种方式。</p>
-
-<p>能够接收发往一个特定多播组地址数据的主机集合称为主机组。一个主机组可以跨越多个网络，主机组中成员可以随时加入或离开主机组。主机组中对主机的数量没有限制，同时不属于某一主机组的主机可以向该组发送信息。
-下图是多播组地址到以太网地址的转换：</p>
-
-<p><img src="http://dl.iteye.com/upload/attachment/599747/65577750-0fa4-3a4c-addd-dcdf7b62e2f9.jpg" alt="" /></p>
-
-<h3 id="igmp">IGMP协议</h3>
-
-<p>Internet组管理协议（IGMP）是因特网协议家族中的一个<strong>组播协议</strong>，用于 IP主机向任一个直接相邻的路由器报告他们的组成员情况。它规定了处于不同网段的主机如何进行多播通信，其前提条件是路由器本身要支持多播。</p>
-
-<p>它用来在IP主机和与其直接相邻的组播路由器之间建立、维护组播组成员关系。IGMP不包括组播路由器之间的组成员关系信息的传播与维护，这部分工作由各组播路由协议完成。</p>
-
-<p>参与IP组播的主机可以在任意位置、任意时间、成员总数不受限制地加入或退出组播组。组播路由器不需要也不可能保存所有主机的成员关系，它只是通过IGMP协议了解每个接口连接的网段上是否存在某个组播组的接收者，即组成员。而主机方只需要保存自己加入了哪些组播组。多播路由器并不关心有多少主机属于一个多播组，它只是想知道给定接口上的多播组是否还有人对这个多播组感兴趣。</p>
-
-<h3 id="section-4">选路协议</h3>
-
-<p>当相邻的路由器之间进行通信，以告知对方每个路由器当前所连接的网络，这时就出现了动态选路。路由器之间必须采用选路协议进行通信，这样的协议有很多种，如RIP、OSPF，路由守护进程运行选路协议，并与其相邻的一些路由器进行通信。路由守护程序将选路策略加入到系统中，选择路由并加入到内核的路由表中。如果守护程序发现前往同一信宿存在多条路由，那么它将（以某种方法）选择最佳路由并加入内核路由表中。如果路由守护程序发现一条链路已经断开，它可以删除受影响的路由或加入另一条路由以绕过该问题。</p>
-
-<p>在像Internet这样的系统中，目前采用了许多不同的选路协议。Internet是以一组自治系统的方式组织的，每个自治系统通常由单个实体管 理。常常将一个公司或大学校园定义为一个自治系统。每个自治系统可以选择该自治系统中各个路由器之间的选路协议，这种协议称之为内部网关协议（IGP）， 常用的IGP有RIP和OSPF。不同自治系统的路由器之间进行通信协议称为外部网关协议（BGP）。</p>
-
-<h2 id="section-5">传输层</h2>
-
-<p>终于到了传输层，先来个开胃菜UDP，再介绍TCP。</p>
-
-<h3 id="udp-">UDP 用户数据报协议</h3>
-<p>下图是UDP首部的格式：</p>
-
-<p><img src="http://dl.iteye.com/upload/attachment/599727/3174ddc1-a81b-36ea-ac8e-a72a8418188d.jpg" alt="" /></p>
-
-<p>当UDP数据报的长度超过网络的MTU时，必须对其进行分片。如果IP层设置了DF位但是通过某个网络时需要分片，将会产生ICMP“不可达（需要分片）”的差错报文。</p>
-
-<p>分片需要注意的是：(1)在分片时，除最后一片外，其他每一 、片中的数据部分（除IP首部外的其余部分）必须是8整数倍；(2)运输层首部只出现在第一片中。UDP比较简陋，所有包丢失、重传问题都必须由上层应用程序来管理。</p>
-
-<h3 id="tcp-">TCP 传输控制协议</h3>
-
-<p>TCP提供<strong>面向连接的，可靠的</strong>字节流服务， 它设计了各种机制以实现丢包、重发、乱序、链路传输错误等传输过程中可能出现的错误。</p>
-
-<p><strong>1. TCP报文格式</strong></p>
-
-<p><img src="http://dl.iteye.com/upload/attachment/599787/eccadd8c-6160-3bda-837c-704c0d09c0b0.jpg" alt="" /></p>
-
-<p>其中6个标志比特，它们中的多个可以被同时设置为1：</p>
-
-<ul>
-  <li>URG：紧急指针有效，与后面的紧急指针结合起来</li>
-  <li>ACK：确认序号有效</li>
-  <li>PSH：接收方尽快将这个报文段交给应用层</li>
-  <li>RST：重建连接</li>
-  <li>SYN：同步序号用来发起一个连接</li>
-  <li>FIN：发端完成发送任务，将要关闭连接</li>
-</ul>
-
-<p>其他字段有：</p>
-
-<ul>
-  <li>窗口大小表明接收端当前的接收能力，以字节为单位，16位窗口限制了最大值为65535字节，在选项字段中，有一个窗口刻度选项，允许这个值按比例放大。</li>
-  <li>紧急指针是一个正的偏移量，和序号中的值相加表示紧急指针最后一个字节的序号。</li>
-  <li>选项字段可以包括<strong>最长报文大小（MSS）</strong>，这是最常见的可选字段。每个连接方通常都在通信的第一个报文段中指明这个选项，表明本端所能接收的最大长度的报文段；还有窗口扩大选项以及时间戳选项。</li>
-</ul>
-
-<p><strong>2. 连接与终止</strong></p>
-
-<p><img src="http://dl.iteye.com/upload/attachment/599805/5991ccb8-afaa-3670-9f00-4da6f24a38ea.jpg" alt="" /></p>
-
-<p>tcp连接的其中一方发起主动连接，它填写目的端口和源端口号，初始化序列号，设置SYN位，并设置了mss选项，将该TCP段发给连接的另一方。 另一方收到tcp段后，与主动连接方做了同样的事情，同时携带ACK，把对主动连接方的初始序号加1填入确认序列号字段，发送给主动连接方。主动连接方向 被动连接方发去一个ack，连接由此建立。</p>
-
-<p>图中还演示了连接关闭的过程，终止一个连接需要四次握手。任何一方在最后的发送数据段中设置FIN位来终止这个方向的连接。当一端收到一个FIN， 它必须通知应用层另一端已经终止了那个方向的数据传输，也就是说，不再会有数据从那个方向传来，但它仍然能够发送数据，收到FIN方回复一个ack。</p>
-
-<p>由图我们还可以看到，SYN和FIN各占用了一个序号。</p>
-
-<p>图中的端口A、B还让我们想起一个问题，如果不存在用户进程在监听端口B（<strong>即端口B没有打开</strong>）时，主机A将会收到什么呢？在UDP中，发送端将收到一份ICMP端口不可达报文，那么在TCP连接中呢？TCP使用复位，即在回应发送端的TCP段中设置了RST位，携带ack主动发送端的确认序列号，自己的序列号为0。发送端收到这样的tcp段后，即知道连接被拒绝了。</p>
-
-<p>那如果<strong>主机B根本就不存在</strong>呢？这时主机A将过一段时间再发送一个SYN到主机B请求连接，一般建立一个连接的最长时间限制为75秒。</p>
-
-<p>如果一方已经关闭或导演终止而另一方却不知道，我们将这样的TCP连接称为<strong>半打开</strong>的。比方说在主机A（客户端）上运行telnet程序，通过它和主机B（服务器）连接，由于突然停电，主机A没有向主机B的telnet端口发送FIN消息，结果主机B就以为与主机A的连接还在。主机A重新启动后再次与主机B连接将会启动新的服务器程序，这样<strong>将会导致主机B上产生很多半打开的TCP连接</strong>。如果是服务器主机B突然当掉了，而客户端A并不知道，它继续向主机B发送数据，假如主机B很快恢复了，然而先前的所有连接信息都丢失了，收到来自主机A的消息时，它<strong>回复以RST消息</strong>（相当于没有端口在监听）。</p>
-
-<p>TCP支持同时打开或同时关闭，不过同时打开将经历4次握手。同时关闭进入<code>TIME_WAIT</code>状态，要再经过2MSL超时才关闭。</p>
-
-<p><img src="http://blog.chinaunix.net/photo/91603_100713212857.jpg" alt="同时打开" /></p>
-
-<p><img src="http://blog.chinaunix.net/photo/91603_100713213550.jpg" alt="同时关闭" /></p>
-
-<p><strong>3. TCP的状态变迁</strong></p>
-
-<p><img src="http://blog.chinaunix.net/photo/91603_100707001221.jpg" alt="" /></p>
-
-<p>状态图中比较重要的一点就是，主动关闭方在收到对方的对自己FIN的ACK以及对方的FIN后，进入一个状态叫<code>TIME_WAIT</code>，这种状态也称为<code>2MSL</code> 等待状态。每个TCP实现必须选择一个报文段最大生存时间MSL(Maximum Segment Lifetime)，它是任何报文段被丢弃前在网络内的最长时间。对于一个具体实现所给定的MSL值，处理的原则是：当TCP执行一个主动关闭，并发回最后一个ACK，该连接必须在<code>TIME_WAIT</code>状态停留的时间为2倍的MSL，<strong>以防这个ACK丢失的时候，可以重发一个ACK（对应另一端收不到ACK重发最后的FIN消息）</strong>。这种2MSL等待的另一个结果是这个TCP连接在2MSL等待期间，定义这个连接的插口（客户的IP地址和端口号，服务的IP地址和端口号）不能再被使用，这个连接只能在2MSL结束后才能被使用。</p>
-
-<p><img src="http://blog.chinaunix.net/photo/91603_100708211823.jpg" alt="" /></p>
-
-<p><strong><code>TIME_WAIT</code>是执行主动关闭的那一段进入的状态，存在的理由有两个</strong>：</p>
-
-<ol>
-  <li>可靠地实现TCP全双工连接的终止，也就是上面的那个理由。</li>
-  <li>
-    <p>运行老的重复分节在网络中消逝。</p>
-
-    <p>防止上一个连接到达的TCP误解为现在的连接的TCP。<code>TIME_WAIT</code>存在2MSL，而两个方向上的TCP都最多存活MSL秒即被丢弃。</p>
-  </li>
-</ol>
-
-<p><strong>4. 呼叫连接请求队列</strong></p>
-
-<p>TCP处理呼入连接请求规则:</p>
-
-<ol>
-  <li>正等待连接的一端有一个固定长度的连接队列，该队列中的连接已经完成3次握手，但还没有被应用层接收。</li>
-  <li>
-    <p>应用层指定这个连接队列的最大长度，这个值通常叫做积压值(backlog)。取值范围为0至5的整数。</p>
-
-    <p>不同环境下，backlog的含义与实现都将不同：</p>
-
-    <blockquote>
-      <p>The behaviour of the backlog parameter on TCP sockets changed with Linux 2.2. Now it specifies the queue length for completely established sockets waiting to be accepted， instead of the number of incomplete connection requests. The maximum length of the queue for incomplete sockets can be set using the tcp_max_syn_backlog sysctl. When syncookies are enabled there is no logical maximum length and this sysctl setting is ignored.</p>
-    </blockquote>
-  </li>
-  <li>当一个请求连接到达(SYN)，TCP根据连接队列中的连接数确认是否接收这个连接。但这时的最大排队连接数并不等于积压值。</li>
-  <li>如果连接队列中的连接数少于最大排队的连接数，TCP将确认建立连接。在客户端主动连接成功而服务端应用层还没接收这个连接时，客户端发送的数据将保存在服务端的TCP缓存队列。</li>
-  <li>如果连接队列没有空间，TCP将丢弃收到的SYN请求，不发回任何报文(包括RST)。客户端将超时重传SYN请求，等待连接队列有空间。</li>
-</ol>
-
-<p>TCP服务器无法使客户端的主动打开失效。因为服务器接收到请求时，TCP的三次握手已经完成。所以对于限定远程IP地址的服务器，必须在客户端三次握手建立连接后才能判断是否合法。</p>
-
-<p><strong>5. TCP的数据流</strong></p>
-
-<p>建立完连接后，两台主机开始进行数据的传输。传输的数据可以分成两种，一种是<strong>交互式数据的传输</strong>，如通过telnet发送指令；一种是<strong>大量数据的传输</strong>，如通过ftp传输文件。TCP显然需要同时能够处理这两种类型的数据，但使用的算法有所不同。</p>
-
-<p><img src="http://blog.chinaunix.net/photo/91603_100717121935.jpg" alt="交互式输入" /></p>
-
-<p>上图为没有优化的字符输入回显的数据传输过程。一共需要四个报文段。</p>
-
-<p>上图第二，三个报文段可以合并—按键确认和按键回显一起发送。这种技术叫做<strong>经受时延的确认</strong>。
-通常TCP在接收到数据时并不立即发送ACK，将以不大于TCP定时器的延时等待是否有数据一起发送，有时也称这种现象为<strong>数据捎带ACK</strong>。</p>
-
-<p>ACK延时等待时间不大于TCP定时器的原因：
-假如TCP使用200ms的定时器，该定时器将相对于内核引导的200ms固定时间溢出，由于将要确定的数据随机到达，TCP将在下一次内核的200ms定时器溢出时得到通知，所以ACK实际等待的时间为1~200ms中任一刻。</p>
-
-<p><strong>Nagle算法对发送方要求TCP连接上最多只有一个未被确认的未完成小分组</strong>，在该分组确认到达之前不能发送其他的小分组。且同时TCP收集这些小分组，在确认到达后以一个大的分组发出去。
-该算法可以减少网络上的微小分组，降低拥塞出现的可能。但相应的，也会增加更多的时延。流程:</p>
-
-<ol>
-  <li>发送端TCP将从应用进程接收到的第一数据块立即发送，不管其大小，哪怕只有一个字节。</li>
-  <li>发送端输出第一块数据后开始收集数据，并等待确认。</li>
-  <li>确认未达到时，若收集数据达到窗口的一半或一个MSS段，立即发送。</li>
-  <li>确认到达后，把缓冲区中的数据组成一个TCP段，然后发送。</li>
-</ol>
-
-<p><strong>对于成块的数据流，TCP更应该关注的是流量的控制。</strong>发送端有发送缓冲区（即从应用程序到tcp），接收端有接收缓冲区，并不是接收到的数据马上就能被应用程序处理，如果发送端不断地发送数据，而接收端的缓冲区已经被占满，它必须通知发送端在缓冲区有空隙前，请不要再发送数据了。在TCP中，缓冲区被形象地比喻成一个可以滑动的窗口，TCP通过一些算法来根据窗口的大小发送数据，<strong>滑动窗口协议</strong>。这是端到端的。还有另外一种情况，就是，当发送方和接收方之间存在多个路由器和速率较慢的链路时，就有可能出现一些问题，一些中间路由器必须缓冲分区，并有可能耗存储器的空间。因此，连接建立时，双方应该慢慢了解去往对方的路况，然后以一个比较合适的速率大小发送块数据。TCP支持一种被称为“<strong>慢启动</strong>”的算法，该算法通过观察到新分组进入网速的速率应该与另一端返回确认的速率相同而进行工作。慢启动为发送方的TCP增加了另一个窗口：<strong>拥塞窗口</strong>，当与另一个网络建立TCP连接时，拥塞窗口被初始化为1个报文段（即另一端通告的报文段大小）。每收到一个ack，拥塞窗口就增加一个报文段，发送方取拥塞窗口与通告窗口中的最小值作为发送上限。拥塞窗口是发送方使用的流量控制，而通告窗口是接收方使用的流量控制。</p>
-
-<p><strong>PUSH标志：</strong>如果待发送数据会清空发送缓冲区，该包将自动设置PUSH标志。</p>
-
-<ol>
-  <li>发送方将发送缓冲区的数据立即发送给接收方。</li>
-  <li>接收方将接收缓冲区的数据立即提交给接收进程。</li>
-</ol>
-
-<p><strong>6. TCP的超时与重传</strong></p>
-
-<p><img src="http://blog.chinaunix.net/photo/91603_100803210729.jpg" alt="" /></p>
-
-<ul>
-  <li>RTT(往返时间)：指发送端发送TCP报文段开始到接收到对方的确定所使用的时间。</li>
-  <li>RTO(超时重传时间)：发送端发送TCP报文段后，在RTO时间内没有收到对方确定，即重传该报文段。</li>
-</ul>
-
-<p><strong>拥塞避免算法</strong></p>
-
-<p>拥塞避免算法和慢启动算法通常一起使用。维持两个变量：拥塞窗口( cwnd )  慢启动门限( ssthresh )。</p>
-
-<ol>
-  <li>对一个给定的连接，初始化cwnd为1个报文段， ssthresh为65535个字节.</li>
-  <li>TCP输出例程的输出不能超过cwnd和接收方通告窗口的大小.拥塞避免是发送方使用的流量控制，而通告窗口则是接收方进行的流量控制.前者是发送方感受到的网络拥塞的估计，后者则与接收方在该连接上的可用缓存大小有关.</li>
-  <li>当拥塞发生时(超时或收到重复确认)，ssthresh被设置为当前窗口大小的一半(cwnd和接收方通告窗口大小的最小值，但最少为2个报文段).此外，如果是超时引起了拥塞，则cwnd被设置为1个报文段（这就是慢启动).</li>
-  <li>当新的数据被对方确认时，就增加cwnd，但增加的方法依赖于我们是否正在进行慢启动或拥塞避免.如果cwnd &lt;= ssthresh，则正在进行慢启动，否则正在进行拥塞避免.</li>
-</ol>
-
-<p><strong>cwnd增加方式</strong></p>
-
-<ul>
-  <li>慢启动初始cwnd为1，每收到一个确定就加1.成指数增长.</li>
-  <li>拥塞避免算法在每个RTT内增加 1/cwnd 个报文，成线性增长.</li>
-  <li>慢启动根据收到的ACK次数增加cwnd，而拥塞避免算法在一个RTT不管收有多少ACK也只增加一次.</li>
-</ul>
-
-<p><strong>快速重传和快速恢复算法</strong></p>
-
-<p>如果收到3个重复ACK，可认为该报文段已经丢失，此时无需等待超时定时器溢出，直接重传丢失的包，这就叫<strong>快速重传算法</strong>.而<strong>接下来执行的不是慢启动而是拥塞避免算法</strong>，这就叫<strong>快速恢复算法</strong>.</p>
-
-<ol>
-  <li>当收到第3个重复的ACK时，将ssthresh设置为当前拥塞窗口cwnd的一半.重传丢失的报文段，设置cwnd为ssthresh加上3倍的报文段大小.</li>
-  <li>每次收到另一个重复的ACK时，cwnd增加1个报文段大小并发送1个分组(如果新的cwnd允许发送).</li>
-  <li>当下一个确认新数据的ACK到达时，设置cwnd为ssthresh(在第1步中设置的值).这个ACK应该是在进行重传后的一个往返时间内对步骤1中重传的确认.另外，这个ACK也应该是对丢失的分组和收到的第1个重复的ACK之间的所有中间报文段的确认.这一步采用的是拥塞避免，因为当分组丢失时我们将当前的速率减半.</li>
-</ol>
-
-<p><strong>7. TCP的四个定时器</strong></p>
-
-<p>对每个连接，TCP管理4个不同的定时器：</p>
-
-<ol>
-  <li>
-    <p><strong>重传定时器</strong>，用于等待另一端的确认。</p>
-
-    <p>当发送端发送出数据后，经过一段时间后假如仍然没有收到接收端的确认，那么就重传该数据块</p>
-  </li>
-  <li>
-    <p><strong>坚持定时器</strong>，使窗口大小信息保持不断流动，即使另一端关闭了其接收窗口</p>
-
-    <p>当接收方的窗口大小为0时，发送方将不能再向它发送数据，直到接收方用一个窗口大小为非0的消息来通告发送端。可是，万一这个消息丢失了呢？接收方就一直这样等着发送方发来数据，而发送端就一直等着接收方发来窗口大于0的消息，两方就都僵在那里了。为了避免这种情况的出现，便有了坚持定时器，<strong>发送方使用一个坚持定时器来周期性地向接收方查询，以便发现窗口是否已增大。坚持定时器的定时时间也是指数退避的。</strong></p>
-
-    <p><strong>糊涂窗口综合症</strong>是指接收方一旦有非0的窗口大小就向发送方通告，从而引起发送端发送少量的数据这样的情况。可以在任何一方采取措施避免出现这种状况：</p>
-
-    <ol>
-      <li>在接收方，接收方不通告小窗口，一般是除非窗口可以增加一个报文段大小或可以增加接收方缓冲区空间的一半，不然通告窗口大小为0.</li>
-      <li>在发送方，发送方除非收到一个比较大的窗口（如一个报文段小大、是接收方通告窗口大小一半的报文段）或者是还没有未被确认的数据的情况下，才会发送数据。</li>
-    </ol>
-
-    <p>接收方和发送方两方同时进行决策，因为接收方不能通告一个不合理的窗口大小（比方说，原先的窗口大小是1500，报文段长度为1024，发送方发送 了1024字节的数据后，这时候接收方的窗口大小是476，小于一个报文大小，但是如果通告窗口大小为0，岂不是很不合理？），因此在收到这个的窗口通告消息后，就轮到发送方使用它的策略了，发送方设定一个坚持定时器，在这个定时器的时间内，除非收到足够大的通告窗口，否则不发送数据。当然，如果定时器超时了，发送方还是要发送小数据量的报文的。</p>
-  </li>
-  <li>
-    <p><strong>保活定时器</strong>，检测到一个空闲连接的另一端何时崩溃或重启。</p>
-
-    <p>前面我们提到“半打开”的连接，这种情况很可能占用服务器很多端口，因此一般由服务器使用保活选项。如果一个给定的连接在两个小时之内没有任何动作，则服务器就向客户发送一个探查报文段，客户主机将必须以下四种状态之一：</p>
-
-    <ol>
-      <li>客户主机依然正常运行，并从服务器可达。客户的TCP响应正常，而服务器也知道对方是正常工作的。服务器在两个小时后将保活定时器复位。如果在两个小时定时器到时间之前有应用程序的通信量通过此连接，则定时器在交换数据后的未来2个小时再复位。</li>
-      <li>客户主机已经崩溃，并且关闭或者正在重新启动。在任何一种情况下，客户的TCP都没有响应，服务器将不能收到对探查的响应，并在75秒后超时。服务器总共发送10个探查，每个间隔75称。如果服务器没有收到一个响应，它就认为客户主机已经关闭并终止连接。</li>
-      <li>客户主机崩溃并且已经重新启动。这时服务器将收到一个对其保活探查的响应，但是这个响应是一个复位，使得服务器终止这个连接。</li>
-      <li>客户主机正常运行，但是从服务器不可达。这跟情况2是一样的。</li>
-    </ol>
-  </li>
-  <li>
-    <p><strong>2MSL的时间测量器</strong></p>
-  </li>
-</ol>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Some NB Translations]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/07/17/Some-NB-translation/"/>
-    <updated>2014-07-17T20:07:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/07/17/Some-NB-translation</id>
-    <content type="html"><![CDATA[<ul>
-  <li><a href="http://blog.csdn.net/eroswang/article/details/1787456">Unix编程常见问题解答</a></li>
-  <li><a href="http://blog.csdn.net/eroswang/article/details/1790351">从程序员角度看ELF</a></li>
-</ul>
 ]]></content>
   </entry>
   

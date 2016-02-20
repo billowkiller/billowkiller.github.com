@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Machine Learning | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/machine-learning/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-02-16T19:29:04+08:00</updated>
+  <updated>2016-02-21T00:31:59+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,348 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ensemble Methods]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/02/18/ensemble/"/>
+    <updated>2016-02-18T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/02/18/ensemble</id>
+    <content type="html"><![CDATA[<p>Ensemble<code>|ɒnˈsɒmbl|</code> Methods 称为集成方法，它还有其他类似的名字，meta-algorithm、aggregation model，这些都代表这同一个意思，就是不同弱分类器的组合成一个强分类器。这里的弱分类器要比随机猜测的结果好，错误率小于50%；弱分类器可以是决策树、逻辑回归、朴素贝叶斯等算法。Ensemble的形式有很多种：</p>
+
+<ul>
+  <li>不同算法的集成;</li>
+  <li>同一算法在不同设置下的集成;</li>
+  <li>数据集不同部分分配给不同分类器之后的集成。</li>
+</ul>
+
+<p>那么这多个弱分类器又是如何组合的呢，下面给出一个big picture，后面的文章也是对其的阐述。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-18/38802537.jpg" width="450px" /></p>
+
+<!--more-->
+
+<p>弱分类的组合可以是linear或者stacking的，linear又可以是uniform或者non-uniform.
+stacking或者stacked generalization的大意是non-linear combining. 通常stacking的组合算法有LR，GBM, KNN, NN, RF 和 ET，可以参考<a href="http://mlwave.com/kaggle-ensembling-guide/">http://mlwave.com/kaggle-ensembling-guide/</a>. 作者Wolpert是这样形容的：</p>
+
+<blockquote>
+  <p>stacked generalization is a means of non-linearly combining generalizers to make a new generalizer, to try to optimally integrate what each of the original generalizers has to say about the learning set. The more each generalizer has to say (which isn’t duplicated in what the other generalizer’s have to say), the better the resultant stacked generalization. </p>
+</blockquote>
+
+<p>那么为什么要把这些分类器进行组合呢？组合之后是否能获得更好的效果？可以看下下面的例子。</p>
+
+<p>假设我们有10个samples的测试集，正确的结果是<code>1111111111</code>。现在有三个分类器，它们只有70%的正确率，那么三个分类器进行majority vote，可以得到如下的正确率：</p>
+
+<script type="math/tex; mode=display">0.7 * 0.7 * 0.7 + \binom{3}{2}0.7 * 0.7 * 0.3 = 0.784</script>
+
+<p>也就是由原来的70%提升到了78%。正确率会随着分类器的增加而增加。5个分类器的正确率大约为83%。这个在统计学上就是“Wisdom of Crowds”。但是这个结果提高的前提在于sample的diversity，也就是减少sample之间的correlation。例如：</p>
+
+<pre><code>1111111100 = 80% accuracy
+1111111100 = 80% accuracy
+1011111100 = 70% accuracy
+</code></pre>
+
+<p>在这个例子中得到<code>1111111100</code>还是只有80%的正确率，而</p>
+
+<pre><code>1111111100 = 80% accuracy
+0111011101 = 70% accuracy
+1000101111 = 60% accuracy
+</code></pre>
+
+<p>经过Ensemle就可以得到<code>1111111101</code>，90%的正确率。</p>
+
+<p>那么如何证明多个组合会比单个的结果好呢，可以用Uniform Linear的组合进行下面的理论描述。</p>
+
+<script type="math/tex; mode=display"> Let\ G(x) = \frac{1}{T}\sum_{t=1}^T g_t(x)</script>
+
+<script type="math/tex; mode=display">   avg((g_t(x) - f(x))^2) = avg(g_t^2 - 2g_tf + f^2)</script>
+
+<script type="math/tex; mode=display">   =avg(g_t^2) - G^2 + (G-f)^2</script>
+
+<script type="math/tex; mode=display">   =avg((g_t-G)^2) + (G-f)^2</script>
+
+<script type="math/tex; mode=display"> avg(E(g_t)) = avg((g_t-G)^2) + E(G) \ge E(G) </script>
+
+<p>更一般的，有如下的预测模型$\hat{F}(x)^T = [\hat{f}_1(x), \hat{f}_2(x)…\hat{f}_M(x)]$, 用最小二乘法寻找线性最小值</p>
+
+<script type="math/tex; mode=display"> \hat{w} = argmin_w E[Y - \sum_{m=1}^M w_m\hat{f}_m(x)]^2 </script>
+
+<script type="math/tex; mode=display"> \hat{w} = E[\hat{F}(x)\hat{F}(x)^T]^{-1}E[\hat{F}(x)Y] </script>
+
+<script type="math/tex; mode=display"> E[Y - \sum_{m=1}^M w_m\hat{f}_m(x)]^2 \le E[Y-\hat{f}_m(x)]^2 \forall m</script>
+
+<h2 id="bagging">Bagging</h2>
+
+<p>Bagging或者bootstrap aggregation是上文提到的Uniform Linear aggregation。其中用到bootstrapping，这是是一种resample的方法，定义如下</p>
+
+<blockquote>
+  <p>re-sample N examples from original sample <strong>uniformly with replacement</strong> – can also use arbitrary N’ instead of original N</p>
+</blockquote>
+
+<p>有training set $Z$, 对每个bootstrap sample $Z^{*b}, b=1,2…B$，bagging定义如下：</p>
+
+<script type="math/tex; mode=display"> \hat{f}_{bag}(x) = \frac{1}{B} \sum_{b=1}^B \hat{f}^{*b}(x) </script>
+
+<h2 id="adaboost">AdaBoost</h2>
+
+<p>AdaBoost或者Adaptive Boosting中只要弱分类器的正确率优于随机选择，那么通过AdaBoost就会得到非常好的结果。它是一种Boosting方法，所谓Boosting就是改变训练数据的概率分布（权值分布）针对不同的训练数据分布调用弱学习算法学习一系列弱分类器。对应于上面的non-uniform linear model。</p>
+
+<p>AdaBoost强调对错误分类的反复学习，但是最后对错误率较高的分类器赋予低权重。每轮学习中都会重新对分类器赋予不同的权重，这是为了得到更多关于数据的不同假设。如何得到更多的不同假设呢？</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-19/91708853.jpg" width="300px" /></p>
+
+<p>那么我们希望在$t+1$迭代学习的时候，$t$轮的结果尽可能的随机，即有错误率</p>
+
+<script type="math/tex; mode=display"> \epsilon_t = \frac{\sum_{n=1}^N u_n^{(t+1)}I(y_n \ne g_t(x_n))}{\sum_{n=1}^N u_n^{(t+1)}} = \frac{1}{2} </script>
+
+<p>于是可以 multiply incorrect $\propto (1 - \epsilon_t)$; multiply correct $\propto \epsilon_t$</p>
+
+<p>定义scalling factor $\blacklozenge_t = \sqrt{\frac{1 - \epsilon_t}{\epsilon_t}}$</p>
+
+<script type="math/tex; mode=display"> incorrect \gets incorrect \cdot \blacklozenge_t \\ correct \gets correct \div \blacklozenge_t </script>
+
+<p>最后对scalling factor取自然对数作为权值 $\alpha_t$ 将弱分类器线性组合在一块，取自然对数的逻辑如下：</p>
+
+<script type="math/tex; mode=display"> \epsilon_t = 1/2 => \blacklozenge_t = 1 => \alpha_t = 0 \\
+\epsilon_t = 0 => \blacklozenge_t = \infty => \alpha_t = \infty </script>
+
+<p>最后伪代码为</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/40495628.jpg" width="450px" /></p>
+
+<p>比较常见的弱分类器是Decision Stump，和AdaBoost组成<code>AdaBoost-Stump</code>，具有efficient feature selection and efficiency的特点。</p>
+
+<h2 id="random-forest">Random Forest</h2>
+
+<p>Bagging是通过平均带有噪声但是近似无偏的模型来减少variance，而对于足够深的Decision Tree来说，它的bias可以非常少，但是variance非常高。所以自然的想将二者结合，综合他们的优点。Bagged Tree并不能减少bias，但是可以有效的减少variance。这个Boosting正好相反，Boosting通过自适应的变化树的样子来减少bias。Random Forest就是Bagging + Decision Tree(C&amp;RT)。EST给出RF的本质：</p>
+
+<blockquote>
+  <p>The idea in random forests is to improve the variance reduction of bagging by reducing the correlation between the trees, without increasing the variance too much.</p>
+</blockquote>
+
+<p>我们了解到增加hypothesis diversity可以提高最终结果的表现，那么Random Forest就将这种Random性发挥到极致，得到多样的hypothesis。为了增加随机性，可以做了以下的措施：</p>
+
+<ul>
+  <li>re-sample new feature subspace for each b(x) in C&amp;RT, 记得bagging进行data randomness for diversity, 那么在RF中是feature randomness for diversity</li>
+  <li>random low-dimensional projections for each b(x) in C&amp;RT, 这就是对feature进行投影，进行feature combination，在特征空间中随机选择若干特征组投影到若干个方向上。</li>
+</ul>
+
+<p>伪代码如下（只用了第一个Randomness）：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/2671550.jpg" width="500px" /></p>
+
+<p>RF还有的特点是训练的时候可以自带<strong>Model Selection和Feature Selection</strong>。那么RF是如何做到的？</p>
+
+<h3 id="model-selection">Model Selection</h3>
+<p>在RF中使用bagging时，每个bootstrap sample都会有一定的概率没有选择原来sample中的一些数据，这些数据就是out-of-bag (OOB) Samples. 在一个RF中，某个Decision Tree训练没有用到数据 $(x_n, y_n)$的概率为：$(1 - \frac{1}{N}) ^ N$，当N无限大的时候，接近 $\frac{1}{e}$.</p>
+
+<p>可以用OOB来validate G, $E_{oob}G = \frac{1}{N} \sum_{n=1}^N err(y_n, G_n^-(x_n))$, $G_n^-$ 表示 $x_n$在OOB中的Decision Tree。这样可以用 $E_{oob}$ 对bagging/RF进行self-validation。</p>
+
+<p>这有什么用呢，当然是进行模型选择了，可以使用 $E_{oob}$ 进行RF的参数选择，例如feature subspace。下图表示使用Validation中进行的模型选择，可以看到RF中少了re-training的步骤。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/30059076.jpg" width="250px" /></p>
+
+<h3 id="feature-selection">Feature Selection</h3>
+
+<p>在模型训练的时候通常希望能够去掉多余的、无关的特征，这样能够得到的好处有：</p>
+
+<ul>
+  <li><strong>efficiency</strong>: simpler hypothesis and shorter prediction time</li>
+  <li><strong>generalization</strong>: feature noise removed</li>
+  <li><strong>interpretability</strong></li>
+</ul>
+
+<p>通常可以通过特征的重要性来进行特征的选择，对于线性模型来说就是 $w_i$ 的绝对值，也就是特征对于最终结果的影响程度。那么在非线性的RF模型中呢？</p>
+
+<p>所用的方法就是random test，例如特征 $i$ 被选择，那么在特征 $i$ 的数据集中加入随机变量重新训练则会降低模型正确率，而对于不重要的特征，怎么改变数据集当然对模型没有什么影响。</p>
+
+<p>RF中使用的random test就是一种常用的统计学工具permutation test，也就是将特征 $i$ 的数据做重新排列。数据表达也就是：</p>
+
+<script type="math/tex; mode=display"> importance(i) = performance(\mathcal{D}) - performance(\mathcal{D}^{(p)}) </script>
+
+<script type="math/tex; mode=display"> \mathcal{D}^{(p)}\ is\ \mathcal{D}\ with\ \{x_{n,i}\}\ replaced\ by\ permuted\ \{x_{n,i}\}_{n=1}^N </script>
+
+<p>$performance(\mathcal{D}^{(p)})$需要重新训练和评估，那么有什么办法可以避免呢？我们可以重新定义 $importance(i) = E_{oob}(G^-) - E_{oob}^{(p)}(G^-)$，表达式后项就是一个permuted OOB value。</p>
+
+<p>具体过程如下，当 $b$ 个树生成的时候，记录OOB评估的 $G^-$ 的正确率，然后OOB sample中的特征 $i$ 数据重新随机排列后再次评估的 $G^-$ 的正确率，二者相减得到特征 $i$的重要性。</p>
+
+<p>RF的缺点是，如果随机过程表现的不稳定，则需要很多的Decision Tree来支持。所以需要重新检查 $G$ 的稳定性来确保有足够多的树。</p>
+
+<h2 id="gradient-boosted-decision-tree">Gradient Boosted Decision Tree</h2>
+
+<p>回忆下假设AdaBoost的分类器输出是binary的，则权值迭代可以转化为</p>
+
+<script type="math/tex; mode=display"> u_n^{t+1} = \begin{cases}{u_n^t \cdot \blacklozenge_t\ if\ incorrect}\\{u_n^t \div \blacklozenge_t\ if\ correct}\end{cases} = u_n^t \cdot \blacklozenge_t^{-y_ng_t(x_n)} = u_n^t \cdot exp(-y_n\alpha_tg_t(x_n))</script>
+
+<script type="math/tex; mode=display"> u_n^{(T+1)} = u_n^{(1)} \cdot \prod_{t=1}^Texp(-y_n\alpha_tg_t(x_n)) = \frac{1}{N} \cdot exp(-y_n\sum_{t=1}^T\alpha_tg_t(x_n)) </script>
+
+<p>在AdaBoost中 $G(x) = sign(\sum_{t=1}^T\alpha_tg_t(x_n))$ 括号中的表达式也被成为voting score。现在我们想要 $y_n(voting\ score)$ 为正且越大越好，也就是让 $u_n^{(T+1)}$ 越小越好。</p>
+
+<p>所以AdaBoost的过程也就是让 $\sum_{n=1}^N u_n^{(t)}$ 减小，也就是最小化</p>
+
+<script type="math/tex; mode=display"> \sum_{n=1}^Nu_n^{(T+1)} =  \frac{1}{N} \cdot exp(-y_n\sum_{t=1}^T\alpha_tg_t(x_n)) </script>
+
+<p>注意到在gradient descent中第 $t$ 次迭代有：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/31496263.jpg" width="400px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/14307315.jpg" width="400px" /></p>
+
+<p>所以找到一个好的 $h(function\ direction)$ 函数也就是最小化 $\sum_{n=1}^Nu_n^{(t)}(-y_nh(x_n))$。对于二元分类，$y_n, h(x_n) \in {-1, +1}$，有</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/93309458.jpg" width="400px" /></p>
+
+<p>也就是每次迭代都需要最小化其中的hypothesis $E_{in}^{u^{(t)}}(h)$，那么谁最小化 $E_{in}^{u^{(t)}}(h)$呢，当然是AdaBoost中的reweighted sample所对应的 $g_t$ 了。</p>
+
+<p>所以现在需要优化 $\eta_t$ 得到梯度下降方向最佳步长，原来的 $\hat{E}_{ADA}$ 变为 $(\sum_{n=1}^N u_n^{(t)}) \cdot ((1-\epsilon_t)exp(-\eta) + \epsilon_t exp(+\eta))$。微分后容易得到 $\eta_t=ln\sqrt{\frac{1-\epsilon_t}{\epsilon_t}} = \alpha_t$。这和我们上面得到的scaling Factor是一致的。</p>
+
+<p>所以AdaBoost是steepest descent with approximate functional gradient. 我们总结下，AdaBoost的数学表达式：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/16682553.jpg" width="400px" /></p>
+
+<p>Gradient Boost就是把二元分类的假设推广到任意的假设并且损失函数也可以任意的。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/85486720.jpg" width="400px" /></p>
+
+<p>当选择平方损失函数时，有如下的可以看到</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/61222916.jpg" width="460px" /></p>
+
+<p>现在需要对 $h$ 加一些限制，否则 $h(x_n) = -\infty \cdot (s_n - y_n)$</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/34172769.jpg" width="400px" /></p>
+
+<p>最优 $g_t = h$ 就是 $(x_n, y_n-s_n)$ 上的最小二乘回归函数，$y_n - s_n$就是残差。于是原来的Gradient Boost表达式变成：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/37566404.jpg" width="400px" /></p>
+
+<p>最小化 $\eta$ 就是 $(g_t\ transformed\ input,\ residual)$ 上的单变量线性回归。所以GradientBoost for regression 的 $\alpha_t = optimal\ \eta\ by\ g_t\ transformed\ linear\ regression$.</p>
+
+<p>Gradient Boosted Decision Tree也就是使用回归算法为Decision Tree。伪代码如下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/38067174.jpg" width="500px" /></p>
+
+<p>总结下Ensemble Methods的有点：</p>
+
+<ul>
+  <li>cure underfitting, 通过feature transform加强$G(x)$的Bias。</li>
+  <li>cure overfitting, 通过多样化假设的合并达到regularization的目的，减少$G(x)$的variance。</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Logistic Regression and Linear Discriminant Analysis]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/02/17/lr-and-lda/"/>
+    <updated>2016-02-17T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/02/17/lr-and-lda</id>
+    <content type="html"><![CDATA[<p>在回归方法中，我们找一个超平面作为类与类之间的decision boundary。回归方法为每个分类建立一个判别函数 $\sigma_k (x)$, 对任意的 $x$，选出得到最大值的判别函数最为归属类。对于后验概率模型 $Pr(G = k|X = x)$ 也是使用同样的方法。对于$\sigma_k (x) 和 Pr(G = k|X = x)$ 来说，只要它们是线性的，那么得到的decision boundary也是线性的。</p>
+
+<p>虽然无法直接使得 $\sigma_k (x) 和 Pr(G = k|X = x)$ 是线性的，但是如果有一个单调的转化函数能够使得是线性的，那么我们也可以得到一个超平面分割数据点。</p>
+
+<p>Logistic Regression 和 Linear Discriminant Analysis就是基于这样的需求构造的模型。</p>
+
+<!--more-->
+
+<h2 id="logistic-regression">Logistic Regression</h2>
+
+<p>逻辑回归的模型也是源于通过 $x$ 的线性函数建立 $K$ 个类的后验概率模型，同时保证它们在[0,1]之间以及和为1。</p>
+
+<script type="math/tex; mode=display"> log {Pr(G = 1 \vert X = x) \over Pr(G = K \vert X = x)} = \beta_{10} + \beta_1^Tx </script>
+
+<script type="math/tex; mode=display"> log {Pr(G = 2 \vert X = x) \over Pr(G = K \vert X = x)} = \beta_{20} + \beta_2^Tx </script>
+
+<script type="math/tex; mode=display"> log {Pr(G = K-1 \vert X = x) \over Pr(G = K \vert X = x)} = \beta_{(K-1)0} + \beta_{K-1}^Tx </script>
+
+<p>这个转换函数称为 logit transformation, 概率称为 log-odds。得到</p>
+
+<script type="math/tex; mode=display"> Pr(G = k \vert X = x) = {exp(\beta_{k0} + \beta_k^Tx) \over {1 + \sum_{l=1}^{K-1} exp(\beta_{l0} + \beta_l^Tx) }} </script>
+
+<script type="math/tex; mode=display"> Pr(G = K \vert X = x) = {1 \over {1 + \sum_{l=1}^{K-1} exp(\beta_{l0} + \beta_l^Tx) }} </script>
+
+<p>当 $K=2$ 的时候，输出设为0/1, 输出结果就是一个伯努利过程。可以使用maximum likelihood来对模型进行参数估计。</p>
+
+<p>假设 $y_i = 1\ when\ g_i = 1,\ y_i = 0\ when\ g_i = 2$, 那么不妨设 $p(x_i; \beta) = Pr(G = 1|X = x) = {\beta^Tx \over {1 + exp(\beta^Tx)}}$，这时的 $p(x_i; \beta) = {1 \over {1 + exp(-\beta^Tx)}}$, 也成为<code>sigmoid function</code>。</p>
+
+<p>log-likelihood得到结果为</p>
+
+<script type="math/tex; mode=display"> \ell(\beta) = \sum {y_i log p(x_i; \beta) + (1 - y_i)log(1-p(x_i, \beta))} 
+        = \sum {y_i\beta^Tx_i - log(1 + exp(\beta^Tx_i))}, </script>
+
+<script type="math/tex; mode=display">其中\beta = \{\beta_{10}, \beta_1\}, x_i$ 的第一个元素为截距1.</script>
+
+<script type="math/tex; mode=display"> 求导后得到\frac{\partial \ell (\beta)}{\partial \beta} = \sum_{i=1}^N {x_i(y_i - p(x_i; \beta))} = 0 </script>
+
+<p>此时，可以使用梯度下降法或者牛顿法求解 $\beta$。下面使用牛顿法求解。</p>
+
+<p>$$ \frac{\partial^2 \ell (\beta)}{\partial \beta \partial \beta^T} = 
+    - \sum_{i=1}^N  {x_i x_i^T p(x_i; \beta)(1 - p(x_i; \beta))} $$
+于是牛顿迭代即为
+<script type="math/tex"> \beta^{new} = \beta^{old} - (\frac{\partial^2 \ell (\beta)}{\partial \beta \partial \beta^T})^{-1} \frac{\partial \ell (\beta)}{\partial \beta}, 其中所有的倒数都是在\beta^{old}的时候计算的 </script></p>
+
+<p>下面说明这个问题就是加权最小二乘问题，可以变换得到
+<script type="math/tex">\frac{\partial \ell (\beta)}{\partial \beta} = X^T(Y-P),\ \frac{\partial^2 \ell (\beta)}{\partial \beta \partial \beta^T} = -X^TWX </script>
+其中 $Y$ 是 $y_i$的向量，$X$ 为 $N * (p+1)$ 的矩阵，$W$ 是一个 $N*N$ 的对角矩阵，元素为 $p(x_i; \beta^{old})(1 - p(x_i; \beta^{old}))$</p>
+
+<p>可以得到 <script type="math/tex">\beta^{new} = (X^TWX)^{-1}X^TWz,\ z = X\beta^{old} + W^{-1}(Y-P)</script>, 这个表达式得到的就是weighted least squares step. $z$ 称为 response，或者说是 <em>adjusted response</em>。每个迭代$p$都会变，所以$W 和 z$也都会变，可以用<em>iteratively reweighted least squares</em>或者IRLS算法来计算，每个迭代就是解决一个weighted least squares问题：</p>
+
+<script type="math/tex; mode=display">\beta^{new} \gets arg min_\beta (z - X\beta)^TW(z - X\beta)</script>
+
+<p><em>注：weighted linear least squares</em></p>
+
+<script type="math/tex; mode=display"> arg min_\beta \sum_{i=1}^m w_i \|y_i - \sum_{j=1}^n x_{ij}\beta_j\|^2 = arg min_\beta \vert W^{1 \over 2}(Y - X\beta) \vert ^2 </script>
+
+<script type="math/tex; mode=display"> \hat{\beta} = (X^TWX)^{-1}X^TWY </script>
+
+<h2 id="linear-discriminant-analysis">Linear Discriminant Analysis</h2>
+
+<p>接下来我们给出另外一个模型，它的后验概率的logit也同样是一个线性模型。</p>
+
+<p>假设 $f_k(x)$ 是类 $G=k$ 的输入的条件密度函数，$\pi_k$ 是类 $k$ 的先验概率，有 $\sum_{k=1}^K \pi_k = 1$。那么依据贝叶斯公式得到</p>
+
+<script type="math/tex; mode=display"> Pr(G=k \vert X=x) = \frac{f_k(x) \pi_k}{\sum_{i=1}^K f_i(x) \pi_i} </script>
+
+<p>假设每个类服从multivariate Guassian分布， 那么</p>
+
+<script type="math/tex; mode=display">f_k(x) = \frac{e^{-1/2(x-\mu_k)^T\Sigma_k^{-1}(x-\mu_k)}}{(2\pi)^{p/2} \vert \Sigma_k \vert ^{1/2}}</script>
+
+<p>当每个类都有一个相同的协方差矩阵 $\Sigma$ 的时候，我们有以下推导</p>
+
+<script type="math/tex; mode=display"> log {Pr(G = k \vert X = x) \over Pr(G = \ell \vert X = x)} = log{\pi_k \over \pi_\ell} - \frac{1}{2}(\mu_k + \mu_\ell)^T\Sigma^{-1}(\mu_k - \mu_\ell) + x^T\Sigma^{-1}(\mu_k - \mu_\ell) </script>
+
+<p>注意到这个式子也就是 $\alpha_{k0} + \alpha_k^Tx$，也就是和logistic regression一样的模型。</p>
+
+<p>并且这个式子可以推出线性判别函数为 </p>
+
+<script type="math/tex; mode=display"> \delta_k(x) = x^T\Sigma^{-1}\mu_k - \frac{1}{2}\mu_k^T\Sigma^{-1}\mu_k + log\pi_k</script>
+
+<script type="math/tex; mode=display"> G(x) = argmax_k \delta_k(x) </script>
+
+<p>实际上，高斯分布的参数可以从训练集中估计：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-16/18265816.jpg" width="400px" /></p>
+
+<p>可以看出来LDA做了一下的假设：</p>
+
+<ul>
+  <li>类的分布是高斯函数</li>
+  <li>每个类都有一个共同的协方差矩阵</li>
+</ul>
+
+<p>看起来LDA和logistic regression模型是一样的，它们的区别是对线性参数估计的方法不同。
+$X$ 和 $G$ 的联合概率如下</p>
+
+<script type="math/tex; mode=display"> Pr(X, G=k) = Pr(X)Pr(G=k \vert X) </script>
+
+<p>对于LDA和logistic regression，公式的后半部分都是一样的。LR模型也是忽略了前半部分的边际概率，直接对条件概率进行最大似然估计。但是LDA的参数估计是基于整个联合概率分布的</p>
+
+<p><script type="math/tex"> Pr(X, G=k) = \phi(X; \mu_k, \Sigma)\pi_k, \phi是高斯密度函数 </script>
+<script type="math/tex"> Pr(X) = \sum_{k=1}^K\phi(X; \mu_k, \Sigma)\pi_k</script></p>
+
+<p>这个边际概率有什么用呢，总的来说是提供参数估计的更多信息，减少参数估计的方差。但是在LDA中，由于outliers会对协方差矩阵做出一定贡献，所以LDA对outliers会比较敏感。如果我们忽略这些假设，而Input确实是高斯分布的，那么根据Efrom的论文，会有”in the worst case ignoring this marginal part of the likelihood constitutes a loss of efficiency of about 30% asymptotically in the error rate”.</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Gradient Descent and Newton Method]]></title>
@@ -64,8 +406,9 @@
 
 <p>其中 $\nabla^2 f(x^{(k)})$ 是 $f(x)$ 在 $x^{(k)}$ 处的Hesse矩阵，为了求极值，对二阶泰勒公式求导，得到</p>
 
-<p><script type="math/tex"> \nabla f(x) = \nabla f(x^{(k)}) + \nabla^2 f(x^{(k)})(x - x^{(k)}) = 0 </script>
-<script type="math/tex"> x^{(k+1)} \gets x^{(k)} - \nabla^2 f(x^{(k)})^{-1} \nabla f(x^{(k)}) </script></p>
+<script type="math/tex; mode=display"> \nabla f(x) = \nabla f(x^{(k)}) + \nabla^2 f(x^{(k)})(x - x^{(k)}) = 0 </script>
+
+<script type="math/tex; mode=display"> x^{(k+1)} \gets x^{(k)} - \nabla^2 f(x^{(k)})^{-1} \nabla f(x^{(k)}) </script>
 
 <p>其中我们假设Hesse矩阵是可逆的，并且对于正定的Hesse矩阵，我们可以确定是迭代方向是下降的，因为 $-\nabla f(x)^T \nabla^2 f(x)^{-1} \nabla f(x) &lt; 0$, $-\nabla^2 f(x)^{-1} \nabla f(x)$就被称为 <em>Newton step</em>. 算法如下：</p>
 
@@ -73,7 +416,7 @@
 
 <h3 id="quasi-newton-methods">Quasi-Newton Methods</h3>
 
-<p>Qusi-Newton即拟牛顿法，这是一种“模拟“的牛顿法，它模拟牛顿法中的搜索方向的生成方式。那么为什么要模拟呢？</p>
+<p>Quasi-Newton即拟牛顿法，这是一种“模拟“的牛顿法，它模拟牛顿法中的搜索方向的生成方式。那么为什么要模拟呢？</p>
 
 <p>在牛顿法中，有如下的缺点：</p>
 
@@ -91,7 +434,7 @@
 <p>记 $y_k = g_{k+1} - g_k, \delta_k = x^{(k+1)} - x^{k}$, 则有
 <script type="math/tex">y_k = H_k \delta_k 或者 H_k^{-1} y_k = \delta_k </script></p>
 
-<p>拟牛顿法将 $G_k$ 作为 $H_k^{-1}$ 的近似，要求矩阵 $G_k$ 同样满足，每次迭代都是正定，并且 $G<em>{k+1} y_k = \delta_k$。按照拟牛顿条件，每次迭代中可以选择更新矩阵 $G</em>{k+1} = G_k + \nabla G_k$. 由此延伸出来三种算法</p>
+<p>拟牛顿法将 $G_k$ 作为 $H_k^{-1}$ 的近似，要求矩阵 $G_k$ 同样满足，每次迭代都是正定，并且 $G_{k+1} y_k = \delta_k$ . 按照拟牛顿条件，每次迭代中可以选择更新矩阵 $G_{k+1} = G_k + \nabla G_k$ . 由此延伸出来三种算法</p>
 
 <ol>
   <li>DFP算法使用 $G_k$ 逼近Hesse矩阵的逆矩阵。</li>
