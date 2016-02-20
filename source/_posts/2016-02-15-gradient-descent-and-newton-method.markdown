@@ -54,6 +54,7 @@ $$ f(x) = f(x^{(k)}) + \nabla f(x^{(k)})^T (x - x^{(k)}) + 1/2 (x - x^{(k)})^T \
 其中 $\nabla^2 f(x^{(k)})$ 是 $f(x)$ 在 $x^{(k)}$ 处的Hesse矩阵，为了求极值，对二阶泰勒公式求导，得到
 
 $$ \nabla f(x) = \nabla f(x^{(k)}) + \nabla^2 f(x^{(k)})(x - x^{(k)}) = 0 $$
+
 $$ x^{(k+1)} \gets x^{(k)} - \nabla^2 f(x^{(k)})^{-1} \nabla f(x^{(k)}) $$
 
 其中我们假设Hesse矩阵是可逆的，并且对于正定的Hesse矩阵，我们可以确定是迭代方向是下降的，因为 $-\nabla f(x)^T \nabla^2 f(x)^{-1} \nabla f(x) < 0$, $-\nabla^2 f(x)^{-1} \nabla f(x)$就被称为 *Newton step*. 算法如下：
@@ -62,7 +63,7 @@ $$ x^{(k+1)} \gets x^{(k)} - \nabla^2 f(x^{(k)})^{-1} \nabla f(x^{(k)}) $$
 
 ### Quasi-Newton Methods
 
-Qusi-Newton即拟牛顿法，这是一种“模拟“的牛顿法，它模拟牛顿法中的搜索方向的生成方式。那么为什么要模拟呢？
+Quasi-Newton即拟牛顿法，这是一种“模拟“的牛顿法，它模拟牛顿法中的搜索方向的生成方式。那么为什么要模拟呢？
 
 在牛顿法中，有如下的缺点：
 
@@ -78,7 +79,7 @@ $$ g_{k+1} - g_k = H_k (x^{(k+1)} - x^{k}), 其中 g_k = \nabla f(x^{(k)}), H_k 
 记 $y_k = g_{k+1} - g_k, \delta_k = x^{(k+1)} - x^{k}$, 则有
 $$y_k = H_k \delta_k 或者 H_k^{-1} y_k = \delta_k $$
 
-拟牛顿法将 $G_k$ 作为 $H_k^{-1}$ 的近似，要求矩阵 $G_k$ 同样满足，每次迭代都是正定，并且 $G_{k+1} y_k = \delta_k$。按照拟牛顿条件，每次迭代中可以选择更新矩阵 $G_{k+1} = G_k + \nabla G_k$. 由此延伸出来三种算法
+拟牛顿法将 $G_k$ 作为 $H_k^{-1}$ 的近似，要求矩阵 $G_k$ 同样满足，每次迭代都是正定，并且 $G\_{k+1} y_k = \delta\_k$ . 按照拟牛顿条件，每次迭代中可以选择更新矩阵 $G_{k+1} = G_k + \nabla G_k$ . 由此延伸出来三种算法
 
 1. DFP算法使用 $G_k$ 逼近Hesse矩阵的逆矩阵。
 2. BFGS算法使用 $B_k$ 逼近Hesse矩阵。

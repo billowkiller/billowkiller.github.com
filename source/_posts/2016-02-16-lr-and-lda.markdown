@@ -1,0 +1,113 @@
+---
+layout: post
+title: "Logistic Regression and Linear Discriminant Analysis"
+date: 2016-02-17 14:00
+comments: true
+category: "Machine Learning"
+tags: regression
+---
+
+在回归方法中，我们找一个超平面作为类与类之间的decision boundary。回归方法为每个分类建立一个判别函数 $\sigma_k (x)$, 对任意的 $x$，选出得到最大值的判别函数最为归属类。对于后验概率模型 $Pr(G = k\|X = x)$ 也是使用同样的方法。对于$\sigma_k (x) 和 Pr(G = k\|X = x)$ 来说，只要它们是线性的，那么得到的decision boundary也是线性的。
+
+虽然无法直接使得 $\sigma_k (x) 和 Pr(G = k\|X = x)$ 是线性的，但是如果有一个单调的转化函数能够使得是线性的，那么我们也可以得到一个超平面分割数据点。
+
+Logistic Regression 和 Linear Discriminant Analysis就是基于这样的需求构造的模型。
+
+<!--more-->
+
+## Logistic Regression
+
+逻辑回归的模型也是源于通过 $x$ 的线性函数建立 $K$ 个类的后验概率模型，同时保证它们在[0,1]之间以及和为1。
+
+$$ log {Pr(G = 1 \vert X = x) \over Pr(G = K \vert X = x)} = \beta_{10} + \beta_1^Tx $$
+
+$$ log {Pr(G = 2 \vert X = x) \over Pr(G = K \vert X = x)} = \beta_{20} + \beta_2^Tx $$
+
+$$ log {Pr(G = K-1 \vert X = x) \over Pr(G = K \vert X = x)} = \beta_{(K-1)0} + \beta_{K-1}^Tx $$
+
+这个转换函数称为 logit transformation, 概率称为 log-odds。得到
+
+$$ Pr(G = k \vert X = x) = {exp(\beta_{k0} + \beta_k^Tx) \over {1 + \sum_{l=1}^{K-1} exp(\beta_{l0} + \beta_l^Tx) }} $$
+
+$$ Pr(G = K \vert X = x) = {1 \over {1 + \sum_{l=1}^{K-1} exp(\beta_{l0} + \beta_l^Tx) }} $$
+
+当 $K=2$ 的时候，输出设为0/1, 输出结果就是一个伯努利过程。可以使用maximum likelihood来对模型进行参数估计。
+
+假设 $y_i = 1\ when\ g_i = 1,\ y_i = 0\ when\ g_i = 2$, 那么不妨设 $p(x_i; \beta) = Pr(G = 1\|X = x) = {\beta^Tx \over {1 + exp(\beta^Tx)}}$，这时的 $p(x_i; \beta) = {1 \over {1 + exp(-\beta^Tx)}}$, 也成为`sigmoid function`。
+
+log-likelihood得到结果为
+
+$$ \ell(\beta) = \sum {y_i log p(x_i; \beta) + (1 - y_i)log(1-p(x_i, \beta))} 
+        = \sum {y_i\beta^Tx_i - log(1 + exp(\beta^Tx_i))}, $$
+        
+$$其中\beta = \{\beta_{10}, \beta_1\}, x_i$ 的第一个元素为截距1.$$
+
+$$ 求导后得到\frac{\partial \ell (\beta)}{\partial \beta} = \sum_{i=1}^N {x_i(y_i - p(x_i; \beta))} = 0 $$
+
+此时，可以使用梯度下降法或者牛顿法求解 $\beta$。下面使用牛顿法求解。
+
+$$ \frac{\partial^2 \ell (\beta)}{\partial \beta \partial \beta^T} = 
+    - \sum_{i=1}^N  {x_i x_i^T p(x_i; \beta)(1 - p(x_i; \beta))} $$
+于是牛顿迭代即为
+$$ \beta^{new} = \beta^{old} - (\frac{\partial^2 \ell (\beta)}{\partial \beta \partial \beta^T})^{-1} \frac{\partial \ell (\beta)}{\partial \beta}, 其中所有的倒数都是在\beta^{old}的时候计算的 $$
+
+下面说明这个问题就是加权最小二乘问题，可以变换得到
+$$\frac{\partial \ell (\beta)}{\partial \beta} = X^T(Y-P),\ \frac{\partial^2 \ell (\beta)}{\partial \beta \partial \beta^T} = -X^TWX $$
+其中 $Y$ 是 $y_i$的向量，$X$ 为 $N * (p+1)$ 的矩阵，$W$ 是一个 $N*N$ 的对角矩阵，元素为 $p(x_i; \beta^{old})(1 - p(x_i; \beta^{old}))$
+
+可以得到 $$\beta^{new} = (X^TWX)^{-1}X^TWz,\ z = X\beta^{old} + W^{-1}(Y-P)$$, 这个表达式得到的就是weighted least squares step. $z$ 称为 response，或者说是 *adjusted response*。每个迭代$p$都会变，所以$W 和 z$也都会变，可以用*iteratively reweighted least squares*或者IRLS算法来计算，每个迭代就是解决一个weighted least squares问题：
+
+$$\beta^{new} \gets arg min_\beta (z - X\beta)^TW(z - X\beta)$$
+
+*注：weighted linear least squares*
+
+$$ arg min_\beta \sum_{i=1}^m w_i \|y_i - \sum_{j=1}^n x_{ij}\beta_j\|^2 = arg min_\beta \vert W^{1 \over 2}(Y - X\beta) \vert ^2 $$
+
+$$ \hat{\beta} = (X^TWX)^{-1}X^TWY $$
+
+## Linear Discriminant Analysis
+
+接下来我们给出另外一个模型，它的后验概率的logit也同样是一个线性模型。
+
+假设 $f_k(x)$ 是类 $G=k$ 的输入的条件密度函数，$\pi_k$ 是类 $k$ 的先验概率，有 $\sum_{k=1}^K \pi_k = 1$。那么依据贝叶斯公式得到
+
+$$ Pr(G=k \vert X=x) = \frac{f_k(x) \pi_k}{\sum_{i=1}^K f_i(x) \pi_i} $$
+
+假设每个类服从multivariate Guassian分布， 那么
+
+$$f_k(x) = \frac{e^{-1/2(x-\mu_k)^T\Sigma_k^{-1}(x-\mu_k)}}{(2\pi)^{p/2} \vert \Sigma_k \vert ^{1/2}}$$ 
+
+当每个类都有一个相同的协方差矩阵 $\Sigma$ 的时候，我们有以下推导
+
+$$ log {Pr(G = k \vert X = x) \over Pr(G = \ell \vert X = x)} = log{\pi_k \over \pi_\ell} - \frac{1}{2}(\mu_k + \mu_\ell)^T\Sigma^{-1}(\mu_k - \mu_\ell) + x^T\Sigma^{-1}(\mu_k - \mu_\ell) $$
+
+注意到这个式子也就是 $\alpha_{k0} + \alpha_k^Tx$，也就是和logistic regression一样的模型。
+
+并且这个式子可以推出线性判别函数为 
+
+$$ \delta_k(x) = x^T\Sigma^{-1}\mu_k - \frac{1}{2}\mu_k^T\Sigma^{-1}\mu_k + log\pi_k$$
+
+$$ G(x) = argmax_k \delta_k(x) $$
+
+实际上，高斯分布的参数可以从训练集中估计：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-16/18265816.jpg" width = "400px"/>
+
+可以看出来LDA做了一下的假设：
+
+* 类的分布是高斯函数
+* 每个类都有一个共同的协方差矩阵
+
+看起来LDA和logistic regression模型是一样的，它们的区别是对线性参数估计的方法不同。
+$X$ 和 $G$ 的联合概率如下
+
+$$ Pr(X, G=k) = Pr(X)Pr(G=k \vert X) $$
+
+对于LDA和logistic regression，公式的后半部分都是一样的。LR模型也是忽略了前半部分的边际概率，直接对条件概率进行最大似然估计。但是LDA的参数估计是基于整个联合概率分布的
+
+$$ Pr(X, G=k) = \phi(X; \mu_k, \Sigma)\pi_k, \phi是高斯密度函数 $$
+$$ Pr(X) = \sum_{k=1}^K\phi(X; \mu_k, \Sigma)\pi_k$$
+
+这个边际概率有什么用呢，总的来说是提供参数估计的更多信息，减少参数估计的方差。但是在LDA中，由于outliers会对协方差矩阵做出一定贡献，所以LDA对outliers会比较敏感。如果我们忽略这些假设，而Input确实是高斯分布的，那么根据Efrom的论文，会有"in the worst case ignoring this marginal part of the likelihood constitutes a loss of efficiency of about 30% asymptotically in the error rate".
+
+
