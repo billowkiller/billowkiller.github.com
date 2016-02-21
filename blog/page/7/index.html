@@ -175,6 +175,68 @@ body {
 
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
         
+           | <a href="/blog/2013/05/14/linuxnei-he-bian-yi-an-zhuang-ji-xie-zai/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/linuxnei-he-bian-yi-an-zhuang-ji-xie-zai/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/linuxnei-he-bian-yi-an-zhuang-ji-xie-zai/">Linux内核编译安装及卸载</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>编译安装：</p>
+
+<p>下载需要的包</p>
+
+<pre><code>apt-get install kernel-package libncurses5-dev fakeroot wget bzip2
+cp linux-3.x.x /usr/src
+cd /usr/src/linux-3.x.x
+make menuconfig
+make modules
+make modules\_install
+make
+make install
+sudo mkinitramfs -o /boot/initrd.img-3.x.x
+sudo update-initramfs -c -k 3.x.x
+sudo update-grub2
+</code></pre>
+
+<hr />
+
+<p></div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/linuxnei-he-bian-yi-an-zhuang-ji-xie-zai/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
            | <a href="/blog/2013/05/14/linux-kvmdai-ma-zhi-mei/#disqus_thread"
              data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/linux-kvmdai-ma-zhi-mei/">Comments</a>
         
@@ -773,67 +835,6 @@ technologies.（这句是wikipedia摘抄的定义）</p>
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/google-pagerank/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/google-pagerank/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/google-pagerank/">Google PageRank</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p><strong>edited</strong> from <strong><em><a href="http://www.ams.org/samplings/feature-column/fcarc-pagerank">How Google Finds Your Needle in the Web’s Haystack</a></em></strong></p>
-
-<hr />
-
-<p>Google搜索的核心算法当然不止是PageRank，但PageRank确实是其中的核心部分。Google就曾经说过：“the
-heart of our software is PageRank”.</p>
-
-<p>Google的PageRank算法声称他们比较了一个月来网页的受欢迎程度从而确定哪个网页显得比较重要。根据Sergey
-Brin和Lawrence
-Page的说法，一个网页的重要性不仅仅包括他们自身的重要程度，还包括链接向这个网页的其他网页数目。</p>
-
-<p>综合公式为：</p>
-
-<p><img src="http://www.ams.org/featurecolumn/images/december2006/index_1.gif" alt="" /></p>
-
-<p>呵呵，看到这个公式我第一反应就是，“我靠，这怎么整啊，这不是鸡生蛋，蛋生鸡”的问题吗？果然，下面就有解决办法。</p>
-
-<p>我们将这个问题转化为一个数学问题。
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/google-pagerank/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -863,9 +864,9 @@ Page的说法，一个网页的重要性不仅仅包括他们自身的重要程�
     
     <a class="list-group-item " href="/blog/2016/02/15/gradient-descent-and-newton-method/">Gradient Descent and Newton Method</a>
     
-    <a class="list-group-item " href="/blog/2015/12/01/hadoop-tunning/">Hadoop Tunning</a>
+    <a class="list-group-item " href="/blog/2016/02/13/concepts-ml/">Some Pre-Concepts in Machine Learning</a>
     
-    <a class="list-group-item " href="/blog/2015/11/22/hadoop-secondary-sorting/">Hadoop Secondary Sorting</a>
+    <a class="list-group-item " href="/blog/2015/12/01/hadoop-tunning/">Hadoop Tunning</a>
     
   </div>
 </section>
@@ -931,7 +932,7 @@ Page的说法，一个网页的重要性不仅仅包括他们自身的重要程�
     
     
     <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
-        <span class="badge">3</span>
+        <span class="badge">4</span>
         Machine Learning
       </a>
     

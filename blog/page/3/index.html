@@ -173,6 +173,65 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-22T09:18:00+08:00" pubdate data-updated="true">Jul 22<span>nd</span>, 2014</time>
+        
+           | <a href="/blog/2014/07/22/network-programming/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/07/22/network-programming/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/22/network-programming/">Unix Network Programming Notes</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>记录Linux网络编程中的一些知识点…</p>
+
+<hr />
+
+<h3 id="section">网络编程可能会遇到的三种情况</h3>
+
+<ol>
+  <li>当<code>fork</code>子进程时，必须捕获<code>SIGCHLD</code>信号。</li>
+  <li>当捕获信号时，必须处理被中断的系统调用；</li>
+  <li>
+    <p><code>SIGCHLD</code>的信号处理函数必须正确编写，应使用<code>waitpid</code>函数以免留下僵死进程。</p>
+
+    <p><code>waitpid</code>是可以非阻塞的等待信号终止，因此可以使用循环调用。</p>
+  </li>
+</ol>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/07/22/network-programming/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-18T09:18:00+08:00" pubdate data-updated="true">Jul 18<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/07/18/TCP-IP/#disqus_thread"
@@ -686,57 +745,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-27T02:18:00+08:00" pubdate data-updated="true">Apr 27<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/04/27/New-features-in/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/04/27/New-features-in/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/27/New-features-in/">New Features in C++11</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>modified from <a href="http://coolshell.cn/articles/5265.html">http://coolshell.cn/articles/5265.html</a></p>
-
-<hr />
-
-<p>C++11在2011年8月通过ISO用来替换C++03。是对目前C++语言的扩展和修正，C++11不仅包含核心语言的新机能，而且扩展了C++的标准程序库（STL），并入了大部分的C++ Technical Report 1（TR1）程序库(数学的特殊函数除外)。</p>
-
-<p>C++11包括大量的新特性：包括lambda表达式，类型推导关键字auto、decltype，和模板的大量改进。下面就来介绍下这些新特性。</p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/04/27/New-features-in/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -766,9 +774,9 @@ body {
     
     <a class="list-group-item " href="/blog/2016/02/15/gradient-descent-and-newton-method/">Gradient Descent and Newton Method</a>
     
-    <a class="list-group-item " href="/blog/2015/12/01/hadoop-tunning/">Hadoop Tunning</a>
+    <a class="list-group-item " href="/blog/2016/02/13/concepts-ml/">Some Pre-Concepts in Machine Learning</a>
     
-    <a class="list-group-item " href="/blog/2015/11/22/hadoop-secondary-sorting/">Hadoop Secondary Sorting</a>
+    <a class="list-group-item " href="/blog/2015/12/01/hadoop-tunning/">Hadoop Tunning</a>
     
   </div>
 </section>
@@ -834,7 +842,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
-        <span class="badge">3</span>
+        <span class="badge">4</span>
         Machine Learning
       </a>
     
