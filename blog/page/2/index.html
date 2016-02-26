@@ -173,6 +173,62 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-07-26T17:23:00+08:00" pubdate data-updated="true">Jul 26<span>th</span>, 2015</time>
+        
+           | <a href="/blog/2015/07/26/mapreduce-framework/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2015/07/26/mapreduce-framework/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/26/mapreduce-framework/">Mapreduce Framework</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><h2 id="mapreduce">MapReduce框架</h2>
+
+<p>mapReduce 的输入是hdfs上存储的一系列文件集。在hadoop中，这些文件被一种定义了如何分割一个文件成分片的input format来分割，一个分片是一个文件基于字节的可以被一个map任务加载的一个块。</p>
+
+<ul>
+  <li>每个map任务被分为以下阶段：<code>record reader</code>，<code>mapper</code>，<code>combiner</code>，<code>partitioner</code>。Map任务的输出叫中间数据，包括keys和values，发送到reduce端。</li>
+  <li>Reduce任务分为以下阶段：<code>shuffle</code>，<code>sort</code>，<code>reduce</code>，<code>output format</code>。运行map任务的节点会尽量选择数据所在的节点。这种情况下，不会出现网络传输，在本地节点就可以完成计算。</li>
+</ul>
+
+<p>过程如图所示，接下来的章节会一一介绍。</p>
+
+<p><img src="https://farm3.static.flickr.com/2275/3529146683_c8247ff6db_o.png" alt="" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2015/07/26/mapreduce-framework/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-07-26T16:57:00+08:00" pubdate data-updated="true">Jul 26<span>th</span>, 2015</time>
         
            | <a href="/blog/2015/07/26/pid-file-analysis/#disqus_thread"
@@ -641,76 +697,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-02T02:18:00+08:00" pubdate data-updated="true">Aug 2<span>nd</span>, 2014</time>
-        
-           | <a href="/blog/2014/08/02/probability-problem/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/08/02/probability-problem/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/02/probability-problem/">Probability Problem</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p><strong>概念：贝叶斯公式</strong></p>
-
-<p>贝叶斯定理是关于随机事件$A$和$B$的条件概率（或边缘概率）的一则定理。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/e824b899a9014c086ec5068f097b02087bf4f419_zps22b92ed4.gif" alt="" /></p>
-
-<table>
-  <tbody>
-    <tr>
-      <td>其中$P(A</td>
-      <td>B)$是在$B$发生的情况下$A$发生的可能性。</td>
-    </tr>
-  </tbody>
-</table>
-
-<h2 id="section">一、抛硬币问题</h2>
-
-<p><strong>问题1 有一苹果，两个人抛硬币来决定谁吃这个苹果，先抛到正面者吃。问先抛这吃到苹果的概率是多少？</strong></p>
-
-<p>假设第一个人吃到苹果的概率是P。第一次抛硬币若为正面则先抛者赢；若为负面且后抛者也为负面，则主动权回到先抛者，回到原问题。</p>
-
-<p>得到关系：P = 1/2 + 1/2 * 1/2 * P  </p>
-
-<p>得出 P = 2/3</p>
-
-<p><strong>问题2 游戏规则为，连续2次抛到硬币朝上，则游戏结束。问平均抛多少次游戏可以结束？</strong></p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/08/02/probability-problem/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -734,6 +720,8 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/02/26/pca-svd/">PCA and SVD</a>
+    
     <a class="list-group-item " href="/blog/2016/02/18/ensemble/">Ensemble Methods</a>
     
     <a class="list-group-item " href="/blog/2016/02/17/lr-and-lda/">Logistic Regression and Linear Discriminant Analysis</a>
@@ -741,8 +729,6 @@ body {
     <a class="list-group-item " href="/blog/2016/02/15/gradient-descent-and-newton-method/">Gradient Descent and Newton Method</a>
     
     <a class="list-group-item " href="/blog/2016/02/13/concepts-ml/">Some Pre-Concepts in Machine Learning</a>
-    
-    <a class="list-group-item " href="/blog/2015/12/01/hadoop-tunning/">Hadoop Tunning</a>
     
   </div>
 </section>
@@ -808,7 +794,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
-        <span class="badge">4</span>
+        <span class="badge">5</span>
         Machine Learning
       </a>
     

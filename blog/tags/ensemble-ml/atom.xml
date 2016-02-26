@@ -4,7 +4,7 @@
   <title><![CDATA[tags: ensemble,ml | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/ensemble-ml/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-02-21T14:59:42+08:00</updated>
+  <updated>2016-02-26T22:03:54+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -191,6 +191,10 @@ stacking或者stacked generalization的大意是non-linear combining. 通常stac
 <p>所以AdaBoost的过程也就是让 $\sum_{n=1}^N u_n^{(t)}$ 减小，也就是最小化</p>
 
 <script type="math/tex; mode=display"> \sum_{n=1}^Nu_n^{(T+1)} =  \frac{1}{N} \cdot exp(-y_n\sum_{t=1}^T\alpha_tg_t(x_n)) </script>
+
+<p>注意到上式是一个损失函数，Exponential Loss Function，之所以用指数损失函数是为了后续的计算方便，可以对比下不同的损失函数。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-22/70940842.jpg" width="400x" /></p>
 
 <p>注意到在gradient descent中第 $t$ 次迭代有：</p>
 

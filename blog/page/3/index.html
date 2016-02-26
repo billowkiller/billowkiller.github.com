@@ -173,6 +173,76 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-02T02:18:00+08:00" pubdate data-updated="true">Aug 2<span>nd</span>, 2014</time>
+        
+           | <a href="/blog/2014/08/02/probability-problem/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/08/02/probability-problem/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/02/probability-problem/">Probability Problem</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p><strong>概念：贝叶斯公式</strong></p>
+
+<p>贝叶斯定理是关于随机事件$A$和$B$的条件概率（或边缘概率）的一则定理。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/e824b899a9014c086ec5068f097b02087bf4f419_zps22b92ed4.gif" alt="" /></p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>其中$P(A</td>
+      <td>B)$是在$B$发生的情况下$A$发生的可能性。</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="section">一、抛硬币问题</h2>
+
+<p><strong>问题1 有一苹果，两个人抛硬币来决定谁吃这个苹果，先抛到正面者吃。问先抛这吃到苹果的概率是多少？</strong></p>
+
+<p>假设第一个人吃到苹果的概率是P。第一次抛硬币若为正面则先抛者赢；若为负面且后抛者也为负面，则主动权回到先抛者，回到原问题。</p>
+
+<p>得到关系：P = 1/2 + 1/2 * 1/2 * P  </p>
+
+<p>得出 P = 2/3</p>
+
+<p><strong>问题2 游戏规则为，连续2次抛到硬币朝上，则游戏结束。问平均抛多少次游戏可以结束？</strong></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/08/02/probability-problem/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-22T09:18:00+08:00" pubdate data-updated="true">Jul 22<span>nd</span>, 2014</time>
         
            | <a href="/blog/2014/07/22/network-programming/#disqus_thread"
@@ -679,72 +749,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-05-01T03:18:00+08:00" pubdate data-updated="true">May 1<span>st</span>, 2014</time>
-        
-           | <a href="/blog/2014/05/01/code-snippet/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/05/01/code-snippet/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/01/code-snippet/">Some Code Snippets</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><ol>
-  <li>
-    <p><strong>在一个二叉树中查找值为x的结点，并打印该结点所有祖先结点的算法，也就是根节点到x的路径。</strong></p>
-
-    <p>思路1： 利用<strong>后序遍历</strong>的非递归算法，在访问结点时增加一个判断，若该结点的值等于x，则打印栈中保持的路径，再中断算法。</p>
-
-    <p>思路2： 采用<strong>前序遍历</strong>的递归算法，在典型的便利算法的参数表中增加了x、path[n]等参数。</p>
-
-    <pre><code> template&lt;class T&gt;
- int Find_Print(BinTreeNode&lt;T*&amp; BT, T x, T path[], int level, int &amp;count) {
-     if(BT != NULL) {
-         level++;
-         path[level] = BT-&gt;data;
-         if (BT-&gt;data==x) { count=level; return 1; }
-         if( Find_Print(BT-&gt;left, x, path, level, count) ) return 1;
-         return Find_Print(BT-&gt;right, x, path, level, count);
-     } else 
-         return 0;
- }
-</code></pre>
-  </li>
-</ol>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/05/01/code-snippet/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -768,6 +772,8 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/02/26/pca-svd/">PCA and SVD</a>
+    
     <a class="list-group-item " href="/blog/2016/02/18/ensemble/">Ensemble Methods</a>
     
     <a class="list-group-item " href="/blog/2016/02/17/lr-and-lda/">Logistic Regression and Linear Discriminant Analysis</a>
@@ -775,8 +781,6 @@ body {
     <a class="list-group-item " href="/blog/2016/02/15/gradient-descent-and-newton-method/">Gradient Descent and Newton Method</a>
     
     <a class="list-group-item " href="/blog/2016/02/13/concepts-ml/">Some Pre-Concepts in Machine Learning</a>
-    
-    <a class="list-group-item " href="/blog/2015/12/01/hadoop-tunning/">Hadoop Tunning</a>
     
   </div>
 </section>
@@ -842,7 +846,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
-        <span class="badge">4</span>
+        <span class="badge">5</span>
         Machine Learning
       </a>
     
