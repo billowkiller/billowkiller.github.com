@@ -169,6 +169,10 @@ $$ u_n^{(T+1)} = u_n^{(1)} \cdot \prod_{t=1}^Texp(-y_n\alpha_tg_t(x_n)) = \frac{
 
 $$ \sum_{n=1}^Nu_n^{(T+1)} =  \frac{1}{N} \cdot exp(-y_n\sum_{t=1}^T\alpha_tg_t(x_n)) $$
 
+注意到上式是一个损失函数，Exponential Loss Function，之所以用指数损失函数是为了后续的计算方便，可以对比下不同的损失函数。
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-22/70940842.jpg" width="400x"/>
+
 注意到在gradient descent中第 $t$ 次迭代有：
 
 <img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-20/31496263.jpg" width = "400px"/>
