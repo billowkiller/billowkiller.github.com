@@ -175,6 +175,116 @@ body {
 
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
         
+           | <a href="/blog/2013/05/14/linuxxia-dhcpfu-wu-qi-pei-zhi/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/linuxxia-dhcpfu-wu-qi-pei-zhi/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/linuxxia-dhcpfu-wu-qi-pei-zhi/">Linux下DHCP服务器配置</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>环境为Ubuntu 12.10，机器为3网卡，需要再eth2上配置一个dhcp服务。</p>
+
+<p>因为eth2后接一个交换机，交换机上的机器需要自动分配网址，并且对于某一台或多台机器需要固定网址，例如打印机。</p>
+
+<h3 id="dhcp">1.   安装DHCP服务</h3>
+
+<pre><code>sudo apt-get install dhcp3-server
+</code></pre>
+
+<p>但是安装的是
+isp-dhcp-server。可能是ubuntu进行的版本替换。但是不影响后面的操作。</p>
+
+<p>服务器上用友3块网卡，需要选择哪一块网卡用来监听DHCP服务。</p>
+
+<p>输入下面命令修改配置文件</p>
+
+<pre><code>vim /etc/default/isc-dhcp-server
+</code></pre>
+
+<p>在文件的注释部分可以看到dhcpd的配置文件在</p>
+
+<pre><code>/etc/dhcp/dhcpd.conf
+</code></pre>
+
+<p>其他注释部分为格外选项，下面要修改INTERFACES</p>
+
+<pre><code>INTERFACES=“eth2” &lt;!--more--&gt; ### 2.  配置DHCP服务
+</code></pre>
+
+<p>修改在上一步查到的dhcpd文件</p>
+
+<p>修改的部分如下：</p>
+
+<pre><code>default-lease-time 600;
+ max-lease-time 7200;
+ option subnet-mask 255.255.255.0;
+ option broadcast-address 192.168.1.255;
+ option routers 192.168.1.254;
+ option domain-name-servers 192.168.1.1, 192.168.1.2;
+ subnet 192.168.1.0 netmask 255.255.255.0 {
+ 　　range 192.168.1.10 192.168.1.200;
+ }
+</code></pre>
+
+<p>注意：不要忘了每句后面加上分号，当时我就粗心了，花了好久时间查出。</p>
+
+<p>这样修改自动分配的地址范围就在</p>
+
+<pre><code>192.168.1.10 与 192.168.1.200
+</code></pre>
+
+<p>还需要绑定MAC地址与ip地址，在添加代码</p>
+
+<pre><code>host printer1 {
+ 　　hardware ethernet 00:0a:95:f5:8f:b3;
+ 　　fixed-address 192.168.1.23;
+ }
+</code></pre>
+
+<p>重启电脑，就ok了。</p>
+
+<p>需要找到DHCP服务器的IP地址，使用下面的命令</p>
+
+<pre><code>sudo dhclient
+</code></pre>
+
+<p>或者</p>
+
+<pre><code>tail -n 15 /var/lib/dhcp3/dhclient.*.leases
+</code></pre>
+
+</div>
+  
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
            | <a href="/blog/2013/05/14/linuxnei-he-dai-ma-feng-ge/#disqus_thread"
              data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/linuxnei-he-dai-ma-feng-ge/">Comments</a>
         
@@ -771,95 +881,6 @@ pair的数据集合；然后再创建一个Reduce函数用来合并所有的具�
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/googlelun-wen-gfs/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-gfs/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/googlelun-wen-gfs/">google论文：GFS</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>论文：<a href="http://www.cs.rochester.edu/meetings/sosp2003/papers/p125-ghemawat.pdf">英文版</a>，<a href="http://blademaster.ixiezi.com/2010/03/27/the-google-file-system%E4%B8%AD%E6%96%87%E7%89%88/">中文版</a></p>
-
-<hr />
-
-<ol>
-  <li>
-    <h2 id="section">导论</h2>
-  </li>
-</ol>
-
-<p>先给个定义：GFS是一个可扩展的分布式文件系统，用于大型的、分布式的、对大量数据进行访问的应用。它运行于廉价的普通硬件上，但可以提供容错功能。它可以给大量的用户提供总体性能较高的服务。</p>
-
-<p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/GoogleFileSystemGFS.svg/500px-GoogleFileSystemGFS.svg.png" alt="Google File System. Designed for system-to-system interaction, and not for user-to-system interaction. The chunk servers replicate the data automatically" /></p>
-
-<p><strong>Assumptions in Google File System (GFS)</strong></p>
-
-<ul>
-  <li>GFS should be built with commodity hardware
-    <ul>
-      <li>Inexpensive disks and machines</li>
-    </ul>
-  </li>
-  <li>GSF stores a modest number of large files
-    <ul>
-      <li>GSF stores a modest number of large files
-        <ul>
-          <li>e.g. Big-table, Map-Reduce records</li>
-        </ul>
-      </li>
-      <li>Do not optimize for small files</li>
-    </ul>
-  </li>
-  <li>Workloads
-    <ul>
-      <li>Large streaming reads (1MB or more) and small random reads (a
-few KBs)</li>
-      <li>Sequential appends to files by hundreds of data producers
-        <ul>
-          <li>Utilizing the fact that files are seldom modified again</li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li>High sustained bandwidth is more important than latency
-    <ul>
-      <li>Response time for individual read and write is not critical
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/googlelun-wen-gfs/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -883,6 +904,8 @@ few KBs)</li>
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/02/27/svm/">Support Vector Machine</a>
+    
     <a class="list-group-item " href="/blog/2016/02/26/pca-svd/">PCA and SVD</a>
     
     <a class="list-group-item " href="/blog/2016/02/18/ensemble/">Ensemble Methods</a>
@@ -890,8 +913,6 @@ few KBs)</li>
     <a class="list-group-item " href="/blog/2016/02/17/lr-and-lda/">Logistic Regression and Linear Discriminant Analysis</a>
     
     <a class="list-group-item " href="/blog/2016/02/15/gradient-descent-and-newton-method/">Gradient Descent and Newton Method</a>
-    
-    <a class="list-group-item " href="/blog/2016/02/13/concepts-ml/">Some Pre-Concepts in Machine Learning</a>
     
   </div>
 </section>
@@ -957,7 +978,7 @@ few KBs)</li>
     
     
     <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
-        <span class="badge">5</span>
+        <span class="badge">6</span>
         Machine Learning
       </a>
     

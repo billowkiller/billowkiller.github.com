@@ -4,7 +4,7 @@
   <title><![CDATA[Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-02-26T22:03:54+08:00</updated>
+  <updated>2016-02-27T22:30:29+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,252 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Support Vector Machine]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/02/27/svm/"/>
+    <updated>2016-02-27T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/02/27/svm</id>
+    <content type="html"><![CDATA[<p>支持向量机(support vector machine, SVM)是一种二类分类模型，其基本模型定义为特征空间上的间隔最大的线性分类器，其学习策略便是间隔最大化，可以形式化为凸二次规划问题的求解，也等价于正则化的合页损失函数的最小化问题。SVM还包括kernel trick，使得它可以成为实质上的非线性分类器。下面就介绍Perceptron到三种类型的SVM模型。</p>
+
+<p><img src="http://research.microsoft.com/en-us/um/people/manik/projects/trade-off/figs/svm2.PNG" width="400px" /></p>
+
+<!--more-->
+
+<h2 id="perceptron">Perceptron</h2>
+
+<p>SVM可以说是Perceptron的一种进化。什么是Perceptron，Wiki的解释如下：</p>
+
+<blockquote>
+  <p>the perceptron is an algorithm for supervised learning of binary classifiers</p>
+</blockquote>
+
+<p>实则是一个二元线性分类器，通过一个线性的预测函数将观察点分成两类，这个预测函数就是特征空间中的一个分离超平面。对应于方程 $wx+b=0$, $w$ 为法向量或者权值，$b$ 是截距或偏置。</p>
+
+<p>能够将数据集的正实例点和负实例点完全正确地划分到超平面的两侧，即对所有 $y_i＝+1$ 的实例 $i$，有 $wx_i+b&gt;0$，对所有 $y_i＝-1$ 的实例 $i$，有 $wx_i+b&lt;0$，则称数据集为线性可分数据集（linearly separable data set）;否则，称数据集线性不可分。</p>
+
+<p>对于误分类点有 $y_i(wx_i+b) &lt; 0$, 设误分类点集 $M$, 采用0/1损失函数, 则得到感知机的损失函数如下：</p>
+
+<script type="math/tex; mode=display"> L(w, b) = -\sum_{x_i \in M} y_i(w x_i + b) </script>
+
+<p>要使损失函数最小，可以采用随机梯度下降法。任意选取一个超平面 $w_0, b_0$，然后用梯度下降法不断地最小化目标函数，每次选取一个误分类点使其梯度下降。每次迭代如下，随机选取一个误分类点 $(x_i, y_i)$, 对 $(w, b)$ 更新, $\eta$ 为步长：</p>
+
+<script type="math/tex; mode=display"> w \gets w + \eta y_ix_i </script>
+
+<script type="math/tex; mode=display"> b \gets b + \eta y_i </script>
+
+<u>下面我们来证明下经过有限次搜索可以找到将训练数据完全正确分开的分离超平面。</u>
+
+<p>存在超平面 $y_i(\hat{w}_{opt} \cdot \hat{x}_i) = w_{opt} \cdot x_i + b_{opt} = 0$，使 $|\hat{w}_{opt}| = 1$，那么可以对于任意的点 $i$，$y_i(\hat{w}_{opt} \cdot \hat{x}_i) &gt; 0$，所有存在 $\gamma$，使得</p>
+
+<script type="math/tex; mode=display">y_i(\hat{w}_{opt} \cdot \hat{x}_i) = w_{opt} \cdot x_i + b_{opt} \ge \gamma</script>
+
+<p>感知机算法从 $\hat{w}_0 = 0$ 开始，如果实例被误分类，则更新权重。设 $\hat{w}_{k-1}$ 是第 $k$ 个误分类点之前扩充的权值向量，则第 $k$ 个误分类点满足$y_i(\hat{w}_{k-1} \cdot \hat{x}_i) \le 0$，$\hat{w}$ 更新后有</p>
+
+<script type="math/tex; mode=display"> \hat{w}_{k} = \hat{w}_{k-1} + \eta y_i \hat{x}_i </script>
+
+<p>可以得到</p>
+
+<script type="math/tex; mode=display"> \hat{w}_{k} \cdot \hat{w}_{opt} = \hat{w}_{k-1} \cdot \hat{w}_{opt} + \eta y_i \hat{w}_{opt} \cdot \hat{x}_i \ge \hat{w}_{k-1} \cdot \hat{w}_{opt} + \eta \gamma </script>
+
+<script type="math/tex; mode=display">\to \hat{w}_{k} \cdot \hat{w}_{opt} \ge k \eta \gamma</script>
+
+<p>另外假设 $R = max(|\hat{x}_i|)$，有</p>
+
+<script type="math/tex; mode=display"> \|\hat{w}_{k}\|^2 = \|\hat{w}_{k-1}\|^2 + 2\eta y_i \hat{w}_{k-1} \cdot \hat{x}_i + \eta^2 \|\hat{x}_i\|^2 \le \|\hat{w}_{k-1}\|^2 + \eta^2 \|\hat{x}_i\|^2 \le \|\hat{w}_{k-1}\|^2 \eta^2 R^2 </script>
+
+<script type="math/tex; mode=display">\to \|\hat{w}_{k}\|^2  \le k \eta^2 R^2 </script>
+
+<p>我们可以得到 </p>
+
+<script type="math/tex; mode=display">k\eta\gamma \le \hat{w}_{k} \cdot \hat{w}_{opt} \le \|\hat{w}_{k}\| \|\hat{w}_{opt}\| \le \sqrt{k}\eta R</script>
+
+<p>于是 $k \le (R / \gamma)^2$，表示误分类次数 $k$ 是有上界的，也就是经过有限次搜索可以找到将训练数据完全正确分开的分离超平面。</p>
+
+<h3 id="pocket">pocket</h3>
+
+<p>这里想另外介绍一种算法，Pocket算法。当训练集线性不可分时，感知机学习算法不收敛，迭代结果会发生震荡。 Pocket算法也就是用来权衡分离超平面和误分类点的。</p>
+
+<p>从直觉上，我们知道如果当前超平面犯错越少越好，Pocket本质上就是在改错的时候多做一步，判断当前改正犯的错是否比之前更小，也就是贪心选择。</p>
+
+<p>方法如图所示：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/79944104.jpg" width="500px" /></p>
+
+<h2 id="linear-support-vector-machine">Linear Support Vector Machine</h2>
+
+<p>Perceptron的问题是什么？它存在许多种解，只要是能够分割观察点的超平面全是它的解，既依赖于初值的选择，也依赖于迭代过程中误分类点的选择。这样的算法带来了不稳定性。为了得到唯一的超平面，需要增加一些约束条件。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/18916886.jpg" width="400px" /></p>
+
+<p>我们认为点距离超平面越远，则越能够容忍噪声，并且对于overfitting的安全边界更大，也就是置信度越大。所以希望能够找到一个距离观察点最远的超平面作为我们的解，这个距离称为Margin，这样的超平面是唯一的。</p>
+
+<p>点到平面的距离为沿着法向量方向的距离，所以有</p>
+
+<script type="math/tex; mode=display"> distance(x, b, w) = \frac{1}{\|w\|} \vert w^Tx + b \vert </script>
+
+<p>顺便提下，上式对法向量进行规范化，使得法向量为单位法向量，这个距离称<strong>几何间隔</strong>，否则是<strong>函数间隔</strong>。接下来，我们想要优化的目标可以写作：</p>
+
+<script type="math/tex; mode=display"> \underset{b,w}{max} \frac{1}{\|w\|} </script>
+
+<script type="math/tex; mode=display">s.t.\ every\ y_n(w^T x_n + b) > 0, \underset{n=1,2..N}{min} y_n(w^T x_n + b) = 1</script>
+
+<p>这里我们有对distance进行缩放，除以 $w^Tx + b$。进一步对问题优化我们得到：</p>
+
+<script type="math/tex; mode=display"> \underset{b,w}{max} \frac{1}{2}w^T w </script>
+
+<script type="math/tex; mode=display">s.t.\ y_n(w^T x_n + b) \ge 1\ for\ all\ n</script>
+
+<p>这样的一个问题其实就是<strong>凸二次规划问题</strong>。可以看下凸二次规划的解法：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/59800326.jpg" width="500px" /></p>
+
+<p>使用任意一款可以解决二次规划的语言包就可以套用上图解决我们的目标问题。这个时候解出来的 $b，w$ 称之为hard-margin，因为没有任何一个点违反我们的限制条件。后面我们会看到一个soft-margin，这个就类似于pocket之于perceptron，可以解决线性不可分的数据集。</p>
+
+<p>对于少量的数据集可以用凸二次规划直接求解，但是数据量一旦增多，求解的速度就成问题。我们可以用拉格朗日乘子法求解原始问题的对偶问题，得到最优解。定义的拉格朗日函数为：</p>
+
+<script type="math/tex; mode=display"> L(b, w, \alpha) = \frac{1}{2}w^Tw + \sum_{n=1}^N \alpha_n(1-y_n(w^T z_n +b)) </script>
+
+<p>这里的 $z_n = \phi(x_n)$ 是为了表示可以对 $x_n$ 做非线性的转换，也就是下一章中提到的kernel function，这里可以直接理解为 $z_n=x_n$。可以这么理解上式：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/6390373.jpg" width="450px" /></p>
+
+<p>根据拉格朗日对偶性，原始问题的对偶问题是极大极小问题，下面我们需要证明：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/47082134.jpg" width="400px" /></p>
+
+<p>假设对于任意的 $\alpha’$，所有的 $\alpha_n’ \ge 0$, 那么</p>
+
+<script type="math/tex; mode=display"> \underset{b,w}{min}(\underset{\alpha_n \ge 0}{max}\ L(b, w, \alpha)) \ge \underset{b,w}{min}\ L(b, w,\alpha’)</script>
+
+<p>因为 $max \ge any$。则对于右式的最优解 $\alpha’$ 有 $best \in any$</p>
+
+<script type="math/tex; mode=display"> \underset{b,w}{min}(\underset{\alpha_n \ge 0}{max}\ L(b, w, \alpha)) \ge \underset{\alpha_n' \ge 0}{max}\underset{b,w}{min}\ L(b, w,\alpha’)</script>
+
+<p>对于大于等于符号来说，这是一个weak duality。如果等号成立则是strong duality，也就是对偶问题和原始问题的最优值相等。需要满足一些限制条件，那就是<a href="https://en.wikipedia.org/wiki/Karush%E2%80%93Kuhn%E2%80%93Tucker_conditions">KKT条件</a>。</p>
+
+<p>求解对偶问题，首先求 （1）$\underset{b,w}{min}\ L(w, b, \alpha)$ </p>
+
+<script type="math/tex; mode=display"> \nabla_w L(w, b, \alpha) = w - \sum_{i=1}^N \alpha_i y_i z_i = 0 \to w=\sum_{i=1}^N \alpha_i y_i z_i</script>
+
+<script type="math/tex; mode=display">\nabla_b L(w, b, \alpha) = \sum_{i=1}^N \alpha_i y_i = 0 \to \sum_{i=1}^N \alpha_i y_i=0</script>
+
+<p>带入原公式得到</p>
+
+<script type="math/tex; mode=display"> L(w, b, \alpha)= -\frac{1}{2} \sum_{i=1}^N \sum_{j=1}^N \alpha_i\alpha_j y_i y_j (z_i \cdot z_j) + \sum_{i=1}^N \alpha_i </script>
+
+<p>接下来求解 （2） $\underset{b,w}{min}\ L(w, b, \alpha)$ 对 $\alpha$ 的极大值，极大值可以变为极小值</p>
+
+<script type="math/tex; mode=display"> \underset{\alpha}{min}\ \frac{1}{2} \sum_{i=1}^N \sum_{j=1}^N \alpha_i\alpha_j y_i y_j (z_i \cdot z_j) - \sum_{i=1}^N \alpha_i</script>
+
+<script type="math/tex; mode=display"> s.t.\ \sum_{i=1}^N \alpha_i y_i=0,\ \alpha_i \ge 0</script>
+
+<p>求解（2）可以用到<a href="http://www.cnblogs.com/biyeymyhjob/archive/2012/07/17/2591592.html">SMO</a>（序列最小最优化）算法。现在回过头来看 $\alpha$ 的最优解，我们发现至少会有一个 $\alpha_j &gt; 0$，因为根据KKT条件有complementary slackness：</p>
+
+<script type="math/tex; mode=display"> \alpha_i(y_i(w \cdot z_i +b)-1) = 0,\ i=1,2,...N</script>
+
+<p>如果 $\alpha=0$ 则会导致 $w=0$，对于$\alpha_j &gt; 0$，我们看到会有 $y_j(w \cdot z_j +b)-1=0$。如此，可以定义分离超平面为</p>
+
+<script type="math/tex; mode=display"> \sum_{i=1}^N \alpha_i y_i (z \cdot z_i) + b = 0 </script>
+
+<script type="math/tex; mode=display"> b = y_i - \sum_{i=1}^N \alpha_i y_i (z_i \cdot z_j)</script>
+
+<p>上面的推导表明，这些点 $(z_j, y_j)$ 也就是站在分离超平面的margin上的点，所以说SVM只依赖于边界上的点，它们被称为support vectors，支持向量，这也是SVM的由来。</p>
+
+<h2 id="kernel-support-machine">Kernel Support Machine</h2>
+
+<p>在上文中，我们已经了解到了SVM处理线性可分的情况，而对于非线性的情况，SVM 的处理方法是选择一个核函数 $K(⋅,⋅)$，<u>通过将数据映射到高维空间，来解决在原始空间中线性不可分的问题</u>。</p>
+
+<p><img src="http://my.csdn.net/uploads/201206/02/1338612063_1634.JPG" width="400px" /></p>
+
+<p>例如，对于上面的数据集中两类数据，分别分布为两个圆圈的形状，这样的数据本身就是线性不可分的。理想的分界应该是一个二次曲面，可以写成：</p>
+
+<script type="math/tex; mode=display">a_1X_1 + a_2X_1^2 + a_3X_2 + a_4X_2^2 + a_5X_1X_2 + a_6 = 0</script>
+
+<p>上式其实就是一个五维的空间。一般地对于二次多项式的转换形式，我们有</p>
+
+<script type="math/tex; mode=display"> \phi_2(x) = (1, x_1, x_2....x_d, x_1^2, x_1x_2,...x_1x_d,x_2x_1, x_2^2...x_d^2) </script>
+
+<p>在这个 $O(d^2)$ 高维空间做计算无疑非常困难。幸运的是从上一章推导出的分离超平面中，我们可以看到<strong>分类决策其实只依赖输入和训练样本输入的内积</strong>，也就是说，我们可以直接计算 </p>
+
+<script type="math/tex; mode=display"> \phi_2(x)^T \phi_2(x') = 1 + \sum_{i=1}^dx_ix_i' +  \sum_{i=1}^d\sum_{j=1}^d x_ix_j'x_ix_j' = 1 + x^Tx' + (x^Tx')^2</script>
+
+<p>这里我们直接计算高维转换后的内积，有什么好处呢？注意到计算可以在原来的低维空间$O(d)$中发生，不需要再高维空间中计算。这样，称呼<strong>计算两个向量在隐式映射过后的空间中的内积的函数叫做核函数</strong>。可以对原有空间进行一些线性变换，得到</p>
+
+<script type="math/tex; mode=display"> \phi_2(x) = (1, \sqrt{2\gamma}x_1,....\gamma x_d^2) \to K_2(x, x')=1 + 2\gamma x^Tx' + \gamma^2 (x^Tx')^2 </script>
+
+<p>推广之后，我们得到一般的多项式Kernel：</p>
+
+<script type="math/tex; mode=display">K_n(x, x')= (\xi + \gamma x^Tx')^n,\ \xi>0,\gamma>0</script>
+
+<p>对于不同的 $\xi,\gamma$ SVM是不同的，它们的支持向量也是不同的，因为对于SVM来说变化Kernel就意味着重新定义margin。下面是二次多项式Kernel的一些例子：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/72039507.jpg" width="450px" /></p>
+
+<p>其他常用的核函数还包括高斯核，它可以把原来的低维空间扩展到无线大的高维空间中，它的一般公式为 $K(x,x’)=exp(-\gamma |x-x’|^2),\gamma&gt;0$。高斯核函数也被称为 Radial Basis Function(RBF) kernel。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/61331101.jpg" width="500px" /></p>
+
+<p>满足核函数的充要条件是Mercer’s condition，包括：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/48999470.jpg" width="450px" /></p>
+
+<h2 id="soft-margin-support-vector-machine">Soft-Margin Support Vector Machine</h2>
+
+<p>下面我们来讨论下 Soft-Margin SVM。Soft-Margin可以支持数据集线性不可分的情况，允许一些误分类点的存在，在目标优化函数上会对这些误分类点增加处罚：</p>
+
+<script type="math/tex; mode=display"> \underset{b,w,\xi}{min} \frac{1}{2}w^T w  + C\sum_{n=1}\xi_n</script>
+
+<script type="math/tex; mode=display">s.t.\ y_i(w^T z_n + b) \ge 1-\xi_n,\ \xi_n \ge 0\ for\ all\ n</script>
+
+<p>对于参数 $C$ 而言，它是大margin和误分类点的trade-off，大 $C$ 表示少误分类点，小 $C$ 表示大margin。同样计算拉格朗日对偶问题：</p>
+
+<script type="math/tex; mode=display">L(b, w, \xi, \alpha, \beta) = \frac{1}{2}w^Tw + C\sum_{n=1}\xi_n + \sum_{n=1}^N \alpha_n(1-\xi_n-y_n(w^T z_n +b)) + \sum_{n=1}^N \beta_n (-\xi_n)</script>
+
+<script type="math/tex; mode=display">want\ \underset{\alpha \ge 0, \beta \ge 0}{max}(\underset{b,w,\xi}{min}\ L(b, w, \xi, \alpha, \beta))</script>
+
+<p>和hard-margin一样的计算后可以得到</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/23447671.jpg" width="350px" /></p>
+
+<p>对于soft-margin的complementary slackness有</p>
+
+<script type="math/tex; mode=display"> \alpha_n(1- \xi_n - y_n(w^T z_n +b)) = 0,\ (C-\alpha_n)\xi_n=0</script>
+
+<p>存在以下三种情况：</p>
+
+<ul>
+  <li>$\alpha_n=0$: $\xi_n=0$, 在边界之外正确分类的点.</li>
+  <li>$0&lt;\alpha_n&lt;C$: $\xi_n=0$，支持向量落在边界上。也正是通过这种情况计算截距 $b$.</li>
+  <li>$\alpha_n=C$：这种情况比较复杂，可以有下图表示，支持向量的位置由$\xi_n$决定。$0&lt;\xi_n&lt;1$则分类正确，在间隔边界和分离超平面之间；$\xi_n=1$则在分离超平面上；$\xi_n&gt;1$则位于超平面误分类的一侧.</li>
+</ul>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/76271972.jpg" width="300px" /></p>
+
+<h2 id="hinge-loss-function">Hinge Loss Function</h2>
+
+<p>最后我们说明下SVM可以用合页损失函数表示，就是最小化以下目标函数：</p>
+
+<script type="math/tex; mode=display"> \sum_{i=1}^N[1-y_i(w \cdot x_i + b)]_+ + \lambda\|w\|^2 </script>
+
+<p>下标“+”表示，对 $[z]_+ = z,\ z&gt;0; [z]_+ = 0,\ z \le 0$</p>
+
+<p>可以看到 $1-y_i(w \cdot x_i + b)$ 可以写成</p>
+
+<script type="math/tex; mode=display"> y_i(w \cdot x_i + b) \ge 1-\xi_i,\ \xi_i \ge 0, \ i=1,2,...N </script>
+
+<p>也就是soft-margin SVM的限制条件，那么取 $\lambda= 1/2C$ 则有</p>
+
+<script type="math/tex; mode=display"> \underset{b,w}{min} \frac{1}{C}(\frac{1}{2}\|w\|^2 + C\sum_{n=1}\xi_n)</script>
+
+<p>也就是soft-margin SVM的目标优化函数。合页损失函数的形状如下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/97100573.jpg" width="400px" /></p>
+
+<p>虚线显示的是感知机的损失函数 $[y_i(w \cdot x_i+b)]_+$。这时，当样本点 $(x_i，y_i)$ 被正确分类时，损失是0，否则损失是 $-y_i(w \cdot x_i+b)$。相比之下，合页损失函数不仅要分类正确，而且置信度足够高时损失才是0。也就是说，合页损失函数对学习有更高的要求。</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[PCA and SVD]]></title>
@@ -3113,210 +3359,6 @@ counts = ones.runningReduce((a, b) =&gt; a+b)
 </span><span class="line"><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Modules in Network Programming]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/08/04/modules-in-network-programming/"/>
-    <updated>2014-08-04T09:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/08/04/modules-in-network-programming</id>
-    <content type="html"><![CDATA[<p>发现自己总喜欢把各种东西混合在一块，所以这又是一篇长文…</p>
-
-<p>本文将会介绍网络编程中的几种模型，包括<strong>I/O模型、服务器编程模型、事件模型、并发模型</strong>。</p>
-
-<hr />
-
-<h2 id="io">I/O模型</h2>
-
-<p>I/O模型包括<strong>阻塞模型、非阻塞模型、信号量驱动模型、多路复用模型、异步模型</strong>。</p>
-
-<p>总体来说包括两大类：</p>
-
-<ol>
-  <li><strong>同步I/O，向程序通知的是I/O就绪事件</strong>，由程序完成读写。包括前四类I/O模型。</li>
-  <li><strong>异步I/O，向程序通知的是I/O完成事件</strong>，读写操作由内核完成。</li>
-</ol>
-
-<!--more-->
-
-<h3 id="section">阻塞模型</h3>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig01_zpsae5d27ed.gif" alt="" /></p>
-
-<p>在这个模型中，用户空间的应用程序执行一个系统调用，这会导致应用程序阻塞。这意味着应用程序会一直阻塞，直到系统调用完成为止（数据传输完成或发生错误）。调用应用程序处于一种不再消费 CPU 而只是简单等待响应的状态，因此从处理的角度来看，这是非常有效的。</p>
-
-<p>其行为非常容易理解，其用法对于典型的应用程序来说都非常有效。在调用 read 系统调用时，应用程序会阻塞并对内核进行上下文切换。然后会触发读操作，当响应返回时（从我们正在从中读取的设备中返回），数据就被移动到用户空间的缓冲区中。然后应用程序就会解除阻塞（read 调用返回）。</p>
-
-<p><strong>阻塞模型在阻塞的时候可能会被信号量中断！！</strong></p>
-
-<h3 id="section-1">非阻塞模型</h3>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig02_zps85e3fe38.gif" alt="" /></p>
-
-<p>非阻塞的实现是I/O命令可能并不会立即满足，需要应用程序调用许多次来等待操作完成。这可能效率不高，因为在很多情况下，当内核执行这个命令时，应用程序必须要进行忙碌等待，直到数据可用为止，或者试图执行其他工作。这个方法可以引入I/O操作的延时，因为数据在内核中变为可用到用户调用 read 返回数据之间存在一定的间隔，这会导致整体数据吞吐量的降低。</p>
-
-<p>当一个应用程序在一个非阻塞的描述符上反复的调用system call的时候，我们称之为<strong>轮询（polling）</strong>。</p>
-
-<h3 id="io-1">I/O复用模型</h3>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig03_zps1ba406e3.gif" alt="" /></p>
-
-<p>I/O复用模型会用到select或者poll函数，这两个函数也会使进程阻塞，但是和阻塞I/O所不同的是，这两个函数可以同时阻塞多个I/O操作。而且可以同时对多个读操作，多个写操作的I/O函数进行检测，直到有数据可读或可写时，才真正调用I/O操作函数。</p>
-
-<h3 id="io-2">信号驱动I/O模型</h3>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig04_zpsb2f0f6ff.gif" alt="" /></p>
-
-<p>首先我们允许套接口进行信号驱动I/O,并安装一个信号处理函数，进程继续运行并不阻塞。当数据准备好时，进程会收到一个SIGIO信号，可以在信号处理函数中调用I/O操作函数处理数据。</p>
-
-<h3 id="io-3">异步I/O模型</h3>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/06fig05_zps636d96a6.gif" alt="" /></p>
-
-<p>调用<code>aio_read</code>函数，告诉内核描述字，缓冲区指针，缓冲区大小，文件偏移以及通知的方式，然后立即返回。当内核将数据拷贝到缓冲区后，再通知应用程序。</p>
-
-<p>这个操作和信号驱动的区别就是：<strong>异步模式等操作完毕后才通知用户程序而信号驱动模式在数据到来时就通知用户程序。</strong></p>
-
-<h3 id="io-4">几种I/O模型的比较</h3>
-
-<p><img src="http://www.blogjava.net/images/blogjava_net/lihao336/o_untitled6_thumb.png" alt="" /></p>
-
-<h2 id="section-2">服务器编程模型</h2>
-
-<p>有个简单的总结<a href="http://www.cnblogs.com/hnrainll/archive/2011/10/13/2210481.html">http://www.cnblogs.com/hnrainll/archive/2011/10/13/2210481.html</a></p>
-
-<h3 id="section-3">多进程服务器模型</h3>
-
-<p>服务器进程接受连接，fork一个子进程为客户服务，然后等待下一个连接。
-多进程模型<strong>适用于单个客户服务需要消耗较多的CPU资源</strong>，例如需要进行大规模或长时间的数据运算或文件访问。多进程模型具有<strong>较好的安全性</strong>。</p>
-
-<pre><code>pid_t pid;
-int listenfd, connfd;
-
-listenfd = Socket( ... );
-Bind(listenfd, ...);
-Listen(listenfd, LISTENQ)
-
-while(1) {
-	connfd = Accept(listenfd, ...); /* probably blocks */
-	if( (pid = Fork()) == 0 ) {
-		Close(listenfd); /* child closes listenning socket */
-		process(connfd); /* process the request */
-		Close(connfd);   /* done with this client */
-		exit(0);		 /* terminate */
-	}
-	Close(connfd);       /* parent closes connected socket */
-}
-</code></pre>
-
-<p>需要仔细体会下，为什么父进程要加最后一个<code>Close</code>。</p>
-
-<h3 id="section-4">单线程模型</h3>
-
-<p>具体实现方式在UNP3e第30章中。</p>
-
-<p>在高性能的网络程序中，使用得最为广泛的恐怕要数“non-blocking IO + IO multiplexing”这种模型，即 Reactor 模式。</p>
-
-<p>在“non-blocking IO + IO multiplexing”这种模型下，程序的基本结构是一个事件循环 (event loop)。它的优点很明显，编程简单，效率也不错。不仅网络读写可以用，连接的建立（connect/accept）甚至 DNS 解析都可以用非阻塞方式进行，以提高并发度和吞吐量 (throughput)。<strong>对于 IO 密集的应用是个不错的</strong>。</p>
-
-<h3 id="section-5">多线程模型</h3>
-
-<p>和多进程模型类似，服务器进程接受连接，新建一个线程为客户服务，然后等待下一个连接。和多进程相比，由于进程消耗的资源比线程大的多，因此，<strong>在需要为较多客户端服务的时候，优先使用多线程</strong>。</p>
-
-<p>具体大概有这么几种做法：</p>
-
-<ol>
-  <li>每个请求创建一个线程，使用阻塞式 IO 操作。在 Java 1.4 引入 NIO 之前，这是 Java 网络编程的推荐做法。可惜伸缩性不佳。</li>
-  <li>使用线程池，同样使用阻塞式 IO 操作。与 1 相比，这是提高性能的措施。</li>
-  <li>使用 non-blocking IO + IO multiplexing。即 Java NIO 的方式。non-blocking IO + one loop per thread 模式。</li>
-  <li>Leader/Follower 等高级模式</li>
-</ol>
-
-<h2 id="section-6">事件处理模型</h2>
-
-<p>一般地,I/O多路复用机制都依赖于一个<strong>事件多路分离器</strong>(Event Demultiplexer)。<u>分离器对象可将来自事件源的I/O事件分离出来，并分发到对应的read/write事件处理器(Event Handler)</u>。开发人员预先注册需要处理的事件及其<strong>事件处理器</strong>（或回调函数）；事件分离器负责将请求事件传递给事件处理器。两个与事件分离器有关的模式是Reactor和Proactor。Reactor模式采用同步IO，而Proactor采用异步IO。</p>
-
-<p><strong>Reactor框架中用户定义的操作是在实际操作之前调用的</strong>。比如你定义了操作是要向一个SOCKET写数据，那么当该SOCKET可以接收数据的时候，你的操作就会被调用；而<strong>Proactor框架中用户定义的操作是在实际操作之后调用的</strong>。比如你定义了一个操作要显示从SOCKET中读入的数据，那么当读操作完成以后，你的操作才会被调用。</p>
-
-<h3 id="reactor">Reactor</h3>
-
-<p>在Reactor中，事件分离器负责等待文件描述符或socket为读写操作准备就绪，然后将就绪事件传递给对应的处理器，最后由处理器负责完成实际的读写工作。</p>
-
-<p><strong>以读操作为例：</strong></p>
-
-<ul>
-  <li>注册读就绪事件和相应的事件处理器</li>
-  <li>事件分离器等待事件</li>
-  <li>事件到来，激活分离器，分离器调用事件对应的处理器。</li>
-  <li>事件处理器完成实际的读操作，处理读到的数据，注册新的事件，然后返还控制权。</li>
-</ul>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/reactor_zpsc844d1e5.png" alt="" /></p>
-
-<h3 id="proactor">Proactor</h3>
-
-<p>在Proactor模式中，处理器–或者兼任处理器的事件分离器，只负责发起异步读写操作。IO操作本身由操作系统来完成。传递给操作系统的参数需要包括用户定义的数据缓冲区地址和数据大小，操作系统才能从中得到写出操作所需数据，或写入从socket读到的数据。事件分离器捕获IO操作完成事件，然后将事件传递给对应处理器。比如，在windows上，处理器发起一个异步IO操作，再由事件分离器等待IOCompletion事件。典型的异步模式实现，都建立在操作系统支持异步API的基础之上，我们将这种实现称为“系统级”异步或“真”异步，因为应用程序完全依赖操作系统执行真正的IO工作。</p>
-
-<p><strong>以读操作为例：</strong></p>
-
-<ul>
-  <li>处理器发起异步读操作（注意：操作系统必须支持异步IO）。在这种情况下，处理器无视IO就绪事件，它关注的是完成事件。</li>
-  <li>事件分离器等待操作完成事件</li>
-  <li>在分离器等待过程中，操作系统利用并行的内核线程执行实际的读操作，并将结果数据存入用户自定义缓冲区，最后通知事件分离器读操作完成。</li>
-  <li>事件分离器呼唤处理器。</li>
-  <li>事件处理器处理用户自定义缓冲区中的数据，然后启动一个新的异步操作，并将控制权返回事件分离器。</li>
-</ul>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/proactor_zpsc40c6bf2.png" alt="" /></p>
-
-<h3 id="section-7">总结</h3>
-
-<p>可以看出，两个模式的相同点，都是对某个IO事件的事件通知(即告诉某个模块，这个IO操作可以进行或已经完成)。在结构上，两者也有相同点：demultiplexor负责提交IO操作(异步)、查询设备是否可操作(同步)，然后当条件满足时，就回调handler；不同点在于，异步情况下(Proactor)，当回调handler时，表示IO操作已经完成；同步情况下(Reactor)，回调handler时，表示IO设备可以进行某个操作(can read or can write)。</p>
-
-<h3 id="ioproactor">同步I/O模拟Proactor</h3>
-
-<p>原理：主线程执行数据读写操作，读写完成后，主线程向工作线程通知这一“完成事件”。那么从工作线程的角度来看，它们就直接获得了数据读写的结果，接下来要做的知识对读写的结果进行逻辑处理。</p>
-
-<p>使用同步I/O模拟出的Proactor模式的工作流程如下：</p>
-
-<ol>
-  <li>主线程往epoll内核事件表中注册socket上的读就绪事件。</li>
-  <li>主线程调用<code>epoll_wait</code>等待socket上有数据可读。</li>
-  <li>当socket上有数据可读时，<code>epoll_wait</code>通知主线程。主线程从socket循环读取数据，知道没有更多数据可读，然后将读取到的数据封装成一个请求对象并插入请求队列。</li>
-  <li>水木在请求队列上的某个工作线程被唤醒，它获得请求对象并处理客户请求，然后往epoll内核事件表中注册socket上的写就绪事件。</li>
-  <li>主线程调用<code>epoll_wait</code>等待socket可写。</li>
-  <li>当socket可写时，<code>epoll_wait</code>通知主线程，主线程往socket上写入服务器处理客户请求结果。</li>
-</ol>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/aproactor_zps46fafc76.png" alt="" /></p>
-
-<h2 id="section-8">并发模型</h2>
-
-<h3 id="section-9">半异步、半同步</h3>
-
-<p>半异步、半同步模式是reactor模式的一个进化，非完全异步，而是通过队列把reactor分成了2个部分：同步部分，异步部分。</p>
-
-<p>同步，是因为队列是block的，这部分采用多线程，提高吞吐量
-reactor部分是单线程的异步的。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/hahs_zps02b41fb9.png" alt="" /></p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/hahs1_zpsb6c7b413.png" alt="" /></p>
-
-<h3 id="leaderfollower">Leader/Follower</h3>
-
-<p>多线程网络服务最简单的方式就是一个连接一个线程，这种模型当客户端连接数快速增长是就会出现性能瓶颈。当然，这时候，我们理所当然会考虑使用线程池，而任何池的使用，都会带来一个管理和切换的问题。 在java 1.4中引入了NIO编程模型，它采用了Reactor模式，或者说观察者模式，由于它的读写操作都是无阻塞的，使得我们能够只用一个线程处理所有的IO事件，这种处理方式是同步的。为了提高性能，当一个线程收到事件后，会考虑启动一个新的线程去处理，而自己继续等待下一个请求。这里可能会有性能问题，就是把工作交给别一个线程的时候的上下文切换，包括数据拷贝。Leader-Follower模型可以用来解决这个问题。</p>
-
-<p><img src="http://my.csdn.net/uploads/201206/30/1341045549_7751.jpg" alt="" /></p>
-
-<p>所有线程会有三种身份中的一种：leader和follower，以及一个干活中的状态：proccesser。它的基本原则就是，永远最多只有一个leader。而所有follower都在等待成为leader。线程池启动时会自动产生一个Leader负责等待网络IO事件，当有一个事件产生时，Leader线程首先通知一个Follower线程将其提拔为新的Leader，然后自己就去干活了，去处理这个网络事件，处理完毕后加入Follower线程等待队列，等待下次成为Leader。这种方法可以增强CPU高速缓存相似性，及消除动态内存分配和线程间的数据交换。</p>
-
-<p>显然地，通过预先分配一个线程池，Leader/Follower设计避免了动态线程创建和销毁的额外开销。将线程放在一个自组织的池中，而且无需交换数据，这种方式将上下文切换、同步、数据移动和动态内存管理的开销都降到了最低。</p>
-
-<p>不过，这种模式在处理短暂的、原子的、反复的和基于事件的动作上可以取得明显的性能提升，比如接收和分发网络事件或者向数据库存储大量数据记录。事件处理程序所提供的服务越多，其体积也就越大，而处理一个请求所需的时间越长，池中的线程占用的资源也就越多，同时也需要更多的线程。相应的，应用程序中其它功能可用的资源也就越少，从而影响到应用程序的总体性能、吞吐量、可扩展性和可用性。</p>
-
-<p>在大多数LEADER/FOLLOWERS设计中共享的事件源封装在一个分配器组件中。如果在一个设计中联合使用了LEADER/FOLLOWERS和REACTOR事件处理基础设施，由reactor组件进行分发。封装事件源将事件分离和分派机制与事件处理程序隔离开来。每个线程有两个方法：一个是join方法，使用这个方法可以把新初始化的线程加入到池中。新加入的线程将自己的执行挂起到线程池监听者条件(monitor condition)上，并开始等待被提升为新的Leader。在它变成一个Leader之后，它便可以访问共享的事件源，等待执行下一个到来的事件。另一个是promote_new_leader方法，当前的Leader线程使用这个方法可以提升新的Leader，其做法是通过线程池监听者条件通知休眠的Follower。收到通知的Follower继续执行(resume)线程池的join方法，访问共享事件源，并等待下一个事件的到来。</p>
 ]]></content>
   </entry>
   
