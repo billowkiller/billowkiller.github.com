@@ -1,0 +1,245 @@
+---
+layout: post
+title: "Support Vector Machine"
+date: 2016-02-27 14:00
+comments: true
+category: "Machine Learning"
+tags: ml,svm
+---
+
+支持向量机(support vector machine, SVM)是一种二类分类模型，其基本模型定义为特征空间上的间隔最大的线性分类器，其学习策略便是间隔最大化，可以形式化为凸二次规划问题的求解，也等价于正则化的合页损失函数的最小化问题。SVM还包括kernel trick，使得它可以成为实质上的非线性分类器。下面就介绍Perceptron到三种类型的SVM模型。
+
+<img src="http://research.microsoft.com/en-us/um/people/manik/projects/trade-off/figs/svm2.PNG" width="400px"/>
+
+<!--more-->
+
+## Perceptron 
+
+SVM可以说是Perceptron的一种进化。什么是Perceptron，Wiki的解释如下：
+
+> the perceptron is an algorithm for supervised learning of binary classifiers
+
+实则是一个二元线性分类器，通过一个线性的预测函数将观察点分成两类，这个预测函数就是特征空间中的一个分离超平面。对应于方程 $wx+b=0$, $w$ 为法向量或者权值，$b$ 是截距或偏置。
+
+能够将数据集的正实例点和负实例点完全正确地划分到超平面的两侧，即对所有 $y_i＝+1$ 的实例 $i$，有 $wx_i+b>0$，对所有 $y_i＝-1$ 的实例 $i$，有 $wx_i+b<0$，则称数据集为线性可分数据集（linearly separable data set）;否则，称数据集线性不可分。
+
+对于误分类点有 $y_i(wx_i+b) < 0$, 设误分类点集 $M$, 采用0/1损失函数, 则得到感知机的损失函数如下：
+
+$$ L(w, b) = -\sum_{x_i \in M} y_i(w x_i + b) $$
+
+要使损失函数最小，可以采用随机梯度下降法。任意选取一个超平面 $w\_0, b\_0$，然后用梯度下降法不断地最小化目标函数，每次选取一个误分类点使其梯度下降。每次迭代如下，随机选取一个误分类点 $(x\_i, y\_i)$, 对 $(w, b)$ 更新, $\eta$ 为步长：
+
+$$ w \gets w + \eta y_ix_i $$
+
+$$ b \gets b + \eta y_i $$
+
+<u>下面我们来证明下经过有限次搜索可以找到将训练数据完全正确分开的分离超平面。</u>
+
+存在超平面 $y\_i(\hat{w}\_{opt} \cdot \hat{x}\_i) = w\_{opt} \cdot x\_i + b\_{opt} = 0$，使 $\|\hat{w}\_{opt}\| = 1$，那么可以对于任意的点 $i$，$y\_i(\hat{w}\_{opt} \cdot \hat{x}\_i) > 0$，所有存在 $\gamma$，使得
+
+$$y_i(\hat{w}_{opt} \cdot \hat{x}_i) = w_{opt} \cdot x_i + b_{opt} \ge \gamma$$
+
+感知机算法从 $\hat{w}\_0 = 0$ 开始，如果实例被误分类，则更新权重。设 $\hat{w}\_{k-1}$ 是第 $k$ 个误分类点之前扩充的权值向量，则第 $k$ 个误分类点满足$y\_i(\hat{w}\_{k-1} \cdot \hat{x}\_i) \le 0$，$\hat{w}$ 更新后有
+
+$$ \hat{w}_{k} = \hat{w}_{k-1} + \eta y_i \hat{x}_i $$
+
+可以得到
+
+$$ \hat{w}_{k} \cdot \hat{w}_{opt} = \hat{w}_{k-1} \cdot \hat{w}_{opt} + \eta y_i \hat{w}_{opt} \cdot \hat{x}_i \ge \hat{w}_{k-1} \cdot \hat{w}_{opt} + \eta \gamma $$ 
+
+$$\to \hat{w}_{k} \cdot \hat{w}_{opt} \ge k \eta \gamma$$
+
+另外假设 $R = max(\|\hat{x}\_i\|)$，有
+
+$$ \|\hat{w}_{k}\|^2 = \|\hat{w}_{k-1}\|^2 + 2\eta y_i \hat{w}_{k-1} \cdot \hat{x}_i + \eta^2 \|\hat{x}_i\|^2 \le \|\hat{w}_{k-1}\|^2 + \eta^2 \|\hat{x}_i\|^2 \le \|\hat{w}_{k-1}\|^2 \eta^2 R^2 $$
+
+$$\to \|\hat{w}_{k}\|^2  \le k \eta^2 R^2 $$
+
+我们可以得到 
+
+$$k\eta\gamma \le \hat{w}_{k} \cdot \hat{w}_{opt} \le \|\hat{w}_{k}\| \|\hat{w}_{opt}\| \le \sqrt{k}\eta R$$
+
+于是 $k \le (R / \gamma)^2$，表示误分类次数 $k$ 是有上界的，也就是经过有限次搜索可以找到将训练数据完全正确分开的分离超平面。
+
+### pocket
+
+这里想另外介绍一种算法，Pocket算法。当训练集线性不可分时，感知机学习算法不收敛，迭代结果会发生震荡。 Pocket算法也就是用来权衡分离超平面和误分类点的。
+
+从直觉上，我们知道如果当前超平面犯错越少越好，Pocket本质上就是在改错的时候多做一步，判断当前改正犯的错是否比之前更小，也就是贪心选择。
+
+方法如图所示：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/79944104.jpg" width="500px"/>
+
+## Linear Support Vector Machine
+
+Perceptron的问题是什么？它存在许多种解，只要是能够分割观察点的超平面全是它的解，既依赖于初值的选择，也依赖于迭代过程中误分类点的选择。这样的算法带来了不稳定性。为了得到唯一的超平面，需要增加一些约束条件。
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/18916886.jpg" width="400px"/>
+
+我们认为点距离超平面越远，则越能够容忍噪声，并且对于overfitting的安全边界更大，也就是置信度越大。所以希望能够找到一个距离观察点最远的超平面作为我们的解，这个距离称为Margin，这样的超平面是唯一的。
+
+点到平面的距离为沿着法向量方向的距离，所以有
+
+$$ distance(x, b, w) = \frac{1}{\|w\|} \vert w^Tx + b \vert $$
+
+顺便提下，上式对法向量进行规范化，使得法向量为单位法向量，这个距离称**几何间隔**，否则是**函数间隔**。接下来，我们想要优化的目标可以写作：
+
+$$ \underset{b,w}{max} \frac{1}{\|w\|} $$ 
+
+$$s.t.\ every\ y_n(w^T x_n + b) > 0, \underset{n=1,2..N}{min} y_n(w^T x_n + b) = 1$$
+
+这里我们有对distance进行缩放，除以 $w^Tx + b$。进一步对问题优化我们得到：
+
+$$ \underset{b,w}{max} \frac{1}{2}w^T w $$ 
+
+$$s.t.\ y_n(w^T x_n + b) \ge 1\ for\ all\ n$$
+
+这样的一个问题其实就是**凸二次规划问题**。可以看下凸二次规划的解法：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/59800326.jpg" width="500px"/>
+
+使用任意一款可以解决二次规划的语言包就可以套用上图解决我们的目标问题。这个时候解出来的 $b，w$ 称之为hard-margin，因为没有任何一个点违反我们的限制条件。后面我们会看到一个soft-margin，这个就类似于pocket之于perceptron，可以解决线性不可分的数据集。
+
+对于少量的数据集可以用凸二次规划直接求解，但是数据量一旦增多，求解的速度就成问题。我们可以用拉格朗日乘子法求解原始问题的对偶问题，得到最优解。定义的拉格朗日函数为：
+
+$$ L(b, w, \alpha) = \frac{1}{2}w^Tw + \sum_{n=1}^N \alpha_n(1-y_n(w^T z_n +b)) $$
+
+这里的 $z_n = \phi(x_n)$ 是为了表示可以对 $x_n$ 做非线性的转换，也就是下一章中提到的kernel function，这里可以直接理解为 $z_n=x_n$。可以这么理解上式：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/6390373.jpg" width="450px"/>
+
+根据拉格朗日对偶性，原始问题的对偶问题是极大极小问题，下面我们需要证明：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/47082134.jpg" width = "400px"/>
+
+假设对于任意的 $\alpha’$，所有的 $\alpha_n’ \ge 0$, 那么
+
+$$ \underset{b,w}{min}(\underset{\alpha_n \ge 0}{max}\ L(b, w, \alpha)) \ge \underset{b,w}{min}\ L(b, w,\alpha’)$$
+
+因为 $max \ge any$。则对于右式的最优解 $\alpha’$ 有 $best \in any$
+
+$$ \underset{b,w}{min}(\underset{\alpha_n \ge 0}{max}\ L(b, w, \alpha)) \ge \underset{\alpha_n' \ge 0}{max}\underset{b,w}{min}\ L(b, w,\alpha’)$$
+
+对于大于等于符号来说，这是一个weak duality。如果等号成立则是strong duality，也就是对偶问题和原始问题的最优值相等。需要满足一些限制条件，那就是[KKT条件](https://en.wikipedia.org/wiki/Karush%E2%80%93Kuhn%E2%80%93Tucker_conditions)。
+
+求解对偶问题，首先求 （1）$\underset{b,w}{min}\ L(w, b, \alpha)$ 
+
+$$ \nabla_w L(w, b, \alpha) = w - \sum_{i=1}^N \alpha_i y_i z_i = 0 \to w=\sum_{i=1}^N \alpha_i y_i z_i$$
+
+$$\nabla_b L(w, b, \alpha) = \sum_{i=1}^N \alpha_i y_i = 0 \to \sum_{i=1}^N \alpha_i y_i=0$$
+
+带入原公式得到
+
+$$ L(w, b, \alpha)= -\frac{1}{2} \sum_{i=1}^N \sum_{j=1}^N \alpha_i\alpha_j y_i y_j (z_i \cdot z_j) + \sum_{i=1}^N \alpha_i $$
+
+接下来求解 （2） $\underset{b,w}{min}\ L(w, b, \alpha)$ 对 $\alpha$ 的极大值，极大值可以变为极小值
+
+$$ \underset{\alpha}{min}\ \frac{1}{2} \sum_{i=1}^N \sum_{j=1}^N \alpha_i\alpha_j y_i y_j (z_i \cdot z_j) - \sum_{i=1}^N \alpha_i$$
+
+$$ s.t.\ \sum_{i=1}^N \alpha_i y_i=0,\ \alpha_i \ge 0$$
+
+求解（2）可以用到[SMO](http://www.cnblogs.com/biyeymyhjob/archive/2012/07/17/2591592.html)（序列最小最优化）算法。现在回过头来看 $\alpha$ 的最优解，我们发现至少会有一个 $\alpha_j > 0$，因为根据KKT条件有complementary slackness：
+
+$$ \alpha_i(y_i(w \cdot z_i +b)-1) = 0,\ i=1,2,...N$$
+
+如果 $\alpha=0$ 则会导致 $w=0$，对于$\alpha_j > 0$，我们看到会有 $y_j(w \cdot z_j +b)-1=0$。如此，可以定义分离超平面为
+
+$$ \sum_{i=1}^N \alpha_i y_i (z \cdot z_i) + b = 0 $$
+
+$$ b = y_i - \sum_{i=1}^N \alpha_i y_i (z_i \cdot z_j)$$
+
+上面的推导表明，这些点 $(z_j, y_j)$ 也就是站在分离超平面的margin上的点，所以说SVM只依赖于边界上的点，它们被称为support vectors，支持向量，这也是SVM的由来。
+
+## Kernel Support Machine
+
+在上文中，我们已经了解到了SVM处理线性可分的情况，而对于非线性的情况，SVM 的处理方法是选择一个核函数 $K(⋅,⋅)$，<u>通过将数据映射到高维空间，来解决在原始空间中线性不可分的问题</u>。
+
+<img src="http://my.csdn.net/uploads/201206/02/1338612063_1634.JPG" width="400px"/>
+
+例如，对于上面的数据集中两类数据，分别分布为两个圆圈的形状，这样的数据本身就是线性不可分的。理想的分界应该是一个二次曲面，可以写成：
+
+$$a_1X_1 + a_2X_1^2 + a_3X_2 + a_4X_2^2 + a_5X_1X_2 + a_6 = 0$$
+
+上式其实就是一个五维的空间。一般地对于二次多项式的转换形式，我们有
+
+$$ \phi_2(x) = (1, x_1, x_2....x_d, x_1^2, x_1x_2,...x_1x_d,x_2x_1, x_2^2...x_d^2) $$
+
+在这个 $O(d^2)$ 高维空间做计算无疑非常困难。幸运的是从上一章推导出的分离超平面中，我们可以看到**分类决策其实只依赖输入和训练样本输入的内积**，也就是说，我们可以直接计算 
+
+$$ \phi_2(x)^T \phi_2(x') = 1 + \sum_{i=1}^dx_ix_i' +  \sum_{i=1}^d\sum_{j=1}^d x_ix_j'x_ix_j' = 1 + x^Tx' + (x^Tx')^2$$
+
+这里我们直接计算高维转换后的内积，有什么好处呢？注意到计算可以在原来的低维空间$O(d)$中发生，不需要再高维空间中计算。这样，称呼**计算两个向量在隐式映射过后的空间中的内积的函数叫做核函数**。可以对原有空间进行一些线性变换，得到
+
+$$ \phi_2(x) = (1, \sqrt{2\gamma}x_1,....\gamma x_d^2) \to K_2(x, x')=1 + 2\gamma x^Tx' + \gamma^2 (x^Tx')^2 $$
+
+推广之后，我们得到一般的多项式Kernel：
+
+$$K_n(x, x')= (\xi + \gamma x^Tx')^n,\ \xi>0,\gamma>0$$
+
+对于不同的 $\xi,\gamma$ SVM是不同的，它们的支持向量也是不同的，因为对于SVM来说变化Kernel就意味着重新定义margin。下面是二次多项式Kernel的一些例子：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/72039507.jpg" width="450px"/>
+
+其他常用的核函数还包括高斯核，它可以把原来的低维空间扩展到无线大的高维空间中，它的一般公式为 $K(x,x')=exp(-\gamma \|x-x'\|^2),\gamma>0$。高斯核函数也被称为 Radial Basis Function(RBF) kernel。
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/61331101.jpg" width="500px"/>
+
+满足核函数的充要条件是Mercer's condition，包括：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/48999470.jpg" width="450px"/>
+
+## Soft-Margin Support Vector Machine
+
+下面我们来讨论下 Soft-Margin SVM。Soft-Margin可以支持数据集线性不可分的情况，允许一些误分类点的存在，在目标优化函数上会对这些误分类点增加处罚：
+
+$$ \underset{b,w,\xi}{min} \frac{1}{2}w^T w  + C\sum_{n=1}\xi_n$$ 
+
+$$s.t.\ y_i(w^T z_n + b) \ge 1-\xi_n,\ \xi_n \ge 0\ for\ all\ n$$
+
+对于参数 $C$ 而言，它是大margin和误分类点的trade-off，大 $C$ 表示少误分类点，小 $C$ 表示大margin。同样计算拉格朗日对偶问题：
+
+$$L(b, w, \xi, \alpha, \beta) = \frac{1}{2}w^Tw + C\sum_{n=1}\xi_n + \sum_{n=1}^N \alpha_n(1-\xi_n-y_n(w^T z_n +b)) + \sum_{n=1}^N \beta_n (-\xi_n)$$
+
+$$want\ \underset{\alpha \ge 0, \beta \ge 0}{max}(\underset{b,w,\xi}{min}\ L(b, w, \xi, \alpha, \beta))$$
+
+和hard-margin一样的计算后可以得到
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/23447671.jpg" width="350px"/>
+
+对于soft-margin的complementary slackness有
+
+$$ \alpha_n(1- \xi_n - y_n(w^T z_n +b)) = 0,\ (C-\alpha_n)\xi_n=0$$
+
+存在以下三种情况：
+
+* $\alpha_n=0$: $\xi_n=0$, 在边界之外正确分类的点.
+* $0<\alpha_n<C$: $\xi_n=0$，支持向量落在边界上。也正是通过这种情况计算截距 $b$.
+* $\alpha_n=C$：这种情况比较复杂，可以有下图表示，支持向量的位置由$\xi_n$决定。$0<\xi_n<1$则分类正确，在间隔边界和分离超平面之间；$\xi_n=1$则在分离超平面上；$\xi_n>1$则位于超平面误分类的一侧.
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/76271972.jpg" width="300px"/>
+
+
+## Hinge Loss Function
+
+最后我们说明下SVM可以用合页损失函数表示，就是最小化以下目标函数：
+
+$$ \sum_{i=1}^N[1-y_i(w \cdot x_i + b)]_+ + \lambda\|w\|^2 $$
+
+下标“+”表示，对 $[z]\_+ = z,\ z>0; [z]\_+ = 0,\ z \le 0$
+
+可以看到 $1-y_i(w \cdot x_i + b)$ 可以写成
+
+$$ y_i(w \cdot x_i + b) \ge 1-\xi_i,\ \xi_i \ge 0, \ i=1,2,...N $$
+
+也就是soft-margin SVM的限制条件，那么取 $\lambda= 1/2C$ 则有
+
+$$ \underset{b,w}{min} \frac{1}{C}(\frac{1}{2}\|w\|^2 + C\sum_{n=1}\xi_n)$$
+
+也就是soft-margin SVM的目标优化函数。合页损失函数的形状如下：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-27/97100573.jpg" width="400px"/>
+
+虚线显示的是感知机的损失函数 $[y_i(w \cdot x_i+b)]_+$。这时，当样本点 $(x_i，y_i)$ 被正确分类时，损失是0，否则损失是 $-y_i(w \cdot x_i+b)$。相比之下，合页损失函数不仅要分类正确，而且置信度足够高时损失才是0。也就是说，合页损失函数对学习有更高的要求。
+
+
