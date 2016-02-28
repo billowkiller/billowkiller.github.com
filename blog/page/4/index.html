@@ -173,6 +173,53 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-06-28T03:18:00+08:00" pubdate data-updated="true">Jun 28<span>th</span>, 2014</time>
+        
+           | <a href="/blog/2014/06/28/signal-and-thread/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/06/28/signal-and-thread/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/28/signal-and-thread/">Signal and Thread</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>类UNIX信号以前是专为进程设计的，它比线程的出现早了很多年。当线程模型出现后，专家们试图也在线程上实现信号，这导致了一个问题：即使是在基于进程的编程模式中，信号的处理也可能是很复杂的，因为它打断了正在运行的thread of control， 在signal handler中只能调用可重入函数，修改全局变量的类型必须是<code>sig_atomic_t</code>类型，防止内存访问优化； 而把线程引入编程范型，就使信号的处理变得更加复杂。</p>
+
+<p><strong>避免信号和线程一起使用是明智的选择。</strong>但是，将他们分开又是不可能或不实际的。只要有可能的话，仅仅在主线程内使用<code>pthread_sigmask()</code>来屏蔽信号，然后同步地在专用线程中使用<code>sigwait()</code>来处理信号。</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/06/28/signal-and-thread/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-06-28T02:18:00+08:00" pubdate data-updated="true">Jun 28<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/06/28/signal-status-and-lifecycle/#disqus_thread"
@@ -684,57 +731,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-12-31T18:09:00+08:00" pubdate data-updated="true">Dec 31<span>st</span>, 2013</time>
-        
-           | <a href="/blog/2013/12/31/large-site-technical-architecture/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/12/31/large-site-technical-architecture/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/12/31/large-site-technical-architecture/">Large Site Technical Architecture</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>本文是李智慧的<a href="http://book.douban.com/subject/25723064/">《大型网站技术架构》</a>的读书笔记。</p>
-
-<p>何为架构，要有大局观，大局观就是提前预防掉那些通用的问题：高可用，工程化，伸缩性，扩展性。对应需要的能力：了解分布式的一些东西，了解项目的业务和流程和运维使之工程化，了解负载均衡，能够对业务的分割和代码的分层。 </p>
-
-<p><img src="http://img3.douban.com/lpic/s27040583.jpg" height="250px" /></p>
-
-<p>本书并没有什么特别的东西，且都比较泛，但是都是很实在的东西，而且能很好的组织起来，也不失为互联网架构的一张蓝图。另外本书还处处透露着一些为人处世的人生哲学，这也是我喜欢的。</p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/12/31/large-site-technical-architecture/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -826,7 +822,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/big-data/index.html">
-        <span class="badge">2</span>
+        <span class="badge">3</span>
         Big Data
       </a>
     
