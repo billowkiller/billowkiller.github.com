@@ -4,7 +4,7 @@
   <title><![CDATA[Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-02-28T23:09:16+08:00</updated>
+  <updated>2016-03-01T00:44:23+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,236 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Kernel Logistic Regression versus SVM]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/02/29/klr-svr/"/>
+    <updated>2016-02-29T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/02/29/klr-svr</id>
+    <content type="html"><![CDATA[<p>Logistic Regression和SVM都是分类方法，它们定义线性决策边界（linear decision boundaries）作为划分的依据。但二者在motivation方便完全不同，区别如下</p>
+
+<ul>
+  <li>LR初衷是为了让linear regression能够输出二元分类，估计一个实例属于某一类的概率；线性决策边界也只是回归函数的结果，在回归函数中使用阈值作为分类的标准，一般是0.5。决策边界在SVM中来的更为重要，整个模型的目标就是为了获得最优的决策边界。</li>
+  <li>每个训练样本都对LR的过程有一定的影响，但SVM只依赖于在决策边界附近的某些点。</li>
+  <li>LR适应于低维空间，并且由于使用最大似然估计，所以对噪声不敏感；SVM更适应于高维空间</li>
+  <li>没有正规化的LR无法保证获得最好的分离超平面，只能获得margin附近的较高的置信度; SVM则能获得最优的分离超平面。</li>
+</ul>
+
+<p>那么二者会有什么联系呢，SVM的kernel function又是如何应用到LR模型的呢？</p>
+
+<!--more-->
+
+<h2 id="loss-function">Loss Function</h2>
+
+<p>我们先来看下Loss Function，它是用来衡量学习函数与数据拟合的程度的。回顾对于机器学习来说有一下几个过程：</p>
+
+<ol>
+  <li>假设空间：函数的参数形式，包括lr，svm等</li>
+  <li>拟合的衡量：Loss function，likelihood</li>
+  <li>bias和variance的trade-off：regularization，bayesian estimator (MAP)</li>
+  <li>在假设空间中寻找好的假设：optimization. convex - global. non-convex - multiple starts</li>
+  <li>假设的验证：测试数据的预测，cross validation</li>
+</ol>
+
+<p>在线性学习方法中，通常我们是要找到一个假设 $y=f(\theta^T x)$，选决定f的参数形式，再通过最大化似然函数或者最小化损失函数找到对应的 $\theta$，常见的几个Loss Function：</p>
+
+<p>For classfication $correct \to y \cdot f &gt; 0;\ incorrect \to y \cdot f &lt; 0$</p>
+
+<ol>
+  <li>0/1 loss： $min_\theta \sum_i L_{0/1}(\theta^T x)$. 定义 $L_{0/1}(\theta^T x)=1\ if\ y \cdot f &lt; 0$，其他情况等于0，非凸函数，难以优化。</li>
+  <li>Hinge loss: $min_\theta \sum_i H(\theta^T x)$。接近 0/1 损失函数，定义 $H(\theta^T x) = max (0,1-y \cdot f)$</li>
+  <li>Logistic loss: $min_\theta \sum_i log(1 + exp(-y \cdot \theta^T x))$. </li>
+</ol>
+
+<p>关于3，在逻辑回归中我们最大化似然函数其实就是最小化Logistic loss：</p>
+
+<script type="math/tex; mode=display">\sum_i log \frac{1}{1+exp(-y^{(i)}\cdot \theta^T x^{(i)})} = \sum_i -log (1+exp(-y^{(i)}\cdot \theta^T x^{(i)}))</script>
+
+<script type="math/tex; mode=display">\to min_\theta \sum_i log(1 + exp(-y \cdot \theta^T x))</script>
+
+<p>For regression:</p>
+
+<ol>
+  <li>Square loss: $min_\theta \sum_i | y^{(i)} - \theta^T x^{(i)} |^2$</li>
+</ol>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-22/70940842.jpg" width="400px" /></p>
+
+<p>如上图所示，SVM使用Hinge Loss；Binomial Deviance就是Logistic Loss，因为output是binomial的；Exponential Loss 可以在Gradient Boost中应用到。</p>
+
+<h2 id="connection-between-svm-and-logistic-regression">Connection between SVM and Logistic Regression</h2>
+
+<p>回顾下soft-margin SVM的原始问题：</p>
+
+<script type="math/tex; mode=display"> \underset{b,w,\xi}{min} \frac{1}{2}w^T w  + C\sum_{n=1}\xi_n</script>
+
+<script type="math/tex; mode=display">s.t.\ y_i(w^T z_n + b) \ge 1-\xi_n,\ \xi_n \ge 0\ for\ all\ n</script>
+
+<p>这里的 $\xi_n$ 实际上就是违反 margin 的距离，称为 margin violation。如果 $(x_n, y_n)$ 不违反 margin，那么 $\xi_n=0$，否则为 $\xi_n=1-y_n(w^T z_n + b)$，从这里我们看到实际上 $\xi_n = max(1-y_n(w^T z_n + b), 0)$，所以原来问题可以写成：</p>
+
+<script type="math/tex; mode=display"> \underset{b,w,\xi}{min} \frac{1}{2}w^T w  + C\sum_{n=1}max(1-y_n(w^T z_n + b), 0)</script>
+
+<p>上式写成 $min\ \frac{1}{2} w^Tw + C \sum \hat{err}$ 就比较熟悉了，这个就是L2 regularization: $min\ \lambda w^Tw + C \sum err$ 嘛。对应关系如下：</p>
+
+<ul>
+  <li>soft-margin $\to special\ \hat{err}$</li>
+  <li>large margin $\to$ fewer hyperplanes $\to$ L2 regularization for small $w$</li>
+  <li>larger C or C $\to$ smaller $\lambda\ to$ less regularization</li>
+</ul>
+
+<p>对比于SVM的原始问题，我们发现新的形式并不是凸二次规划问题；不能利用kernel trick；并且max函数不能微分，所以难以解决。那么为什么要变化成这种形式呢？如果设置 linear score: $s=w^T z_n + b$。我们观察下它的损失函数 $\hat{err}_{svm}(s,y) = max(1-ys, 0)$，另外再看下logistic loss: $err_{ll}(ys) = log(1 + exp(-ys))$.</p>
+
+<p>可以对比下上图的损失函数曲线，二者比较接近，并且都是 0/1 损失函数的上限。所以可以把 SVM 当成 L2-regularized logistic regression。以下是几个二分类线性模型的对比：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/76344341.jpg" width="600px" /></p>
+
+<h2 id="kernel-logistic-regression">Kernel Logistic Regression</h2>
+
+<p>现在我们知道 SVM 和 Logistic Regression存在联系，那么是否可以综合二者的有点呢：</p>
+
+<ul>
+  <li>SVM flavor: 利用kernel function 得到 $w_{svm}，b_{svm}$ 得到超平面 </li>
+  <li>LR flavor: 通过 scalling(A) 和 shifting(B) 匹配最大似然函数的方法细粒度地调优超平面
+    <ul>
+      <li>often $A &gt; 0$ if $w_{svm}$ reasonably good</li>
+      <li>often $B \approx 0$ if $b_{svm}$ reasonably good</li>
+    </ul>
+  </li>
+</ul>
+
+<p>所以新的LR问题可以看成 two-level learning 问题：LR on SVM-transformed data</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/6560678.jpg" width="450px" /></p>
+
+<p>于是我们得到Probabilistic SVM for Soft Binary Classification 的算法，因为 LR 是根据概率分类的，过程如下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/75482355.jpg" width="450px" /></p>
+
+<ul>
+  <li>这个 Soft Binary Classifier 得到 bounary 与 SVM 的不同，因为有平移 B。</li>
+  <li>只需要解两个变量，可以使用GD或者SGD等。</li>
+  <li>Kernel SVM 相当于在 $Z$ 空间中进行 LR</li>
+</ul>
+
+<p>Kernel SVM 中有 $w_{svm}^T \phi(x) + b_{svm} = \sum_{SV} \alpha_n y_n K(x_n, x) + b_{svm}$，则最后 Probabilistic SVM 的结果为</p>
+
+<script type="math/tex; mode=display"> g(x) = \theta(\sum_{SV} A\alpha_n y_n K(x_n, x) + Ab_{svm} + B)</script>
+
+<p>但这个方法其实并不是在 $Z$ 空间里的最好的解，只是通过两次 scaling 和 shifting 接近最好的解，那么如何得到最好的解呢。这就是我们要介绍的Kernel Logistic Regression。</p>
+
+<p>先来介绍下 Representer Theorem，它的定义如下：</p>
+
+<blockquote>
+  <p>the solution of regularization and interpolation problems with Hillbertian penalties can be expressed as a linear combination of the data.</p>
+</blockquote>
+
+<p>也就是最优的 $w_* = \sum_{n=1}^N \beta_n z_n$，我们可以把原来在 Hillbertian Space
+ 的计算放到低维空间中进行。</p>
+
+<script type="math/tex; mode=display"> w_*z = \sum_{n=1}^N \beta_n z_n^Tz = \sum_{n=1}^N \beta_n K(x_n, x)</script>
+
+<p>证明Representer Theorem如下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/22880811.jpg" width="450px" /></p>
+
+<p>这其实就表明所有的 L2-regularized linear model 都可以被 kernalized。把损失函数替换成 logistic loss，我们就得到 Kernel Logistic Regression 的优化函数。</p>
+
+<script type="math/tex; mode=display"> \underset{w}{min}\ \frac{\lambda}{N}w^Tw + \frac{1}{N} \sum_{n=1}^N log(1+ exp(-y_n w^T z_n)) </script>
+
+<p>利用 Representer Theorem，将原来对 $w$ 的求解转化为对 $\beta$ 求解：</p>
+
+<script type="math/tex; mode=display"> \underset{\beta}{min}\ \frac{\lambda}{N} \sum_{n=1}^N \sum_{m=1}^N \beta_n \beta_m K(x_n, x_m) +  \frac{1}{N} \sum_{n=1}^N log(1+ exp(-y_n \sum_{m=1}^N \beta_m K(x_m, x_n)))</script>
+
+<p>可以用 GD/SGD 等做最优化求解，<strong>解出来的 $\beta$ 并不同于 SVM 的 $\alpha$，基本上是非零的</strong>。综合上述，总结得到 KLR 其实就是</p>
+
+<blockquote>
+  <p>use representer theorem for kernel trick on L2-regularized logistic regression</p>
+</blockquote>
+
+<p>对 KLR 还有另外另外的解释</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/45320882.jpg" width="450px" /></p>
+
+<h2 id="support-vector-regression">Support Vector Regression</h2>
+
+<p>最后说下SVR，上面提到 regression 的损失函数 squared error $err(y, w^Tz) = (y- w^Tz)^2$，替换下KLR的损失函数我们可以得到</p>
+
+<script type="math/tex; mode=display"> \underset{w}{min}\ \frac{\lambda}{N}w^Tw + \frac{1}{N} \sum_{n=1}^N (y- w^Tz)^2 </script>
+
+<p>这个就是 <strong>kernel ridge regression</strong>，也可以通过解 $\beta$ 得到答案</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/56123028.jpg" width="500px" /></p>
+
+<p>对 $\beta$ 求导得到</p>
+
+<script type="math/tex; mode=display">\nabla E_{aug}(\beta) = \frac{2}{N}(\lambda K^TI\beta + K^TK\beta - K^Ty) = \frac{2}{N}K^T((\lambda I + K)\beta - y)</script>
+
+<script type="math/tex; mode=display">\nabla E_{aug}(\beta) =0 \to \beta=(\lambda I + K)^{-1}y</script>
+
+<p>因为 Merer’s condition，所以 $K$ 是半正定矩阵，继而上式有解。但是稠密矩阵求反需要 $O(N^3)$ 时间复杂度。可以对比下 linear ridge regression:</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/7052157.jpg" width="450px" /></p>
+
+<p>根据前面所述的SVM和LR之间的关系，我们这里可以吧 kernel ridge regression 看成 least-squares SVM(LLSVM)。它有什么特点呢：</p>
+
+<ul>
+  <li>对比soft-margin SVM，有这相似的boundary，但是更多的支持向量。导致预测慢，因为 $\beta$ 比较稠密</li>
+</ul>
+
+<p>现在想让 $\beta$ 变得和 soft-margin SVM 的 $\alpha$ 一样稀疏。可以看到 tube regression 的特点，使用 $\epsilon$-insensitive error：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/74768649.jpg" width="450px" /></p>
+
+<p>整理下是 L2-regularized tube regression</p>
+
+<script type="math/tex; mode=display"> \underset{w}{min}\ \frac{\lambda}{N}w^Tw + \frac{1}{N} \sum_{n=1}^N\ max(0, \vert w^Tz_n - y \vert - \epsilon)</script>
+
+<p>这个函数没有限制条件，但是max难以微分，并且不能很明显的看出有 sparse $\beta$。发现这个表达式和最开始 soft-SVM 的表示有点像，那么我们可以反向的把它模拟成 standard SVM 形式:</p>
+
+<script type="math/tex; mode=display"> \underset{b,w,\xi^ \vee, \xi ^ \land}{min}\ \frac{1}{2} w^Tw + C \sum_{n=1}^N (\xi_n^ \vee + \xi_n ^ \land)</script>
+
+<script type="math/tex; mode=display">s.t.\ -\epsilon-\xi_n^ \vee \le y_n - w^Tz_n-b \le \epsilon-\xi_n^ \land,\ \xi_n^ \vee \ge 0,\ \xi_n^ \land \ge 0</script>
+
+<p>这就构成 SVR 的原始问题: minimize regularizer + (upper tube violations $\xi_n^ \land$ and lower violations $\xi_n^ \vee$)。这里参数 $C$ 就是 trade-off of regularization and tube violation. 现在要求 SVR 的对偶问题。</p>
+
+<ul>
+  <li>Lagrange multiplier $\alpha_n^ \vee\ for\ -\epsilon-\xi_n^ \vee \le y_n - w^Tz_n-b$</li>
+  <li>Lagrange multiplier $\alpha_n^ \land\ for\ y_n - w^Tz_n-b \le \epsilon-\xi_n^ \land$</li>
+</ul>
+
+<p>一些KTT条件如下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-1/97895297.jpg" width="450px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-1/34361452.jpg" width="500px" /></p>
+
+<p>在 tube 中我们可以得到 </p>
+
+<p>$\vert w^Tz_n + b- y_n \vert &lt; \epsilon$</p>
+
+<p>$\to \xi_n^ \vee=0,\ \xi_n^ \land=0$</p>
+
+<p>$\to (\epsilon + \xi_n^ \land - y_n + w^Tz_n +b) \neq 0,\ (\epsilon + \xi_n^ \vee + y_n - w^Tz_n -b) \neq 0$</p>
+
+<p>$\to \alpha_n^ \vee =0,\ \alpha_n^ \land=0$</p>
+
+<p>$\to \beta_n=0$</p>
+
+<p>对于support vector来说，$\beta_n \neq 0$，是在tube上或者tube外的。综上可以得到sparse $\beta$。</p>
+
+<u>总结得到的Linear/Kernel Model如下图：</u>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-1/58915472.jpg" width="450px" /></p>
+
+<ul>
+  <li>first row: less used due to worse performance</li>
+  <li>second row: popular in <strong>LIBLINEAR</strong></li>
+  <li>third row: less used due to dense $\beta$</li>
+  <li>fourth row: popular in <strong>LIBSVM</strong></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Support Vector Machine]]></title>
@@ -3078,284 +3308,6 @@ counts = ones.runningReduce((a, b) =&gt; a+b)
 <p>而<code>vmalloc</code>分配的地址则限于<code>vmalloc_start</code>与<code>vmalloc_end</code>之间。每一块k分配的内核虚拟内存都对应一个<code>vm_struct</code>结构体（可别和<code>vm_area_struct</code>搞混，那可是进程虚拟内存区域的结构），不同的内核虚拟地址被4k大小的空闲区间隔，以防止越界——见下图）。与进程虚拟地址的特性一样，这些虚拟地址与物理内存没有简单的位移关系，必须通过内核页表才可转换为物理地址或物理页。它们有可能尚未被映射，在发生缺页时才真正分配物理页面。</p>
 
 <p><img src="http://www.kerneltravel.net/journal/v/mem.files/image013.jpg" alt="" /></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[QuickSort and Derivatives]]></title>
-    <link href="http://billowkiller.github.io/blog/2014/08/09/quicksort/"/>
-    <updated>2014-08-09T03:18:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2014/08/09/quicksort</id>
-    <content type="html"><![CDATA[<p>记录下快排相关的一些东西。包括普通快排，迭代快排和单链表快排。</p>
-
-<hr />
-
-<!--more-->
-
-<h2 id="section">普通快排</h2>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="cm">/* A typical recursive implementation of quick sort */</span>
-</span><span class="line">
-</span><span class="line"><span class="cm">/* This function takes last element as pivot, places the pivot element at its correct position in sorted array, and places all smaller (smaller than pivot) to left of pivot and all greater elements to right of pivot */</span>
-</span><span class="line"><span class="kt">int</span> <span class="n">partition</span> <span class="p">(</span><span class="kt">int</span> <span class="n">arr</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">l</span><span class="p">,</span> <span class="kt">int</span> <span class="n">h</span><span class="p">)</span> <span class="p">{</span>
-</span><span class="line">    <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">h</span><span class="p">];</span>
-</span><span class="line">    <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="p">(</span><span class="n">l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
-</span><span class="line">
-</span><span class="line">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">l</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;=</span> <span class="n">h</span><span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-</span><span class="line">        <span class="k">if</span> <span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
-</span><span class="line">            <span class="n">i</span><span class="o">++</span><span class="p">;</span>
-</span><span class="line">            <span class="n">swap</span> <span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="n">j</span><span class="p">]);</span>
-</span><span class="line">        <span class="p">}</span>
-</span><span class="line">    <span class="p">}</span>
-</span><span class="line">    <span class="n">swap</span> <span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="n">h</span><span class="p">]);</span>
-</span><span class="line">    <span class="k">return</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
-</span><span class="line"><span class="p">}</span>
-</span><span class="line">
-</span><span class="line"><span class="cm">/* A[] --&gt; Array to be sorted, l  --&gt; Starting index, h  --&gt; Ending index */</span>
-</span><span class="line"><span class="kt">void</span> <span class="n">quickSort</span><span class="p">(</span><span class="kt">int</span> <span class="n">A</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">l</span><span class="p">,</span> <span class="kt">int</span> <span class="n">h</span><span class="p">)</span> <span class="p">{</span>
-</span><span class="line">    <span class="k">if</span> <span class="p">(</span><span class="n">l</span> <span class="o">&lt;</span> <span class="n">h</span><span class="p">){</span>
-</span><span class="line">        <span class="kt">int</span> <span class="n">p</span> <span class="o">=</span> <span class="n">partition</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">h</span><span class="p">);</span>
-</span><span class="line">        <span class="n">quickSort</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">p</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
-</span><span class="line">        <span class="n">quickSort</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">p</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">h</span><span class="p">);</span>
-</span><span class="line">    <span class="p">}</span>
-</span><span class="line"><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>这种实现方式有很多可以值得改进的地方：</p>
-
-<ol>
-  <li>上面的实现使用最后一个元素作为pivot，这对于已经排好序的数组来说是个灾难。可以随机选取一个元素或者直接用中位数来替代。</li>
-  <li>为了减少递归层次，可以先递归数组中个数少的一半。</li>
-  <li>对于小数组来说，插入排序可能更快。可以综合下插入和快排。</li>
-  <li>使用了递归和函数调用栈来存储中间值，并且还需要存储其他的信息。此外还包括存储函数调用的活动记录，恢复上层函数执行的费用。</li>
-</ol>
-
-<p>可以使用迭代来替代递归。</p>
-
-<h3 id="section-1">迭代快排</h3>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-<span class="line-number">29</span>
-<span class="line-number">30</span>
-<span class="line-number">31</span>
-<span class="line-number">32</span>
-<span class="line-number">33</span>
-<span class="line-number">34</span>
-<span class="line-number">35</span>
-<span class="line-number">36</span>
-<span class="line-number">37</span>
-</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="cm">/* This function is same in both iterative and recursive*/</span>
-</span><span class="line"><span class="kt">int</span> <span class="n">partition</span> <span class="p">(</span><span class="kt">int</span> <span class="n">arr</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">l</span><span class="p">,</span> <span class="kt">int</span> <span class="n">h</span><span class="p">)</span> <span class="p">{</span>
-</span><span class="line">    <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">h</span><span class="p">]</span><span class="err">，</span> <span class="n">i</span> <span class="o">=</span> <span class="p">(</span><span class="n">l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
-</span><span class="line">
-</span><span class="line">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">l</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;=</span> <span class="n">h</span><span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">){</span>
-</span><span class="line">        <span class="k">if</span> <span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">){</span>
-</span><span class="line">            <span class="n">i</span><span class="o">++</span><span class="p">;</span>
-</span><span class="line">            <span class="n">swap</span> <span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="n">j</span><span class="p">]);</span>
-</span><span class="line">        <span class="p">}</span>
-</span><span class="line">    <span class="p">}</span>
-</span><span class="line">    <span class="n">swap</span> <span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="n">h</span><span class="p">]);</span>
-</span><span class="line">    <span class="k">return</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
-</span><span class="line"><span class="p">}</span>
-</span><span class="line">
-</span><span class="line"><span class="kt">void</span> <span class="n">quickSortIterative</span> <span class="p">(</span><span class="kt">int</span> <span class="n">arr</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">l</span><span class="p">,</span> <span class="kt">int</span> <span class="n">h</span><span class="p">)</span> <span class="p">{</span>
-</span><span class="line">	<span class="c1">// initialize top of stack</span>
-</span><span class="line">    <span class="kt">int</span> <span class="n">stack</span><span class="p">[</span> <span class="n">h</span> <span class="o">-</span> <span class="n">l</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">];</span> <span class="kt">int</span> <span class="n">top</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-</span><span class="line">
-</span><span class="line">    <span class="c1">// push initial values of l and h to stack</span>
-</span><span class="line">    <span class="n">stack</span><span class="p">[</span> <span class="o">++</span><span class="n">top</span> <span class="p">]</span> <span class="o">=</span> <span class="n">l</span><span class="p">;</span>  <span class="n">stack</span><span class="p">[</span> <span class="o">++</span><span class="n">top</span> <span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">;</span>
-</span><span class="line">
-</span><span class="line">    <span class="c1">// Keep popping from stack while is not empty</span>
-</span><span class="line">    <span class="k">while</span> <span class="p">(</span> <span class="n">top</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="p">){</span>
-</span><span class="line">        <span class="c1">// Pop h and l</span>
-</span><span class="line">        <span class="n">h</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span> <span class="n">top</span><span class="o">--</span> <span class="p">];</span>  <span class="n">l</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span> <span class="n">top</span><span class="o">--</span> <span class="p">];</span>
-</span><span class="line">
-</span><span class="line">        <span class="kt">int</span> <span class="n">p</span> <span class="o">=</span> <span class="n">partition</span><span class="p">(</span> <span class="n">arr</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">h</span> <span class="p">);</span>
-</span><span class="line">
-</span><span class="line">        <span class="k">if</span> <span class="p">(</span> <span class="n">p</span><span class="o">-</span><span class="mi">1</span> <span class="o">&gt;</span> <span class="n">l</span> <span class="p">)</span> <span class="p">{</span>
-</span><span class="line">            <span class="n">stack</span><span class="p">[</span> <span class="o">++</span><span class="n">top</span> <span class="p">]</span> <span class="o">=</span> <span class="n">l</span><span class="p">;</span> <span class="n">stack</span><span class="p">[</span> <span class="o">++</span><span class="n">top</span> <span class="p">]</span> <span class="o">=</span> <span class="n">p</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
-</span><span class="line">        <span class="p">}</span>
-</span><span class="line">
-</span><span class="line">        <span class="k">if</span> <span class="p">(</span> <span class="n">p</span><span class="o">+</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="n">h</span> <span class="p">)</span> <span class="p">{</span>
-</span><span class="line">            <span class="n">stack</span><span class="p">[</span> <span class="o">++</span><span class="n">top</span> <span class="p">]</span> <span class="o">=</span> <span class="n">p</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> <span class="n">stack</span><span class="p">[</span> <span class="o">++</span><span class="n">top</span> <span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">;</span>
-</span><span class="line">        <span class="p">}</span>
-</span><span class="line">    <span class="p">}</span>
-</span><span class="line"><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<h2 id="section-2">文艺快排</h2>
-
-<p>思路和数据的快速排序一样，都需要找到一个pivot元素、或者节点。然后将数组或者单向链表划分为两个部分，然后递归分别快排。</p>
-
-<p>针对数组进行快排的时候，交换交换不同位置的数值，在分而治之完成之后，数据就是排序好的。那么单向链表是什么样的情况呢？除了交换节点值之外，是否有其他更好的方法呢？可以修改指针，不进行数值交换。这可以获取更高的效率。</p>
-
-<p>在修改指针的过程中，会产生新的头指针以及尾指针，要记录下来。在partition之后，要将小于pivot的的部分、pivot、以及大于pivot的部分重新串起来成为一个singly linked list。</p>
-
-<p>在partition时，我们用最后的节点作为pivot。当我们扫描链表时，如果节点值大于pivot，将节点移到尾部之后；如果节点小于，保持不变。</p>
-
-<p>在递归排序时，我们先调用partition将pivot放到正确的为止并返回pivot，然后，递归左边，递归右边，最后在合成一个单链表。</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-<span class="line-number">29</span>
-<span class="line-number">30</span>
-<span class="line-number">31</span>
-<span class="line-number">32</span>
-<span class="line-number">33</span>
-<span class="line-number">34</span>
-<span class="line-number">35</span>
-<span class="line-number">36</span>
-<span class="line-number">37</span>
-<span class="line-number">38</span>
-<span class="line-number">39</span>
-<span class="line-number">40</span>
-<span class="line-number">41</span>
-<span class="line-number">42</span>
-<span class="line-number">43</span>
-<span class="line-number">44</span>
-<span class="line-number">45</span>
-<span class="line-number">46</span>
-<span class="line-number">47</span>
-<span class="line-number">48</span>
-<span class="line-number">49</span>
-<span class="line-number">50</span>
-<span class="line-number">51</span>
-<span class="line-number">52</span>
-<span class="line-number">53</span>
-<span class="line-number">54</span>
-</pre></td><td class="code"><pre><code class="c++"><span class="line"><span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">partition</span><span class="p">(</span><span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">head</span><span class="p">,</span> <span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">end</span><span class="p">,</span>
-</span><span class="line">                      <span class="k">struct</span> <span class="n">node</span> <span class="o">**</span><span class="n">newHead</span><span class="p">,</span> <span class="k">struct</span> <span class="n">node</span> <span class="o">**</span><span class="n">newEnd</span><span class="p">)</span>
-</span><span class="line"><span class="p">{</span>
-</span><span class="line">   <span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">pivot</span> <span class="o">=</span> <span class="n">end</span><span class="p">;</span>
-</span><span class="line">   <span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">prev</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">*</span><span class="n">cur</span> <span class="o">=</span> <span class="n">head</span><span class="p">,</span> <span class="o">*</span><span class="n">tail</span> <span class="o">=</span> <span class="n">pivot</span><span class="p">;</span>
-</span><span class="line">
-</span><span class="line">   <span class="k">while</span><span class="p">(</span><span class="n">cur</span> <span class="o">!=</span> <span class="n">pivot</span><span class="p">)</span>
-</span><span class="line">   <span class="p">{</span>
-</span><span class="line">       <span class="k">if</span><span class="p">(</span><span class="n">cur</span><span class="o">-&gt;</span><span class="n">data</span> <span class="o">&lt;</span> <span class="n">pivot</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">)</span>
-</span><span class="line">       <span class="p">{</span>
-</span><span class="line">          <span class="k">if</span><span class="p">((</span><span class="o">*</span><span class="n">newHead</span><span class="p">)</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
-</span><span class="line">               <span class="p">(</span><span class="o">*</span><span class="n">newHead</span><span class="p">)</span> <span class="o">=</span> <span class="n">cur</span><span class="p">;</span>
-</span><span class="line">           <span class="n">prev</span> <span class="o">=</span> <span class="n">cur</span><span class="p">;</span>
-</span><span class="line">           <span class="n">cur</span> <span class="o">=</span> <span class="n">cur</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
-</span><span class="line">       <span class="p">}</span>
-</span><span class="line">       <span class="k">else</span>
-</span><span class="line">       <span class="p">{</span>
-</span><span class="line">           <span class="k">if</span><span class="p">(</span><span class="n">prev</span><span class="p">)</span>
-</span><span class="line">               <span class="n">prev</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">cur</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
-</span><span class="line">           <span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">tmp</span> <span class="o">=</span> <span class="n">cur</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
-</span><span class="line">           <span class="n">cur</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-</span><span class="line">           <span class="n">tail</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">cur</span><span class="p">;</span>
-</span><span class="line">           <span class="n">tail</span> <span class="o">=</span> <span class="n">cur</span><span class="p">;</span>
-</span><span class="line">           <span class="n">cur</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">;</span>
-</span><span class="line">       <span class="p">}</span>
-</span><span class="line">   <span class="p">}</span>
-</span><span class="line">   <span class="k">if</span><span class="p">((</span><span class="o">*</span><span class="n">newHead</span><span class="p">)</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="n">newHead</span><span class="p">)</span> <span class="o">=</span> <span class="n">pivot</span><span class="p">;</span>
-</span><span class="line">   <span class="p">(</span><span class="o">*</span><span class="n">newEnd</span><span class="p">)</span> <span class="o">=</span> <span class="n">tail</span><span class="p">;</span>
-</span><span class="line">   <span class="k">return</span> <span class="n">pivot</span><span class="p">;</span>
-</span><span class="line"><span class="p">}</span>
-</span><span class="line"><span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">quickSortRecur</span><span class="p">(</span><span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">head</span><span class="p">,</span> <span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">end</span><span class="p">)</span>
-</span><span class="line"><span class="p">{</span>
-</span><span class="line">   <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">head</span> <span class="o">||</span> <span class="n">head</span> <span class="o">==</span> <span class="n">end</span><span class="p">)</span>
-</span><span class="line">       <span class="k">return</span> <span class="n">head</span><span class="p">;</span>
-</span><span class="line">   <span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">newHead</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">*</span><span class="n">newEnd</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-</span><span class="line">   <span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">pivot</span> <span class="o">=</span> <span class="n">partition</span><span class="p">(</span><span class="n">head</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">newHead</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">newEnd</span><span class="p">);</span>
-</span><span class="line">   <span class="k">if</span><span class="p">(</span><span class="n">newHead</span> <span class="o">!=</span> <span class="n">pivot</span><span class="p">)</span>
-</span><span class="line">   <span class="p">{</span>
-</span><span class="line">      <span class="k">struct</span> <span class="n">node</span> <span class="o">*</span><span class="n">tmp</span> <span class="o">=</span> <span class="n">newHead</span><span class="p">;</span>
-</span><span class="line">       <span class="k">while</span><span class="p">(</span><span class="n">tmp</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">!=</span> <span class="n">pivot</span><span class="p">)</span>
-</span><span class="line">           <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
-</span><span class="line">       <span class="n">tmp</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-</span><span class="line">       <span class="n">newHead</span> <span class="o">=</span> <span class="n">quickSortRecur</span><span class="p">(</span><span class="n">newHead</span><span class="p">,</span> <span class="n">tmp</span><span class="p">);</span>
-</span><span class="line">       <span class="n">tmp</span> <span class="o">=</span> <span class="n">getTail</span><span class="p">(</span><span class="n">newHead</span><span class="p">);</span>
-</span><span class="line">       <span class="n">tmp</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span>  <span class="n">pivot</span><span class="p">;</span>
-</span><span class="line">   <span class="p">}</span>
-</span><span class="line">   <span class="n">pivot</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">quickSortRecur</span><span class="p">(</span><span class="n">pivot</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">,</span> <span class="n">newEnd</span><span class="p">);</span>
-</span><span class="line">   <span class="n">returnn</span> <span class="n">ewHead</span><span class="p">;</span>
-</span><span class="line"><span class="p">}</span>
-</span><span class="line"><span class="kt">void</span> <span class="n">quickSort</span><span class="p">(</span><span class="k">struct</span> <span class="n">node</span> <span class="o">**</span><span class="n">headRef</span><span class="p">)</span>
-</span><span class="line"><span class="p">{</span>
-</span><span class="line">   <span class="p">(</span><span class="o">*</span><span class="n">headRef</span><span class="p">)</span> <span class="o">=</span> <span class="n">quickSortRecur</span><span class="p">(</span><span class="o">*</span><span class="n">headRef</span><span class="p">,</span> <span class="n">getTail</span><span class="p">(</span><span class="o">*</span><span class="n">headRef</span><span class="p">));</span>
-</span><span class="line">   <span class="k">return</span><span class="p">;</span>
-</span><span class="line"><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
 ]]></content>
   </entry>
   

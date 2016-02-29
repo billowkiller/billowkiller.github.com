@@ -173,6 +173,59 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-06-28T04:18:00+08:00" pubdate data-updated="true">Jun 28<span>th</span>, 2014</time>
+        
+           | <a href="/blog/2014/06/28/signal-and-fork/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/06/28/signal-and-fork/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/28/signal-and-fork/">Signal and Fork</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>当线程调用fork时，就为子进程创建了整个进程地址空间的副本。子进程与父进程是完全不同的进程，只要两者都没有对内存作出改动，父进程和子进程之间还可以共享内存副本。注意一下几个情况：</p>
+
+<ol>
+  <li>子进程通过继承整个地址空间的副本，<strong>从父进程那里继承了所有互斥量、读写锁和条件变量的状态</strong>。也就是说，如果它在父进程中被锁住，则它在子进程中也是被锁住的。</li>
+  <li>只有调用fork()的线程被复制到子进程（子进程中线程的ID），如果子进程中包含占有锁的线程的副本，那么子进程就没有办法知道它占有了那些锁并且需要释放那些锁，<strong>容易造成死锁</strong>。</li>
+  <li>thread-specific data的销毁函数和清除函数都不会被调用。在多线程中调用fork()可能会引起内存泄露。比如在其他线程中创建的thread-specific data，在子进程中将没有指针来存取这些数据，<strong>造成内存泄露</strong>。</li>
+</ol>
+
+<p>因为以上这些问题，<strong>在线程中调用fork()的后，我们通常都会在子进程中调用exec()</strong>。因为exec()能让父进程中的所有互斥量，条件变量（pthread objects）在子进程中统统消失（用新数据覆盖所有的内存）。对于那些要使用fork()但不使用exec()的程序，pthread API提供了一个新的函数</p>
+
+<pre><code>pthread_atfor(void (*prepare_func)(void), void(*parent_func)(void), void (*child_func)(void))
+</code></pre>
+
+<p>prepare_func在父进程调用fork之前调用，parent_func在fork执行后在父进程内被调用，child_func在fork执行后子进程内被调用。除非你打算很快的exec一个新程序，否则应该避免在一个多线程的程序中使用fork。</p>
+</div>
+  
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-06-28T03:18:00+08:00" pubdate data-updated="true">Jun 28<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/06/28/signal-and-thread/#disqus_thread"
@@ -671,66 +724,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-02-16T09:18:00+08:00" pubdate data-updated="true">Feb 16<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/02/16/inline/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/02/16/inline/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/02/16/inline/">C++ Inline</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p><code>inline</code>定义的函数，比起没有<code>inline</code>的函数来说，没有执行函数调用所带来的负担，因此它是高效率的；比起宏来，它具有<strong>函数的可预期行为和参数类型检验</strong>。</p>
-
-<p><code>inline</code>对于编译器而言，意味着“在编译阶段，将调用动作以被调用函数的本体替换之”。但是它只是一种建议，编译器可以去做，也可以不去做。从逻辑上来说，编译器将函数<code>inline</code>的步骤如下：</p>
-
-<ol>
-  <li>将<code>inline</code>函数体复制到<code>inline</code>函数调用点处；</li>
-  <li>为所用<code>inline</code>函数中的局部变量分配内存；</li>
-  <li>将<code>inline</code>函数的的输入参数和返回值映射到调用方法的局部变量空间中；</li>
-  <li>如果<code>inline</code>函数有多个返回点，将其转变为<code>inline</code>函数代码块末尾的分支（使用GOTO）。</li>
-</ol>
-
-<p><code>inline</code>函数的缺点有哪些呢？</p>
-
-<ol>
-  <li><strong>代码膨胀。</strong>如果<code>inline</code>函数体过大且编译器还让它<code>inline</code>成功，那么你最终的程序会代码膨胀，从而造成设备缓冲命中率低，引起较多的页面错误，读写硬盘的次数增多，这样程序的性能就下降了！建议：<strong><code>inline</code>函数体一般不要超过5行，不包括循环，不包括递归调用。</strong></li>
-  <li><strong><code>inline</code>函数内部不要有static变量。</strong><code>inline</code>函数的定义几乎总是放在头文件（.h）里，这允许多个实现文件（.cpp）得以引用。我们知道编译器是分别编译的，所以这个时候，在多个实现文件里就会有多个<code>inline</code>函数的展开，也就是说有个多个static变量，这恐怕不是我们期望的！</li>
-  <li><strong><code>inline</code>函数无法随着函数库升级而升级。</strong>如果f是函数库中的一个<code>inline</code>函数，使用它的用户会将f函数实体编译到他们的程序中。一旦函数库实现者改变f，所有用到f的程序都必须重新编译。如果f是non-<code>inline</code>的，用户程序只需重新连接即可。如果函数库采用的是动态连接，那这一升级的f函数可以不知不觉的被程序使用。</li>
-  <li><strong>不要获取<code>inline</code>函数的地址。</strong>如果要取得一个<code>inline</code>函数的地址，编译器就必须为此函数产生一个函数实体，无论如何，编译器无法交出一个“不存在函数”的指针。注意，有些编译器可能会使用类的constructors和destructors的函数指针，用以构造和析构一个class对象的数组。另外类的constructors和destructors可能简单，但是其父类的类的constructors和destructors可能是复杂的，所以<strong>类的constructors和destructors往往不是<code>inline</code>函数的最佳选择</strong>！</li>
-  <li><strong><code>inline</code>虚函数往往是无效的。</strong>虚函数往往是运行时确定的，而<code>inline</code>是在编译时进行的，所以<code>inline</code>虚函数往往无效。当然如果直接用类的对象来使用虚函数，那么对有的编译器而言，也可起到优化的作用。</li>
-  <li><strong><code>inline</code>函数无法调试。</strong>原因请参见上面编译器将函数<code>inline</code>的步骤。所以请在项目后期，<strong>对程序进行profile后，再决定将那些函数<code>inline</code>化。</strong></li>
-</ol>
-</div>
-  
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -754,6 +747,8 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/02/29/klr-svr/">Kernel Logistic Regression Versus SVM</a>
+    
     <a class="list-group-item " href="/blog/2016/02/27/svm/">Support Vector Machine</a>
     
     <a class="list-group-item " href="/blog/2016/02/26/pca-svd/">PCA and SVD</a>
@@ -761,8 +756,6 @@ body {
     <a class="list-group-item " href="/blog/2016/02/18/ensemble/">Ensemble Methods</a>
     
     <a class="list-group-item " href="/blog/2016/02/17/lr-and-lda/">Logistic Regression and Linear Discriminant Analysis</a>
-    
-    <a class="list-group-item " href="/blog/2016/02/15/gradient-descent-and-newton-method/">Gradient Descent and Newton Method</a>
     
   </div>
 </section>
@@ -828,7 +821,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
-        <span class="badge">6</span>
+        <span class="badge">7</span>
         Machine Learning
       </a>
     
