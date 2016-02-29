@@ -1,0 +1,204 @@
+---
+layout: post
+title: "Kernel Logistic Regression versus SVM"
+date: 2016-02-29 14:00
+comments: true
+category: "Machine Learning"
+tags: ml,svm,svr,klr
+---
+
+Logistic Regression和SVM都是分类方法，它们定义线性决策边界（linear decision boundaries）作为划分的依据。但二者在motivation方便完全不同，区别如下
+
+* LR初衷是为了让linear regression能够输出二元分类，估计一个实例属于某一类的概率；线性决策边界也只是回归函数的结果，在回归函数中使用阈值作为分类的标准，一般是0.5。决策边界在SVM中来的更为重要，整个模型的目标就是为了获得最优的决策边界。
+* 每个训练样本都对LR的过程有一定的影响，但SVM只依赖于在决策边界附近的某些点。
+* LR适应于低维空间，并且由于使用最大似然估计，所以对噪声不敏感；SVM更适应于高维空间
+* 没有正规化的LR无法保证获得最好的分离超平面，只能获得margin附近的较高的置信度; SVM则能获得最优的分离超平面。
+
+那么二者会有什么联系呢，SVM的kernel function又是如何应用到LR模型的呢？
+
+<!--more-->
+
+## Loss Function
+
+我们先来看下Loss Function，它是用来衡量学习函数与数据拟合的程度的。回顾对于机器学习来说有一下几个过程：
+
+1. 假设空间：函数的参数形式，包括lr，svm等
+2. 拟合的衡量：Loss function，likelihood
+3. bias和variance的trade-off：regularization，bayesian estimator (MAP)
+4. 在假设空间中寻找好的假设：optimization. convex - global. non-convex - multiple starts
+5. 假设的验证：测试数据的预测，cross validation
+
+在线性学习方法中，通常我们是要找到一个假设 $y=f(\theta^T x)$，选决定f的参数形式，再通过最大化似然函数或者最小化损失函数找到对应的 $\theta$，常见的几个Loss Function：
+
+For classfication $correct \to y \cdot f > 0;\ incorrect \to y \cdot f < 0$
+
+1. 0/1 loss： $min\_\theta \sum\_i L\_{0/1}(\theta^T x)$. 定义 $L\_{0/1}(\theta^T x)=1\ if\ y \cdot f < 0$，其他情况等于0，非凸函数，难以优化。
+2. Hinge loss: $min_\theta \sum_i H(\theta^T x)$。接近 0/1 损失函数，定义 $H(\theta^T x) = max (0,1-y \cdot f)$
+3. Logistic loss: $min_\theta \sum_i log(1 + exp(-y \cdot \theta^T x))$. 
+
+关于3，在逻辑回归中我们最大化似然函数其实就是最小化Logistic loss：
+
+$$\sum_i log \frac{1}{1+exp(-y^{(i)}\cdot \theta^T x^{(i)})} = \sum_i -log (1+exp(-y^{(i)}\cdot \theta^T x^{(i)}))$$
+
+$$\to min_\theta \sum_i log(1 + exp(-y \cdot \theta^T x))$$
+
+For regression:
+
+1. Square loss: $min_\theta \sum_i \| y^{(i)} - \theta^T x^{(i)} \|^2$
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-22/70940842.jpg" width="400px"/>
+
+如上图所示，SVM使用Hinge Loss；Binomial Deviance就是Logistic Loss，因为output是binomial的；Exponential Loss 可以在Gradient Boost中应用到。
+
+## Connection between SVM and Logistic Regression
+
+回顾下soft-margin SVM的原始问题：
+
+$$ \underset{b,w,\xi}{min} \frac{1}{2}w^T w  + C\sum_{n=1}\xi_n$$ 
+
+$$s.t.\ y_i(w^T z_n + b) \ge 1-\xi_n,\ \xi_n \ge 0\ for\ all\ n$$
+
+这里的 $\xi_n$ 实际上就是违反 margin 的距离，称为 margin violation。如果 $(x_n, y_n)$ 不违反 margin，那么 $\xi_n=0$，否则为 $\xi_n=1-y_n(w^T z_n + b)$，从这里我们看到实际上 $\xi_n = max(1-y_n(w^T z_n + b), 0)$，所以原来问题可以写成：
+
+$$ \underset{b,w,\xi}{min} \frac{1}{2}w^T w  + C\sum_{n=1}max(1-y_n(w^T z_n + b), 0)$$ 
+
+上式写成 $min\ \frac{1}{2} w^Tw + C \sum \hat{err}$ 就比较熟悉了，这个就是L2 regularization: $min\ \lambda w^Tw + C \sum err$ 嘛。对应关系如下：
+
+* soft-margin $\to special\ \hat{err}$
+* large margin $\to$ fewer hyperplanes $\to$ L2 regularization for small $w$
+* larger C or C $\to$ smaller $\lambda\ to$ less regularization
+
+对比于SVM的原始问题，我们发现新的形式并不是凸二次规划问题；不能利用kernel trick；并且max函数不能微分，所以难以解决。那么为什么要变化成这种形式呢？如果设置 linear score: $s=w^T z_n + b$。我们观察下它的损失函数 $\hat{err}\_{svm}(s,y) = max(1-ys, 0)$，另外再看下logistic loss: $err\_{ll}(ys) = log(1 + exp(-ys))$.
+
+可以对比下上图的损失函数曲线，二者比较接近，并且都是 0/1 损失函数的上限。所以可以把 SVM 当成 L2-regularized logistic regression。以下是几个二分类线性模型的对比：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/76344341.jpg" width="600px"/>
+
+## Kernel Logistic Regression
+
+现在我们知道 SVM 和 Logistic Regression存在联系，那么是否可以综合二者的有点呢：
+
+* SVM flavor: 利用kernel function 得到 $w\_{svm}，b\_{svm}$ 得到超平面 
+* LR flavor: 通过 scalling(A) 和 shifting(B) 匹配最大似然函数的方法细粒度地调优超平面
+  * often $A > 0$ if $w_{svm}$ reasonably good
+  * often $B \approx 0$ if $b_{svm}$ reasonably good
+  
+所以新的LR问题可以看成 two-level learning 问题：LR on SVM-transformed data
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/6560678.jpg" width="450px"/>
+
+于是我们得到Probabilistic SVM for Soft Binary Classification 的算法，因为 LR 是根据概率分类的，过程如下：
+
+<img src ="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/75482355.jpg" width="450px"/>
+
+* 这个 Soft Binary Classifier 得到 bounary 与 SVM 的不同，因为有平移 B。
+* 只需要解两个变量，可以使用GD或者SGD等。
+* Kernel SVM 相当于在 $Z$ 空间中进行 LR
+
+Kernel SVM 中有 $w\_{svm}^T \phi(x) + b\_{svm} = \sum\_{SV} \alpha\_n y\_n K(x\_n, x) + b\_{svm}$，则最后 Probabilistic SVM 的结果为
+
+$$ g(x) = \theta(\sum_{SV} A\alpha_n y_n K(x_n, x) + Ab_{svm} + B)$$
+
+但这个方法其实并不是在 $Z$ 空间里的最好的解，只是通过两次 scaling 和 shifting 接近最好的解，那么如何得到最好的解呢。这就是我们要介绍的Kernel Logistic Regression。
+
+先来介绍下 Representer Theorem，它的定义如下：
+
+> the solution of regularization and interpolation problems with Hillbertian penalties can be expressed as a linear combination of the data.
+
+也就是最优的 $w\_* = \sum\_{n=1}^N \beta\_n z\_n$，我们可以把原来在 Hillbertian Space
+ 的计算放到低维空间中进行。
+
+$$ w_*z = \sum_{n=1}^N \beta_n z_n^Tz = \sum_{n=1}^N \beta_n K(x_n, x)$$
+
+证明Representer Theorem如下：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/22880811.jpg" width="450px"/>
+
+这其实就表明所有的 L2-regularized linear model 都可以被 kernalized。把损失函数替换成 logistic loss，我们就得到 Kernel Logistic Regression 的优化函数。
+
+$$ \underset{w}{min}\ \frac{\lambda}{N}w^Tw + \frac{1}{N} \sum_{n=1}^N log(1+ exp(-y_n w^T z_n)) $$
+
+利用 Representer Theorem，将原来对 $w$ 的求解转化为对 $\beta$ 求解：
+
+$$ \underset{\beta}{min}\ \frac{\lambda}{N} \sum_{n=1}^N \sum_{m=1}^N \beta_n \beta_m K(x_n, x_m) +  \frac{1}{N} \sum_{n=1}^N log(1+ exp(-y_n \sum_{m=1}^N \beta_m K(x_m, x_n)))$$
+
+可以用 GD/SGD 等做最优化求解，**解出来的 $\beta$ 并不同于 SVM 的 $\alpha$，基本上是非零的**。综合上述，总结得到 KLR 其实就是
+
+> use representer theorem for kernel trick on L2-regularized logistic regression
+
+对 KLR 还有另外另外的解释
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/45320882.jpg" width="450px"/>
+
+## Support Vector Regression
+
+最后说下SVR，上面提到 regression 的损失函数 squared error $err(y, w^Tz) = (y- w^Tz)^2$，替换下KLR的损失函数我们可以得到
+
+$$ \underset{w}{min}\ \frac{\lambda}{N}w^Tw + \frac{1}{N} \sum_{n=1}^N (y- w^Tz)^2 $$
+
+这个就是 **kernel ridge regression**，也可以通过解 $\beta$ 得到答案
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/56123028.jpg" width="500px"/>
+
+对 $\beta$ 求导得到
+
+$$\nabla E_{aug}(\beta) = \frac{2}{N}(\lambda K^TI\beta + K^TK\beta - K^Ty) = \frac{2}{N}K^T((\lambda I + K)\beta - y)$$
+
+$$\nabla E_{aug}(\beta) =0 \to \beta=(\lambda I + K)^{-1}y$$
+
+因为 Merer's condition，所以 $K$ 是半正定矩阵，继而上式有解。但是稠密矩阵求反需要 $O(N^3)$ 时间复杂度。可以对比下 linear ridge regression:
+
+<img src = "http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/7052157.jpg" width="450px"/>
+
+根据前面所述的SVM和LR之间的关系，我们这里可以吧 kernel ridge regression 看成 least-squares SVM(LLSVM)。它有什么特点呢：
+
+* 对比soft-margin SVM，有这相似的boundary，但是更多的支持向量。导致预测慢，因为 $\beta$ 比较稠密
+
+现在想让 $\beta$ 变得和 soft-margin SVM 的 $\alpha$ 一样稀疏。可以看到 tube regression 的特点，使用 $\epsilon$-insensitive error：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/74768649.jpg" width="450px"/>
+
+整理下是 L2-regularized tube regression
+
+$$ \underset{w}{min}\ \frac{\lambda}{N}w^Tw + \frac{1}{N} \sum_{n=1}^N\ max(0, \vert w^Tz_n - y \vert - \epsilon)$$ 
+
+这个函数没有限制条件，但是max难以微分，并且不能很明显的看出有 sparse $\beta$。发现这个表达式和最开始 soft-SVM 的表示有点像，那么我们可以反向的把它模拟成 standard SVM 形式:
+
+$$ \underset{b,w,\xi^ \vee, \xi ^ \land}{min}\ \frac{1}{2} w^Tw + C \sum_{n=1}^N (\xi_n^ \vee + \xi_n ^ \land)$$
+
+$$s.t.\ -\epsilon-\xi_n^ \vee \le y_n - w^Tz_n-b \le \epsilon-\xi_n^ \land,\ \xi_n^ \vee \ge 0,\ \xi_n^ \land \ge 0$$ 
+
+这就构成 SVR 的原始问题: minimize regularizer + (upper tube violations $\xi_n^ \land$ and lower violations $\xi_n^ \vee$)。这里参数 $C$ 就是 trade-off of regularization and tube violation. 现在要求 SVR 的对偶问题。
+
+* Lagrange multiplier $\alpha_n^ \vee\ for\ -\epsilon-\xi_n^ \vee \le y_n - w^Tz_n-b$
+* Lagrange multiplier $\alpha_n^ \land\ for\ y_n - w^Tz_n-b \le \epsilon-\xi_n^ \land$
+
+一些KTT条件如下：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-1/97895297.jpg" width="450px"/>
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-1/34361452.jpg" width="500px"/>
+
+在 tube 中我们可以得到 
+
+$\vert w^Tz_n + b- y_n \vert < \epsilon$
+
+$\to \xi_n^ \vee=0,\ \xi_n^ \land=0$
+
+$\to (\epsilon + \xi_n^ \land - y_n + w^Tz_n +b) \neq 0,\ (\epsilon + \xi_n^ \vee + y_n - w^Tz_n -b) \neq 0$
+
+$\to \alpha_n^ \vee =0,\ \alpha_n^ \land=0$
+
+$\to \beta_n=0$
+
+对于support vector来说，$\beta_n \neq 0$，是在tube上或者tube外的。综上可以得到sparse $\beta$。
+
+<u>总结得到的Linear/Kernel Model如下图：</u>
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-1/58915472.jpg" width="450px"/>
+
+* first row: less used due to worse performance
+* second row: popular in **LIBLINEAR**
+* third row: less used due to dense $\beta$
+* fourth row: popular in **LIBSVM**
+
