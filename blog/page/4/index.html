@@ -173,6 +173,55 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-15T02:18:00+08:00" pubdate data-updated="true">Jul 15<span>th</span>, 2014</time>
+        
+           | <a href="/blog/2014/07/15/linux-epoll-module/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/07/15/linux-epoll-module/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/15/linux-epoll-module/">Linux Epoll Module</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>综合了几个blog以及自己查到的一些资料，总结下Linux中的IO多路复用，主要是<code>epoll</code>模型。</p>
+
+<p><code>select</code>，<code>poll</code>，<code>epoll</code>都是Linux下IO多路复用的机制。Windows下为<code>IOCP</code>模型。I/O多路复用就通过一种机制，可以监视多个描述符，一旦某个文件描述符就绪，能够通知程序进行相应的读写操作。其中文件描述符是一个简单的整数，用以标明每一个被进程所打开的文件和socket，包括<code>filefd</code>、<code>socketfd</code>、<code>signalfd</code>、<code>timerfd</code>、<code>eventfd</code>等。<code>eventfd</code> 是一个比 <code>pipe </code>更高效的线程间事件通知机制。</p>
+
+<p>但<code>select</code>，<code>poll</code>，<code>epoll</code>本质上都是<strong>同步I/O</strong>，因为他们都需要在读写事件就绪后自己负责进行读写，也就是说这个读写过程是阻塞的，而<strong>异步I/O</strong>则无需自己负责进行读写，异步I/O的实现会负责把数据从内核拷贝到用户空间。</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/07/15/linux-epoll-module/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-06-28T04:18:00+08:00" pubdate data-updated="true">Jun 28<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/06/28/signal-and-fork/#disqus_thread"
@@ -673,57 +722,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-03-12T02:18:00+08:00" pubdate data-updated="true">Mar 12<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/03/12/string-copy-on-write/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/03/12/string-copy-on-write/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/03/12/string-copy-on-write/">C++ String Copy-on-write</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>不同版本的C++ string实现时不同的，sizeof(string)得出来的结果也不尽相同，其中有种实现采用copy-on-write的方式来共享内存。</p>
-
-<p>引用计数就是string类中写时才拷贝的原理！当第一个类构造时，string的构造函数会根据 传入的参数从堆上分配内存，当有其它类需要这块内存时，这个计数为自动累加，当有类析构时，这个计数会减一，直到最后一个类析构时，此时的RefCnt为1或是0，此时，程序才会真正的Free这块从堆上分配的内存。</p>
-
-<p>string类的内存是在堆上动态分配的，共享内存的各个类指向的是同一个内存区。这块内存区域还包括引用计数，其位于字符串内存区域的上方，通过<code>_Ptr[-1]</code>来访问。这样所有共享这块内存的类都可以访问到引用计数，也就知道这块内存的引用者有多少了。</p>
-
-<p>于是，有了这样一个机制，每当我们为string分配内存时，我们总是要多分配一个空间用来存放这个引用计数的值，只要发生拷贝构造可是赋值时，这个内存的值就会加一。而在内容修改时，string类为查看这个引用计数是否为0，如果不为零，表示有人在共享这块内存，那么自己需要先做一份拷贝，然后把引用计数减去一，再把数据拷贝过来。</p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/03/12/string-copy-on-write/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -797,7 +795,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/rework/index.html">
-        <span class="badge">17</span>
+        <span class="badge">13</span>
         rework
       </a>
     
@@ -814,15 +812,15 @@ body {
       </a>
     
     
-    <a class="list-group-item " href="/blog/categories/big-data/index.html">
-        <span class="badge">3</span>
-        Big Data
+    <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
+        <span class="badge">8</span>
+        Machine Learning
       </a>
     
     
-    <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
+    <a class="list-group-item " href="/blog/categories/big-data/index.html">
         <span class="badge">7</span>
-        Machine Learning
+        Big Data
       </a>
     
   </div>

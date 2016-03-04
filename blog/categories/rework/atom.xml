@@ -4,7 +4,7 @@
   <title><![CDATA[Category: rework | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/rework/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-03-01T00:44:23+08:00</updated>
+  <updated>2016-03-04T10:22:06+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,509 +12,6 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
-  
-  <entry>
-    <title type="html"><![CDATA[Hadoop Secondary Sorting]]></title>
-    <link href="http://billowkiller.github.io/blog/2015/11/22/hadoop-secondary-sorting/"/>
-    <updated>2015-11-22T17:27:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2015/11/22/hadoop-secondary-sorting</id>
-    <content type="html"><![CDATA[<p>Hadoop MapReduce的神奇之处发生在mapper和reducer之间，将所有相同key的map输出记录聚集在一块，使得用户可以方便的处理聚合在一起的数据。Hadoop内部使用了partition、sort和merge（shuffle的一部分），在每个reducer中流式地得到排序后的key和value集合。在MapReduce Sorting中有个特别的部分是secondary sort，也就是对value进行排序。</p>
-
-<!--more-->
-
-<p>Secondary sort在两种情况下特别有用：</p>
-
-<ul>
-  <li>需要某一部分的数据比其他数据更快的到达reducer。</li>
-  <li>希望job的输出按照两个key进行排序。</li>
-</ul>
-
-<p>实现Secondary sort需要对MapReduce中的数据流和处理有一定的了解，下图展示了对reducer中出现的数据有影响的三个部分。</p>
-
-<p><img src="http://i5.tietuku.com/7ad3ad872415c4b6.png" width="600px" /></p>
-
-<p><code>partitioner</code>决定哪个reducer接收该mapper数据记录；<code>sorting RawComparator</code>用于在各自的分片中排序输出的结果，map和reduce阶段都有它，其中map阶段的sorting是对reduce阶段sorting的一个优化，让reducer的sorting更高效；最后，<code>grouping RawComparator</code>用于决定reducer处理排序后记录的边界，发生在reducer从本地磁盘读取数据的时候，也就是说，你可以用这个方法决定数据记录是如何聚集起来调用一个reduce方法的。MapReduce默认把这个三个方法作用于map方法输出的key上。</p>
-
-<p>要实现Secondary sorting，我们需要重写partitioner、sort comparator和grouping comparator。</p>
-
-<p>下面，通过对人名的排序来说明如何使用Secondary sorting。使用primary sort排序last name，secondary sort排序first name。</p>
-
-<p>我们需要构建一个由map方法输出的Composite key，这个key由两部分组成：</p>
-
-<ul>
-  <li>Natural Key</li>
-  <li>Secondary Key</li>
-</ul>
-
-<p><img src="http://i5.tietuku.com/25eedf0319e92775.png" width="430px" /></p>
-
-<p>``` java
-public class Person implements WritableComparable<person> {</person></p>
-
-<p>private String firstName;
-  private String lastName;</p>
-
-<p>@Override
-  public void readFields(DataInput in) throws IOException {
-    this.firstName = in.readUTF();
-    this.lastName = in.readUTF();
-  }</p>
-
-<p>@Override
-  public void write(DataOutput out) throws IOException {
-    out.writeUTF(firstName);
-    out.writeUTF(lastName);
-  }
-…
-```</p>
-
-<p>下图说明hadoop框架配置中用于设置partitioning、sorting和grouping类的名字和方法。</p>
-
-<p><img src="http://i5.tietuku.com/520e7242cd6ecc43.png" width="530px" /></p>
-
-<h3 id="partitioner">Partitioner</h3>
-
-<p>默认的partitioner使用对key进行hash后取reducer个数的模。但是默认的partitioner使用整个key，会导致相同的natural key发往不同的reducer。所以需要实现自己的partitioner。</p>
-
-<p>``` java
-public class PersonNamePartitioner extends
-    Partitioner&lt;Person, Text&gt; {</p>
-
-<p>@Override
-  public int getPartition(Person key, Text value, int numPartitions) {
-    return Math.abs(key.getLastName().hashCode() * 127) %
-        numPartitions;
-  }
-} 
-```</p>
-
-<h3 id="sorting">Sorting</h3>
-
-<p>``` java
-public class PersonComparator extends WritableComparator {
-  protected PersonComparator() {
-    super(Person.class, true);
-  }</p>
-
-<p>@Override
-  public int compare(WritableComparable w1, WritableComparable w2) {</p>
-
-<pre><code>Person p1 = (Person) w1;
-Person p2 = (Person) w2;
-
-
-int cmp = p1.getLastName().compareTo(p2.getLastName());
-if (cmp != 0) {
-  return cmp;
-}
-
-return p1.getFirstName().compareTo(p2.getFirstName());   } } ```
-</code></pre>
-
-<h3 id="grouping">grouping</h3>
-
-<p>grouping阶段所有的数据记录已经是secondary sort了，grouping comparator需要将相同的last name聚合在一起。</p>
-
-<p>``` java
-public class PersonNameComparator extends WritableComparator {</p>
-
-<p>protected PersonNameComparator() {
-    super(Person.class, true);
-  }</p>
-
-<p>@Override
-  public int compare(WritableComparable o1, WritableComparable o2) {</p>
-
-<pre><code>Person p1 = (Person) o1;
-Person p2 = (Person) o2;
-
-return p1.getLastName().compareTo(p2.getLastName());
-</code></pre>
-
-<p>}
-}
-```</p>
-
-<h3 id="mapreduce">MapReduce</h3>
-
-<p>最后在driver中，需要设置上文提到的三个类：</p>
-
-<p>``` java
-job.setPartitionerClass(PersonNamePartitioner.class);
-job.setSortComparatorClass(PersonComparator.class);
-job.setGroupingComparatorClass(PersonNameComparator.class);</p>
-
-<p>public static class Map extends Mapper&lt;Text, Text, Person, Text&gt; {
-  private Person outputKey = new Person();</p>
-
-<p>@Override
-  protected void map(Text lastName, Text firstName, Context context)
-      throws IOException, InterruptedException {
-    outputKey.set(lastName.toString(), firstName.toString());
-    context.write(outputKey, firstName);
-  }
-}</p>
-
-<p>public static class Reduce extends Reducer&lt;Person, Text, Text, Text&gt; {</p>
-
-<p>Text lastName = new Text();
-  @Override
-  public void reduce(Person key, Iterable<text> values,
-                     Context context)
-      throws IOException, InterruptedException {
-    lastName.set(key.getLastName());
-    for (Text firstName : values) {
-      context.write(lastName, firstName);
-    }
-  }
-}   
-```</text></p>
-
-<p>Secondary sort涉及到的自定义的partitioner、sorter和grouper，还是比较复杂的。可以考虑<a href="http://htuple.org">htuple</a>对简单类型进行secondary sort。</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Spark Streaming]]></title>
-    <link href="http://billowkiller.github.io/blog/2015/10/27/spark-streaming/"/>
-    <updated>2015-10-27T21:04:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2015/10/27/spark-streaming</id>
-    <content type="html"><![CDATA[<p>流式计算通常是为了满足日益增长的数据的实时获取和低延时计算的需求。通常来说，一个优秀的流式计算引擎需要满足一下的一些需求：</p>
-
-<ol>
-  <li>不重不丢的保证（在节点或计算失败的时候，内存中的计算状态能被正确的恢复）</li>
-  <li>低延迟</li>
-  <li>高吞吐量</li>
-  <li>强大的计算模型</li>
-  <li>容错机制的低开销</li>
-  <li>流控</li>
-</ol>
-
-<p><img src="http://spark.apache.org/images/spark-logo.png" alt="image" />
-<!--more--></p>
-
-<p>介绍完了spark后就可以来说说spark streaming，毕竟spark streaming是完全构建在spark之上，熟悉了spark的RDD原理之后就比较容易理解spark streaming。说白了，spark streaming中的流式计算是伪实时的，之所以是伪实时的是因为它将实时的处理变成时间跨度较小的批量处理。没错，就是将一段时间间隔中的数据变成RDD，然后利用spark原有的架构处理这段时间内的数据，接着在时间维度上对这些处理后的RDD进行迭代计算。也就是将流式计算分解为一系列微小的、原子的批量作业，每个微批量作业如果失败则可以重新计算。这种分解的思想可以应用在批量计算框架、也可以应用在流式计算框架上，例如Storm Trident。</p>
-
-<p>这样的处理带来了几个明显的好处：</p>
-
-<ul>
-  <li>高吞吐量</li>
-  <li>不从不丢的保证</li>
-  <li>快速falut recovery</li>
-  <li>更方便处理慢节点</li>
-  <li>实时和批量统一的编程接口</li>
-</ul>
-
-<p>下面介绍下spark streaming中的具体实现来理解这几点。</p>
-
-<h3 id="section">计算模型</h3>
-
-<p><img src="http://blog.selfup.cn/wp-content/uploads/2014/08/streaming-flow.png" alt="image" /></p>
-
-<p>首先，Spark Streaming把实时输入数据流以时间片（如1秒）为单位切分成块。Spark Streaming会把每块数据作为一个RDD，并使用RDD操作处理每一小块数据。每个块都会生成一个Spark Job处理，最终结果也返回多块。</p>
-
-<p>举个栗子来说明下这个过程：</p>
-
-<pre><code>pageViews = readStream("http://..."， “ls”)
-ones = pageViews.map(event =&gt; (event.url, 1))
-counts = ones.runningReduce((a, b) =&gt; a+b)
-</code></pre>
-
-<p>上述代码的作用是根据URL的数量计算访问次数。处理的过程为首先通过HTTP获取到一个pageview事件的RDD，经过<em>transformation</em>操作变成(URL, 1), 最后的操作计算相同的URL数目。整个streaming过程可以用下图来表示：
-<img src="http://img-storage.qiniudn.com/15-10-18/95269436.jpg" alt="" /></p>
-
-<p>整个的处理过程可以看出，输入流被分成每个都是1秒的batch，经过处理后生成resultRDD，这个resultRDD在每个时间间隔中都会产生一个，并经过reduce迭代计算。在上图中最终的reduce的输入参数就包括上一个时间间隔的resultRDD和这个时间间隔中map操作的结果。上图也可以看出这些RDD的lineage graph，在节点失败的时候，可以根据这个lineage graph以partition的粒度为单位重新执行任务计算丢失的分片，可以看出这些计算的任务都是可以并行执行的。同时，对于慢节点来说，因为计算是无状态的，且每个job的结果是可以确定的，spark streaming可以执行类似于hadoop中的预测模型——在其他节点上计算同样的任务。另外，spark streaming也会有些checkpoint来防止无限制的恢复计算。</p>
-
-<p>对比于其他流式处理的方式，spark streaming在处理失败任务和慢节点上无疑更有效率。它可以从时间和partition两个维度上并行地计算数据来加快恢复速度。而对于像Strom的流式处理来说，往往是通过<strong>上游数据backup</strong>或者<strong>同时复制执行相同的作业</strong>来保证数据处理的可靠性。这两种处理方式对于资源的消耗无疑都是巨大的，且恢复的时间也比较长。</p>
-
-<ul>
-  <li>其中对于前者来说，每个节点都需要保存上一个checkpoing后所发送数据的拷贝，在节点失败时由standby机器重新计算上游节点发送过来的数据，因为这些计算都是有状态的，所以恢复的时间比较长，Storm就只保证“at least once”语义来提高处理速度。Trident之所以能够保证不重不丢是使用了数据库来复制计算状态。</li>
-  <li>对于后者无疑更加消耗资源，并且需要保证两个数据处理操作接受到的上游数据的顺序是一样的。</li>
-</ul>
-
-<p>同spark一样，只有当某个Output Operations原语被调用时，stream才会开始真正的计算过程。现阶段支持的Output方式有以下几种：</p>
-
-<ul>
-  <li>print()</li>
-  <li>foreachRDD(func)</li>
-  <li>saveAsObjectFiles(prefix, [suffix])</li>
-  <li>saveAsTextFiles(prefix, [suffix])</li>
-  <li>saveAsHadoopFiles(prefix, [suffix])</li>
-</ul>
-
-<h3 id="section-1">流式处理中的几点难点</h3>
-
-<p>在流式处理中通常都会有几个难点需要考虑。</p>
-
-<ul>
-  <li>时间窗口问题</li>
-  <li>数据一致性问题</li>
-  <li>内存状态管理问题</li>
-</ul>
-
-<p>我们来看下spark streaming是如何解决的。</p>
-
-<ol>
-  <li>
-    <p><strong>时间窗口问题。</strong>spark streaming是根据数据到达系统的时间将记录放到对应的RDD中，这种时间窗口划分是基于墙上时间的，好处可以保证系统及时产生一个新的batch运行job，并且可以让程序运行在数据生成的地方，不必再进行分发。</p>
-
-    <p>这种基于墙上时间的统计有一个非常严重的问题是不能回放数据流。当数据流是实时产生的时候，“墙上时间”的一分钟也就只会有一分钟的event被产生出来。但是如果统计的数据流是基于历史event的，那么一分钟可以产生消费的event数量只受限于数据处理速度。另外event在分布式采集的时候也遇到有快有慢的问题，一分钟内产生的event未必可以在一分钟内精确到达统计端，这样就会因为采集的延迟波动影响统计数据的准确性。所以产生了另外一种时间窗口划分的方法。</p>
-
-    <p>另一种时间窗口划分的方法是基于外部时间的，例如日志时间。spark streaming提供两种方法来处理这种情况：</p>
-
-    <ul>
-      <li>延迟处理，等待一定时间来处理每个batch。</li>
-      <li>用户的应用程序中保证乱序事件的正确处理。</li>
-    </ul>
-
-    <p>以上也说明在批处理的流式计算模型是受限的，很多情况下只能依靠用户的应用程序来做处理，例如实时的统计5s内的pv；其次这种方式也没有很好的流控技术手段，如果有突发的大量数据产生，会导致结果产生的时间更长，甚至是将系统的JVM撑爆。最后实时性也是受限的，只能达到次秒级的处理延迟，毕竟是要等待一个时间batch的处理完成。</p>
-  </li>
-  <li>
-    <p><strong>数据一致性问题。</strong>什么是数据一致性，举个栗子，要统计网站中来自各个国家的page view，把不同国家的pv统计放在不同的节点上处理。但是现在统计英国的节点处理速度要慢于法国的，这将导致两个节点上数据的时间状态不一致。在流式处理中，数据的一致性的保证同时意味着资源的消耗。流式处理的数据一致性有三种解决思路，在上文中也有提到，这里概括下：</p>
-
-    <ul>
-      <li>上游备份策略：重启的时候重放kafka的历史数据，恢复内存状态</li>
-      <li>中间状态持久化：把统计的状态放到外部的持久的数据库里，不放内存里</li>
-      <li>同时跑两份：同时有两个完全一样的统计任务，重启一个，另外一个还能正常运行。</li>
-    </ul>
-
-    <p>而在spark streaming中，数据一致性天然得到保证的。因为记录根据时间来分片，所以中间的resultRDD反应的是当前时间和之前时间所计算出来的结果，无论计算和结果被分配到哪个节点上都不会有节点间数据不一致的情况。也就是数据的不重不丢可以得到保证。</p>
-  </li>
-  <li>
-    <p><strong>内存状态管理问题。</strong>
-做流式统计的有两种做法：</p>
-
-    <ul>
-      <li>依赖于外部存储管理状态：比如没收到一个event，就往redis里发incr增1</li>
-      <li>纯内存统计：在内存里设置一个counter，每收到一个event就+1</li>
-    </ul>
-
-    <p>第一种会把整个压力全部压到数据库上，造成处理速度下降；第二种的状态相对来说容易管理一些，计算直接是基于这个内存状态做的。如果重启丢失了，重放一段历史数据就可以重建出来。内存的问题是它总是不够用的，解决的方法是input分割和把存储移到外边去。在内存计算中把窗口统计的中间状态落地的好处是显而易见的：重启之后不用通过重算来恢复内存状态。但是这种对外部数据库使用不小心就会导致两个问题：</p>
-
-    <ul>
-      <li>处理速度慢。不用一些批量的操作，数据库操作很快就会变成瓶颈</li>
-      <li>数据库的状态不一致。内存的状态重启了就丢失了，外部的状态重启之后不丢失。重放数据流就可能导致数据的重复统计</li>
-    </ul>
-
-    <p>在spark streaming中支持传统批量计算中的无状态<em>transformation</em>操作，例如<code>map</code>、<code>reduce</code>、<code>groupBy</code>和<code>join</code>。这就避免了普通流式计算中麻烦的状态保存问题。但spark streaming中也支持多个时间间隔中有状态的<em>transformation</em>操作，包括：</p>
-
-    <ol>
-      <li>Windowing: 生成滑动窗口RDD。<code>words.window("5s")</code>将产生一个RDD包含[0,5),[1,6),[2,7)的时间间隔。</li>
-      <li>增量聚合：在滑动窗口的基础上进行RDD的聚合操作，也就是<code>reduceByWindow</code>。在下图的<em>a</em>中对应的代码为<code>pairs.reduceByWindow("5s", (a, b) =&gt; a+b)</code>，也就是计算5s内的计数之后。图<em>b</em>的代码为<code>pairs.reduceByWindow("5s", (a, b) =&gt; a+b, (a, b) =&gt; a-b)</code>。其实很简单，第一个lambda表达式为进入滑动窗口的处理函数，第二个表达式为离开滑动窗口的处理函数。这样也就不用重复求和了。
- <img src="http://img-storage.qiniudn.com/15-10-18/97873121.jpg" alt="" /></li>
-      <li>状态跟踪：
- 如下图所示，就是保存上一个时间间隔的RDD与本次的记录进行groupBy加map计算的到状态的变化情况。
- <img src="http://img-storage.qiniudn.com/15-10-18/91458919.jpg" alt="" /></li>
-    </ol>
-
-    <p>在对这些带状态的操作的处理过程中也就用到了上述的所属的利用外存在保存中间的状态。spark streaming中这只发生在intervel之间，所以整个内存的状态管理会比传统的流式处理简单许多，而且高效，不需要对每一步都进行状态同步，状态恢复的成本也比较低，上文中提到的可以在多个节点上并行计算恢复。</p>
-  </li>
-</ol>
-
-<h3 id="system-architecture">System Architecture</h3>
-<p><img src="http://img-storage.qiniudn.com/15-10-18/82954556.jpg" alt="" /></p>
-
-<p>Spark streaming和Spark的系统结构有些许改动，如上图所示主要包括3个部分：</p>
-
-<ul>
-  <li><em>master</em> that tracks the D-Stream lineage graph and schedules tasks to compute new RDD partitions.</li>
-  <li><em>Worker</em> nodes that receive data, store the partitions of input and computed RDDs, and execute tasks.</li>
-  <li>A <em>client</em> library used to send data into the system.</li>
-</ul>
-
-<p>从上图中可以看出，Spark Streaming和传统的流式系统最大的区别就是Spark Streaming将计算分成小的，无状态的确定性的任务，这些任务会在集群的任意节点上运行。并且相对于传统流式系统的拓扑结构来说，无需消耗大量时间将将任务进行迁移，Spark Streaming可以很好的对机器上的节点进行负载均衡，处理失败任务并且对慢节点进行预测。</p>
-
-<p>对比于Spark的系统，Spark Streaming做了一下的改进：</p>
-
-<ul>
-  <li>网络传输。使用异步I/O获取远端数据。</li>
-  <li>TimeStep pipelining。Spark的调度器可以在当前任务还未完成的时候可以提交下一个时间分片的任务。</li>
-  <li>任务调度：优化任务调度器，例如调整控制消息的大小，可以在每隔几百毫秒时间内启动几百个并行任务。</li>
-  <li>存储层：支持异步的RDD checkpoint，RDD是不可变的，所以异步存储不会阻塞现有的计算。</li>
-  <li>Lineage切割：控制RDD linage graph的大小，在checkpoint之前的lineage便可以删除。</li>
-</ul>
-
-<p>当master fail的时候可以进行HA，所有的worker重新连接到新的master上，将原来的checkpoint和原始数据重新计算。因为所有的操作都是确定性的，所以RDD是可以重复计算，也就是说在HA的时候丢失一些正在运行的计算任务不会对最终结果造成什么影响。所有的元数据都是存储在HDFS上的，包括：</p>
-
-<ol>
-  <li>RDD的lineage graph，代表用户代码的Scala函数对象。</li>
-  <li>上一个checkpoint的时间</li>
-  <li>RDD的ID。因为HDFS的checkpoint文件会在每个时间片重新命名。</li>
-</ol>
-
-<h3 id="faq">FAQ</h3>
-<ol>
-  <li>
-    <p>Dstream与RDD之间的关系</p>
-
-    <p>首先来看下Spark streaming的代码<code>val ssc = new StreamingContext(sc, Seconds(2))</code>。在这句的作用是定义Dstream生成的时间间隔，<code>2s</code>就是这个时间间隔，也叫<code>batch interval</code>。具体说来<strong>一个streaming batch对应一个RDD</strong>，也就是这个batch interval里产生的数据。</p>
-
-    <p>在这个RDD中，有n个partition，n = batch interval / block interval。 <code>block interval</code>是spark steaming内部定义的一个变量<code>spark.streaming.blockInterval</code>，通常是200ms。上述例子就产生10个partitions。</p>
-
-    <p>Blocks由一个receiver产生，receiver就是流式数据的接收端，每个receiver被分配到一个host上，所以上述的1-个partitions就由一个node产生，同时被复制到第二个节点上做容错。注意，这里产生了data locality的问题。好的做法是，分配多个receivers接收数据，最后使用union合并数据做processing。当然还可以对Dstream做<code>repartition</code>操作提高并行度。</p>
-  </li>
-  <li>
-    <p>时间窗口和job的关系</p>
-  </li>
-</ol>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Spark Introduction]]></title>
-    <link href="http://billowkiller.github.io/blog/2015/10/27/spark-introduction/"/>
-    <updated>2015-10-27T21:00:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2015/10/27/spark-introduction</id>
-    <content type="html"><![CDATA[<p>简单介绍下Spark。Spark是分布式的内存计算模型，对于两类计算形式能够极大地提升处理的效率：迭代计算，和交互式的数据挖掘工具。迭代计算例如PageRank、K-means聚类、逻辑回归等要求计算结果的重新利用，交互式的数据挖掘例如针对一份的数据集进行多次特定查询也要求原始数据的重复利用。对比于MR作业，它不需要外部存储的介入，从而提升处理速度。接下来将会从Spark的数据模型、编程模型和架构来介绍Spark。</p>
-
-<p><img src="https://spark.apache.org/images/spark-logo.png" alt="image" /></p>
-
-<!--more-->
-
-<h3 id="rdd-data-model">RDD Data Model</h3>
-<p>那么如何利用多个节点的内存进行分布式的计算呢，这就是Spark的核心RDD（Resilient Distributed Dataset）。RDD是一个个记录的集合，只读和分片的。它只能通过外部存储或者其他RDD生成。RDD的这些变化操作名称为<em>transformation</em>，在Spark编程中还有另外一个操作需要知道，<em>action</em>，意思是返回一个值或者将数据导出到外部存储，像<code>count</code>、<code>collect</code>、<code>save</code>。一个spark程序往往是从外部存储中定义一个或多个RDD开始的，接着经过各种<em>transformation</em>，最后<em>action</em>。同时<em>action</em>也是计算的开始，在spark中计算是延迟的，各种<em>transformation</em>形成了computation pipeline在<em>action</em>中进行计算。</p>
-
-<p>下表是对RDD中的<em>transformation</em>和<em>action</em>操作：
-<img src="http://ww2.sinaimg.cn/large/74311666jw1ex310kinr3j210c0fujwg.jpg" alt="" /></p>
-
-<p>RDD还有两个操作：<em>persistence</em>和<em>partitioning</em>。其实顾名思义，<em>persistence</em>即RDD的持久化操作，这是为了避免重复计算。<em>partitioning</em>是重新分区，为了得到更好的执行并发度。</p>
-
-<p>合理的分区可以有效减少shuffle的数据量，根据特定的应用场景执行不同的<em>partitioning</em>。例如在PageRank中根据域名来对URL进行Hash，因为很多链接都是内部的。下图表示<em>partitioning</em>的效果。</p>
-
-<p><img src="http://img-storage.qiniudn.com/15-10-16/6543188.jpg" alt="" /></p>
-
-<p>持久化操作是也是为了更高的计算效率。例如在下图中，Spark有两个action，所以产生两个job。两个job各自计算RDD1和RDD2，对于数据量大的RDD无疑会影响性能，所以可以将RDD进行<em>persistence</em>操作，可以存入内存、硬盘或者二者结合。后续缓存的资源可以手动清除或者通过LRU算法自动清除。
-<img src="http://ww2.sinaimg.cn/large/74311666jw1ex30g3zpazj20u60f2tb9.jpg" alt="" /></p>
-
-<p>在上文中我们提到RDD是有<code>transformation</code>和<code>lazy compute</code>的特性的。这两个特性使得RDD不需要一直被实例化，只需要保存这个RDD是如何产生的，在延迟计算的时候便可以通过这些dependence信息进行RDD transformation操作。以上就是RDD lineage，一个RDD的血统关系图。RDD的只读特性也是为了更好地描述这个lineage graph。在上图中两个Output的产生也可以直观地看到RDD的lineage信息。那么这个linage究竟有什么好处呢，RDD可以根据dependency信息直接追踪到在外存中的数据，在发生错误的时候直接通过外存的原始数据计算丢失或错误的RDD分片信息。</p>
-
-<h3 id="rdd-programming-model">RDD Programming Model</h3>
-
-<p>RDD的编程模型需要通过适当的接口来表示RDD是如何经过一系列的transformations来达到现在的状态。在Spark中，RDD的编程模型暴露了5方面的信息：</p>
-
-<ul>
-  <li>dateset中的分片信息</li>
-  <li>父RDD的依赖关系</li>
-  <li>基于其父RDD的计算RDD方法</li>
-  <li>分片的shceme元数据</li>
-  <li>数据存放的位置
-<img src="http://ww3.sinaimg.cn/large/74311666jw1ex32afwa8gj20qq0ds41v.jpg" alt="" /></li>
-</ul>
-
-<p>在第3个方法中，也就是根据父RDD分片计算本RDD的分片有两种情况：每个父RDD分片最多被一个子RDD分片依赖；父RDD分片被多个子RDD分片依赖。这两种情况分别对应<em>narrow dependency</em>和<em>wide dependency</em>。为什么区分这两种依赖关系呢，这和RDD的延迟计算特性有关系。</p>
-
-<ul>
-  <li>在<em>narrow dependency</em>中，一个节点上的RDD分片可以通过pipeline的方式从原始数据开始计算，多个分片可以并行的进行。而对于<em>wide dependency</em>需要所有父RDD的分片可用，而且涉及到data shuffle。</li>
-  <li><em>narrow dependency</em>在节点失效后的恢复的效率更高，因为可以并行地在不同的节点上计算丢失的分片。而在<em>wide dependency</em>中，一个父RDD分片可能被多个子RDD分片使用，所以可能导致这些子RDD的祖先分片都有丢失，所以需要重新完整的计算。</li>
-</ul>
-
-<p>整个spark作业的执行调度也是和这两种dependency有关。当一个用户执行一个<em>action</em>操作的时候，spark的调度器检测RDD的lineage graph，建立一个DAG图来执行，DAG图中的每个节点就是一个<em>stage</em>。在每个<em>stage</em>中包含了多个pipeline的<em>transformation</em>操作，这些RDD的关系全都是
-<em>narrow dependency</em>。每个<em>stage</em>的边界都是由<em>wide dependency</em>的shuffle操作，或者已经计算好的分片。调度器这时候就可以建立执行任务计算每个stage中缺失的<em>partitions</em>，直到得到最终的RDD。</p>
-
-<p>那么如何合理划分 stage，并确定 task 的类型和个数？
-<img src="http://img-storage.qiniudn.com/15-10-16/48846624.jpg" alt="" /></p>
-
-<p>可以看到在上图中，每个stage中的数据都是形成了pipeline计算的，这里的pipeline思想是：<strong>数据用的时候再算，而且数据是流到要计算的位置的</strong>。有两层意思，一是延迟计算，二是计算本地化。比如在第一个 task 中，从 FlatMappedValuesRDD 中的 partition 向前推算，只计算要用的（依赖的） RDDs 及 partitions。在第二个 task 中，从 CoGroupedRDD 到 FlatMappedValuesRDD 计算过程中，不需要存储中间结果（MappedValuesRDD 中 partition 的全部数据）。</p>
-
-<p>在有<em>wide dependency</em>的时候需要Shuffle后无法进行pipeline。那么我们可以<strong>从后往前推算，遇到 <em>wide dependency</em>就断开，遇到<em>narrow dependency</em>就将其加入该stage。每个stage里面task 的数目由该stage最后一个RDD中的partition个数决定</strong>。因此上图中最后一个stage的id是0，stage 1  stage 2都是stage 0的parents。</p>
-
-<p>整个的computing chain也是根据数据依赖关系自后向前建立，遇到<em>wide dependency</em>后形成 stage。computing chain从后到前建立，而实际计算出的数据从前到后流动，那么RDD内部是如何实现计算的呢。在每个stage中，每个RDD中的compute()调用parentRDD.iter()来将parent RDDs中的 records一个个fetch过来。</p>
-
-<blockquote>
-  <p>代码实现：每个 RDD 包含的 getDependency() 负责确立 RDD 的数据依赖，compute() 方法负责接收 parent RDDs 或者 data block 流入的 records，进行计算，然后输出 record。经常可以在 RDD 中看到这样的代码firstParent[T].iterator(split, context).map(f)。firstParent 表示该 RDD 依赖的第一个 parent RDD，iterator() 表示 parentRDD 中的 records 是一个一个流入该 RDD 的，map(f) 表示每流入一个 recod 就对其进行 f(record) 操作，输出 record。为了统一接口，这段 compute() 仍然返回一个 iterator，来迭代 map(f) 输出的 records。</p>
-</blockquote>
-
-<p>在实现中，每个task是基于数据的本地性进行分配的，任务是在该分片的节点上执行的。而对于<em>wide dependecy</em>，会在拥有父分片的节点上计算中间结果，这是为了减少fault recovery的时间。</p>
-
-<h3 id="spark-architecture">Spark Architecture</h3>
-<p>在上一节中我们确定了Spark stage和task的生成和执行方式，那么这些stage和task在整个spark application中又处于什么样的位置呢，上文中我们提到的每个job又是什么意思呢，为什么一个application中又会有好多个job，它们之间的关系又是什么样的呢？</p>
-
-<p><img src="http://spark-internals.books.yourtion.com/markdown/PNGfigures/deploy.png" alt="image" /></p>
-
-<p>从部署图中可以看到</p>
-
-<ul>
-  <li>整个集群分为 Master 节点和 Worker 节点，相当于 Hadoop 的 Master 和 Slave 节点。</li>
-  <li>Master 节点上常驻 Master 守护进程，负责管理全部的 Worker 节点。</li>
-  <li>Worker 节点上常驻 Worker 守护进程，负责与 Master 节点通信并管理 executors。</li>
-  <li>Driver 官方解释是 “The process running the main() function of the application and creating the SparkContext”。Application 就是用户自己写的 Spark 程序（driver program），比如 WordCount.scala。</li>
-  <li>每个 Worker 上存在一个或者多个 ExecutorBackend 进程。每个进程包含一个 Executor 对象，该对象持有一个线程池，每个线程可以执行一个 task。</li>
-  <li>每个 application 包含一个 driver 和多个 executors，每个 executor 里面运行的 tasks 都属于同一个 application。</li>
-</ul>
-
-<p>在最开始的时候我们介绍了RDD的<code>action</code>操作，还提到每个<code>action</code>就是一个job，事实上上表中的<code>action</code>操作其实是论文中的，实际上还有更多的<code>action</code>。如下表：</p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align:left">Action</th>
-<th style="text-align:left">finalRDD(records) =&gt; result</th>
-<th style="text-align:left">compute(results)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left">reduce(func)</td>
-<td style="text-align:left">(record1, record2) =&gt; result, (result, record i) =&gt; result</td>
-<td style="text-align:left">(result1, result 2) =&gt; result, (result, result i) =&gt; result</td>
-</tr>
-<tr>
-<td style="text-align:left">collect()</td>
-<td style="text-align:left">Array[records] =&gt; result</td>
-<td style="text-align:left">Array[result]</td>
-</tr>
-<tr>
-<td style="text-align:left">count()</td>
-<td style="text-align:left">count(records) =&gt; result</td>
-<td style="text-align:left">sum(result)</td>
-</tr>
-<tr>
-<td style="text-align:left">foreach(f)</td>
-<td style="text-align:left">f(records) =&gt; result</td>
-<td style="text-align:left">Array[result]</td>
-</tr>
-<tr>
-<td style="text-align:left">take(n)</td>
-<td style="text-align:left">record (i&lt;=n) =&gt; result</td>
-<td style="text-align:left">Array[result]</td>
-</tr>
-<tr>
-<td style="text-align:left">first()</td>
-<td style="text-align:left">record 1 =&gt; result</td>
-<td style="text-align:left">Array[result]</td>
-</tr>
-<tr>
-<td style="text-align:left">takeSample()</td>
-<td style="text-align:left">selected records =&gt; result</td>
-<td style="text-align:left">Array[result]</td>
-</tr>
-<tr>
-<td style="text-align:left">takeOrdered(n, [ordering])</td>
-<td style="text-align:left">TopN(records) =&gt; result</td>
-<td style="text-align:left">TopN(results)</td>
-</tr>
-<tr>
-<td style="text-align:left">saveAsHadoopFile(path)</td>
-<td style="text-align:left">records =&gt; write(records)</td>
-<td style="text-align:left">null</td>
-</tr>
-<tr>
-<td style="text-align:left">countByKey()</td>
-<td style="text-align:left">(K, V) =&gt; Map(K, count(K))</td>
-<td style="text-align:left">(Map, Map) =&gt; Map(K, count(K))</td>
-</tr>
-</tbody>
-</table>
-
-<p>用户的 driver 程序中一旦出现 action()，就会生成一个 job，比如 foreach() 会调用sc.runJob(this, (iter: Iterator[T]) =&gt; iter.foreach(f))，向 DAGScheduler 提交 job。如果 driver 程序后面还有 action()，那么其他 action() 也会生成 job 提交。所以，driver 有多少个 action()，就会生成多少个 job。这就是 Spark 称 driver 程序为 application（可能包含多个 job）而不是 job 的原因。</p>
-
-<p>每一个 job 包含 n 个 stage，最后一个 stage 产生 result。。在提交 job 过程中，DAGScheduler 会首先划分 stage，然后先提交无 parent stage 的 stages，并在提交过程中确定该 stage 的 task 个数及类型，并提交具体的 task。无 parent stage 的 stage 提交完后，依赖该 stage 的 stage 才能够提交。从 stage 和 task 的执行角度来讲，一个 stage 的 parent stages 执行完后，该 stage 才能执行。</p>
-
-<p>Spark就先介绍到这里，没有涉及到spark的具体内部实现，包括job的调度，shuffle的过程、文件的管理、cache和broadcast机制等。</p>
-]]></content>
-  </entry>
   
   <entry>
     <title type="html"><![CDATA[Compression Format Introduction]]></title>
@@ -729,6 +226,442 @@ private void runMe(String parameter){
     </ul>
   </li>
 </ul>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Static and Dynamic Library]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/08/29/static-and-dynamic-library/"/>
+    <updated>2014-08-29T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/08/29/static-and-dynamic-library</id>
+    <content type="html"><![CDATA[<p>库是写好的现有的，成熟的，可以复用的代码。现实中每个程序都要依赖很多基础的底层库。C默认使用的库就是<code>libc.so</code>。</p>
+
+<p>本质上来说库是一种可执行代码的二进制形式，可以被操作系统载入内存执行。库有两种：静态库（.a、.lib）和动态库（.so、.dll）。</p>
+
+<p>所谓静态、动态是指链接。</p>
+
+<!--more-->
+
+<h2 id="section">编译和链接</h2>
+
+<p>将一个程序编译成可执行程序的步骤：</p>
+
+<ol>
+  <li>
+    <p><strong>预处理：</strong>主要是处理源代码中以“#”开始的预编译指令，以及删除注释，添加行号和文件名标识。</p>
+
+    <pre><code> gcc -E hello.c -o hello.i
+</code></pre>
+  </li>
+  <li>
+    <p><strong>编译：</strong> 把预处理完的文件进行一系列<strong>词法分析</strong>、<strong>语法分析</strong>、<strong>语义分析</strong>以及<strong>优化</strong>后<strong>生成相应的汇编代码文件</strong>。</p>
+
+    <pre><code> gcc -S hello.i -o hello.s 
+</code></pre>
+  </li>
+  <li>
+    <p><strong>汇编：</strong>将汇编代码转变为机器代码。</p>
+
+    <pre><code> as hello.s -o hello.o
+ gcc -c hello.s -o hello.o
+</code></pre>
+  </li>
+  <li>
+    <p><strong>链接：</strong>链接过程主要包括了<strong>地址和空间分配</strong>、<strong>符号决议</strong>和<strong>重定位</strong>。</p>
+
+    <p>链接所要做的工作也就是打补丁，将模块中引用其他模块变量或函数的地方由0修改成其他模块中的地址。这个修正的过程叫做重定位，每个要被修正的地方叫一个重定位入口。</p>
+
+    <pre><code> ld a.o b.o -e main -o ab
+</code></pre>
+  </li>
+</ol>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/gcc_zps9691e38f.png" alt="gcc过程分解" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/compile_zps2febeeff.gif" alt="" /></p>
+
+<h2 id="section-1">静态链接</h2>
+
+<p>链接器异步都采用一种叫两步链接的方法。也就是整个链接过程分两步。</p>
+
+<ul>
+  <li>
+    <p>空间与地址分配</p>
+
+    <p>链接器获得所有输入目标文件的段长度，并且将他们合并，计算出输出文件中各个段合并后的长度和位置，并建立映射关系。</p>
+
+    <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/compile2_zps2aaa528b.png" alt="" /></p>
+  </li>
+  <li>
+    <p>符号解析与重定位</p>
+
+    <p>通过空间与地址的分配可以得知，链接器在完成空间与地址的分配之后就可以确定所有符号的虚拟地址了，那么链接器就可以根据符号的地址对每个需要重定位的指令进行地址修正。</p>
+  </li>
+</ul>
+
+<p>在ELF文件中，有个叫做<strong>重定位表</strong>的数据结构专门用来保存这些与重定位相关的信息，它在ELF文件中往往是一个或多个段。.text和.data段各有自己的重定位表，包含信息有<strong>重定位入口</strong>以及<strong>偏移</strong>。</p>
+
+<p>重定位过程中，每个重定位的入口都是对一个符号的引用，当链接器需要对某个符号的引用进行重定位时，它就要确定这个符号的目标地址。这时候链接器就会去查找有所有输入目标文件的符号表组成的<strong>全局符号表</strong>，找到相应的符号后进行重定位。</p>
+
+<p>在链接器扫描完所有的输入目标文件之后，所有这些未定义的符号都应该能够在全局符号表中找到，否则连接器就报<strong>符号未定义</strong>错误。</p>
+
+<p><strong>静态库</strong>可以简单地看成一组目标文件的集合，即很多目标文件经过压缩打包后形成的一个文件。人们使用<code>ar</code>压缩程序将这些目标文件压缩到一起，并且对其进行编号和索引，以便于查找和检索。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/compile3_zps21c35794.png" alt="" /></p>
+
+<h2 id="section-2">可执行文件的装载</h2>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load1_zps072482ca.png" alt="" />
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load2_zpscd53f782.png" alt="" />
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load3_zpsf9324209.png" alt="" />
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load4_zpsc3f80dea.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load5_zps5d1477cf.png" alt="" /></p>
+
+<p>ELF文件中，段的权限往往只有为数不多的几种组合，基本上是三种：</p>
+
+<ul>
+  <li>以代码段为代表的权限为可读可执行的段</li>
+  <li>以数据段和.bss段为代表的可读可写段</li>
+  <li>以制度数据段为代表的权限为只读的段</li>
+</ul>
+
+<p>操作系统通过给进程空间划分出一个个VMA来管理进程的虚拟空间，基本原则是将相同权限属性的、有相同映像文件的映射成一个VMA，这样可以减少页面内部碎片，从而节省了内存空间：</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load6_zpsde691d1c.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/load7_zps0008209b.png" alt="" /></p>
+
+<p>操作系统堆的最大申请空间会受到操作系统版本、程序本身大小、用到的动态/共享库数量、大小、程序栈数量、大小的等的影响。甚至有可能每次运行的结果都会不同，因为有些操作系统使用了一种叫做随机地址空间分布的技术，使得进程的堆空间变小。</p>
+
+<h3 id="section-3">程序的执行过程</h3>
+
+<p>首先在用户层面，bash进程会调用<code>fork()</code>系统调用创建一个新的进程，新的进程调用<code>execve()</code>系统调用执行指定的ELF，原先的bash进程继续返回等待刚才启动的新进程结束，然后继续等待用户输入命令。</p>
+
+<p>系统通过文件开头的魔数判断是ELF文件后调用<code>load_elf_binary()</code>;</p>
+
+<ol>
+  <li>检测ELF可执行文件格式的有效性</li>
+  <li>寻找动态链接的“.interp”段，设置动态连接器路径</li>
+  <li>根据ELF可执行文件的程序头表的描述，对ELF文件进行映射，比如代码、数据、只读数据。</li>
+  <li>初始化ELF进程环境</li>
+  <li>将系统调用的返回地址修改成ELF可执行文件的入口点，这个入口点取决于程序的连接方式，对于静态连接的ELF可执行文件，这个入口就是ELF文件的文件头中的<code>e_entry</code>所指向的地址；对于动态链接的ELF可执行文件，入口点就是动态链接器。</li>
+</ol>
+
+<p>指令寄存器设置成程序的入口点，启动程序。</p>
+
+<p><strong>系统的动态链接器会将程序所需要的所有动态链接库装载到进程的地址空间，并且将程序中所有未决议的符号绑定到相应的动态链接库中，并进行重定位工作。</strong></p>
+
+<p>我们在静态链接时提到过重定位，那时的重定位叫做<strong>链接时重定位</strong>（Link Time Relocation） ， 而现在这种情况经常被称为<strong>装载时重定位</strong>（Load Time Relocation）。</p>
+
+<p>所以说装载时重定位一个很大的缺点就是指令部分无法在多个进程之间共享，这样就失去了动态链接节省内存的一大优势。 解决方法就是把指令中那些需要被修改的部分分离出来，跟数据部分放在一起，这样指令部分就可以保持不变， 而数据部分可以在进程中拥有一个副本。这种方案被称为 <strong>地址无关代码</strong>（PIC, Position-independent Code）技术。目的是希望程序模块中共享的指令部分在装载时不需要因为装载地址的改变而改变。</p>
+
+<h2 id="section-4">动态链接</h2>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/dl1_zps2e9939ac.png" alt="" /></p>
+
+<p>为什么需要动态库，其实也是静态库的特点导致。</p>
+
+<ul>
+  <li>空间浪费是静态库的一个问题。</li>
+  <li>另一个问题是静态库对程序的更新、部署和发布页会带来麻烦。如果静态库liba.lib更新了，所以使用它的应用程序都需要重新编译、发布给用户（对于玩家来说，可能是一个很小的改动，却导致整个程序重新下载，全量更新）。</li>
+</ul>
+
+<p>动态库在程序编译时并不会被连接到目标代码中，而是等到程序要运行时才进行链接。<strong>不同的应用程序如果调用相同的库，那么在内存里只需要有一份该共享库的实例，规避了空间浪费问题</strong>。动态库在程序运行是才被载入，也解决了静态库对程序的更新、部署和发布页会带来麻烦。用户只需要更新动态库即可，<strong>增量更新</strong>。</p>
+
+<p>动态库特点总结：</p>
+
+<ul>
+  <li>动态库把对一些库函数的链接载入推迟到程序运行的时期。</li>
+  <li>动态链接的方式使得开发过程中各个模块更加独立、耦合度更小，便于不同的开发者和开发组织之间进行独立的开发和测试。</li>
+  <li>程序在运行时可以动态的选择加载各种程序模块，使得插件成为可能。</li>
+</ul>
+
+<p>动态链接过程：</p>
+
+<p><strong>链接时重定位（静态链接）；装载时重定位（动态链接）</strong></p>
+
+<p><strong>地址无关代码</strong>：PIC，Position-independent Code，把指令中那些需要修改的部分分离出来，跟数据部分放在一起，这样指令部分就可以保持不变，而数据部分可以再每个进程中拥有个副本。</p>
+
+<p>对于现代机器来说，产生地址无关的代码并不麻烦。我们首先把共享对象模块中的地址引用按照是否为跨模块分成两类： 模块内部引用和模块外部引用；按照不同的引用方式又可以分为指令引用和数据访问。 这样我们就得到了如下4种情况：</p>
+
+<ol>
+  <li>模块内部的函数调用、跳转等；</li>
+  <li>模块内部的数据访问，比如模块中定义的全局变量、静态变量；</li>
+  <li>模块外部的函数调用、跳转等；</li>
+  <li>模块外部的数据访问，比如其它模块中定义的全局变量；</li>
+</ol>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/dl2_zps9afd4901.png" alt="" /></p>
+
+<p><strong>动态链接比静态链接慢</strong>的主要原因是动态链接下对于全局静态的数据访问要进行复杂的GOT定位,然后间接寻址.</p>
+
+<p><strong>延迟绑定：</strong></p>
+
+<p>由于很多函数在程序执行过程中不一定被用到（错误处理函数，特殊功能模块），ELF采用一种叫做 <strong>延迟绑定（Lazy Binding）</strong>的做法， 基本思想就是当函数第一次被用到时才进行绑定（符号查找、重定位等），如果没有用到则不进行绑定。可以大大加快程序的启动速度。</p>
+
+<p>ELF使用PLT（Procedure Linkage Table）的方法来实现延迟绑定。PLT大致的工作原理如下：每个外部函数在PLT中都有一个相应的项，如果链接器在初始化阶段已经初始化该项，并且将函数地址填入该项，那么直接跳转到这个地址，实现函数的正确调用。否则调用_dl_runtime_resolve()函数，该函数利用重定位表完成符号解析和重定位工作。解析结束后将地址填入对应的项中。</p>
+
+<p><strong>ELF中的字段：</strong></p>
+
+<p>在动态链接的ELF可执行文件中，有一个专门的段叫做“.interp”，该段保存了需要的动态链接器需路径，一般是/lib/ld-linux.so.2。</p>
+
+<p>动态链接ELF中最重要的结构应该是“.dynamic”段，这个段里面保存了动态连接器所需要的基本信息，比如依赖哪些共享对象、动态链接符号表的位置、动态链接重定位表的位置、共享对象初始化代码的地址等。</p>
+
+<p>为了表示动态链接这些模块之间的符号导出与导入关系，ELF专门有一个叫做动态符号表的段用来保存这些信息。这个段叫做“.dynsym”。</p>
+
+<p>动态链接的文件中，也有类似静态链接的重定位表，分别叫做“.rel.dyn”和“.rel.plt”，他们分别相当于“.rel.text”和“.rel.data”。</p>
+
+<p><strong>动态链接的步骤和实现</strong>：</p>
+
+<p>动态链接的步骤基本分为三步：先启动动态连接器本身，然后装载所有需要的共享对象，最后是重定位和初始化。</p>
+
+<p>但是对于动态链接器本身来说，它的重定位工作是由谁来完成的？ 动态连接器本身通过自举（Bootstrap）来完成。完成基本自举之后，动态连接器将可执行文件和连接器本身的符号表都合并到一个符号表当中，我们可以称它为全局符号表（Global Symbol Table）。</p>
+
+<p>动态连接器按照各个模块之间的依赖关系，当有两个不同的模块定义了同一个符号时怎么办？当一个符号需要被加入全局符号表时，如果相同的符号已经存在，则后加入的符号被忽略。</p>
+
+<p><strong>显示运行时链接：</strong></p>
+
+<p>动态库的装载则是通过一些列由动态连接器提供的API，具体是4个函数：打开动态库（<code>dlopen</code>）、查找符号（<code>dlsym</code>）、错误处理（<code>dlerror</code>）、以及关闭动态库（<code>dlclose</code>）。</p>
+
+<p><code>dlopen()</code>函数用来打开动态库，并将其加载到进程的地址空间，完成初始化过程。</p>
+
+<pre><code>void  *dlopen(const char *filename, int flag);
+</code></pre>
+
+<p><code>dlsym()</code>，我们通过该函数找到所需要的符号。</p>
+
+<pre><code>dlsym(void  *handle,  char  *symbol);
+</code></pre>
+
+<h3 id="c">显式调用C++动态库注意点</h3>
+
+<p>对C++来说，情况稍微复杂。显式加载一个C++动态库的困难一部分是因为C++的name mangling；另一部分是因为没有提供一个合适的API来装载类，在C++中，您可能要用到库中的一个类，而这需要创建该类的一个实例，这不容易做到。</p>
+
+<p>name mangling可以通过<code>extern "C"</code>解决。C++有个特定的关键字用来声明采用C binding的函数：<code>extern "C"</code> 。用 <code>extern "C"</code>声明的函数将使用函数名作符号名，就像C函数一样。因此，只有非成员函数才能被声明为<code>extern "C"</code>，并且不能被重载。尽管限制多多，<code>extern "C"</code>函数还是非常有用，因为它们可以象C函数一样被<code>dlopen</code>动态加载。冠以<code>extern "C"</code>限定符后，并不意味着函数中无法使用C++代码了，相反，它仍然是一个完全的C++函数，可以使用任何C++特性和各种类型的参数。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Classical Sync Problem]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/08/23/classical-sync-problem/"/>
+    <updated>2014-08-23T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/08/23/classical-sync-problem</id>
+    <content type="html"><![CDATA[<p>简单的记录下，后期再整理吧。</p>
+
+<hr />
+
+<h2 id="section">生产者、消费者</h2>
+
+<h3 id="section-1">多个生产者，单个消费者</h3>
+
+<!--more-->
+
+<p><strong>1. 使用互斥锁 &amp;&amp; 条件变量</strong></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc1_zps5e6026ee.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc2_zps96f163b4.png" alt="" /></p>
+
+<p><strong>2. 使用信号量</strong></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc3_zps90f678c0.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc4_zpsff637264.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc5_zpsc1ce838d.png" alt="" /></p>
+
+<h3 id="section-2">多个生产者，多个消费者</h3>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc6_zps5fd624fc.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc7_zps77aab9e4.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc8_zps7ec189ae.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/pc9_zps88ec073a.png" alt="" /></p>
+
+<h2 id="section-3">多个缓冲区读写</h2>
+
+<p>最简单的双缓冲区示意图</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/db1_zps098b0d0f.png" alt="" /></p>
+
+<p><strong>多缓冲区生产者消费者代码</strong></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/db2_zps9fda343a.png" alt="" /></p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/db3_zps03dac974.png" alt="" /></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Design Pattern Abstraction]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/08/22/design-pattern/"/>
+    <updated>2014-08-22T02:18:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/08/22/design-pattern</id>
+    <content type="html"><![CDATA[<p>本文是对设计模式的一个备忘录，仅是做了些摘要，具体的设计模式学习还得看GOF。</p>
+
+<p>这儿也有一个还不错的博客<a href="http://blog.csdn.net/zhengzhb/article/category/926691">http://blog.csdn.net/zhengzhb/article/category/926691</a>。</p>
+
+<hr />
+
+<p>面向对象设计（OOD）核心原则是<strong>高内聚低耦合</strong>。</p>
+
+<ul>
+  <li><em>高内聚</em>是指某个特定模块（程序，类型）都应完成一系列相关功能，描述了不同程序，类型中方法，方法中不同操作描述的逻辑之间的距离相近。高内聚意味可维护性，可重新性，因为模块对外部的依赖少（功能的完备性）。</li>
+  <li><em>耦合</em>是描述模块之间的依赖程度。低耦合是我们的设计目的，但不是不存在耦合不存依赖，依赖是必须的，因为模块之间必须通信交互，不过应该设计依赖于不变或者不易变的接口，无需了解模块的具体实现（OO封装性）。</li>
+</ul>
+
+<p>使用<strong>设计模式</strong>是为了提高代码的工程化，提供更加高内聚、低耦合的代码。同时可重用代码、让代码更容易被他人理解、保证代码可靠性。套用一句话就是：</p>
+
+<blockquote>
+  <p>每个模式描述了一个在我们周围不断重复发生的问题，已经该问题的解决方案的核心。这样我们就能一次又一次地使用该方案而不必做重复劳动。</p>
+</blockquote>
+
+<p>设计模式分为三种类型，共23种。</p>
+
+<ul>
+  <li><strong>创建型模式：</strong>单例模式、抽象工厂模式、建造者模式、工厂模式、原型模式。</li>
+  <li><strong>结构型模式：</strong>适配器模式、桥接模式、装饰模式、组合模式、外观模式、享元模式、代理模式。</li>
+  <li><strong>行为型模式：</strong>模版方法模式、命令模式、迭代器模式、观察者模式、中介者模式、备忘录模式、解释器模式、状态模式、策略模式、职责链模式、访问者模式。</li>
+</ul>
+
+<!--more-->
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/dp1_zps74894e4d.png" alt="" /></p>
+
+<h2 id="section">创建型模式</h2>
+
+<h3 id="factory">工厂模式（Factory）</h3>
+
+<p>定义一个用于创建对象的接口，让子类决定实例化哪一个类。Factory Method 使一个类的实例化延迟到其子类。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>当一个类不知道它所必须创建的对象的类的时候。</li>
+  <li>当一个类希望由它的子类来指定它所创建的对象的时候。</li>
+  <li>当类将创建对象的职责委托给多个帮助子类中的某一个，并且你希望将哪一个帮助子类是代理者这一信息局部化的时候。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/factory_zpsc31117cb.gif" alt="" /></p>
+
+<h3 id="abstract-factory">抽象工厂模式（Abstract Factory）</h3>
+
+<p>提供一个创建一系列相关或相互依赖对象的接口，而无需指定它们具体的类。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>一个系统要独立于它的产品的创建、组合和表示时。</li>
+  <li>一个系统要由多个产品系列中的一个来配置时。</li>
+  <li>当你要强调一系列相关的产品对象的设计以便进行联合使用时。</li>
+  <li>当你提供一个产品类库，而只想显示它们的接口而不是实现时。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/abstractfactory_zpsf3be4cdd.gif" alt="" /></p>
+
+<h3 id="builder">建造者模式（Builder）</h3>
+
+<p>将一个复杂对象的构建与它的表示分离，使得同样的构建过程可以创建不同的表示。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>当创建复杂对象的算法应该独立于该对象的组成部分以及它们的装配方式时。</li>
+  <li>当构造过程必须允许被构造的对象有不同的表示时。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/builder_zps7d31e2f5.gif" alt="" /></p>
+
+<h3 id="prototype">原型模式（Prototype）</h3>
+
+<p>用原型实例指定创建对象的种类，并且通过拷贝这些原型创建新的对象。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>当要实例化的类是在运行时刻指定时，例如，通过动态装载；或者</li>
+  <li>为了避免创建一个与产品类层次平行的工厂类层次时；或者</li>
+  <li>当一个类的实例只能有几个不同状态组合中的一种时。建立相应数目的原型并克隆它们可能比每次用合适的状态手工实例化该类更方便一些。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/prototype_zpsb4a5c2aa.gif" alt="" /></p>
+
+<h2 id="section-1">结构型模式</h2>
+
+<h3 id="adapter">适配器模式（Adapter）</h3>
+
+<p>将一个类的接口转换成另外一个客户希望的接口。Adapter模式使得原本由于接口不兼容而不能一起工作的那些类可以一起工作。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>你想使用一个已经存在的类，而它的接口不符合你的需求。</li>
+  <li>你想创建一个可以复用的类，该类可以与其他不相关的类或不可预见的类（即那些接口可能不一定兼容的类）协同工作。</li>
+  <li>（仅适用于对象Adapter）你想使用一些已经存在的子类，但是不可能对每一个都进行子类化以匹配它们的接口。对象适配器可以适配它的父类接口。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/adapter_zps1800d0cc.gif" alt="" /></p>
+
+<h3 id="decorator">装饰模式（Decorator）</h3>
+
+<p>动态地给一个对象添加一些额外的职责。就增加功能来说，Decorator模式相比生成子类更为灵活。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>在不影响其他对象的情况下，以动态、透明的方式给单个对象添加职责。</li>
+  <li>处理那些可以撤消的职责。</li>
+  <li>当不能采用生成子类的方法进行扩充时。一种情况是，可能有大量独立的扩展，为支持每一种组合将产生大量的子类，使得子类数目呈爆炸性增长。另一种情况可能是因为类定义被隐藏，或类定义不能用于生成子类。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/Decorator_zpse3f223d4.gif" alt="" /></p>
+
+<h2 id="section-2">行为型模式</h2>
+
+<h3 id="observer">观察者模式（Observer）</h3>
+
+<p>定义对象间的一种一对多的依赖关系,当一个对象的状态发生改变时, 所有依赖于它的对象都得到通知并被自动更新。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>当一个抽象模型有两个方面, 其中一个方面依赖于另一方面。将这二者封装在独立的对象中以使它们可以各自独立地改变和复用。</li>
+  <li>当对一个对象的改变需要同时改变其它对象, 而不知道具体有多少对象有待改变。</li>
+  <li>当一个对象必须通知其它对象，而它又不能假定其它对象是谁。换言之，你不希望这些对象是紧密耦合的。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/observer_zps892df2a6.gif" alt="" /></p>
+
+<h3 id="state">状态模式（State）</h3>
+
+<p>允许一个对象在其内部状态改变时改变它的行为。对象看起来似乎修改了它的类。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>一个对象的行为取决于它的状态, 并且它必须在运行时刻根据状态改变它的行为。</li>
+  <li>一个操作中含有庞大的多分支的条件语句，且这些分支依赖于该对象的状态。这个状态通常用一个或多个枚举常量表示。通常, 有多个操作包含这一相同的条件结构。State模式将每一个条件分支放入一个独立的类中。这使得你可以根据对象自身的情况将对象的状态作为一个对象，这一对象可以不依赖于其他对象而独立变化。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/state_zps349fba82.gif" alt="" /></p>
+
+<h3 id="strategy">策略模式（Strategy）</h3>
+
+<p>定义一系列的算法,把它们一个个封装起来, 并且使它们可相互替换。本模式使得算法可独立于使用它的客户而变化。</p>
+
+<p><strong>适用性</strong></p>
+
+<ul>
+  <li>许多相关的类仅仅是行为有异。“策略”提供了一种用多个行为中的一个行为来配置一个类的方法。</li>
+  <li>需要使用一个算法的不同变体。例如，你可能会定义一些反映不同的空间/时间权衡的算法。当这些变体实现为一个算法的类层次时，可以使用策略模式。</li>
+  <li>算法使用客户不应该知道的数据。可使用策略模式以避免暴露复杂的、与算法相关的数据结构。</li>
+  <li>一个类定义了多种行为, 并且这些行为在这个类的操作中以多个条件语句的形式出现。将相关的条件分支移入它们各自的Strategy类中以代替这些条件语句。</li>
+</ul>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/strategy_zpsc3f3c44b.gif" alt="" /></p>
 ]]></content>
   </entry>
   

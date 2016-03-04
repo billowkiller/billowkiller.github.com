@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Machine Learning | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/machine-learning/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-03-01T00:44:23+08:00</updated>
+  <updated>2016-03-04T10:22:06+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -142,7 +142,7 @@
 
 <p>证明Representer Theorem如下：</p>
 
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/22880811.jpg" width="450px" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/22880811.jpg" width="500px" /></p>
 
 <p>这其实就表明所有的 L2-regularized linear model 都可以被 kernalized。把损失函数替换成 logistic loss，我们就得到 Kernel Logistic Regression 的优化函数。</p>
 

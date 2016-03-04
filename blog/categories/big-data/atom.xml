@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Big Data | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/big-data/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-03-01T00:44:23+08:00</updated>
+  <updated>2016-03-04T10:22:06+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -448,169 +448,505 @@ job.setProfileTaskRange(false, "");
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[mapreduce framework]]></title>
-    <link href="http://billowkiller.github.io/blog/2015/07/26/mapreduce-framework/"/>
-    <updated>2015-07-26T17:23:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2015/07/26/mapreduce-framework</id>
-    <content type="html"><![CDATA[<h2 id="mapreduce">MapReduce框架</h2>
-
-<p>mapReduce 的输入是hdfs上存储的一系列文件集。在hadoop中，这些文件被一种定义了如何分割一个文件成分片的input format来分割，一个分片是一个文件基于字节的可以被一个map任务加载的一个块。</p>
-
-<ul>
-  <li>每个map任务被分为以下阶段：<code>record reader</code>，<code>mapper</code>，<code>combiner</code>，<code>partitioner</code>。Map任务的输出叫中间数据，包括keys和values，发送到reduce端。</li>
-  <li>Reduce任务分为以下阶段：<code>shuffle</code>，<code>sort</code>，<code>reduce</code>，<code>output format</code>。运行map任务的节点会尽量选择数据所在的节点。这种情况下，不会出现网络传输，在本地节点就可以完成计算。</li>
-</ul>
-
-<p>过程如图所示，接下来的章节会一一介绍。</p>
-
-<p><img src="https://farm3.static.flickr.com/2275/3529146683_c8247ff6db_o.png" alt="" /></p>
+    <title type="html"><![CDATA[Hadoop Secondary Sorting]]></title>
+    <link href="http://billowkiller.github.io/blog/2015/11/22/hadoop-secondary-sorting/"/>
+    <updated>2015-11-22T17:27:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/11/22/hadoop-secondary-sorting</id>
+    <content type="html"><![CDATA[<p>Hadoop MapReduce的神奇之处发生在mapper和reducer之间，将所有相同key的map输出记录聚集在一块，使得用户可以方便的处理聚合在一起的数据。Hadoop内部使用了partition、sort和merge（shuffle的一部分），在每个reducer中流式地得到排序后的key和value集合。在MapReduce Sorting中有个特别的部分是secondary sort，也就是对value进行排序。</p>
 
 <!--more-->
 
-<h3 id="input-format">Input Format</h3>
-
-<p>Record reader会把根据input fromat生成输入分片翻译成records。Record reader的目的是把数据解析成记录，而不是解析数据本身。它把数据以键值对的形式传递给mapper。通常情况下键是偏移量，值是这条记录的整个字节块。从Input file到map的中间过程如下图所示</p>
-
-<p><img src="http://i12.tietuku.com/691b0fd1648b0497.png" width="450px" /></p>
-
-<p>InputFormat其实做了三件事：</p>
+<p>Secondary sort在两种情况下特别有用：</p>
 
 <ul>
-  <li>校验job的input configuration（比如，查看数据是否存在）。</li>
-  <li>split输入的数据文件为逻辑上分片InputSplit，每个InputSplit给接下来的map task处理。</li>
-  <li>创建RecordReader从InputSplit中解析出一个个键值对，这个键值对就是Record。</li>
+  <li>需要某一部分的数据比其他数据更快的到达reducer。</li>
+  <li>希望job的输出按照两个key进行排序。</li>
 </ul>
 
-<p>如果要自定义InputFormat则最重要的是两个方法：</p>
+<p>实现Secondary sort需要对MapReduce中的数据流和处理有一定的了解，下图展示了对reducer中出现的数据有影响的三个部分。</p>
+
+<p><img src="http://i5.tietuku.com/7ad3ad872415c4b6.png" width="600px" /></p>
+
+<p><code>partitioner</code>决定哪个reducer接收该mapper数据记录；<code>sorting RawComparator</code>用于在各自的分片中排序输出的结果，map和reduce阶段都有它，其中map阶段的sorting是对reduce阶段sorting的一个优化，让reducer的sorting更高效；最后，<code>grouping RawComparator</code>用于决定reducer处理排序后记录的边界，发生在reducer从本地磁盘读取数据的时候，也就是说，你可以用这个方法决定数据记录是如何聚集起来调用一个reduce方法的。MapReduce默认把这个三个方法作用于map方法输出的key上。</p>
+
+<p>要实现Secondary sorting，我们需要重写partitioner、sort comparator和grouping comparator。</p>
+
+<p>下面，通过对人名的排序来说明如何使用Secondary sorting。使用primary sort排序last name，secondary sort排序first name。</p>
+
+<p>我们需要构建一个由map方法输出的Composite key，这个key由两部分组成：</p>
 
 <ul>
-  <li><code>public List&lt;InputSplit&gt; getSplits(JobContext context)</code></li>
-  <li><code>public RecordReader createRecordReader(InputSplit split, TaskAttemptContext context)</code></li>
+  <li>Natural Key</li>
+  <li>Secondary Key</li>
 </ul>
 
-<p>通常在处理文本文件的时候，为了保证记录的完整性，RecorderReader会读取超过InputSplit边界的数据。</p>
+<p><img src="http://i5.tietuku.com/25eedf0319e92775.png" width="430px" /></p>
 
-<p><img src="http://i5.tietuku.com/392e9f9f99737b4d.jpg" alt="" /></p>
+<p>``` java
+public class Person implements WritableComparable<person> {</person></p>
 
-<p>在上图中共有三个InputSplit，在hadoop中默认的InputSplit大小为HDFS中每个Block的大小，所以共产生三个map task，它们读取数据的情况如下：</p>
+<p>private String firstName;
+  private String lastName;</p>
 
-<table>
-  <thead>
-    <tr>
-      <th> </th>
-      <th>Start</th>
-      <th>Actual Start</th>
-      <th>End</th>
-      <th>Line(s)</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Mapper1</td>
-      <td>B1:0</td>
-      <td>B1:0</td>
-      <td>B2:150</td>
-      <td>L1, L2, L3</td>
-    </tr>
-    <tr>
-      <td>Mapper2</td>
-      <td>B2:128</td>
-      <td>B2:150</td>
-      <td>B3:300</td>
-      <td>L4, L5, L6</td>
-    </tr>
-    <tr>
-      <td>Mapper3</td>
-      <td>B3:256</td>
-      <td>B3:300</td>
-      <td>B3:300</td>
-      <td>N/A</td>
-    </tr>
-  </tbody>
-</table>
+<p>@Override
+  public void readFields(DataInput in) throws IOException {
+    this.firstName = in.readUTF();
+    this.lastName = in.readUTF();
+  }</p>
 
-<p>现有的InputFormat包括：</p>
+<p>@Override
+  public void write(DataOutput out) throws IOException {
+    out.writeUTF(firstName);
+    out.writeUTF(lastName);
+  }
+…
+```</p>
 
-<ul>
-  <li>TextInputFormat，Hadoop中默认的InputFormat，每行都是一个record，以偏移量为key</li>
-  <li>KeyValueTextInputFormat， 可以指定key value分割符的TextInputFormat</li>
-  <li>NLineInputFormat, mapper接受固定行数的记录</li>
-  <li>SequenceFileInputFormat，二进制的KV
-    <ul>
-      <li>SequenceFileAsTextInputFormat，文本形式的KV</li>
-      <li>SequenceFileAsBinaryInputFormat</li>
-      <li>FixedLengthInputFormat</li>
-    </ul>
-  </li>
-  <li>MultipleInputs</li>
-  <li>DBInputFormat</li>
-</ul>
+<p>下图说明hadoop框架配置中用于设置partitioning、sorting和grouping类的名字和方法。</p>
 
-<h3 id="map">Map</h3>
-
-<p>Map阶段，会对每个从RecordReader读取的Record键值对执行用户代码，这些键值对又叫中间键值对。键和值的选择不是任意的，并且对MapReduce job的成功非常重要。键会用来分组，值是reducer端用来分析的数据。。</p>
-
-<h3 id="combiner">Combiner</h3>
-<p>Combiner 是一个map阶段分组数据，可选的，局部reducer。它根据用户提供的方法在一个mapper范围内根据中间键去聚合值。例如：数的总和是各个部分数量的和，你可以先计算中间的数目，最后再把所有中间数目加起来。很多情况下，这样能减少数据的网络传输量。发送（hello world，1）三次很显然要比发送（hello world，3）需要更多的网络传输字节量。</p>
-
-<p><img src="http://i12.tietuku.com/009804b71667c5b9.png" width="500px" /></p>
-
-<p>上图所示就是combiner发生的时机，它发生在map side写入磁盘的时候，可能会发生两次，一次是在Spill的时候，一次是在Merge的时候。在这两个阶段之前，是有一个sort的过程，这是为了最大化地提高combiner效率。其实从结构和作用来看，combiner函数和reducer函数的作用是相同的，很多情况下，Combiner也是直接用Reducer。</p>
+<p><img src="http://i5.tietuku.com/520e7242cd6ecc43.png" width="530px" /></p>
 
 <h3 id="partitioner">Partitioner</h3>
 
-<p>Partitioner很简单，它决定哪个reducer接收该mapper数据记录，默认的是一个hash函数，对key进行hash之后取reducer个数的模。Partitioner会获取从mapper（或combiner）来的键值对，并分割成分片，每个reducer一个分片。默认用哈希值，典型使用md5sum。然后partitioner根据reduce的个数执行取余运算：key.hashCode() % (number of reducers)。这样能随即均匀的根据key分发数据到reduce，但仍然要保证不同mapper的相同key要到同一个reduce。Partitioner也可以自定义，使用更高级的样式，例如排序。然而，更改partitioner很少用。Partitioner的每个map的数据会写到本地磁盘，并等待对应的reducer检测，拿走数据。</p>
+<p>默认的partitioner使用对key进行hash后取reducer个数的模。但是默认的partitioner使用整个key，会导致相同的natural key发往不同的reducer。所以需要实现自己的partitioner。</p>
 
-<h3 id="shuffle-and-sort">Shuffle and sort</h3>
-<p>虽然说这个阶段主要是在Reduce端，但是Map端的一些行为也会影响到Reduce端。</p>
+<p>``` java
+public class PersonNamePartitioner extends
+    Partitioner&lt;Person, Text&gt; {</p>
 
-<p><img src="http://i5.tietuku.com/952140624345e77f.png" width="500px" /></p>
+<p>@Override
+  public int getPartition(Person key, Text value, int numPartitions) {
+    return Math.abs(key.getLastName().hashCode() * 127) %
+        numPartitions;
+  }
+} 
+```</p>
 
-<p>上图是Map端的Shuffle过程，从整个过程来看，最重的部分在于Spill和Merge这两个I/O相关的操作，所有的数据需要从磁盘中读取后又重新写入到磁盘中，所以理想情况下是能够将所有mapper的output都装入到内存中。</p>
+<h3 id="sorting">Sorting</h3>
 
-<p>Reduce任务开始于shuffle和sort阶段，Reduce将会开启多个fetcher从每个节点上的shuffle service中获取数据流。这一阶段获取partitioner的输出文件，并下载到reduce运行的本地机器。在下载的过程中，map的output首先会写入到内存中并进行排序，在数据达到一定量之后spill到磁盘，会有一个后台程序不断merge这些spilled file。最终，所有的output会合并成一个大的文件。这一阶段不能自定义，由框架自动处理。需要做的只是key的选择和可以自定义个用于分组的比较器。整个过程如下图所示。</p>
+<p>``` java
+public class PersonComparator extends WritableComparator {
+  protected PersonComparator() {
+    super(Person.class, true);
+  }</p>
 
-<p><img src="http://i5.tietuku.com/d11419d045f44d9a.png" width="500px" /></p>
+<p>@Override
+  public int compare(WritableComparable w1, WritableComparable w2) {</p>
 
-<h3 id="reduce">Reduce</h3>
-<p>Reduce 任务会把分组的数据作为输入并对每个key组执行reduce方法代码。方法会传递key和可以相关的所有值得迭代集合。很多的处理会在这个方法里执行，也就会有很多的模式。一旦reduce方法完成，会发送0或多个键值对到output format。跟map一样，不同的reduce依据不同的逻辑情形而不同。</p>
+<pre><code>Person p1 = (Person) w1;
+Person p2 = (Person) w2;
 
-<h3 id="output-format">Output format</h3>
-<p>Output Format会把reduce阶段的输出键值对根据record writer写到文件里。默认用tab分割键值对，用换行分割不同行。这里也可以自定义为更丰富的输出格式，最后，数据被写到hdfs。整个过程类似于InputFormat。</p>
 
-<p><img src="http://i12.tietuku.com/cbdb549a3e19f898.png" width="500px" /></p>
-
-<p>LazyOutputFormat 用来保证output (part-r-nnnnn) files有数据，不会存在空文件。</p>
-
-<h3 id="output-commiter">Output Commiter</h3>
-
-<p>Hadoop使用<code>OutputCommitter</code>来保证作业和任务的事务性。在旧的API中需要显示的使用<code>setOutputCommitter</code>或者设置<code>mapred.output.committer.class</code>。
-而在新的API中，<code>OutputCommitter</code>是由<code>OutputFormat</code>通过<code>getOutputCommitter()</code>方法决定的。默认的是<code>FileOutputCommitter</code>，它适用于所有的基于文件的MapReduce。</p>
-
-<p><code>OutputCommitter</code>API如下：</p>
-
-<pre><code>public abstract class OutputCommitter {
-	public abstract void setupJob(JobContext jobContext) throws IOException; 
-	public void commitJob(JobContext jobContext) throws IOException { } 
-	public void abortJob(JobContext jobContext, JobStatus.State state) throws IOException { }
-	public abstract void setupTask(TaskAttemptContext taskContext) throws IOException;
-	public abstract boolean needsTaskCommit(TaskAttemptContext taskContext) throws IOException;
-	public abstract void commitTask(TaskAttemptContext taskContext) throws IOException;
-	public abstract void abortTask(TaskAttemptContext taskContext) throws IOException;
+int cmp = p1.getLastName().compareTo(p2.getLastName());
+if (cmp != 0) {
+  return cmp;
 }
+
+return p1.getFirstName().compareTo(p2.getFirstName());   } } ```
 </code></pre>
 
-<p><code>setupJob</code>方法在job运行前就被调用，用来服务于作业的初始化，类似创建作业和task的临时目录。</p>
+<h3 id="grouping">grouping</h3>
 
-<p>job成功后会调用<code>commitJob()</code>方法，用于删除临时目录和创建<em>_SUCCESS</em>文件。如果job失败，则调用<code>abortJob()</code>方法
-表示作业失败或者被kill，默认情况下会删除临时目录。</p>
+<p>grouping阶段所有的数据记录已经是secondary sort了，grouping comparator需要将相同的last name聚合在一起。</p>
 
-<p>在task级别的操作类似。Hadoop框架会保证在一个task中的多个task attempt中，只有一个会commit，其他abort。有两种情况：</p>
+<p>``` java
+public class PersonNameComparator extends WritableComparator {</p>
+
+<p>protected PersonNameComparator() {
+    super(Person.class, true);
+  }</p>
+
+<p>@Override
+  public int compare(WritableComparable o1, WritableComparable o2) {</p>
+
+<pre><code>Person p1 = (Person) o1;
+Person p2 = (Person) o2;
+
+return p1.getLastName().compareTo(p2.getLastName());
+</code></pre>
+
+<p>}
+}
+```</p>
+
+<h3 id="mapreduce">MapReduce</h3>
+
+<p>最后在driver中，需要设置上文提到的三个类：</p>
+
+<p>``` java
+job.setPartitionerClass(PersonNamePartitioner.class);
+job.setSortComparatorClass(PersonComparator.class);
+job.setGroupingComparatorClass(PersonNameComparator.class);</p>
+
+<p>public static class Map extends Mapper&lt;Text, Text, Person, Text&gt; {
+  private Person outputKey = new Person();</p>
+
+<p>@Override
+  protected void map(Text lastName, Text firstName, Context context)
+      throws IOException, InterruptedException {
+    outputKey.set(lastName.toString(), firstName.toString());
+    context.write(outputKey, firstName);
+  }
+}</p>
+
+<p>public static class Reduce extends Reducer&lt;Person, Text, Text, Text&gt; {</p>
+
+<p>Text lastName = new Text();
+  @Override
+  public void reduce(Person key, Iterable<text> values,
+                     Context context)
+      throws IOException, InterruptedException {
+    lastName.set(key.getLastName());
+    for (Text firstName : values) {
+      context.write(lastName, firstName);
+    }
+  }
+}   
+```</text></p>
+
+<p>Secondary sort涉及到的自定义的partitioner、sorter和grouper，还是比较复杂的。可以考虑<a href="http://htuple.org">htuple</a>对简单类型进行secondary sort。</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Spark Streaming]]></title>
+    <link href="http://billowkiller.github.io/blog/2015/10/27/spark-streaming/"/>
+    <updated>2015-10-27T21:04:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/10/27/spark-streaming</id>
+    <content type="html"><![CDATA[<p>流式计算通常是为了满足日益增长的数据的实时获取和低延时计算的需求。通常来说，一个优秀的流式计算引擎需要满足一下的一些需求：</p>
+
+<ol>
+  <li>不重不丢的保证（在节点或计算失败的时候，内存中的计算状态能被正确的恢复）</li>
+  <li>低延迟</li>
+  <li>高吞吐量</li>
+  <li>强大的计算模型</li>
+  <li>容错机制的低开销</li>
+  <li>流控</li>
+</ol>
+
+<p><img src="http://spark.apache.org/images/spark-logo.png" alt="image" />
+<!--more--></p>
+
+<p>介绍完了spark后就可以来说说spark streaming，毕竟spark streaming是完全构建在spark之上，熟悉了spark的RDD原理之后就比较容易理解spark streaming。说白了，spark streaming中的流式计算是伪实时的，之所以是伪实时的是因为它将实时的处理变成时间跨度较小的批量处理。没错，就是将一段时间间隔中的数据变成RDD，然后利用spark原有的架构处理这段时间内的数据，接着在时间维度上对这些处理后的RDD进行迭代计算。也就是将流式计算分解为一系列微小的、原子的批量作业，每个微批量作业如果失败则可以重新计算。这种分解的思想可以应用在批量计算框架、也可以应用在流式计算框架上，例如Storm Trident。</p>
+
+<p>这样的处理带来了几个明显的好处：</p>
 
 <ul>
-  <li>第一个attempt失败的时候会abort，第二个attempt如果成功则会commit。</li>
-  <li>对于预测任务，只要有一个首先成功的话会commit，另外一个则abort。</li>
+  <li>高吞吐量</li>
+  <li>不从不丢的保证</li>
+  <li>快速falut recovery</li>
+  <li>更方便处理慢节点</li>
+  <li>实时和批量统一的编程接口</li>
 </ul>
+
+<p>下面介绍下spark streaming中的具体实现来理解这几点。</p>
+
+<h3 id="section">计算模型</h3>
+
+<p><img src="http://blog.selfup.cn/wp-content/uploads/2014/08/streaming-flow.png" alt="image" /></p>
+
+<p>首先，Spark Streaming把实时输入数据流以时间片（如1秒）为单位切分成块。Spark Streaming会把每块数据作为一个RDD，并使用RDD操作处理每一小块数据。每个块都会生成一个Spark Job处理，最终结果也返回多块。</p>
+
+<p>举个栗子来说明下这个过程：</p>
+
+<pre><code>pageViews = readStream("http://..."， “ls”)
+ones = pageViews.map(event =&gt; (event.url, 1))
+counts = ones.runningReduce((a, b) =&gt; a+b)
+</code></pre>
+
+<p>上述代码的作用是根据URL的数量计算访问次数。处理的过程为首先通过HTTP获取到一个pageview事件的RDD，经过<em>transformation</em>操作变成(URL, 1), 最后的操作计算相同的URL数目。整个streaming过程可以用下图来表示：
+<img src="http://img-storage.qiniudn.com/15-10-18/95269436.jpg" alt="" /></p>
+
+<p>整个的处理过程可以看出，输入流被分成每个都是1秒的batch，经过处理后生成resultRDD，这个resultRDD在每个时间间隔中都会产生一个，并经过reduce迭代计算。在上图中最终的reduce的输入参数就包括上一个时间间隔的resultRDD和这个时间间隔中map操作的结果。上图也可以看出这些RDD的lineage graph，在节点失败的时候，可以根据这个lineage graph以partition的粒度为单位重新执行任务计算丢失的分片，可以看出这些计算的任务都是可以并行执行的。同时，对于慢节点来说，因为计算是无状态的，且每个job的结果是可以确定的，spark streaming可以执行类似于hadoop中的预测模型——在其他节点上计算同样的任务。另外，spark streaming也会有些checkpoint来防止无限制的恢复计算。</p>
+
+<p>对比于其他流式处理的方式，spark streaming在处理失败任务和慢节点上无疑更有效率。它可以从时间和partition两个维度上并行地计算数据来加快恢复速度。而对于像Strom的流式处理来说，往往是通过<strong>上游数据backup</strong>或者<strong>同时复制执行相同的作业</strong>来保证数据处理的可靠性。这两种处理方式对于资源的消耗无疑都是巨大的，且恢复的时间也比较长。</p>
+
+<ul>
+  <li>其中对于前者来说，每个节点都需要保存上一个checkpoing后所发送数据的拷贝，在节点失败时由standby机器重新计算上游节点发送过来的数据，因为这些计算都是有状态的，所以恢复的时间比较长，Storm就只保证“at least once”语义来提高处理速度。Trident之所以能够保证不重不丢是使用了数据库来复制计算状态。</li>
+  <li>对于后者无疑更加消耗资源，并且需要保证两个数据处理操作接受到的上游数据的顺序是一样的。</li>
+</ul>
+
+<p>同spark一样，只有当某个Output Operations原语被调用时，stream才会开始真正的计算过程。现阶段支持的Output方式有以下几种：</p>
+
+<ul>
+  <li>print()</li>
+  <li>foreachRDD(func)</li>
+  <li>saveAsObjectFiles(prefix, [suffix])</li>
+  <li>saveAsTextFiles(prefix, [suffix])</li>
+  <li>saveAsHadoopFiles(prefix, [suffix])</li>
+</ul>
+
+<h3 id="section-1">流式处理中的几点难点</h3>
+
+<p>在流式处理中通常都会有几个难点需要考虑。</p>
+
+<ul>
+  <li>时间窗口问题</li>
+  <li>数据一致性问题</li>
+  <li>内存状态管理问题</li>
+</ul>
+
+<p>我们来看下spark streaming是如何解决的。</p>
+
+<ol>
+  <li>
+    <p><strong>时间窗口问题。</strong>spark streaming是根据数据到达系统的时间将记录放到对应的RDD中，这种时间窗口划分是基于墙上时间的，好处可以保证系统及时产生一个新的batch运行job，并且可以让程序运行在数据生成的地方，不必再进行分发。</p>
+
+    <p>这种基于墙上时间的统计有一个非常严重的问题是不能回放数据流。当数据流是实时产生的时候，“墙上时间”的一分钟也就只会有一分钟的event被产生出来。但是如果统计的数据流是基于历史event的，那么一分钟可以产生消费的event数量只受限于数据处理速度。另外event在分布式采集的时候也遇到有快有慢的问题，一分钟内产生的event未必可以在一分钟内精确到达统计端，这样就会因为采集的延迟波动影响统计数据的准确性。所以产生了另外一种时间窗口划分的方法。</p>
+
+    <p>另一种时间窗口划分的方法是基于外部时间的，例如日志时间。spark streaming提供两种方法来处理这种情况：</p>
+
+    <ul>
+      <li>延迟处理，等待一定时间来处理每个batch。</li>
+      <li>用户的应用程序中保证乱序事件的正确处理。</li>
+    </ul>
+
+    <p>以上也说明在批处理的流式计算模型是受限的，很多情况下只能依靠用户的应用程序来做处理，例如实时的统计5s内的pv；其次这种方式也没有很好的流控技术手段，如果有突发的大量数据产生，会导致结果产生的时间更长，甚至是将系统的JVM撑爆。最后实时性也是受限的，只能达到次秒级的处理延迟，毕竟是要等待一个时间batch的处理完成。</p>
+  </li>
+  <li>
+    <p><strong>数据一致性问题。</strong>什么是数据一致性，举个栗子，要统计网站中来自各个国家的page view，把不同国家的pv统计放在不同的节点上处理。但是现在统计英国的节点处理速度要慢于法国的，这将导致两个节点上数据的时间状态不一致。在流式处理中，数据的一致性的保证同时意味着资源的消耗。流式处理的数据一致性有三种解决思路，在上文中也有提到，这里概括下：</p>
+
+    <ul>
+      <li>上游备份策略：重启的时候重放kafka的历史数据，恢复内存状态</li>
+      <li>中间状态持久化：把统计的状态放到外部的持久的数据库里，不放内存里</li>
+      <li>同时跑两份：同时有两个完全一样的统计任务，重启一个，另外一个还能正常运行。</li>
+    </ul>
+
+    <p>而在spark streaming中，数据一致性天然得到保证的。因为记录根据时间来分片，所以中间的resultRDD反应的是当前时间和之前时间所计算出来的结果，无论计算和结果被分配到哪个节点上都不会有节点间数据不一致的情况。也就是数据的不重不丢可以得到保证。</p>
+  </li>
+  <li>
+    <p><strong>内存状态管理问题。</strong>
+做流式统计的有两种做法：</p>
+
+    <ul>
+      <li>依赖于外部存储管理状态：比如没收到一个event，就往redis里发incr增1</li>
+      <li>纯内存统计：在内存里设置一个counter，每收到一个event就+1</li>
+    </ul>
+
+    <p>第一种会把整个压力全部压到数据库上，造成处理速度下降；第二种的状态相对来说容易管理一些，计算直接是基于这个内存状态做的。如果重启丢失了，重放一段历史数据就可以重建出来。内存的问题是它总是不够用的，解决的方法是input分割和把存储移到外边去。在内存计算中把窗口统计的中间状态落地的好处是显而易见的：重启之后不用通过重算来恢复内存状态。但是这种对外部数据库使用不小心就会导致两个问题：</p>
+
+    <ul>
+      <li>处理速度慢。不用一些批量的操作，数据库操作很快就会变成瓶颈</li>
+      <li>数据库的状态不一致。内存的状态重启了就丢失了，外部的状态重启之后不丢失。重放数据流就可能导致数据的重复统计</li>
+    </ul>
+
+    <p>在spark streaming中支持传统批量计算中的无状态<em>transformation</em>操作，例如<code>map</code>、<code>reduce</code>、<code>groupBy</code>和<code>join</code>。这就避免了普通流式计算中麻烦的状态保存问题。但spark streaming中也支持多个时间间隔中有状态的<em>transformation</em>操作，包括：</p>
+
+    <ol>
+      <li>Windowing: 生成滑动窗口RDD。<code>words.window("5s")</code>将产生一个RDD包含[0,5),[1,6),[2,7)的时间间隔。</li>
+      <li>增量聚合：在滑动窗口的基础上进行RDD的聚合操作，也就是<code>reduceByWindow</code>。在下图的<em>a</em>中对应的代码为<code>pairs.reduceByWindow("5s", (a, b) =&gt; a+b)</code>，也就是计算5s内的计数之后。图<em>b</em>的代码为<code>pairs.reduceByWindow("5s", (a, b) =&gt; a+b, (a, b) =&gt; a-b)</code>。其实很简单，第一个lambda表达式为进入滑动窗口的处理函数，第二个表达式为离开滑动窗口的处理函数。这样也就不用重复求和了。
+ <img src="http://img-storage.qiniudn.com/15-10-18/97873121.jpg" alt="" /></li>
+      <li>状态跟踪：
+ 如下图所示，就是保存上一个时间间隔的RDD与本次的记录进行groupBy加map计算的到状态的变化情况。
+ <img src="http://img-storage.qiniudn.com/15-10-18/91458919.jpg" alt="" /></li>
+    </ol>
+
+    <p>在对这些带状态的操作的处理过程中也就用到了上述的所属的利用外存在保存中间的状态。spark streaming中这只发生在intervel之间，所以整个内存的状态管理会比传统的流式处理简单许多，而且高效，不需要对每一步都进行状态同步，状态恢复的成本也比较低，上文中提到的可以在多个节点上并行计算恢复。</p>
+  </li>
+</ol>
+
+<h3 id="system-architecture">System Architecture</h3>
+<p><img src="http://img-storage.qiniudn.com/15-10-18/82954556.jpg" alt="" /></p>
+
+<p>Spark streaming和Spark的系统结构有些许改动，如上图所示主要包括3个部分：</p>
+
+<ul>
+  <li><em>master</em> that tracks the D-Stream lineage graph and schedules tasks to compute new RDD partitions.</li>
+  <li><em>Worker</em> nodes that receive data, store the partitions of input and computed RDDs, and execute tasks.</li>
+  <li>A <em>client</em> library used to send data into the system.</li>
+</ul>
+
+<p>从上图中可以看出，Spark Streaming和传统的流式系统最大的区别就是Spark Streaming将计算分成小的，无状态的确定性的任务，这些任务会在集群的任意节点上运行。并且相对于传统流式系统的拓扑结构来说，无需消耗大量时间将将任务进行迁移，Spark Streaming可以很好的对机器上的节点进行负载均衡，处理失败任务并且对慢节点进行预测。</p>
+
+<p>对比于Spark的系统，Spark Streaming做了一下的改进：</p>
+
+<ul>
+  <li>网络传输。使用异步I/O获取远端数据。</li>
+  <li>TimeStep pipelining。Spark的调度器可以在当前任务还未完成的时候可以提交下一个时间分片的任务。</li>
+  <li>任务调度：优化任务调度器，例如调整控制消息的大小，可以在每隔几百毫秒时间内启动几百个并行任务。</li>
+  <li>存储层：支持异步的RDD checkpoint，RDD是不可变的，所以异步存储不会阻塞现有的计算。</li>
+  <li>Lineage切割：控制RDD linage graph的大小，在checkpoint之前的lineage便可以删除。</li>
+</ul>
+
+<p>当master fail的时候可以进行HA，所有的worker重新连接到新的master上，将原来的checkpoint和原始数据重新计算。因为所有的操作都是确定性的，所以RDD是可以重复计算，也就是说在HA的时候丢失一些正在运行的计算任务不会对最终结果造成什么影响。所有的元数据都是存储在HDFS上的，包括：</p>
+
+<ol>
+  <li>RDD的lineage graph，代表用户代码的Scala函数对象。</li>
+  <li>上一个checkpoint的时间</li>
+  <li>RDD的ID。因为HDFS的checkpoint文件会在每个时间片重新命名。</li>
+</ol>
+
+<h3 id="faq">FAQ</h3>
+<ol>
+  <li>
+    <p>Dstream与RDD之间的关系</p>
+
+    <p>首先来看下Spark streaming的代码<code>val ssc = new StreamingContext(sc, Seconds(2))</code>。在这句的作用是定义Dstream生成的时间间隔，<code>2s</code>就是这个时间间隔，也叫<code>batch interval</code>。具体说来<strong>一个streaming batch对应一个RDD</strong>，也就是这个batch interval里产生的数据。</p>
+
+    <p>在这个RDD中，有n个partition，n = batch interval / block interval。 <code>block interval</code>是spark steaming内部定义的一个变量<code>spark.streaming.blockInterval</code>，通常是200ms。上述例子就产生10个partitions。</p>
+
+    <p>Blocks由一个receiver产生，receiver就是流式数据的接收端，每个receiver被分配到一个host上，所以上述的1-个partitions就由一个node产生，同时被复制到第二个节点上做容错。注意，这里产生了data locality的问题。好的做法是，分配多个receivers接收数据，最后使用union合并数据做processing。当然还可以对Dstream做<code>repartition</code>操作提高并行度。</p>
+  </li>
+  <li>
+    <p>时间窗口和job的关系</p>
+  </li>
+</ol>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Spark Introduction]]></title>
+    <link href="http://billowkiller.github.io/blog/2015/10/27/spark-introduction/"/>
+    <updated>2015-10-27T21:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/10/27/spark-introduction</id>
+    <content type="html"><![CDATA[<p>简单介绍下Spark。Spark是分布式的内存计算模型，对于两类计算形式能够极大地提升处理的效率：迭代计算，和交互式的数据挖掘工具。迭代计算例如PageRank、K-means聚类、逻辑回归等要求计算结果的重新利用，交互式的数据挖掘例如针对一份的数据集进行多次特定查询也要求原始数据的重复利用。对比于MR作业，它不需要外部存储的介入，从而提升处理速度。接下来将会从Spark的数据模型、编程模型和架构来介绍Spark。</p>
+
+<p><img src="https://spark.apache.org/images/spark-logo.png" alt="image" /></p>
+
+<!--more-->
+
+<h3 id="rdd-data-model">RDD Data Model</h3>
+<p>那么如何利用多个节点的内存进行分布式的计算呢，这就是Spark的核心RDD（Resilient Distributed Dataset）。RDD是一个个记录的集合，只读和分片的。它只能通过外部存储或者其他RDD生成。RDD的这些变化操作名称为<em>transformation</em>，在Spark编程中还有另外一个操作需要知道，<em>action</em>，意思是返回一个值或者将数据导出到外部存储，像<code>count</code>、<code>collect</code>、<code>save</code>。一个spark程序往往是从外部存储中定义一个或多个RDD开始的，接着经过各种<em>transformation</em>，最后<em>action</em>。同时<em>action</em>也是计算的开始，在spark中计算是延迟的，各种<em>transformation</em>形成了computation pipeline在<em>action</em>中进行计算。</p>
+
+<p>下表是对RDD中的<em>transformation</em>和<em>action</em>操作：
+<img src="http://ww2.sinaimg.cn/large/74311666jw1ex310kinr3j210c0fujwg.jpg" alt="" /></p>
+
+<p>RDD还有两个操作：<em>persistence</em>和<em>partitioning</em>。其实顾名思义，<em>persistence</em>即RDD的持久化操作，这是为了避免重复计算。<em>partitioning</em>是重新分区，为了得到更好的执行并发度。</p>
+
+<p>合理的分区可以有效减少shuffle的数据量，根据特定的应用场景执行不同的<em>partitioning</em>。例如在PageRank中根据域名来对URL进行Hash，因为很多链接都是内部的。下图表示<em>partitioning</em>的效果。</p>
+
+<p><img src="http://img-storage.qiniudn.com/15-10-16/6543188.jpg" alt="" /></p>
+
+<p>持久化操作是也是为了更高的计算效率。例如在下图中，Spark有两个action，所以产生两个job。两个job各自计算RDD1和RDD2，对于数据量大的RDD无疑会影响性能，所以可以将RDD进行<em>persistence</em>操作，可以存入内存、硬盘或者二者结合。后续缓存的资源可以手动清除或者通过LRU算法自动清除。
+<img src="http://ww2.sinaimg.cn/large/74311666jw1ex30g3zpazj20u60f2tb9.jpg" alt="" /></p>
+
+<p>在上文中我们提到RDD是有<code>transformation</code>和<code>lazy compute</code>的特性的。这两个特性使得RDD不需要一直被实例化，只需要保存这个RDD是如何产生的，在延迟计算的时候便可以通过这些dependence信息进行RDD transformation操作。以上就是RDD lineage，一个RDD的血统关系图。RDD的只读特性也是为了更好地描述这个lineage graph。在上图中两个Output的产生也可以直观地看到RDD的lineage信息。那么这个linage究竟有什么好处呢，RDD可以根据dependency信息直接追踪到在外存中的数据，在发生错误的时候直接通过外存的原始数据计算丢失或错误的RDD分片信息。</p>
+
+<h3 id="rdd-programming-model">RDD Programming Model</h3>
+
+<p>RDD的编程模型需要通过适当的接口来表示RDD是如何经过一系列的transformations来达到现在的状态。在Spark中，RDD的编程模型暴露了5方面的信息：</p>
+
+<ul>
+  <li>dateset中的分片信息</li>
+  <li>父RDD的依赖关系</li>
+  <li>基于其父RDD的计算RDD方法</li>
+  <li>分片的shceme元数据</li>
+  <li>数据存放的位置
+<img src="http://ww3.sinaimg.cn/large/74311666jw1ex32afwa8gj20qq0ds41v.jpg" alt="" /></li>
+</ul>
+
+<p>在第3个方法中，也就是根据父RDD分片计算本RDD的分片有两种情况：每个父RDD分片最多被一个子RDD分片依赖；父RDD分片被多个子RDD分片依赖。这两种情况分别对应<em>narrow dependency</em>和<em>wide dependency</em>。为什么区分这两种依赖关系呢，这和RDD的延迟计算特性有关系。</p>
+
+<ul>
+  <li>在<em>narrow dependency</em>中，一个节点上的RDD分片可以通过pipeline的方式从原始数据开始计算，多个分片可以并行的进行。而对于<em>wide dependency</em>需要所有父RDD的分片可用，而且涉及到data shuffle。</li>
+  <li><em>narrow dependency</em>在节点失效后的恢复的效率更高，因为可以并行地在不同的节点上计算丢失的分片。而在<em>wide dependency</em>中，一个父RDD分片可能被多个子RDD分片使用，所以可能导致这些子RDD的祖先分片都有丢失，所以需要重新完整的计算。</li>
+</ul>
+
+<p>整个spark作业的执行调度也是和这两种dependency有关。当一个用户执行一个<em>action</em>操作的时候，spark的调度器检测RDD的lineage graph，建立一个DAG图来执行，DAG图中的每个节点就是一个<em>stage</em>。在每个<em>stage</em>中包含了多个pipeline的<em>transformation</em>操作，这些RDD的关系全都是
+<em>narrow dependency</em>。每个<em>stage</em>的边界都是由<em>wide dependency</em>的shuffle操作，或者已经计算好的分片。调度器这时候就可以建立执行任务计算每个stage中缺失的<em>partitions</em>，直到得到最终的RDD。</p>
+
+<p>那么如何合理划分 stage，并确定 task 的类型和个数？
+<img src="http://img-storage.qiniudn.com/15-10-16/48846624.jpg" alt="" /></p>
+
+<p>可以看到在上图中，每个stage中的数据都是形成了pipeline计算的，这里的pipeline思想是：<strong>数据用的时候再算，而且数据是流到要计算的位置的</strong>。有两层意思，一是延迟计算，二是计算本地化。比如在第一个 task 中，从 FlatMappedValuesRDD 中的 partition 向前推算，只计算要用的（依赖的） RDDs 及 partitions。在第二个 task 中，从 CoGroupedRDD 到 FlatMappedValuesRDD 计算过程中，不需要存储中间结果（MappedValuesRDD 中 partition 的全部数据）。</p>
+
+<p>在有<em>wide dependency</em>的时候需要Shuffle后无法进行pipeline。那么我们可以<strong>从后往前推算，遇到 <em>wide dependency</em>就断开，遇到<em>narrow dependency</em>就将其加入该stage。每个stage里面task 的数目由该stage最后一个RDD中的partition个数决定</strong>。因此上图中最后一个stage的id是0，stage 1  stage 2都是stage 0的parents。</p>
+
+<p>整个的computing chain也是根据数据依赖关系自后向前建立，遇到<em>wide dependency</em>后形成 stage。computing chain从后到前建立，而实际计算出的数据从前到后流动，那么RDD内部是如何实现计算的呢。在每个stage中，每个RDD中的compute()调用parentRDD.iter()来将parent RDDs中的 records一个个fetch过来。</p>
+
+<blockquote>
+  <p>代码实现：每个 RDD 包含的 getDependency() 负责确立 RDD 的数据依赖，compute() 方法负责接收 parent RDDs 或者 data block 流入的 records，进行计算，然后输出 record。经常可以在 RDD 中看到这样的代码firstParent[T].iterator(split, context).map(f)。firstParent 表示该 RDD 依赖的第一个 parent RDD，iterator() 表示 parentRDD 中的 records 是一个一个流入该 RDD 的，map(f) 表示每流入一个 recod 就对其进行 f(record) 操作，输出 record。为了统一接口，这段 compute() 仍然返回一个 iterator，来迭代 map(f) 输出的 records。</p>
+</blockquote>
+
+<p>在实现中，每个task是基于数据的本地性进行分配的，任务是在该分片的节点上执行的。而对于<em>wide dependecy</em>，会在拥有父分片的节点上计算中间结果，这是为了减少fault recovery的时间。</p>
+
+<h3 id="spark-architecture">Spark Architecture</h3>
+<p>在上一节中我们确定了Spark stage和task的生成和执行方式，那么这些stage和task在整个spark application中又处于什么样的位置呢，上文中我们提到的每个job又是什么意思呢，为什么一个application中又会有好多个job，它们之间的关系又是什么样的呢？</p>
+
+<p><img src="http://spark-internals.books.yourtion.com/markdown/PNGfigures/deploy.png" alt="image" /></p>
+
+<p>从部署图中可以看到</p>
+
+<ul>
+  <li>整个集群分为 Master 节点和 Worker 节点，相当于 Hadoop 的 Master 和 Slave 节点。</li>
+  <li>Master 节点上常驻 Master 守护进程，负责管理全部的 Worker 节点。</li>
+  <li>Worker 节点上常驻 Worker 守护进程，负责与 Master 节点通信并管理 executors。</li>
+  <li>Driver 官方解释是 “The process running the main() function of the application and creating the SparkContext”。Application 就是用户自己写的 Spark 程序（driver program），比如 WordCount.scala。</li>
+  <li>每个 Worker 上存在一个或者多个 ExecutorBackend 进程。每个进程包含一个 Executor 对象，该对象持有一个线程池，每个线程可以执行一个 task。</li>
+  <li>每个 application 包含一个 driver 和多个 executors，每个 executor 里面运行的 tasks 都属于同一个 application。</li>
+</ul>
+
+<p>在最开始的时候我们介绍了RDD的<code>action</code>操作，还提到每个<code>action</code>就是一个job，事实上上表中的<code>action</code>操作其实是论文中的，实际上还有更多的<code>action</code>。如下表：</p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Action</th>
+<th style="text-align:left">finalRDD(records) =&gt; result</th>
+<th style="text-align:left">compute(results)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">reduce(func)</td>
+<td style="text-align:left">(record1, record2) =&gt; result, (result, record i) =&gt; result</td>
+<td style="text-align:left">(result1, result 2) =&gt; result, (result, result i) =&gt; result</td>
+</tr>
+<tr>
+<td style="text-align:left">collect()</td>
+<td style="text-align:left">Array[records] =&gt; result</td>
+<td style="text-align:left">Array[result]</td>
+</tr>
+<tr>
+<td style="text-align:left">count()</td>
+<td style="text-align:left">count(records) =&gt; result</td>
+<td style="text-align:left">sum(result)</td>
+</tr>
+<tr>
+<td style="text-align:left">foreach(f)</td>
+<td style="text-align:left">f(records) =&gt; result</td>
+<td style="text-align:left">Array[result]</td>
+</tr>
+<tr>
+<td style="text-align:left">take(n)</td>
+<td style="text-align:left">record (i&lt;=n) =&gt; result</td>
+<td style="text-align:left">Array[result]</td>
+</tr>
+<tr>
+<td style="text-align:left">first()</td>
+<td style="text-align:left">record 1 =&gt; result</td>
+<td style="text-align:left">Array[result]</td>
+</tr>
+<tr>
+<td style="text-align:left">takeSample()</td>
+<td style="text-align:left">selected records =&gt; result</td>
+<td style="text-align:left">Array[result]</td>
+</tr>
+<tr>
+<td style="text-align:left">takeOrdered(n, [ordering])</td>
+<td style="text-align:left">TopN(records) =&gt; result</td>
+<td style="text-align:left">TopN(results)</td>
+</tr>
+<tr>
+<td style="text-align:left">saveAsHadoopFile(path)</td>
+<td style="text-align:left">records =&gt; write(records)</td>
+<td style="text-align:left">null</td>
+</tr>
+<tr>
+<td style="text-align:left">countByKey()</td>
+<td style="text-align:left">(K, V) =&gt; Map(K, count(K))</td>
+<td style="text-align:left">(Map, Map) =&gt; Map(K, count(K))</td>
+</tr>
+</tbody>
+</table>
+
+<p>用户的 driver 程序中一旦出现 action()，就会生成一个 job，比如 foreach() 会调用sc.runJob(this, (iter: Iterator[T]) =&gt; iter.foreach(f))，向 DAGScheduler 提交 job。如果 driver 程序后面还有 action()，那么其他 action() 也会生成 job 提交。所以，driver 有多少个 action()，就会生成多少个 job。这就是 Spark 称 driver 程序为 application（可能包含多个 job）而不是 job 的原因。</p>
+
+<p>每一个 job 包含 n 个 stage，最后一个 stage 产生 result。。在提交 job 过程中，DAGScheduler 会首先划分 stage，然后先提交无 parent stage 的 stages，并在提交过程中确定该 stage 的 task 个数及类型，并提交具体的 task。无 parent stage 的 stage 提交完后，依赖该 stage 的 stage 才能够提交。从 stage 和 task 的执行角度来讲，一个 stage 的 parent stages 执行完后，该 stage 才能执行。</p>
+
+<p>Spark就先介绍到这里，没有涉及到spark的具体内部实现，包括job的调度，shuffle的过程、文件的管理、cache和broadcast机制等。</p>
 
 ]]></content>
   </entry>
