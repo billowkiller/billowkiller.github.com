@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: ml,em | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/ml-em/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2016-03-05T15:42:47+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Expectation Maximization]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/03/05/em/"/>
+    <updated>2016-03-05T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/03/05/em</id>
+    <content type="html"><![CDATA[<p>Expectation Maximization, EM算法在参数估计里面有极大的用处，它用于含有隐变量的概率模型参数的极大似然估计，或极大后验概率（MAP）估计。隐变量的概率模型参数的极大似然估计可以理解为，使用的方法还是的极大似然估计，但是要处理隐变量。极大后验概率是一种Beyesian Inference，其实就是把极大似然估计中的参数赋予权值，这个权值是预先定义好的先验概率。可以来看下下表中Frequentist-Bayesian对峙的部分，来感受下EM算法的应用范围：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-5/88568881.jpg" width="500px" /></p>
+
+<!--more-->
+
+<p>下面我们先从一个Two-Component Gaussian Mixture Model为例，介绍EM算法。</p>
+
+<h2 id="two-component-gaussian-mixture-model">Two-Component Gaussian Mixture Model</h2>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-5/45836233.jpg" width="600px" /></p>
+
+<p>上图是一个mixture example，左边是我们观察到数据的直方图，右边红线是最大似然拟合的高斯密度函数，绿色的点是用来做两个模型的分类用。</p>
+
+<p>这里其实我们得到的是一些数据点，对于这些点的分布完全一无所知。先做出如下假设，这是两个高斯模型混合后的sample data。</p>
+
+<script type="math/tex; mode=display"> Y_1 \sim N(\mu_1, \theta_1^2) </script>
+
+<script type="math/tex; mode=display"> Y_2 \sim N(\mu_2, \theta_2^2) </script>
+
+<script type="math/tex; mode=display"> Y = (1 - \Delta)\cdot Y_1 + \Delta \cdot Y_2,\  \Delta \in \{0,1\}, Pr(\Delta =1) = \pi</script>
+
+<p>那么需要我们估计的参数就为 $(\pi, \theta_1, \theta_2) = (\pi, \mu_1, \sigma_1, \mu_2, \sigma_2)$，一共五个参数。使用似然估计，我们可以得到如下过程：</p>
+
+<script type="math/tex; mode=display"> g_Y(y) = (1-\pi)\phi_{\theta_1}(y) + \pi \phi_{\theta_2}(y) </script>
+
+<script type="math/tex; mode=display">log\ likelihood \to l(\theta; Z) = \sum_{i=1}^N log[(1-\pi)\phi_{\theta_1}(y_i) + \pi \phi_{\theta_2}(y_i)] </script>
+
+<p>最大化 $l(\theta; Z)$ 无疑是困难的，因为对数中含有加号。如果我们知道隐变量 $\Delta$ 的取值，那么参数估计就会变得容易，$\phi$ 的估计也就是 $\Delta_i=1$ 的比例，另外 $\theta_1,\theta_2$ 也就变成 $\Delta_i=0，\Delta_i=1$ 的似然估计。</p>
+
+<p>所以问题的关键是 $\Delta$ 的取值，解决问题的思路是采用迭代的方式，每次都用 $\Delta_i$ 的估计值替换：</p>
+
+<script type="math/tex; mode=display">\gamma_i(\theta) = E(\Delta_i \vert \theta,Z) = Pr(\Delta_i=1 \vert \theta,Z)</script>
+
+<p>如此 $\theta_1,\theta_2$ 自然也就可以由最大似然估计求出。在下一次过程中，$\gamma_i(\theta)$ 又可以由上一步估计的 $\theta_1,\theta_2$ 求出。所以我们首先需要给出参数的初始值，就可以由上述过程得到结果。算法入下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-5/24344888.jpg" width="550px" /></p>
+
+<p>这里需要注意的是，如果我们在某个点取 $\hat{\mu}_1 = y_i, \hat{\sigma}_1=0$ 那么我们可以去到最大的似然值，无限大，但这并不是有用的解。所以我们其实是求解 <u>a good local maximum of the likelihood</u>，因此我们可以设多个初值，最后选择似然值最大的解。</p>
+
+<h2 id="em-in-general">EM in General</h2>
+
+<p>EM算法被用于data augmentation，关于data augmentation的解释如下：</p>
+
+<blockquote>
+  <p>maximization of the likelihodd is difficult, but made easier by enlarging the sample with latent data</p>
+</blockquote>
+
+<p>上面的例子中我们设的latent data为 $\Delta$，是出于我们对模型的假设；其他的latent data还可以为丢失的观察值。接下来我们介绍EM的通用形式，先给出算法：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-5/67870944.jpg" width="550px" /></p>
+
+<p>上面的算法中，$Z$ 为观察值，log likelihood是 $l(\theta, Z)$。latent or missing data 为 $Z^m$， 完整的数据为 $T=(Z, Z^m$)，对比于上面的例子 $(Z, Z^m) = (y, \Delta)$。</p>
+
+<ul>
+  <li>E step就是完全数据 $T$ 的对数似然函数 $l_0(\theta’; T)$ 关于在给定观察数据 $Z$ 和当前参数 $\theta^{(j)}$ 下对未观察数据 $Z^m$ 的条件概率分布 $Pr(Z^m \vert Z, \theta^{(j)})$ 的期望，得到的是 $Z^m$ 的估计。</li>
+  <li>M step就是通过似然估计方法，求未观察数据 $Z^m$ 的条件概率分布的期望的最大值，得到参数 $\theta$ 的重新估计 $\theta’$，在下一个E中变为 $\theta^{(j+1)}$。</li>
+</ul>
+
+<p>上面叙述了EM的算法，那么为什么EM算法能有效，也就是近似实现对观测数据的极大似然估计呢？我们看到</p>
+
+<script type="math/tex; mode=display"> Pr(Z^m \vert Z, \theta') = \frac{Pr(Z^m,Z  \vert \theta')}{Pr(Z \vert  \theta')} </script>
+
+<script type="math/tex; mode=display"> \to Pr(Z \vert  \theta') = \frac{Pr(T  \vert  \theta')}{ Pr(Z^m \vert Z, \theta')} </script>
+
+<script type="math/tex; mode=display"> \to l(\theta'; Z) = l_0(\theta'; T) - l_1(\theta'; Z^m \vert Z) </script>
+
+<p>对由 $\theta$ 控制的分布 $T \vert Z$ 数据求期望可以得到：</p>
+
+<script type="math/tex; mode=display"> l(\theta'; Z) = E[l_0(\theta'; T) \vert Z,\theta] - E[l_1(\theta'; Z^m \vert Z) \vert Z,\theta] = Q(\theta', \theta) - R(\theta', \theta) </script>
+
+<p>在 $M\ step$ 中，EM算法求出可以使 $Q(\theta’, \theta)$ 最大化的 $\theta’$，而不是真正的目标函数 $l(\theta’; Z)$。为什么最大化 $Q(\theta’, \theta)$ 最终可以最大化 $l(\theta’; Z)$呢？</p>
+
+<p>可以看到 $R(\theta^*, \theta)$ 是由 $\theta^*$ 决定的条件分布的log-likelihood的期望，这个分布和由 $\theta$ 决定的条件分布是相同的。因此由 Jensen’s inequality 可以得到，$R(\theta’, \theta) \le R(\theta, \theta)$。具体的推导可以参考《统计学习方法》。所以如果 $\theta’$ 最大化 $Q(\theta’, \theta)$ 则</p>
+
+<script type="math/tex; mode=display"> l(\theta'; Z) - l(\theta; Z) = [Q(\theta', \theta) - Q(\theta, \theta)] - [R(\theta', \theta) - R(\theta, \theta)] \ge 0 </script>
+
+<p>所以说EM迭代中，$l(\theta’; Z)$ 一直都会在增大。</p>
+
+<blockquote>
+  <p>Jensen’s inequality, $E[\phi(X)] \ge \phi[E(X)]$, for Random variable $X$ and convex function $\phi(x)$</p>
+</blockquote>
+
+<p>也就是说在 $M step$ 中完全的最大化是没有必要的，我们只需要找到一个 $\theta^{(j+1)}$ 使得 $Q(\theta^{(j+1)}, \theta^{(j)}) - Q(\theta^{(j)}, \theta^{(j)})$。所以我们得到的EM收敛条件也就是 </p>
+
+<script type="math/tex; mode=display">% &lt;![CDATA[
+ \theta^{(j+1)} - \theta^{(j)} < \epsilon\ or\ Q(\theta^{(j+1)}, \theta^{(j)}) - Q(\theta^{(j)}, \theta^{(j)}) < \epsilon  %]]&gt;</script>
+
+<h2 id="em-as-max-max-procedure">EM as max-max Procedure</h2>
+
+<p>EM算法还可以看成是F 函数的极大极大算法， F函数定义如下</p>
+
+<script type="math/tex; mode=display"> F(\theta',  \tilde{P}) = E_{\tilde{P}}[l_0(\theta'; T)] - E_{\tilde{P}}[log \tilde{P}(Z^m)] </script>
+
+<p>$\tilde{P}(Z^m)$也就是隐变量 $Z^m$ 的分布, $- E_{\tilde{P}}[log \tilde{P}(Z^m)]$ 也就是 $\tilde{P}(Z^m)$ 的熵。于是EM算法可以由下图表示：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-5/44573110.jpg" width="500px" /></p>
+
+<p>也就是，设 $\theta^{(i)}$ 为第 $i$ 次迭代参数 $\theta$ 的估计，$\tilde{P}^{(i)}$ 为第 $i$ 次迭代参数 $\tilde{P}$ 的估计。在第 $i+1$ 次迭代的两步为：</p>
+
+<ul>
+  <li>对固定的 $\theta^{(i)}$，求 $\tilde{P}^{(i+1)}$ 使得 $F(\theta^{(i)},  \tilde{P})$ 极大化</li>
+  <li>对固定的 $\tilde{P}^{(i+1)}$，求 $\theta^{(i+1)}$ 使得 $F(\theta,  \tilde{P}^{(i+1)})$ 极大化</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

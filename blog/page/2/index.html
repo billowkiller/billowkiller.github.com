@@ -173,6 +173,51 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-11-22T17:27:00+08:00" pubdate data-updated="true">Nov 22<span>nd</span>, 2015</time>
+        
+           | <a href="/blog/2015/11/22/hadoop-secondary-sorting/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2015/11/22/hadoop-secondary-sorting/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2015/11/22/hadoop-secondary-sorting/">Hadoop Secondary Sorting</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>Hadoop MapReduce的神奇之处发生在mapper和reducer之间，将所有相同key的map输出记录聚集在一块，使得用户可以方便的处理聚合在一起的数据。Hadoop内部使用了partition、sort和merge（shuffle的一部分），在每个reducer中流式地得到排序后的key和value集合。在MapReduce Sorting中有个特别的部分是secondary sort，也就是对value进行排序。</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2015/11/22/hadoop-secondary-sorting/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-10-27T21:04:00+08:00" pubdate data-updated="true">Oct 27<span>th</span>, 2015</time>
         
            | <a href="/blog/2015/10/27/spark-streaming/#disqus_thread"
@@ -596,76 +641,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-22T02:18:00+08:00" pubdate data-updated="true">Aug 22<span>nd</span>, 2014</time>
-        
-           | <a href="/blog/2014/08/22/design-pattern/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/08/22/design-pattern/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/22/design-pattern/">Design Pattern Abstraction</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>本文是对设计模式的一个备忘录，仅是做了些摘要，具体的设计模式学习还得看GOF。</p>
-
-<p>这儿也有一个还不错的博客<a href="http://blog.csdn.net/zhengzhb/article/category/926691">http://blog.csdn.net/zhengzhb/article/category/926691</a>。</p>
-
-<hr />
-
-<p>面向对象设计（OOD）核心原则是<strong>高内聚低耦合</strong>。</p>
-
-<ul>
-  <li><em>高内聚</em>是指某个特定模块（程序，类型）都应完成一系列相关功能，描述了不同程序，类型中方法，方法中不同操作描述的逻辑之间的距离相近。高内聚意味可维护性，可重新性，因为模块对外部的依赖少（功能的完备性）。</li>
-  <li><em>耦合</em>是描述模块之间的依赖程度。低耦合是我们的设计目的，但不是不存在耦合不存依赖，依赖是必须的，因为模块之间必须通信交互，不过应该设计依赖于不变或者不易变的接口，无需了解模块的具体实现（OO封装性）。</li>
-</ul>
-
-<p>使用<strong>设计模式</strong>是为了提高代码的工程化，提供更加高内聚、低耦合的代码。同时可重用代码、让代码更容易被他人理解、保证代码可靠性。套用一句话就是：</p>
-
-<blockquote>
-  <p>每个模式描述了一个在我们周围不断重复发生的问题，已经该问题的解决方案的核心。这样我们就能一次又一次地使用该方案而不必做重复劳动。</p>
-</blockquote>
-
-<p>设计模式分为三种类型，共23种。</p>
-
-<ul>
-  <li><strong>创建型模式：</strong>单例模式、抽象工厂模式、建造者模式、工厂模式、原型模式。</li>
-  <li><strong>结构型模式：</strong>适配器模式、桥接模式、装饰模式、组合模式、外观模式、享元模式、代理模式。</li>
-  <li><strong>行为型模式：</strong>模版方法模式、命令模式、迭代器模式、观察者模式、中介者模式、备忘录模式、解释器模式、状态模式、策略模式、职责链模式、访问者模式。</li>
-</ul>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/08/22/design-pattern/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -689,6 +664,8 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/03/05/em/">Expectation Maximization</a>
+    
     <a class="list-group-item " href="/blog/2016/02/29/klr-svr/">Kernel Logistic Regression Versus SVM</a>
     
     <a class="list-group-item " href="/blog/2016/02/27/svm/">Support Vector Machine</a>
@@ -696,8 +673,6 @@ body {
     <a class="list-group-item " href="/blog/2016/02/26/pca-svd/">PCA and SVD</a>
     
     <a class="list-group-item " href="/blog/2016/02/18/ensemble/">Ensemble Methods</a>
-    
-    <a class="list-group-item " href="/blog/2016/02/17/lr-and-lda/">Logistic Regression and Linear Discriminant Analysis</a>
     
   </div>
 </section>
@@ -757,7 +732,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
-        <span class="badge">8</span>
+        <span class="badge">9</span>
         Machine Learning
       </a>
     

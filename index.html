@@ -173,6 +173,53 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-03-05T14:00:00+08:00" pubdate data-updated="true">Mar 5<span>th</span>, 2016</time>
+        
+           | <a href="/blog/2016/03/05/em/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2016/03/05/em/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2016/03/05/em/">Expectation Maximization</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>Expectation Maximization, EM算法在参数估计里面有极大的用处，它用于含有隐变量的概率模型参数的极大似然估计，或极大后验概率（MAP）估计。隐变量的概率模型参数的极大似然估计可以理解为，使用的方法还是的极大似然估计，但是要处理隐变量。极大后验概率是一种Beyesian Inference，其实就是把极大似然估计中的参数赋予权值，这个权值是预先定义好的先验概率。可以来看下下表中Frequentist-Bayesian对峙的部分，来感受下EM算法的应用范围：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-5/88568881.jpg" width="500px" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2016/03/05/em/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-02-29T14:00:00+08:00" pubdate data-updated="true">Feb 29<span>th</span>, 2016</time>
         
            | <a href="/blog/2016/02/29/klr-svr/#disqus_thread"
@@ -598,51 +645,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-11-22T17:27:00+08:00" pubdate data-updated="true">Nov 22<span>nd</span>, 2015</time>
-        
-           | <a href="/blog/2015/11/22/hadoop-secondary-sorting/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2015/11/22/hadoop-secondary-sorting/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2015/11/22/hadoop-secondary-sorting/">Hadoop Secondary Sorting</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>Hadoop MapReduce的神奇之处发生在mapper和reducer之间，将所有相同key的map输出记录聚集在一块，使得用户可以方便的处理聚合在一起的数据。Hadoop内部使用了partition、sort和merge（shuffle的一部分），在每个reducer中流式地得到排序后的key和value集合。在MapReduce Sorting中有个特别的部分是secondary sort，也就是对value进行排序。</p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2015/11/22/hadoop-secondary-sorting/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -666,6 +668,8 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/03/05/em/">Expectation Maximization</a>
+    
     <a class="list-group-item " href="/blog/2016/02/29/klr-svr/">Kernel Logistic Regression Versus SVM</a>
     
     <a class="list-group-item " href="/blog/2016/02/27/svm/">Support Vector Machine</a>
@@ -673,8 +677,6 @@ body {
     <a class="list-group-item " href="/blog/2016/02/26/pca-svd/">PCA and SVD</a>
     
     <a class="list-group-item " href="/blog/2016/02/18/ensemble/">Ensemble Methods</a>
-    
-    <a class="list-group-item " href="/blog/2016/02/17/lr-and-lda/">Logistic Regression and Linear Discriminant Analysis</a>
     
   </div>
 </section>
@@ -734,7 +736,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
-        <span class="badge">8</span>
+        <span class="badge">9</span>
         Machine Learning
       </a>
     
