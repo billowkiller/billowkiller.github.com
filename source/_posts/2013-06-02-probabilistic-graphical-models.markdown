@@ -3,8 +3,8 @@ layout: post
 title: "Probabilistic Graphical Models"
 date: 2013-06-02 13:49
 comments: true
-categories: [rework]
-tags: [PGM,Machine Learning]
+category: Machine Learning
+tags: [PGM, ml]
 ---
 
 ### 1. PGM介绍
@@ -217,3 +217,4 @@ CRF可以被称为Task-Specify Prediction。因为不像MN，它的判别对象�
 ### 4. Inference && Learning
 
 Inference和Learning我学习的也是一知半解的，很多东西都是知其然不知其所以然，就不误人子弟了，具体的可以参考[pluskid](http://freemind.pluskid.org/machine-learning/probabilistic-graphical-model/)的博文，讲的非常的详细。
+

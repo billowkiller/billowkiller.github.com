@@ -3,7 +3,7 @@ layout: post
 title: "Hadoop Secondary Sorting"
 date: 2015-11-22 17:27
 comments: true
-categories: rework
+category: Big Data
 tags: [hadoop, sort]
 ---
 

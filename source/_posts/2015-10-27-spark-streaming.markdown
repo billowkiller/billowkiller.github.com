@@ -3,7 +3,7 @@ layout: post
 title: "Spark Streaming"
 date: 2015-10-27 21:04
 comments: true
-categories: rework
+category: Big Data
 tags: spark
 ---
 

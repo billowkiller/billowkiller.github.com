@@ -112,7 +112,7 @@ $$ w_*z = \sum_{n=1}^N \beta_n z_n^Tz = \sum_{n=1}^N \beta_n K(x_n, x)$$
 
 证明Representer Theorem如下：
 
-<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/22880811.jpg" width="450px"/>
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/22880811.jpg" width="500px"/>
 
 这其实就表明所有的 L2-regularized linear model 都可以被 kernalized。把损失函数替换成 logistic loss，我们就得到 Kernel Logistic Regression 的优化函数。
 

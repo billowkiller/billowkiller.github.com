@@ -3,7 +3,7 @@ layout: post
 title: "Spark Introduction"
 date: 2015-10-27 21:00
 comments: true
-categories: rework
+category: Big Data
 tags: spark
 ---
 
@@ -145,3 +145,5 @@ RDD的编程模型需要通过适当的接口来表示RDD是如何经过一系�
 每一个 job 包含 n 个 stage，最后一个 stage 产生 result。。在提交 job 过程中，DAGScheduler 会首先划分 stage，然后先提交无 parent stage 的 stages，并在提交过程中确定该 stage 的 task 个数及类型，并提交具体的 task。无 parent stage 的 stage 提交完后，依赖该 stage 的 stage 才能够提交。从 stage 和 task 的执行角度来讲，一个 stage 的 parent stages 执行完后，该 stage 才能执行。
 
 Spark就先介绍到这里，没有涉及到spark的具体内部实现，包括job的调度，shuffle的过程、文件的管理、cache和broadcast机制等。
+
+
