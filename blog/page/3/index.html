@@ -173,6 +173,57 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-23T02:18:00+08:00" pubdate data-updated="true">Aug 23<span>rd</span>, 2014</time>
+        
+           | <a href="/blog/2014/08/23/classical-sync-problem/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/08/23/classical-sync-problem/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/23/classical-sync-problem/">Classical Sync Problem</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>简单的记录下，后期再整理吧。</p>
+
+<hr />
+
+<h2 id="section">生产者、消费者</h2>
+
+<h3 id="section-1">多个生产者，单个消费者</h3>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/08/23/classical-sync-problem/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-22T02:18:00+08:00" pubdate data-updated="true">Aug 22<span>nd</span>, 2014</time>
         
            | <a href="/blog/2014/08/22/design-pattern/#disqus_thread"
@@ -670,87 +721,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-17T09:18:00+08:00" pubdate data-updated="true">Jul 17<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/07/17/thundering-herd/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/07/17/thundering-herd/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/17/thundering-herd/">Linux Thundering Herd</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p><em>modified from <a href="http://blog.csdn.net/russell_tao/article/details/7204260">http://blog.csdn.net/russell_tao/article/details/7204260</a></em></p>
-
-<hr />
-
-<h2 id="section">惊群现象</h2>
-
-<p>什么是“惊群”？简单说来，多线程/多进程（linux下线程进程也没多大区别）等待同一个socket事件，当这个事件发生时，这些线程/进程被同时唤醒，就是惊群。可以想见，效率很低下，许多进程被内核重新调度唤醒，同时去响应这一个事件，当然只有一个进程能处理事件成功，其他的进程在处理该事件失败后重新休眠（也有其他选择）。这种性能浪费现象就是惊群。</p>
-
-<p>惊群通常发生在server 上，当父进程绑定一个端口监听socket，然后fork出多个子进程，子进程们开始循环处理（比如accept）这个socket。每当用户发起一个TCP连接时，多个子进程同时被唤醒，然后其中一个子进程accept新连接成功，余者皆失败，重新休眠。</p>
-
-<p>那么，我们不能只用一个进程去accept新连接么？然后通过消息队列等同步方式使其他子进程处理这些新建的连接，这样惊群不就避免了？没错，惊群是避免了，但是效率低下，因为这个进程只能用来accept连接。对多核机器来说，仅有一个进程去accept，这也是程序员在自己创造accept瓶颈。所以，我仍然坚持需要多进程处理accept事件。</p>
-
-<h2 id="linux">linux解决的惊群</h2>
-
-<p>其实，在linux2.6内核上，<strong>accept系统调用已经不存在惊群了</strong>（至少我在2.6.18内核版本上已经不存在）。大家可以写个简单的程序试下，在父进程中bind,listen，然后fork出子进程，所有的子进程都accept这个监听句柄。这样，当新连接过来时，大家会发现，仅有一个子进程返回新建的连接，其他子进程继续休眠在accept调用上，没有被唤醒。</p>
-
-<p>对于一些已知的惊群问题，内核开发者增加了一个“<strong>互斥等待</strong>”选项。一个互斥等待的行为与睡眠基本类似，主要的不同点在于：</p>
-
-<ul>
-  <li>当一个等待队列入口有 WQ_FLAG_EXCLUSEVE 标志置位, 它被添加到等待队列的尾部. 没有这个标志的入口项, 相反, 添加到开始.</li>
-  <li>当 wake_up 被在一个等待队列上调用时, 它在唤醒第一个有 WQ_FLAG_EXCLUSIVE 标志的进程后停止。也就是说，对于互斥等待的行为，比如如对一个listen后的socket描述符，多线程阻塞accept时，系统内核只会唤醒所有正在等待此时间的队列的第一个，队列中的其他人则继续等待下一次事件的发生，这样就避免的多个线程同时监听同一个socket描述符时的惊群问题。</li>
-</ul>
-
-<h2 id="nginx">nginx解决惊群</h2>
-
-<p>但是很不幸，通常我们的程序没那么简单，不会愿意阻塞在accept调用上，我们还有许多其他网络读写事件要处理，linux下我们爱用epoll解决非阻塞socket。所以，即使accept调用没有惊群了，我们也还得处理惊群这事，因为epoll有这问题。上面说的测试程序，如果我们在子进程内不是阻塞调用accept，而是用<code>epoll_wait</code>，就会发现，新连接过来时，多个子进程都会在<code>epoll_wait</code>后被唤醒！</p>
-
-<p>nginx就是这样，master进程监听端口号（例如80），所有的nginx worker进程开始用<code>epoll_wait</code>来处理新事件（linux下），如果不加任何保护，一个新连接来临时，会有多个worker进程在<code>epoll_wait</code>后被唤醒，然后发现自己accept失败。</p>
-
-<p>nginx在同一时刻只允许一个nginx worker在自己的epoll中处理监听句柄。它的负载均衡也很简单，当达到最大connection的7/8时，本worker不会去试图拿accept锁，也不会去处理新连接，这样其他nginx worker进程就更有机会去处理监听句柄，建立新连接了。而且，由于timeout的设定，使得没有拿到锁的worker进程，去拿锁的频繁更高。</p>
-
-<h2 id="nginx-1">nginx的锁</h2>
-
-<p>在用户空间进程间锁实现的原理很简单，就是能弄一个让所有进程共享的东西，比如mmap的内存，比如文件，然后通过这个东西来控制进程的互斥。</p>
-
-<p>nginx的实现分为两种情况：</p>
-
-<ul>
-  <li>一种是支持原子操作的情况，也就是由mmap的内存区域来进行控制的</li>
-  <li>一种是不支持原子操作，这是是使用文件锁来实现。 </li>
-</ul>
-
-</div>
-  
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -774,6 +744,8 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/03/06/apriori/">Apriori Algorithm</a>
+    
     <a class="list-group-item " href="/blog/2016/03/05/em/">Expectation Maximization</a>
     
     <a class="list-group-item " href="/blog/2016/02/29/klr-svr/">Kernel Logistic Regression Versus SVM</a>
@@ -781,8 +753,6 @@ body {
     <a class="list-group-item " href="/blog/2016/02/27/svm/">Support Vector Machine</a>
     
     <a class="list-group-item " href="/blog/2016/02/26/pca-svd/">PCA and SVD</a>
-    
-    <a class="list-group-item " href="/blog/2016/02/18/ensemble/">Ensemble Methods</a>
     
   </div>
 </section>
@@ -842,7 +812,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
-        <span class="badge">9</span>
+        <span class="badge">10</span>
         Machine Learning
       </a>
     

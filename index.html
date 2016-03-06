@@ -173,6 +173,57 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-03-06T14:00:00+08:00" pubdate data-updated="true">Mar 6<span>th</span>, 2016</time>
+        
+           | <a href="/blog/2016/03/06/apriori/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2016/03/06/apriori/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2016/03/06/apriori/">Apriori Algorithm</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>如果说监督学习的形式化表达是 $Pr(Y \vert X)$, 找到最佳的参数最小化每个 $x$ 的epxected error： $argmin_{\theta}\ E_{Y \vert X} L(Y, \theta)$。那么非监督学习的形式化表达就是 $Pr(X)$，目标是在没有 $Y$ 引导的情况下，推测出 $Pr(X)$ 的潜在属性。本文要提到的apriori算法也是一种非监督学习算法，wiki的定义为</p>
+
+<blockquote>
+  <p>The Apriori Algorithm is an influential algorithm for mining frequent itemsets for boolean association rules.</p>
+</blockquote>
+
+<p>著名的啤酒和尿布例子就是指这个算法。它是属于关联分析中的一种，也就是从大规模数据集中寻找物品间的隐含关系。</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2016/03/06/apriori/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-03-05T14:00:00+08:00" pubdate data-updated="true">Mar 5<span>th</span>, 2016</time>
         
            | <a href="/blog/2016/03/05/em/#disqus_thread"
@@ -596,55 +647,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-12-01T09:50:00+08:00" pubdate data-updated="true">Dec 1<span>st</span>, 2015</time>
-        
-           | <a href="/blog/2015/12/01/hadoop-tunning/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2015/12/01/hadoop-tunning/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2015/12/01/hadoop-tunning/">Hadoop Tunning</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>Hadoop的调优涉及到整个MapReduce的各个过程，并且要对每个参数的意义和Counter信息有一定的了解。也就是说，根据Counter的信息推测哪些MapReduce阶段可能存在性能瓶颈，并且根据这个瓶颈理解对应的Hadoop 框架中的处理逻辑，进而可以调整相关参数的大小或程序的行为。</p>
-
-<p>从大面上来看，MapReduce的瓶颈可能存在以下图中的各个部分。</p>
-
-<p><img src="http://ww2.sinaimg.cn/large/74311666jw1eyjx8zpfz2j20rq0cegna.jpg" width="500px" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2015/12/01/hadoop-tunning/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -668,6 +670,8 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/03/06/apriori/">Apriori Algorithm</a>
+    
     <a class="list-group-item " href="/blog/2016/03/05/em/">Expectation Maximization</a>
     
     <a class="list-group-item " href="/blog/2016/02/29/klr-svr/">Kernel Logistic Regression Versus SVM</a>
@@ -675,8 +679,6 @@ body {
     <a class="list-group-item " href="/blog/2016/02/27/svm/">Support Vector Machine</a>
     
     <a class="list-group-item " href="/blog/2016/02/26/pca-svd/">PCA and SVD</a>
-    
-    <a class="list-group-item " href="/blog/2016/02/18/ensemble/">Ensemble Methods</a>
     
   </div>
 </section>
@@ -736,7 +738,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
-        <span class="badge">9</span>
+        <span class="badge">10</span>
         Machine Learning
       </a>
     
