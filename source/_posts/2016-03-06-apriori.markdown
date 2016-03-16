@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Apriori Algorithm"
+title: "Apriori and FP-Growth"
 date: 2016-03-06 14:00
 comments: true
 category: "Machine Learning"
@@ -72,7 +72,59 @@ tags: ml,apriori
 
 <img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-6/23943688.jpg" width="500px"/>
 
+## FP-Growth
 
+Apriori通过不断的构造候选集、筛选候选集挖掘出频繁项集，需要多次扫描原始数据，当原始数据较大时，磁盘I/O次数太多，效率比较低下。FP-Growth算法则只需扫描原始数据两遍，通过FP-tree数据结构对原始数据进行压缩，效率较高。
+
+搜索引擎中的提示词项就可以用FP-Growth得到，通过输入项找到它的频繁项集。
+
+FP-Growth算法主要分为两个步骤：FP-tree构建、递归挖掘FP-tree。FP-tree构建通过两次数据扫描，将原始数据中的事务压缩到一个FP-tree树，该FP-tree类似于前缀树，相同前缀的路径可以共用，从而达到压缩数据，减少数据库扫描的目的。接着通过FP-tree找出每个item的条件模式基、条件FP-tree，递归的挖掘条件FP-tree得到所有的频繁项集。递归挖掘FP-tree利用分治的思想将任务分解为更小的任务，并且可以避免频繁项集Candidate的生成。
+
+还是以上面的数据库为示例，我们看下产生频繁项集的过程。剩下的挖掘关联规则则和Apriori一样。
+
+* 第一次扫描和Apriori一样，得到1-itemsets和它们的support counts。频繁集是按照support的带下倒序排列。结果为 $L = \lbrace I2:7,I1:6,I3:6,I4:2,I5:2 \rbrace$。
+
+* 第二次扫描的时候构建FP-tree。
+
+	* 对每个transaction，过滤不频繁集合，剩下的频繁项集按 $L$ 顺序排序
+	* 把每个transaction的1-itemsets插入到FP-tree中，相同前缀的路径可以共用
+	* 同时增加一个header table，把FP-tree中相同item连接起来，也是降序排序
+
+结果如图所示：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-7/45883923.jpg" width="500px"/>
+
+接下来进行频繁项的挖掘。
+
+步骤为：
+
+1. 从header table的最下面的item开始，构造每个item的条件模式基（conditional pattern base）
+	* 顺着header table中item的链表，找出所有包含该item的前缀路径，这些前缀路径就是该item的条件模式基（CPB）
+	* 所有这些CPB的频繁度（计数）为该路径上item的频繁度（计数）
+2. 构造条件FP-tree（conditional FP-tree）
+	* 累加每个CPB上的item的频繁度（计数），过滤低于阈值的item，构建FP-tree
+3. FP-Growh：递归的挖掘每个条件FP-tree，累加后缀频繁项集，直到找到FP-tree为空或者FP-tree只有一条路径（只有一条路径情况下，所有路径上item的组合都是频繁项集）
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-7/57749816.jpg" width="500px"/>
+
+接着上面的例子：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-7/37306135.jpg" width="500px"/>
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-7/29869117.jpg" width="500px"/>
+
+FP-Growth算法计算频繁项集的效率要高于Apriori，原因有以下几点：
+
+* 无需Candidate的生成和检查
+* 使用压缩的数据结构
+* 减少重复的数据库扫描，事实上只需要两次
+* 基本的操作就是计数和构建FP-Tree
+
+
+## Reference
+
+[http://120.52.72.49/software.ucv.ro/c3pr90ntcsf0/~cmihaescu/ro/teaching/AIR/docs/Lab8-Apriori.pdf](http://120.52.72.49/software.ucv.ro/c3pr90ntcsf0/~cmihaescu/ro/teaching/AIR/docs/Lab8-Apriori.pdf)
+[http://120.52.72.51/www3.cs.stonybrook.edu/c3pr90ntcsf0/~cse634/lecture_notes/07apriori.pdf](http://120.52.72.51/www3.cs.stonybrook.edu/c3pr90ntcsf0/~cse634/lecture_notes/07apriori.pdf)
 
 
 
