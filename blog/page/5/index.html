@@ -58,8 +58,8 @@
 
 <style type="text/css">
 body {
-  font-family: Helvetica, arial, sans-serif;
-  font-size: 14px;
+  font-family: Lucida Grande,Helvetica, arial, sans-serif;
+  font-size: 15px;
   line-height: 1.6;
   padding-top: 10px;
   padding-bottom: 10px;
@@ -92,6 +92,7 @@ body {
       margin-bottom: 0; }
     }
 </style>
+
 
   <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
   
@@ -153,6 +154,59 @@ body {
   <div class="page-content col-md-9">
     <div class="blog-index">
       
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-22T02:18:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2014</time>
+        
+           | <a href="/blog/2014/04/22/byte-alignment/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/04/22/byte-alignment/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/22/byte-alignment/">C/C++ Byte Alignment</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p><strong>字节对齐的细节和编译器实现相关，但一般而言，满足三个准则</strong>：</p>
+
+<ol>
+  <li>结构体变量的首地址能够被其<strong>最宽基本类型</strong>成员的大小所整除；</li>
+  <li>结构体每个成员相对于结构体首地址的偏移量（offset）都是<strong>成员大小的整数倍</strong>，如有需要编译器会在成员之间加上填充字节（internal adding）；</li>
+  <li>结构体的总大小为结构体最宽基本类型成员大小的整数倍，如有需要编译器会在最末一个成员之后加上填充字节（trailing padding）。</li>
+</ol>
+
+<p>需要仔细体会上面的三个准则。</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/04/22/byte-alignment/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
       
       
         <article class="post">
@@ -630,57 +684,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-10-13T00:28:00+08:00" pubdate data-updated="true">Oct 13<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/10/13/nginx-architecture-1-overview/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/10/13/nginx-architecture-1-overview/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/10/13/nginx-architecture-1-overview/">Nginx architecture(1)&#8211;Overview</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>从04年发布以来，Nginx已经成为多个国内外互联网具体首选的高性能Web服务器。其特点是占有内存少，并发能力强，并且由于Nginx使用基于事件驱动的架构能够最有效的利用多核CPU的处理能力，进程可以无阻塞的运行。</p>
-
-<p>特别是Nginx可以利用当前操作系统特有的一些高校API来提高自己的性能，例如Linux上的<code>epoll</code>、Solaris上的event ports和Free BSD上的kqueue。又如对于Linux，Nginx支持其独有的sendfile系统调用，可以高效的讲硬盘中的数据发送到网络上（无需将硬盘数据先复制到用户态内存中）。</p>
-
-<p>所以通过分析Nginx的架构设计，可以怎样充分利用服务器上的硬件资源，以及学习到更为先进的理念。下面就来分析和学习Nginx的架构设计。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx_zps7d735b88.jpg" alt="Nginx logo" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/10/13/nginx-architecture-1-overview/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -704,6 +707,8 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/03/16/rs-note/">Practice in Recommend System</a>
+    
     <a class="list-group-item " href="/blog/2016/03/06/apriori/">Apriori and FP-Growth</a>
     
     <a class="list-group-item " href="/blog/2016/03/05/em/">Expectation Maximization</a>
@@ -711,8 +716,6 @@ body {
     <a class="list-group-item " href="/blog/2016/02/29/klr-svr/">Kernel Logistic Regression Versus SVM</a>
     
     <a class="list-group-item " href="/blog/2016/02/27/svm/">Support Vector Machine</a>
-    
-    <a class="list-group-item " href="/blog/2016/02/26/pca-svd/">PCA and SVD</a>
     
   </div>
 </section>
@@ -772,7 +775,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
-        <span class="badge">10</span>
+        <span class="badge">11</span>
         Machine Learning
       </a>
     

@@ -58,8 +58,8 @@
 
 <style type="text/css">
 body {
-  font-family: Helvetica, arial, sans-serif;
-  font-size: 14px;
+  font-family: Lucida Grande,Helvetica, arial, sans-serif;
+  font-size: 15px;
   line-height: 1.6;
   padding-top: 10px;
   padding-bottom: 10px;
@@ -92,6 +92,7 @@ body {
       margin-bottom: 0; }
     }
 </style>
+
 
   <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
   
@@ -153,6 +154,66 @@ body {
   <div class="page-content col-md-9">
     <div class="blog-index">
       
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/05/14/shao-nian-pai/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/shao-nian-pai/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/shao-nian-pai/">少年派</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><h3 id="section">徐子东：他人就是老虎</h3>
+
+<p>老虎三个阶段：</p>
+
+<ol>
+  <li>力量比你大，你得自卫;反过来，你的力量比较强大，你就是老虎</li>
+  <li>自卫后，利用特别的情况，给他好处，给他恩惠，指挥他，利用它</li>
+  <li>产生幻觉，你们是同舟共济，共同面对困难</li>
+</ol>
+
+<p>点睛：</p>
+
+<ul>
+  <li>瘦骨凛丁的老虎头也不回的进入森林</li>
+  <li>pi父亲一开始所说的：你在动物眼里看到的所有的同情，友爱，善良都是你的倒影</li>
+</ul>
+
+<p></div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/shao-nian-pai/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
       
       
         <article class="post">
@@ -862,81 +923,6 @@ sudo update-grub2
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/ji-ge-linuxming-ling/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/ji-ge-linuxming-ling/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/ji-ge-linuxming-ling/">几个linux命令</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>转换文件到pdf </p>
-
-<pre><code>unoconv -f pdf mydocument.odt
-</code></pre>
-
-<p>zip乱码解压 </p>
-
-<pre><code>unzip -O CP936 xx.zip
-</code></pre>
-
-<p>mp3 乱码 </p>
-
-<pre><code>mid3iconv -e gbk \*.mp3 //当前目录下的mp3文件
-</code></pre>
-
-<p>视频转码 </p>
-
-<pre><code>mencoder \*.rmvb -o output.avi -oac mp3lame -lameopts cbr:br=32 -ovc x264 -x264encopts bitrate=440 -vf scale=320:-3
-</code></pre>
-
-<p>linux 声音调节  alsamixer</p>
-
-<p>gedit 乱码：</p>
-
-<pre><code>gsettings set org.gnome.gedit.preferences.encodings auto-detected "['UTF-8','CURRENT','GB18030','ISO-8859-15','UTF-16']"
-</code></pre>
-
-<p>SSH 远程登录：</p>
-
-<pre><code>ssh -l root 192.168.0.150
-</code></pre>
-
-<p>vim 中文乱码：</p>
-
-<p>let &amp;termencoding=&amp;encoding\
-set fileencodings=utf-8,gbk</p>
-</div>
-  
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -960,6 +946,8 @@ set fileencodings=utf-8,gbk</p>
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/03/16/rs-note/">Practice in Recommend System</a>
+    
     <a class="list-group-item " href="/blog/2016/03/06/apriori/">Apriori and FP-Growth</a>
     
     <a class="list-group-item " href="/blog/2016/03/05/em/">Expectation Maximization</a>
@@ -967,8 +955,6 @@ set fileencodings=utf-8,gbk</p>
     <a class="list-group-item " href="/blog/2016/02/29/klr-svr/">Kernel Logistic Regression Versus SVM</a>
     
     <a class="list-group-item " href="/blog/2016/02/27/svm/">Support Vector Machine</a>
-    
-    <a class="list-group-item " href="/blog/2016/02/26/pca-svd/">PCA and SVD</a>
     
   </div>
 </section>
@@ -1028,7 +1014,7 @@ set fileencodings=utf-8,gbk</p>
     
     
     <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
-        <span class="badge">10</span>
+        <span class="badge">11</span>
         Machine Learning
       </a>
     
