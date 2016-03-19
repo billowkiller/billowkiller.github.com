@@ -4,7 +4,7 @@ title: "Ensemble Methods"
 date: 2016-02-18 14:00
 comments: true
 category: "Machine Learning"
-tags: ensemble,ml
+tags: [ensemble, ml]
 ---
 
 Ensemble`|ɒnˈsɒmbl|` Methods 称为集成方法，它还有其他类似的名字，meta-algorithm、aggregation model，这些都代表这同一个意思，就是不同弱分类器的组合成一个强分类器。这里的弱分类器要比随机猜测的结果好，错误率小于50%；弱分类器可以是决策树、逻辑回归、朴素贝叶斯等算法。Ensemble的形式有很多种：

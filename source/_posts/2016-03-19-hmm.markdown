@@ -4,7 +4,7 @@ title: "Hidden Markov Model"
 date: 2016-03-19 14:00
 comments: true
 category: "Machine Learning"
-tags: ml,hmm,em
+tags: [ml, hmm, em]
 ---
 
 隐马尔可夫模型（Hidden Markov Model，HMM）是统计模型，它用来描述一个含有隐含未知参数的马尔可夫过程（Markov process）。HMM 被用来对有序的序列数据建模，例如句子中的单词，基因中的基本序列，所以常被应用在语音识别、信息提取、基因测序、股票预测等领域。

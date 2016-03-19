@@ -4,7 +4,7 @@ title: "Practice in Recommend System"
 date: 2016-03-16 14:00
 comments: true
 category: "Machine Learning"
-tags: ml,recommend system
+tags: [ml, recommend system]
 ---
 
 本文作为推荐系统实践笔记。

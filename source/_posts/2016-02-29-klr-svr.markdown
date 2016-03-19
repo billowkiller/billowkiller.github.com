@@ -4,7 +4,7 @@ title: "Kernel Logistic Regression versus SVM"
 date: 2016-02-29 14:00
 comments: true
 category: "Machine Learning"
-tags: ml,svm,svr,klr
+tags: [ml, svm, svr, klr]
 ---
 
 Logistic Regression和SVM都是分类方法，它们定义线性决策边界（linear decision boundaries）作为划分的依据。但二者在motivation方便完全不同，区别如下

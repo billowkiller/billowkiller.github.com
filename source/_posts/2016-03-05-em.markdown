@@ -4,7 +4,7 @@ title: "Expectation Maximization"
 date: 2016-03-05 14:00
 comments: true
 category: "Machine Learning"
-tags: ml,em
+tags: [ml, em]
 ---
 
 Expectation Maximization, EM算法在参数估计里面有极大的用处，它用于含有隐变量的概率模型参数的极大似然估计，或极大后验概率（MAP）估计。隐变量的概率模型参数的极大似然估计可以理解为，使用的方法还是的极大似然估计，但是要处理隐变量。极大后验概率是一种Beyesian Inference，其实就是把极大似然估计中的参数赋予权值，这个权值是预先定义好的先验概率。可以来看下下表中Frequentist-Bayesian对峙的部分，来感受下EM算法的应用范围：

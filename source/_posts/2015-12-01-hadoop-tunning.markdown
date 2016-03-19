@@ -4,7 +4,7 @@ title: "Hadoop Tunning"
 date: 2015-12-01 09:50
 comments: true
 category: Big Data
-tags: 
+tags: [mr, hadoop, tunning]
 ---
 
 Hadoop的调优涉及到整个MapReduce的各个过程，并且要对每个参数的意义和Counter信息有一定的了解。也就是说，根据Counter的信息推测哪些MapReduce阶段可能存在性能瓶颈，并且根据这个瓶颈理解对应的Hadoop 框架中的处理逻辑，进而可以调整相关参数的大小或程序的行为。

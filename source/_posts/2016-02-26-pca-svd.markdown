@@ -4,7 +4,7 @@ title: "PCA and SVD"
 date: 2016-02-26 14:00
 comments: true
 category: "Machine Learning"
-tags: ml,math,pca,svd
+tags: [ml, math, pca, svd]
 ---
 
 PCA即为（Principal Components Analysis）主成分分析，SVD是（Singular value decomposition）奇异值分解。从字面上的理解就可以看出这两个并不是在同一语义层面的东西。之所以把这两个放在一块，一是为了文章的完整性，二是为了说明二者在数据转换（基转换）上的共性。

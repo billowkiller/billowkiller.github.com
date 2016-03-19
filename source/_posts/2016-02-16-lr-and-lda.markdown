@@ -4,7 +4,7 @@ title: "Logistic Regression and Linear Discriminant Analysis"
 date: 2016-02-17 14:00
 comments: true
 category: "Machine Learning"
-tags: regression
+tags: [ml, regression]
 ---
 
 在回归方法中，我们找一个超平面作为类与类之间的decision boundary。回归方法为每个分类建立一个判别函数 $\sigma_k (x)$, 对任意的 $x$，选出得到最大值的判别函数最为归属类。对于后验概率模型 $Pr(G = k\|X = x)$ 也是使用同样的方法。对于$\sigma_k (x) 和 Pr(G = k\|X = x)$ 来说，只要它们是线性的，那么得到的decision boundary也是线性的。

@@ -4,7 +4,7 @@ title: "Gradient Descent and Newton Method"
 date: 2016-02-15 14:00
 comments: true
 category: "Machine Learning"
-tags: math
+tags: [ml, math]
 ---
 
 梯度下降和牛顿法都是最优化算法，二者都是求解无约束优化问题的方法，通过递归地逼近最优值来达到求解值。区别在于梯度下降是一阶收敛，而牛顿法是二阶收敛的，所以牛顿法通常会更快，因为牛顿法是用一个二次曲面去拟合当前所处位置的局部曲面，而梯度下降法是用一个平面去拟合当前的局部曲面。wiki上有张图形象地说明了这个问题：

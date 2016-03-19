@@ -4,7 +4,7 @@ title: "Extract-Transform-Load Application Scenarios"
 date: 2016-01-13 14:00
 comments: true
 category: "Big Data"
-tags: etl,streaming,kafka,flume
+tags: [etl, streaming, kafka, flume]
 ---
 
 # 实时流ETL应用场景
