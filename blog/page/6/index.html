@@ -174,6 +174,53 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-11-14T00:16:00+08:00" pubdate data-updated="true">Nov 14<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/11/14/nginx-architecture-2-event-driven/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-2-event-driven/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/14/nginx-architecture-2-event-driven/">Nginx architecture(2)&#8211;Event Driven</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>Nginx是一个事件驱动架构的Web服务器。在Linux中，<code>epoll</code>是目前最强大的事件管理机制(I/O多路复用)，定时器事件也是由<code>epoll</code>等事件模块触发的，它是由红黑树实现的。并且Nginx很好的解决多个<code>worker</code>子进程监听同一个端口引起的惊群问题，以及对<code>worker</code>进行负载平衡。最后会讨论下linux内核中的文件异步I/O。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx-logo_zpsabde8e46.png" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/11/14/nginx-architecture-2-event-driven/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-10-13T00:28:00+08:00" pubdate data-updated="true">Oct 13<span>th</span>, 2013</time>
         
            | <a href="/blog/2013/10/13/nginx-architecture-1-overview/#disqus_thread"
@@ -694,68 +741,6 @@ Smile》，这是一部小成本电影。整部影片从头到尾没有任何异
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/shi-ge-ni-ke-neng-mei-yong-guo-de-linuxming-ling/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/shi-ge-ni-ke-neng-mei-yong-guo-de-linuxming-ling/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/shi-ge-ni-ke-neng-mei-yong-guo-de-linuxming-ling/">十个你可能没用过的Linux命令</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p><em><strong>excerpted</strong> from <a href="http://www.ituring.com.cn/article/1782">图灵社区</a></em></p>
-
-<hr />
-
-<p>如果你是一个硬件系统管理员或者Linux工程师，你可能会记得大多数Linux命令行技巧。下面的这些Linux命令行技巧通常不被Linux用户所使用。</p>
-
-<p><strong>1.使用<em>pgrep</em>快速查找一个PID</strong></p>
-
-<p><strong><em>pgrep</em></strong>遍历目前正在运行的进程然后列出符合查找规则的进程ID（PID）。</p>
-
-<pre><code>pgrep ssh</code></pre>
-
-<p>这条命令会列出所有与ssh有关的进程。</p>
-
-<p><strong>2.执行上次执行过的命令</strong></p>
-
-<p>这个标题有些绕口，但是它是名副其实的。</p>
-
-<pre><code>!!</code></pre>
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/shi-ge-ni-ke-neng-mei-yong-guo-de-linuxming-ling/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -779,6 +764,8 @@ Smile》，这是一部小成本电影。整部影片从头到尾没有任何异
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/03/19/hmm/">Hidden Markov Model</a>
+    
     <a class="list-group-item " href="/blog/2016/03/16/rs-note/">Practice in Recommend System</a>
     
     <a class="list-group-item " href="/blog/2016/03/06/apriori/">Apriori and FP-Growth</a>
@@ -786,8 +773,6 @@ Smile》，这是一部小成本电影。整部影片从头到尾没有任何异
     <a class="list-group-item " href="/blog/2016/03/05/em/">Expectation Maximization</a>
     
     <a class="list-group-item " href="/blog/2016/02/29/klr-svr/">Kernel Logistic Regression Versus SVM</a>
-    
-    <a class="list-group-item " href="/blog/2016/02/27/svm/">Support Vector Machine</a>
     
   </div>
 </section>
@@ -847,7 +832,7 @@ Smile》，这是一部小成本电影。整部影片从头到尾没有任何异
     
     
     <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
-        <span class="badge">11</span>
+        <span class="badge">12</span>
         Machine Learning
       </a>
     

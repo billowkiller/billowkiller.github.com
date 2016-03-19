@@ -176,6 +176,64 @@ body {
 
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
         
+           | <a href="/blog/2013/05/14/linux-kvmdai-ma-zhi-mei/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/linux-kvmdai-ma-zhi-mei/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/linux-kvmdai-ma-zhi-mei/">Linux KVM代码之美</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p><em>*edited as an essey for *程序语言设计原理</em> **</p>
+
+<hr />
+
+<p>在程序的编写上，我认为编程的难度，也就是可写性是一个次要的角色，而代码的可读性，可维护性一直软件生命周期中的主要部分，尤其是对于大型项目而言，软件的维护绝对是项目管理人员首先要考虑的问题，成本的控制，人月量的降低。在这一点上更为突出表现的我想应该是对于开源项目来说，人员的流动性大，项目时间的不确定性，还有对开发人员的吸引力。开源项目应该关注的不止是软件功能性的强大，思维理念的超前，更应该是代码的可读性，可维护性。毕竟没有人愿意在垃圾场上重新盖一栋漂亮的大楼。所以开源项目应该从一开始就在可读性，可维护性上下工夫，并且需要有一些自己的理念，开发标准在里面，这样可以引导后来的开发人员遵循这些原则，保证代码的可读性，可维护性，避免出现破窗效应。</p>
+
+<p>那么如此看来，代码之美又应该包括哪些方面呢，我想应该需要有程序的可读性，可维护性，另外还需要有一些设计准则。这里就以Linux内核中的KVM代码部分为例，谈谈这些原则。</p>
+
+<h2 id="section">一、可读性、可维护性</h2>
+
+<p>在Github上打开Linux内核代码，涉及KVM的主要有两个目录，virt和arch/x86/kvm，我们主要研究的是arch/x86/kvm。文件夹下的Makefile和Kconfig文件可以将程序的脉络显得极为的清晰。</p>
+
+<p>现在查看的是emulate.c文件，程序大概有4000多行，这也是C语言代码中值得诟病的地方，因为程序代码超过2页屏幕大小后，会影响人们对程序的理解，难于找到需要注意的地方，并且纠结于大量的方法和结构体之间。</p>
+
+<p>emulate.c的文件头注释表明只是一个X86架构（32位或者64位）指令的译码器和模拟器，并且表明程序的作者，来源，程序具体涉及的方面。代码是遵循Linux编码规范的。
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/linux-kvmdai-ma-zhi-mei/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
            | <a href="/blog/2013/05/14/ji-ge-linuxming-ling/#disqus_thread"
              data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/ji-ge-linuxming-ling/">Comments</a>
         
@@ -777,76 +835,6 @@ Page的说法，一个网页的重要性不仅仅包括他们自身的重要程�
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/design-pattern-principle/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/design-pattern-principle/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/design-pattern-principle/">Design Pattern&#8211;Principle</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>Head First Design Patterns</p>
-
-<hr />
-
-<p>​1. Identify the aspects of your application that vary and separate them
-from what stays the same.</p>
-
-<p>　　Take the parts that vary and encapsulate them, so that later you can
-alter or extend the parts that vary without affecting those that don’t.</p>
-
-<p>​2. Program to an interface, not an implementation.</p>
-
-<p>　　Our intuition to solve problems is relying on an implementation,
-either in the superclass or in the subclass itself. We were locked into
-using that specific implementation and there was no room for changing
-out the behavior other than writing more code.</p>
-
-<p>　　With a new design, the subclasses will use a behavior represented by
-an interface, so that the actual implementation of the behavior won’t be
-locked.</p>
-
-<p>　　ps: *program to an interface *really means *program to a
-supertype. *In JAVA, it means interface or abstract class.</p>
-
-<p>　　　　Even better, you can assign the concrete implementation object
-at runtime.</p>
-
-<p></div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/design-pattern-principle/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -870,6 +858,8 @@ at runtime.</p>
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/03/19/hmm/">Hidden Markov Model</a>
+    
     <a class="list-group-item " href="/blog/2016/03/16/rs-note/">Practice in Recommend System</a>
     
     <a class="list-group-item " href="/blog/2016/03/06/apriori/">Apriori and FP-Growth</a>
@@ -877,8 +867,6 @@ at runtime.</p>
     <a class="list-group-item " href="/blog/2016/03/05/em/">Expectation Maximization</a>
     
     <a class="list-group-item " href="/blog/2016/02/29/klr-svr/">Kernel Logistic Regression Versus SVM</a>
-    
-    <a class="list-group-item " href="/blog/2016/02/27/svm/">Support Vector Machine</a>
     
   </div>
 </section>
@@ -938,7 +926,7 @@ at runtime.</p>
     
     
     <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
-        <span class="badge">11</span>
+        <span class="badge">12</span>
         Machine Learning
       </a>
     
