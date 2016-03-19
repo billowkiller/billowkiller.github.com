@@ -1,0 +1,136 @@
+---
+layout: post
+title: "Hidden Markov Model"
+date: 2016-03-19 14:00
+comments: true
+category: "Machine Learning"
+tags: ml,hmm,em
+---
+
+隐马尔可夫模型（Hidden Markov Model，HMM）是统计模型，它用来描述一个含有隐含未知参数的马尔可夫过程（Markov process）。HMM 被用来对有序的序列数据建模，例如句子中的单词，基因中的基本序列，所以常被应用在语音识别、信息提取、基因测序、股票预测等领域。
+
+在 HMM 中，马尔可夫过程是一类随机过程，原始模型是马尔可夫链。它包含一个状态的有限集，状态的变化只依赖于上一个时间点，而与再之前的时间无任何关系，且状态的轮换是有一定的概率发生。所以可以把马尔可夫过程当成是一个有限状态自动机的概率变种。PageRank 其实也是一种马尔可夫过程。
+
+但是在 HMM 中，状态是未知的，这就是 hidden 的由来，我们只能看到观察值，也就是由状态产生的结果。下图是一个 HMM 的例子。
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/24496294.jpg" width="300px"/>
+
+<!--more-->
+
+## 1. HMM 模型
+
+HMM 包含三种假设：
+
+* The Markov assumption：现在的状态只依赖于上一个时刻的状态。
+* The stationarity assumption：状态的转换概率并不依赖于转换发送的时刻。
+* The output independence assumption：观察值生成事件是独立的。
+
+HMM 模型由三元组 $<S, O, \theta>$ 组成。$S$ 是有限状态，产生一个观察值 $o, o \in O$。另外 $\theta$ 是另外一个三元组 $<A, B, \pi>$，$A$ 是一个 $\vert S \vert \times \vert S \vert$ 的隐含状态转移概率矩阵，$A\_q (r)$ 就表示从状态 $q$ 到 $r$ 的概率；$B$ 是一个 $\vert S \vert \times \vert O \vert$ 的观测状态转移概率矩阵，$B\_q(o)$ 表示由状态 $q$ 生成 观察值 $o$ 的概率；$\pi$ 是一个 $\vert S \vert$ 的向量，$\pi\_q$ 表示 HMM 开始于状态 $q$ 的概率。
+
+在大部分应用中，稀疏矩阵就够用了，现在我们规定 $A\_q(r) \ge 0, B\_q(o) \ge 0, \pi\_q \ge 0$，并且有
+
+$$ \underset{r \in S}{\Sigma} A_q(r)=1\ \forall q, \underset{o \in O}{\Sigma} B_q(o)=1\ \forall q, \underset{q \in S}{\Sigma} \pi_q=1$$。
+
+一个观察序列的生成如下：
+
+1. $t=1$，从 $\pi$ 的分布中选择一个初始状态 $q$
+2. 观察值 $o \in O$ 从 $B\_q$ 的分布中生成
+3. 新的状态 $r$ 根据上一个状态的分布 $A\_q$ 得到
+4. 重复上述过程直到生成的观察值达到指定长度
+
+下图表示一个 part-of speech tagging 的例子，即给单词标记词的词义属性 (determiner, adjective, noun, and verb)。
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/24593933.jpg" width="500px"/>
+
+## 2. HMM 的三个问题
+
+有以下几个关于 HMM 的基础问题。
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/12179682.jpg" width="520px"/>
+
+### 2.1 The Forward Algorithm
+
+现在我们解答第一个问题，观察值 $x$ 的概率也就是关于 $x$ 和所有可能的词性 $y$ 组合的联合概率之和。$y$ 的个数是关于 $x$ 长度的指数级别，所以这种方法并不现实。那么有什么其他方法？
+
+现在提出另外一个相关的问题，在时间 $t$ 的状态为 $q$，那么我们观察到的序列为 $<x\_1, x\_2...x\_t>$ 的概率为多大？假设这个概率是 $\alpha\_t(q)$，可以看到 $\alpha\_t(q)$ 是一个 $\vert x \vert \times \vert S \vert$ 的矩阵，称为 trellis，容易知道 $\alpha\_1(q) = \pi\_q \cdot B\_q(x\_1)$。根据时刻 $t$ 的 trellis，我们可以很容易地得到 $t+1$ 时刻的 trellis。
+
+$$ \alpha_{t+1}(r) = B_r(x_{t+1}) \cdot \underset{q \in S}{\Sigma} \alpha_t(q) \cdot A_q(r) $$
+
+所以，最后我们可以在多项式时间内得到时刻 $\vert x \vert$ 的观察值概率：
+
+$$ Pr(x; \theta) = \underset{q \in S}{\Sigma} \alpha_{\vert x \vert}(q)$$
+
+上面例子的示例为：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/14971721.jpg" width="300px"/>
+
+### 2.2 The Viterbi Algorithm
+
+现在回答第二个问题，也就是求最有可能产生观察值的状态序列。
+
+从 Forward Algorithm 得到启发，我们可以定义 Viterbi Probability $\gamma_t(q)$，表示在时刻 $t$ 产生观察值并且最后的状态为 $q$ 的状态序列的概率。因为最后要重新构造状态序列，所以我们另外定义 backpointer, $bp_t(q)$，表示在时刻 $t-1$ 的状态。可以得到以下公式：
+
+$$ \gamma_1(q) = \pi_q \cdot B_q(x_1),\ bp_1(q) = -1$$
+
+$$ \gamma_t(q) = \underset{q \in S}{max}\ \gamma_{t-1}(q) \cdot A_q(r) \cdot B_r(x_t)$$
+
+$$ bp_t(r) = \underset{q \in S}{argmax}\ \gamma_{t-1}(q) \cdot A_q(r) \cdot B_r(x_t)$$
+
+最后为了得到最有可能的状态序列 $y^*$，我们选择时刻 $\vert x \vert$ 概率最高的 viterbi probability。整个序列可以根据 backpointer 递归求出来：
+
+$$ y_{\vert x \vert}^* = \underset{q \in S}{argmax}\ \gamma_{\vert x \vert}(q),\ y_{t-1}^* = bp_t(y_t)$$
+
+### 2.3 Parameter Estimation for HMMs
+
+现在来看问题3，已知 $S,O$，要求最有可能生成观察序列的参数 $\pi^*$。观察值是由未知的状态序列产生的，这时可以通过 EM 算法最优化观察值的 marginal likelihood 得到参数估计。
+
+假设未知的状态是已知的，那么参数的最大似然估计可以根据测试集的得到：在所有测试集中从状态 $q$ 转移到状态 $r$ 的比例，$T(q \to r)$；状态 $q$ 生成观察值 $o$ 的次数 $O(q \uparrow o)$；起始状态 $q$ 的次数 $I(q)$。下面给出 fully observable case 的参数最大似然估计，$N(q)$ 表示马尔可夫过程进入状态 $q$ 的次数：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/64200477.jpg" width="500px"/>
+
+那么又怎样才能在未知状态序列的情况下做参数估计呢？ 可以看到在 fully observable case ，每个马尔可夫过程中的状态转换记为 1，这样就可以统计参数的最大似然估计。但是未知状态序列的情况下，我们可以想象每个状态转换的发生都是有一定概率，这个概率其实就是 "posterior probability of the transition, given the model and an observation sequence"。根据这个概率，可以计算特定状态转换的期望次数。于是我们得到如下的公式：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/47910145.jpg" width="500px"/> 
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/15960296.jpg" width="400px"/>
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/46548481.jpg" width="400px"/>
+
+因为马尔可夫过程的独立假设，我们其实包含的是 $2 \vert S \vert +1$ 个独立的优化问题：求解 $\pi$ 是一个；$\vert S \vert$ 个解决 $A_q(\cdot)$；$\vert S \vert$ 个解决 $B_q(\cdot)$。
+
+解释下上面的后验概率。这个后验概率其实就是关于 $\theta$ 的先验概率加上观察值这个 evidence 形成的，包含有状态转移的后验概率和观察值生成的后验概率。这两个概率又都可以由 forward probabilities $\alpha_t(\cdot)$ 和 backward probabilities $\beta_t(\cdot)$ 得到。
+
+* forward probabilities：在时刻 $t$ 到达某个状态时生成观察值序列 $<x\_1, x\_2....x\_t>$ 的概率
+* backward probabilities：在时刻 $t$ 到达某个状态后生成观察值序列 $<x\_{t+1}, x\_{t+2}....x\_{\vert x \vert}>$ 的概率
+
+这时候两个后验概率就可以写成
+
+$$Pr(y_i = q \vert x;\theta) = \alpha_i(q) \cdot \beta_i(q)$$
+
+$$Pr(y_i=q, y_{i+1}=r \vert x;\theta) = \alpha_i(q) \cdot A_q(r) \cdot B_r(x_{i+1}) \cdot \beta_{i+1}(q)$$
+
+**The backward algorithm.** 类似于forward 和 Viterbi algorithms， backward algorithm 也可以用动态规划算法计算，在时刻 $\vert x \vert$ 初始公式为 $\beta_{\vert x \vert}(q) = 1$，递归如下：
+
+$$\beta_t(q) = \underset{r \in S}{\Sigma} \beta_{t+1}(r) \cdot A_q(r) \cdot B_r(x_{t+1}) $$
+
+**重新总结下。**在 EM 迭代中，我们想要根据 $M=<S,O,\theta^{(i)}>$ 得到 $\theta^{(i+1)}$。每个训练实例都可以独立计算，根据上述的算法计算 forward 和 backward probabilities，这些后验概率就用来计算状态转换、观察值生成和初始状态的期望次数。各个训练实例中的期望值之和也就是 E-step。M-step 就是进行 normalizing，计算 $\pi_q,A_q(r),B_q(o)$。HMM 的 EM 参数估计中有几点需要注意：
+
+* HMM 的似然函数是非凸的，EM 只能找到局部最优值，所以算法依赖于初始值。
+* 如果一个参数在 EM 过程中变为 0，那么接下来就会一直为 0.
+* 计算过程容易造成 arithmetic underflow，可以用概率对数化进行解决。
+
+## 3. HMM in MR
+
+HMM 的参数估计很有效地在 MR 中进行并行化：
+
+* 计算量比较大的为 forward 和 backward 算法，而每个训练实例都可以单独计算，所以理论上可以为每个实例都分配一个 mapper
+* M-step 其实就是 $2 \vert S \vert +1$ 个优化问题，因此可以用相应个数的 reducer 进行计算。
+
+对应的算法如下：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/53556849.jpg" width="500px"/>
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/60561193.jpg" width="500px"/>
+
+
+
