@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: kafka | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/kafka/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2016-03-22T10:40:09+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Extract-Transform-Load Application Scenarios]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/01/13/etl/"/>
+    <updated>2016-01-13T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/01/13/etl</id>
+    <content type="html"><![CDATA[<h1 id="etl">实时流ETL应用场景</h1>
+
+<p>现有的企业级数据量在不断增大，用户也在寻求大数据解决方案来处理这些日益增长的数据。那么什么是大数据处理的架构呢。Cloudera总结的很好，大数据架构是建立在一系列开发可靠、可扩张、完整的自动化data pipeline上，下面的一张图给了很好的解释：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-1-25/11725472.jpg" width="500px" /></p>
+
+<!--more-->
+
+<p>data pipeline目的在于获取数据并能够发掘其中的价值。数据工程师决定数据从何处来，如何进入数据处理层，以及如何处理，如何存储和进一步展示。当然还需要包括必不可少的集群设计、系统调优等。上图中后端的分析工具通常为BI展示或其他分析工具，中间的处理通常由Spark、Hadoop进行，前端的数据获取包括批量和实时的两种。</p>
+
+<p>在BMR中，我们已经为您处理了底层的集群设计、系统调优，打通数据交互层等工作，您只需要专注于如何在业务上挖掘数据潜在的价值即可。</p>
+
+<h2 id="section">应用场景举例</h2>
+
+<p>百度的IDMapping接入层每天的PV达到上亿，每天产生的日志量达到100GB，日志中的信息包括用户的访问IP、访问时间、响应时间、用户请求、应答内容等。IDMapping由10台nginx服务器构成、分别部署在不同的服务器上。其中的日志格式如下：</p>
+
+<p>数据格式如下：</p>
+
+<pre><code>$remote_addr - [$time_local] "$request" $status $body_bytes_sent "$http_referer"  $http_cookie" $remote_user "$http_user_agent" $request_time  $host $msec
+</code></pre>
+
+<p>下面是一条具体日志：</p>
+
+<pre><code>10.81.78.220 - [04/Oct/2015:21:31:22 +0800] "GET /u2bmp.html?dm=37no6.com/003&amp;ac=1510042131161237772&amp;v=y88j6-1.0&amp;rnd=1510042131161237772&amp;ext_y88j6_tid=003&amp;ext_y88j6_uid=1510042131161237772 HTTP/1.1" 200 54 "-" "-" 9CA13069CB4D7B836DC0B8F8FD06F8AF "ImgoTV-iphone/4.5.3.150815 CFNetwork/672.1.13 Darwin/14.0.0" 0.004 test.com.org 1443965482.737
+</code></pre>
+
+<p>负责人希望能够通过这些日志信息实时地获取服务的PV、UV等统计信息以及访问用户IP的所在地信息等，并且希望可以查询任意时间的用户访问信息，以此满足日常运营的需求，后续还可能添加告警和日运营报表等功能。</p>
+
+<h2 id="section-1">解决方案</h2>
+
+<p>在BMR中我们集成了Flume、Kafka、Spark、Hbase组件，可以很好的满足应用场景中IDMapping负责人的集群需求。我们设计了如下的大数据处理的pipeline。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-1-26/97268179.jpg" width="750px" /></p>
+
+<p>每台机器上的日志数据通过flume实时地推送到Kafka集群中，在spark集群中订阅这些日志数据，经过ETL处理后存储到Hbase中。前端展示系统可以通过Hbase的Restful接口实时的获取数据。同时，可以提交新的spark streaming application修改原有的数据处理模型，也可以在后端也可以对数据进一步加工：通过集群内部的mahout、spark mllib或对接其他的BI系统，例如Palo、Saiku。</p>
+
+<p>以下是前端获取数据后的展示效果图：</p>
+
+<p><img src="http://i4.tietuku.com/50dd01cd4f5db9c2.png" width="350px" /></p>
+
+<p><img src="http://i4.tietuku.com/93356a3071840b10.png" width="400px" /></p>
+
+<p>接下来通过三步骤对这个解决方案在BMR中的实现进行详细的阐述。</p>
+
+<h3 id="step-1-">Step 1 创建集群</h3>
+
+<p>创建包括Spark和Streaming组件的集群。在生产环境中建议分别创建Kafka和Spark集群。可以参考<a href="https://bce.baidu.com/doc/BMR/GettingStarted.html#.E5.88.9B.E5.BB.BA.E9.9B.86.E7.BE.A4">文档</a>。</p>
+
+<h3 id="step-2-">Step 2 数据准备</h3>
+
+<p>数据获取表示如何将nginx产生的日志通过flume导入到BMR集群中。我们执行下面的命令：</p>
+
+<pre><code>wget http://bmr.bj.bcebos.com/tools/flume/flume-1.6.0.tar.gz
+vim $FLUME_HOME/conf/flume-conf.properties
+$FLUME_HOME/bin/flume-ng agent --conf conf --conf-file $FLUME_HOME/conf/flume-conf.properties --name agent
+</code></pre>
+
+<p>以上的命令分别表示获取flume、编辑配置文件、运行flume agent。其中配置文件参考<a href="http://wiki.baidu.com/pages/viewpage.action?pageId=158727265">http://wiki.baidu.com/pages/viewpage.action?pageId=158727265</a>，将<code>agent.sources.s.command</code>改为<code>tail $NGINX_HOME/logs/access.log</code>。</p>
+
+<h3 id="step-3-">Step 3 数据处理</h3>
+<p>建立新的spark集群，当然在测试阶段您也可以直接使用kafka集群中的spark进行处理，在实际应用中推荐使用新的spark集群。</p>
+
+<ol>
+  <li>下载spark streaming代码，进行编译，将编译结果<code>bmr-spark-kafka-samples-1.0-SNAPSHOT-jar-with-dependencies.jar</code>放到bos中。</li>
+  <li>
+    <p>从console页面进去到对应集群的作业列表页面，然后点击“添加作业”，如果使用系统提供的输入数据和jar包，可以按照如下方式填写参数：</p>
+
+    <blockquote>
+      <p>作业类型：Spark</p>
+    </blockquote>
+
+    <blockquote>
+      <p>名称：FKSTest</p>
+    </blockquote>
+
+    <blockquote>
+      <p>bos输入地址： bos://${PATH}/bmr-spark-kafka-samples-1.0-SNAPSHOT-jar-with-dependencies.jar</p>
+    </blockquote>
+
+    <blockquote>
+      <p>失败后操作：继续</p>
+    </blockquote>
+
+    <blockquote>
+      <p>Spark-submit: –class com.baidubce.bmr.sample.DirectFKSTest</p>
+    </blockquote>
+
+    <blockquote>
+      <p>应用程序参数：ng1889b62-master-instance-f5lvbago topic</p>
+    </blockquote>
+
+    <p>其中应用程序参数分别代表集群master的hostname和kafka topic。 </p>
+  </li>
+  <li>
+    <p>您可以通过集群页面的<code>Resource Manager Web UI</code>查看spark UI查看作业运行的状态。（进入页面所需要的用户名密码会通过短信形式发送到您手机上）
+ <img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-1-25/49196148.jpg" alt="" /></p>
+  </li>
+  <li>
+    <p>查看hbase中的数据：</p>
+
+    <pre><code> hbase(main):001:0&gt; list
+ hbase(main):002:0&gt; scan 'PVUV', {COLUMN=&gt;['statistics:PV:toInt', 'statistics:UV:toInt']}
+</code></pre>
+  </li>
+</ol>
+
+<h2 id="spark-streaming">关于Spark Streaming中实时流的说明建议</h2>
+
+<p>在Spark Streaming中有两种API用于处理与kafka之间的交互。</p>
+
+<ul>
+  <li>一种是spark1.2.0引进的<code>KafkaUtils.createStream</code>，这种方式可以将kafka或其他流式输入先写入磁盘再分片处理，防止重启driver造成数据丢失。换句话说，可以保证At least Once语义，前提是开启<code>Write Ahead Logs</code>，方法如下
+    <ul>
+      <li>在代码中通过<code>streamingContext.checkpoint</code>配置checkpoint目录</li>
+      <li>配置<code>spark.streaming.receiver.writeAheadLog.enable</code>为<code>true</code></li>
+    </ul>
+  </li>
+  <li>另外一种则是spark1.3.0引进的Direct API。这种方式保证的是<code>Exactly Once</code>语义，解决上种方式中<code>consumer offset</code>和数据Logs存储不一致性造成的数据重复计算。这种方式通过将<code>offset</code>存入
+checkpoints中，来保证接收数据的一致性。</li>
+</ul>
+
+<p>使用<code>KafkaUtils.createStream</code>需要有一下两种考虑：</p>
+
+<ul>
+  <li>提高streaming的吞吐量，我们通常会使用多个consumer来并行的获取数据，每个consumer分配到一个executor的单核上，最后将所有得到的Stream进行<code>Union</code>操作。
+如果不进行<code>Union</code>则会导致<code>Transformation</code>数量增多<code>#consumer</code>倍。</li>
+  <li>另外也要考虑RDD中partition的数量，减少partition数量有助于减少task个数以及调度时间。partition的数量是由batchInterval和spark.streaming.blockInterval共同决定的，根据spark官方指导，通常partition数目
+为cores的2到3倍比较合适，所以可以调整适当的参数控制partition的个数。</li>
+</ul>
+
+<p>而在DirectAPI中会自动定期的根据kafka的topic+partition查询最新的offset，定义需要处理的offset范围。所以不需要考虑创建多少receivers，也不需要考虑partition的数量。在API中每个kafka partition都是自动地并行读取，并且对应每个RDD partition，从而简化Streaming处理的并行模式。</p>
+
+<p>但是DirectAPI并不会在zookeeper中更新offset，所以基于zookeeper的kafka监控工具无法查看日志处理的进度。但您也可以查询checkpoint，将offset写入zookeeper中。</p>
+
+<p>这两种使用方式在Sample中都有详细的例子可以参考，分别是<code>com.baidubce.bmr.sample.FKSTest</code>和<code>com.baidubce.bmr.sample.DirectFKSTest</code>。</p>
+
+<h2 id="section-2">总结</h2>
+
+<p>虽然针对不同的目标和业务案例使用流式处理的方式也不同，但其主要场景包括：</p>
+
+<ul>
+  <li>流ETL——将数据推入存储系统之前对其进行清洗和聚合。</li>
+  <li>触发器——实时检测异常行为并触发相关的处理逻辑。</li>
+  <li>数据浓缩——将实时数据与静态数据浓缩成更为精炼的数据以用于实时分析。</li>
+  <li>复杂会话和持续学习——将与实时会话相关的事件组合起来进行分析。</li>
+</ul>
+
+<p>在上述例子中我们介绍了BMR中流ETL的场景。
+在BMR中，我们提供了Hadoop生态圈中的全栈组件包括Hadoop、Spark、Hbase、Hive、Pig、Kafka、Mahout等，
+您可以根据自己的业务场景灵活地选择不同的组件。</p>
+
+]]></content>
+  </entry>
+  
+</feed>

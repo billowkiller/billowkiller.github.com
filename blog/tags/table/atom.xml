@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: table | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/table/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2016-03-22T10:40:09+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Table Join Semantics]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/03/19/table-join/"/>
+    <updated>2016-03-19T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/03/19/table-join</id>
+    <content type="html"><![CDATA[<p>这篇文章主要是记录下各种不同 <code>join</code> 的语义。</p>
+
+<p>在最高层面上，<code>join</code> 分为三种：</p>
+
+<ul>
+  <li>INNER</li>
+  <li>OUTER</li>
+  <li>CROSS</li>
+</ul>
+
+<!--more-->
+
+<hr />
+
+<ol>
+  <li>
+    <p><code>INNER JOIN</code> - fetches data if present in both the tables.</p>
+  </li>
+  <li>
+    <p><code>OUTER JOIN</code> are of 3 types:</p>
+
+    <ul>
+      <li><code>LEFT OUTER JOIN</code> - fetches data if present in the left table.</li>
+      <li><code>RIGHT OUTER JOIN</code> - fetches data if present in the right table.</li>
+      <li><code>FULL OUTER JOIN</code> - fetches data if present in either of the two tables.</li>
+    </ul>
+  </li>
+  <li>
+    <p><code>CROSS JOIN</code>, as the name suggests, does [n X m] that joins everything to everything. Similar to scenario where we simply lists the tables for joining (in the FROM clause of the SELECT statement), using commas to separate them.</p>
+  </li>
+</ol>
+
+<p>重点关注前两种，因为在语法中它们包含 <code>join</code> 这个关键词。语法如下：</p>
+
+<p>```</p>
+<join_type> ::= 
+    [ { INNER | { { LEFT | RIGHT | FULL } [ OUTER ] } } [ <join_hint> ] ]
+    JOIN
+```
+
+`OUTER`是一个可选词，有没有对于语义并没有什么区别。解释下上面的语法，可以看到以下的用法是等价的：
+
+```
+A LEFT JOIN B            A LEFT OUTER JOIN B
+A RIGHT JOIN B           A RIGHT OUTER JOIN B
+A FULL JOIN B            A FULL OUTER JOIN B
+A INNER JOIN B           A JOIN B
+```
+
+<img src="http://i.stack.imgur.com/qje6o.png" width="500px" />
+
+结果可以看到是这样的：
+
+```
+Table A | Table B     Table A | Table B      Table A | Table B      Table A | Table B
+   1    |   5            1    |   1             1    |   1             1    |   1
+   2    |   1            2    |   2             2    |   2             2    |   2
+   3    |   6            3    |  null           3    |  null           -    |   -
+   4    |   2            4    |  null           4    |  null           -    |   -
+                        null  |   5             -    |   -            null  |   5
+                        null  |   6             -    |   -            null  |   6
+
+                      OUTER JOIN (FULL)     LEFT OUTER (partial)   RIGHT OUTER (partial)
+```
+
+</join_hint></join_type>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: em | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/em/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2016-03-22T10:40:09+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Hidden Markov Model]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/03/19/hmm/"/>
+    <updated>2016-03-19T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/03/19/hmm</id>
+    <content type="html"><![CDATA[<p>隐马尔可夫模型（Hidden Markov Model，HMM）是统计模型，它用来描述一个含有隐含未知参数的马尔可夫过程（Markov process）。HMM 被用来对有序的序列数据建模，例如句子中的单词，基因中的基本序列，所以常被应用在语音识别、信息提取、基因测序、股票预测等领域。</p>
+
+<p>在 HMM 中，马尔可夫过程是一类随机过程，原始模型是马尔可夫链。它包含一个状态的有限集，状态的变化只依赖于上一个时间点，而与再之前的时间无任何关系，且状态的轮换是有一定的概率发生。所以可以把马尔可夫过程当成是一个有限状态自动机的概率变种。PageRank 其实也是一种马尔可夫过程。</p>
+
+<p>但是在 HMM 中，状态是未知的，这就是 hidden 的由来，我们只能看到观察值，也就是由状态产生的结果。下图是一个 HMM 的例子。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/24496294.jpg" width="300px" /></p>
+
+<!--more-->
+
+<h2 id="hmm-">1. HMM 模型</h2>
+
+<p>HMM 包含三种假设：</p>
+
+<ul>
+  <li>The Markov assumption：现在的状态只依赖于上一个时刻的状态。</li>
+  <li>The stationarity assumption：状态的转换概率并不依赖于转换发送的时刻。</li>
+  <li>The output independence assumption：观察值生成事件是独立的。</li>
+</ul>
+
+<p>HMM 模型由三元组 $&lt;S, O, \theta&gt;$ 组成。$S$ 是有限状态，产生一个观察值 $o, o \in O$。另外 $\theta$ 是另外一个三元组 $&lt;A, B, \pi&gt;$，$A$ 是一个 $\vert S \vert \times \vert S \vert$ 的隐含状态转移概率矩阵，$A_q (r)$ 就表示从状态 $q$ 到 $r$ 的概率；$B$ 是一个 $\vert S \vert \times \vert O \vert$ 的观测状态转移概率矩阵，$B_q(o)$ 表示由状态 $q$ 生成 观察值 $o$ 的概率；$\pi$ 是一个 $\vert S \vert$ 的向量，$\pi_q$ 表示 HMM 开始于状态 $q$ 的概率。</p>
+
+<p>在大部分应用中，稀疏矩阵就够用了，现在我们规定 $A_q(r) \ge 0, B_q(o) \ge 0, \pi_q \ge 0$，并且有</p>
+
+<p><script type="math/tex"> \underset{r \in S}{\Sigma} A_q(r)=1\ \forall q, \underset{o \in O}{\Sigma} B_q(o)=1\ \forall q, \underset{q \in S}{\Sigma} \pi_q=1</script>。</p>
+
+<p>一个观察序列的生成如下：</p>
+
+<ol>
+  <li>$t=1$，从 $\pi$ 的分布中选择一个初始状态 $q$</li>
+  <li>观察值 $o \in O$ 从 $B_q$ 的分布中生成</li>
+  <li>新的状态 $r$ 根据上一个状态的分布 $A_q$ 得到</li>
+  <li>重复上述过程直到生成的观察值达到指定长度</li>
+</ol>
+
+<p>下图表示一个 part-of speech tagging 的例子，即给单词标记词的词义属性 (determiner, adjective, noun, and verb)。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/24593933.jpg" width="500px" /></p>
+
+<h2 id="hmm--1">2. HMM 的三个问题</h2>
+
+<p>有以下几个关于 HMM 的基础问题。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/12179682.jpg" width="520px" /></p>
+
+<h3 id="the-forward-algorithm">2.1 The Forward Algorithm</h3>
+
+<p>现在我们解答第一个问题，观察值 $x$ 的概率也就是关于 $x$ 和所有可能的词性 $y$ 组合的联合概率之和。$y$ 的个数是关于 $x$ 长度的指数级别，所以这种方法并不现实。那么有什么其他方法？</p>
+
+<p>现在提出另外一个相关的问题，在时间 $t$ 的状态为 $q$，那么我们观察到的序列为 $&lt;x_1, x_2…x_t&gt;$ 的概率为多大？假设这个概率是 $\alpha_t(q)$，可以看到 $\alpha_t(q)$ 是一个 $\vert x \vert \times \vert S \vert$ 的矩阵，称为 trellis，容易知道 $\alpha_1(q) = \pi_q \cdot B_q(x_1)$。根据时刻 $t$ 的 trellis，我们可以很容易地得到 $t+1$ 时刻的 trellis。</p>
+
+<script type="math/tex; mode=display"> \alpha_{t+1}(r) = B_r(x_{t+1}) \cdot \underset{q \in S}{\Sigma} \alpha_t(q) \cdot A_q(r) </script>
+
+<p>所以，最后我们可以在多项式时间内得到时刻 $\vert x \vert$ 的观察值概率：</p>
+
+<script type="math/tex; mode=display"> Pr(x; \theta) = \underset{q \in S}{\Sigma} \alpha_{\vert x \vert}(q)</script>
+
+<p>上面例子的示例为：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/14971721.jpg" width="300px" /></p>
+
+<h3 id="the-viterbi-algorithm">2.2 The Viterbi Algorithm</h3>
+
+<p>现在回答第二个问题，也就是求最有可能产生观察值的状态序列。</p>
+
+<p>从 Forward Algorithm 得到启发，我们可以定义 Viterbi Probability $\gamma_t(q)$，表示在时刻 $t$ 产生观察值并且最后的状态为 $q$ 的状态序列的概率。因为最后要重新构造状态序列，所以我们另外定义 backpointer, $bp_t(q)$，表示在时刻 $t-1$ 的状态。可以得到以下公式：</p>
+
+<script type="math/tex; mode=display"> \gamma_1(q) = \pi_q \cdot B_q(x_1),\ bp_1(q) = -1</script>
+
+<script type="math/tex; mode=display"> \gamma_t(q) = \underset{q \in S}{max}\ \gamma_{t-1}(q) \cdot A_q(r) \cdot B_r(x_t)</script>
+
+<script type="math/tex; mode=display"> bp_t(r) = \underset{q \in S}{argmax}\ \gamma_{t-1}(q) \cdot A_q(r) \cdot B_r(x_t)</script>
+
+<p>最后为了得到最有可能的状态序列 $y^*$，我们选择时刻 $\vert x \vert$ 概率最高的 viterbi probability。整个序列可以根据 backpointer 递归求出来：</p>
+
+<script type="math/tex; mode=display"> y_{\vert x \vert}^* = \underset{q \in S}{argmax}\ \gamma_{\vert x \vert}(q),\ y_{t-1}^* = bp_t(y_t)</script>
+
+<h3 id="parameter-estimation-for-hmms">2.3 Parameter Estimation for HMMs</h3>
+
+<p>现在来看问题3，已知 $S,O$，要求最有可能生成观察序列的参数 $\pi^*$。观察值是由未知的状态序列产生的，这时可以通过 EM 算法最优化观察值的 marginal likelihood 得到参数估计。</p>
+
+<p>假设未知的状态是已知的，那么参数的最大似然估计可以根据测试集的得到：在所有测试集中从状态 $q$ 转移到状态 $r$ 的比例，$T(q \to r)$；状态 $q$ 生成观察值 $o$ 的次数 $O(q \uparrow o)$；起始状态 $q$ 的次数 $I(q)$。下面给出 fully observable case 的参数最大似然估计，$N(q)$ 表示马尔可夫过程进入状态 $q$ 的次数：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/64200477.jpg" width="500px" /></p>
+
+<p>那么又怎样才能在未知状态序列的情况下做参数估计呢？ 可以看到在 fully observable case ，每个马尔可夫过程中的状态转换记为 1，这样就可以统计参数的最大似然估计。但是未知状态序列的情况下，我们可以想象每个状态转换的发生都是有一定概率，这个概率其实就是 “posterior probability of the transition, given the model and an observation sequence”。根据这个概率，可以计算特定状态转换的期望次数。于是我们得到如下的公式：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/47910145.jpg" width="500px" /> </p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/15960296.jpg" width="400px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/46548481.jpg" width="400px" /></p>
+
+<p>因为马尔可夫过程的独立假设，我们其实包含的是 $2 \vert S \vert +1$ 个独立的优化问题：求解 $\pi$ 是一个；$\vert S \vert$ 个解决 $A_q(\cdot)$；$\vert S \vert$ 个解决 $B_q(\cdot)$。</p>
+
+<p>解释下上面的后验概率。这个后验概率其实就是关于 $\theta$ 的先验概率加上观察值这个 evidence 形成的，包含有状态转移的后验概率和观察值生成的后验概率。这两个概率又都可以由 forward probabilities $\alpha_t(\cdot)$ 和 backward probabilities $\beta_t(\cdot)$ 得到。</p>
+
+<ul>
+  <li>forward probabilities：在时刻 $t$ 到达某个状态时生成观察值序列 $&lt;x_1, x_2….x_t&gt;$ 的概率</li>
+  <li>backward probabilities：在时刻 $t$ 到达某个状态后生成观察值序列 $&lt;x_{t+1}, x_{t+2}….x_{\vert x \vert}&gt;$ 的概率</li>
+</ul>
+
+<p>这时候两个后验概率就可以写成</p>
+
+<script type="math/tex; mode=display">Pr(y_i = q \vert x;\theta) = \alpha_i(q) \cdot \beta_i(q)</script>
+
+<script type="math/tex; mode=display">Pr(y_i=q, y_{i+1}=r \vert x;\theta) = \alpha_i(q) \cdot A_q(r) \cdot B_r(x_{i+1}) \cdot \beta_{i+1}(q)</script>
+
+<p><strong>The backward algorithm.</strong> 类似于forward 和 Viterbi algorithms， backward algorithm 也可以用动态规划算法计算，在时刻 $\vert x \vert$ 初始公式为 $\beta_{\vert x \vert}(q) = 1$，递归如下：</p>
+
+<script type="math/tex; mode=display">\beta_t(q) = \underset{r \in S}{\Sigma} \beta_{t+1}(r) \cdot A_q(r) \cdot B_r(x_{t+1}) </script>
+
+<p><strong>重新总结下。</strong>在 EM 迭代中，我们想要根据 $M=&lt;S,O,\theta^{(i)}&gt;$ 得到 $\theta^{(i+1)}$。每个训练实例都可以独立计算，根据上述的算法计算 forward 和 backward probabilities，这些后验概率就用来计算状态转换、观察值生成和初始状态的期望次数。各个训练实例中的期望值之和也就是 E-step。M-step 就是进行 normalizing，计算 $\pi_q,A_q(r),B_q(o)$。HMM 的 EM 参数估计中有几点需要注意：</p>
+
+<ul>
+  <li>HMM 的似然函数是非凸的，EM 只能找到局部最优值，所以算法依赖于初始值。</li>
+  <li>如果一个参数在 EM 过程中变为 0，那么接下来就会一直为 0.</li>
+  <li>计算过程容易造成 arithmetic underflow，可以用概率对数化进行解决。</li>
+</ul>
+
+<h2 id="hmm-in-mr">3. HMM in MR</h2>
+
+<p>HMM 的参数估计很有效地在 MR 中进行并行化：</p>
+
+<ul>
+  <li>计算量比较大的为 forward 和 backward 算法，而每个训练实例都可以单独计算，所以理论上可以为每个实例都分配一个 mapper</li>
+  <li>M-step 其实就是 $2 \vert S \vert +1$ 个优化问题，因此可以用相应个数的 reducer 进行计算。</li>
+</ul>
+
+<p>对应的算法如下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/53556849.jpg" width="500px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/60561193.jpg" width="500px" /></p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Expectation Maximization]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/03/05/em/"/>
+    <updated>2016-03-05T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/03/05/em</id>
+    <content type="html"><![CDATA[<p>Expectation Maximization, EM算法在参数估计里面有极大的用处，它用于含有隐变量的概率模型参数的极大似然估计，或极大后验概率（MAP）估计。隐变量的概率模型参数的极大似然估计可以理解为，使用的方法还是的极大似然估计，但是要处理隐变量。极大后验概率是一种Beyesian Inference，其实就是把极大似然估计中的参数赋予权值，这个权值是预先定义好的先验概率。可以来看下下表中Frequentist-Bayesian对峙的部分，来感受下EM算法的应用范围：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-5/88568881.jpg" width="500px" /></p>
+
+<!--more-->
+
+<p>下面我们先从一个Two-Component Gaussian Mixture Model为例，介绍EM算法。</p>
+
+<h2 id="two-component-gaussian-mixture-model">Two-Component Gaussian Mixture Model</h2>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-5/45836233.jpg" width="600px" /></p>
+
+<p>上图是一个mixture example，左边是我们观察到数据的直方图，右边红线是最大似然拟合的高斯密度函数，绿色的点是用来做两个模型的分类用。</p>
+
+<p>这里其实我们得到的是一些数据点，对于这些点的分布完全一无所知。先做出如下假设，这是两个高斯模型混合后的sample data。</p>
+
+<script type="math/tex; mode=display"> Y_1 \sim N(\mu_1, \theta_1^2) </script>
+
+<script type="math/tex; mode=display"> Y_2 \sim N(\mu_2, \theta_2^2) </script>
+
+<script type="math/tex; mode=display"> Y = (1 - \Delta)\cdot Y_1 + \Delta \cdot Y_2,\  \Delta \in \{0,1\}, Pr(\Delta =1) = \pi</script>
+
+<p>那么需要我们估计的参数就为 $(\pi, \theta_1, \theta_2) = (\pi, \mu_1, \sigma_1, \mu_2, \sigma_2)$，一共五个参数。使用似然估计，我们可以得到如下过程：</p>
+
+<script type="math/tex; mode=display"> g_Y(y) = (1-\pi)\phi_{\theta_1}(y) + \pi \phi_{\theta_2}(y) </script>
+
+<script type="math/tex; mode=display">log\ likelihood \to l(\theta; Z) = \sum_{i=1}^N log[(1-\pi)\phi_{\theta_1}(y_i) + \pi \phi_{\theta_2}(y_i)] </script>
+
+<p>最大化 $l(\theta; Z)$ 无疑是困难的，因为对数中含有加号。如果我们知道隐变量 $\Delta$ 的取值，那么参数估计就会变得容易，$\phi$ 的估计也就是 $\Delta_i=1$ 的比例，另外 $\theta_1,\theta_2$ 也就变成 $\Delta_i=0，\Delta_i=1$ 的似然估计。</p>
+
+<p>所以问题的关键是 $\Delta$ 的取值，解决问题的思路是采用迭代的方式，每次都用 $\Delta_i$ 的估计值替换：</p>
+
+<script type="math/tex; mode=display">\gamma_i(\theta) = E(\Delta_i \vert \theta,Z) = Pr(\Delta_i=1 \vert \theta,Z)</script>
+
+<p>如此 $\theta_1,\theta_2$ 自然也就可以由最大似然估计求出。在下一次过程中，$\gamma_i(\theta)$ 又可以由上一步估计的 $\theta_1,\theta_2$ 求出。所以我们首先需要给出参数的初始值，就可以由上述过程得到结果。算法入下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-5/24344888.jpg" width="550px" /></p>
+
+<p>这里需要注意的是，如果我们在某个点取 $\hat{\mu}_1 = y_i, \hat{\sigma}_1=0$ 那么我们可以去到最大的似然值，无限大，但这并不是有用的解。所以我们其实是求解 <u>a good local maximum of the likelihood</u>，因此我们可以设多个初值，最后选择似然值最大的解。</p>
+
+<h2 id="em-in-general">EM in General</h2>
+
+<p>EM算法被用于data augmentation，关于data augmentation的解释如下：</p>
+
+<blockquote>
+  <p>maximization of the likelihodd is difficult, but made easier by enlarging the sample with latent data</p>
+</blockquote>
+
+<p>上面的例子中我们设的latent data为 $\Delta$，是出于我们对模型的假设；其他的latent data还可以为丢失的观察值。接下来我们介绍EM的通用形式，先给出算法：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-5/67870944.jpg" width="550px" /></p>
+
+<p>上面的算法中，$Z$ 为观察值，log likelihood是 $l(\theta, Z)$。latent or missing data 为 $Z^m$， 完整的数据为 $T=(Z, Z^m$)，对比于上面的例子 $(Z, Z^m) = (y, \Delta)$。</p>
+
+<ul>
+  <li>E step就是完全数据 $T$ 的对数似然函数 $l_0(\theta’; T)$ 关于在给定观察数据 $Z$ 和当前参数 $\theta^{(j)}$ 下对未观察数据 $Z^m$ 的条件概率分布 $Pr(Z^m \vert Z, \theta^{(j)})$ 的期望，得到的是 $Z^m$ 的估计。</li>
+  <li>M step就是通过似然估计方法，求未观察数据 $Z^m$ 的条件概率分布的期望的最大值，得到参数 $\theta$ 的重新估计 $\theta’$，在下一个E中变为 $\theta^{(j+1)}$。</li>
+</ul>
+
+<p>上面叙述了EM的算法，那么为什么EM算法能有效，也就是近似实现对观测数据的极大似然估计呢？我们看到</p>
+
+<script type="math/tex; mode=display"> Pr(Z^m \vert Z, \theta') = \frac{Pr(Z^m,Z  \vert \theta')}{Pr(Z \vert  \theta')} </script>
+
+<script type="math/tex; mode=display"> \to Pr(Z \vert  \theta') = \frac{Pr(T  \vert  \theta')}{ Pr(Z^m \vert Z, \theta')} </script>
+
+<script type="math/tex; mode=display"> \to l(\theta'; Z) = l_0(\theta'; T) - l_1(\theta'; Z^m \vert Z) </script>
+
+<p>对由 $\theta$ 控制的分布 $T \vert Z$ 数据求期望可以得到：</p>
+
+<script type="math/tex; mode=display"> l(\theta'; Z) = E[l_0(\theta'; T) \vert Z,\theta] - E[l_1(\theta'; Z^m \vert Z) \vert Z,\theta] = Q(\theta', \theta) - R(\theta', \theta) </script>
+
+<p>在 $M\ step$ 中，EM算法求出可以使 $Q(\theta’, \theta)$ 最大化的 $\theta’$，而不是真正的目标函数 $l(\theta’; Z)$。为什么最大化 $Q(\theta’, \theta)$ 最终可以最大化 $l(\theta’; Z)$呢？</p>
+
+<p>可以看到 $R(\theta^*, \theta)$ 是由 $\theta^*$ 决定的条件分布的log-likelihood的期望，这个分布和由 $\theta$ 决定的条件分布是相同的。因此由 Jensen’s inequality 可以得到，$R(\theta’, \theta) \le R(\theta, \theta)$。具体的推导可以参考《统计学习方法》。所以如果 $\theta’$ 最大化 $Q(\theta’, \theta)$ 则</p>
+
+<script type="math/tex; mode=display"> l(\theta'; Z) - l(\theta; Z) = [Q(\theta', \theta) - Q(\theta, \theta)] - [R(\theta', \theta) - R(\theta, \theta)] \ge 0 </script>
+
+<p>所以说EM迭代中，$l(\theta’; Z)$ 一直都会在增大。</p>
+
+<blockquote>
+  <p>Jensen’s inequality, $E[\phi(X)] \ge \phi[E(X)]$, for Random variable $X$ and convex function $\phi(x)$</p>
+</blockquote>
+
+<p>也就是说在 $M step$ 中完全的最大化是没有必要的，我们只需要找到一个 $\theta^{(j+1)}$ 使得 $Q(\theta^{(j+1)}, \theta^{(j)}) - Q(\theta^{(j)}, \theta^{(j)})$。所以我们得到的EM收敛条件也就是 </p>
+
+<script type="math/tex; mode=display">% &lt;![CDATA[
+ \theta^{(j+1)} - \theta^{(j)} < \epsilon\ or\ Q(\theta^{(j+1)}, \theta^{(j)}) - Q(\theta^{(j)}, \theta^{(j)}) < \epsilon  %]]&gt;</script>
+
+<h2 id="em-as-max-max-procedure">EM as max-max Procedure</h2>
+
+<p>EM算法还可以看成是F 函数的极大极大算法， F函数定义如下</p>
+
+<script type="math/tex; mode=display"> F(\theta',  \tilde{P}) = E_{\tilde{P}}[l_0(\theta'; T)] - E_{\tilde{P}}[log \tilde{P}(Z^m)] </script>
+
+<p>$\tilde{P}(Z^m)$也就是隐变量 $Z^m$ 的分布, $- E_{\tilde{P}}[log \tilde{P}(Z^m)]$ 也就是 $\tilde{P}(Z^m)$ 的熵。于是EM算法可以由下图表示：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-5/44573110.jpg" width="500px" /></p>
+
+<p>也就是，设 $\theta^{(i)}$ 为第 $i$ 次迭代参数 $\theta$ 的估计，$\tilde{P}^{(i)}$ 为第 $i$ 次迭代参数 $\tilde{P}$ 的估计。在第 $i+1$ 次迭代的两步为：</p>
+
+<ul>
+  <li>对固定的 $\theta^{(i)}$，求 $\tilde{P}^{(i+1)}$ 使得 $F(\theta^{(i)},  \tilde{P})$ 极大化</li>
+  <li>对固定的 $\tilde{P}^{(i+1)}$，求 $\theta^{(i+1)}$ 使得 $F(\theta,  \tilde{P}^{(i+1)})$ 极大化</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

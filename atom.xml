@@ -4,7 +4,7 @@
   <title><![CDATA[Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-03-19T17:19:17+08:00</updated>
+  <updated>2016-03-22T10:40:09+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,89 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Table Join Semantics]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/03/19/table-join/"/>
+    <updated>2016-03-19T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/03/19/table-join</id>
+    <content type="html"><![CDATA[<p>这篇文章主要是记录下各种不同 <code>join</code> 的语义。</p>
+
+<p>在最高层面上，<code>join</code> 分为三种：</p>
+
+<ul>
+  <li>INNER</li>
+  <li>OUTER</li>
+  <li>CROSS</li>
+</ul>
+
+<!--more-->
+
+<hr />
+
+<ol>
+  <li>
+    <p><code>INNER JOIN</code> - fetches data if present in both the tables.</p>
+  </li>
+  <li>
+    <p><code>OUTER JOIN</code> are of 3 types:</p>
+
+    <ul>
+      <li><code>LEFT OUTER JOIN</code> - fetches data if present in the left table.</li>
+      <li><code>RIGHT OUTER JOIN</code> - fetches data if present in the right table.</li>
+      <li><code>FULL OUTER JOIN</code> - fetches data if present in either of the two tables.</li>
+    </ul>
+  </li>
+  <li>
+    <p><code>CROSS JOIN</code>, as the name suggests, does [n X m] that joins everything to everything. Similar to scenario where we simply lists the tables for joining (in the FROM clause of the SELECT statement), using commas to separate them.</p>
+  </li>
+</ol>
+
+<p>重点关注前两种，因为在语法中它们包含 <code>join</code> 这个关键词。语法如下：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">&lt;join_type&gt; ::= 
+</span><span class="line">    [ { INNER | { { LEFT | RIGHT | FULL } [ OUTER ] } } [ &lt;join_hint&gt; ] ]
+</span><span class="line">    JOIN</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p><code>OUTER</code>是一个可选词，有没有对于语义并没有什么区别。解释下上面的语法，可以看到以下的用法是等价的：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">A LEFT JOIN B            A LEFT OUTER JOIN B
+</span><span class="line">A RIGHT JOIN B           A RIGHT OUTER JOIN B
+</span><span class="line">A FULL JOIN B            A FULL OUTER JOIN B
+</span><span class="line">A INNER JOIN B           A JOIN B</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p><img src="http://i.stack.imgur.com/qje6o.png" width="500px" /></p>
+
+<p>结果可以看到是这样的：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">Table A | Table B     Table A | Table B      Table A | Table B      Table A | Table B
+</span><span class="line">   1    |   5            1    |   1             1    |   1             1    |   1
+</span><span class="line">   2    |   1            2    |   2             2    |   2             2    |   2
+</span><span class="line">   3    |   6            3    |  null           3    |  null           -    |   -
+</span><span class="line">   4    |   2            4    |  null           4    |  null           -    |   -
+</span><span class="line">                        null  |   5             -    |   -            null  |   5
+</span><span class="line">                        null  |   6             -    |   -            null  |   6
+</span><span class="line">
+</span><span class="line">                      OUTER JOIN (FULL)     LEFT OUTER (partial)   RIGHT OUTER (partial)</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Hidden Markov Model]]></title>
@@ -3439,162 +3522,6 @@ counts = ones.runningReduce((a, b) =&gt; a+b)
   <li>对于预测任务，只要有一个首先成功的话会commit，另外一个则abort。</li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[PID File Analysis]]></title>
-    <link href="http://billowkiller.github.io/blog/2015/07/26/pid-file-analysis/"/>
-    <updated>2015-07-26T16:57:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2015/07/26/pid-file-analysis</id>
-    <content type="html"><![CDATA[<h1 id="pid-">pid 文件浅析</h1>
-
-<p>在Linux系统的目录/var/run下面一般我们都会看到很多的*.pid文件。而且往往新安装的程序在运行后也会在/var/run目录下面产生自己的pid文件。那么这些pid文件有什么作用呢？它的内容又是什么呢？</p>
-
-<!--more-->
-
-<h3 id="pid">pid文件的内容</h3>
-
-<p>pid文件为文本文件，内容只有一行, 记录了该进程的ID。
-用cat命令可以看到。</p>
-
-<h3 id="pid-1">pid文件的作用</h3>
-
-<p>防止进程启动多个副本。只有获得pid文件固定路径固定文件名)写入权限(F_WRLCK)的进程才能正常启动并把自身的PID写入该文件中。其它同一个程序的多余进程则自动退出。</p>
-
-<h3 id="section">编程技巧</h3>
-
-<p>调用fcntl设置pid文件的锁定F_SETLK状态，其中锁定的标志位F_WRLCK。
-如果成功锁定，则写入进程当前PID，进程继续往下执行。
-如果锁定不成功，说明已经有同样的进程在运行了，当前进程结束退出。</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>pid usage</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="n">lock</span><span class="p">.</span><span class="n">l_type</span> <span class="o">=</span> <span class="n">F_WRLCK</span><span class="p">;</span>
-</span><span class="line"><span class="n">lock</span><span class="p">.</span><span class="n">l_whence</span> <span class="o">=</span> <span class="n">SEEK_SET</span><span class="p">;</span>
-</span><span class="line"><span class="k">if</span> <span class="p">(</span><span class="n">fcntl</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">F_SETLK</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lock</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">){</span>
-</span><span class="line">    <span class="c1">//锁定不成功, 退出......</span>
-</span><span class="line"><span class="p">}</span>
-</span><span class="line"><span class="n">sprintf</span> <span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="s">&quot;%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="n">pid</span><span class="p">);</span>
-</span><span class="line"><span class="n">pidsize</span> <span class="o">=</span> <span class="n">strlen</span><span class="p">(</span><span class="n">buf</span><span class="p">);</span>
-</span><span class="line"><span class="k">if</span> <span class="p">((</span><span class="n">tmp</span> <span class="o">=</span> <span class="n">write</span> <span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="n">pidsize</span><span class="p">))</span> <span class="o">!=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">pidsize</span><span class="p">){</span>
-</span><span class="line">    <span class="c1">//写入不成功, 退出......</span>
-</span><span class="line"><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<h3 id="section-1">一些注意事项：</h3>
-
-<ol>
-  <li>如果进程退出，则该进程加的锁自动失效。</li>
-  <li>如果进程关闭了该文件描述符fd， 则加的锁失效。(整个进程运行期间不能关闭此文件描述符)</li>
-  <li>锁的状态不会被子进程继承。如果进程关闭则锁失效而不管子进程是否在运行。
- (Locks are associated with processes. A process can only have one kind of lock set for each byte of a given file. When any file descriptor for that file is closed by the process, all of the locks that process holds on that file are released, even if the locks were made using other descripors that remain open. Likewise, locks are released when a process exits, and are not inherited by child processes created using fork.)</li>
-</ol>
-
-<h3 id="section-2">其他</h3>
-
-<p><strong>C的fcntl函数：</strong></p>
-
-<pre><code>int fcntl(int fd, int cmd, struct flock *lock);
-</code></pre>
-
-<p>参数cmd代表欲垄断的号召</p>
-
-<ul>
-  <li>F_DUPFD 复制参数fd的文件描写符，厉行获胜则归来新复制的文件描写符，</li>
-  <li>F_GETFD 获得close-on-exec符号，若些符号的FD_CLOEXEC位为0，代表在调用exec()相干函数时文件将不会关闭</li>
-  <li>F_SETFD 设置close-on-exec符号，该符号以参数arg的 FD_CLOEXEC位定夺</li>
-  <li>F_GETFL 获得open()设置的符号</li>
-  <li>F_SETFL 改换open()设置的符号</li>
-  <li>F_GETLK 获得文件锁定的事态，依据lock的描写，定夺是否上文件锁</li>
-  <li>F_SETLK 设置文件锁定的事态，此刻flcok，构造的l_tpye值定然是F_RDLCK、F_WRLCK或F_UNLCK，
-万一无法发生锁定，则归来-1</li>
-  <li>F_SETLKW 是F_SETLK的阻塞版本，在无法获得锁时会进去睡眠事态，万一能够获得锁可能捉拿到信号则归来</li>
-</ul>
-
-<p>参数lock指针为flock构造指针定义如下</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>flock structure</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">struct</span> <span class="n">flock</span> <span class="p">{</span>
-</span><span class="line">	<span class="p">...</span>
-</span><span class="line">	<span class="kt">short</span> <span class="n">l_type</span><span class="p">;</span>
-</span><span class="line">	<span class="kt">short</span> <span class="n">l_whence</span><span class="p">;</span>
-</span><span class="line">	<span class="kt">off_t</span> <span class="n">l_start</span><span class="p">;</span> <span class="err">锁定区域的开关位置</span>
-</span><span class="line">	<span class="kt">off_t</span> <span class="n">l_len</span><span class="p">;</span> <span class="err">锁定区域的大小</span>
-</span><span class="line">	<span class="n">pid_t</span> <span class="n">l_pid</span><span class="p">;</span> <span class="err">锁定动作的历程</span>
-</span><span class="line">	<span class="p">...</span>
-</span><span class="line"><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>1_type有三种事态：</p>
-
-<ul>
-  <li>F_RDLCK读取锁（分享锁）</li>
-  <li>F_WRLCK写入锁（排斥锁）</li>
-  <li>F_UNLCK解锁</li>
-</ul>
-
-<p>l_whence也有三种措施</p>
-
-<ul>
-  <li>SEEK_SET以文件开始为锁定的起始位置</li>
-  <li>SEEK_CUR以现在文件读写位置为锁定的起始位置</li>
-  <li>SEEK_END以文件尾为锁定的起始位置</li>
-</ul>
-
-<p><strong>Python用法:</strong></p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>test_fcntl.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="kn">import</span> <span class="nn">signal</span><span class="o">,</span> <span class="nn">fcntl</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">time</span>
-</span><span class="line">
-</span><span class="line"><span class="k">def</span> <span class="nf">signal_handler</span><span class="p">(</span><span class="n">signum</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
-</span><span class="line">    <span class="n">fcntl</span><span class="o">.</span><span class="n">flock</span><span class="p">(</span><span class="n">pid_file</span><span class="p">,</span> <span class="n">fcntl</span><span class="o">.</span><span class="n">LOCK_UN</span><span class="p">)</span>
-</span><span class="line">    <span class="n">pid_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-</span><span class="line">    <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">pid_path</span><span class="p">)</span>
-</span><span class="line">    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-</span><span class="line">
-</span><span class="line"><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
-</span><span class="line">    <span class="n">pid_path</span> <span class="o">=</span> <span class="s">&#39;test.pid&#39;</span>
-</span><span class="line">    <span class="n">pid_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">pid_path</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
-</span><span class="line">    <span class="n">fcntl</span><span class="o">.</span><span class="n">flock</span><span class="p">(</span><span class="n">pid_file</span><span class="p">,</span> <span class="n">fcntl</span><span class="o">.</span><span class="n">LOCK_EX</span> <span class="o">|</span> <span class="n">fcntl</span><span class="o">.</span><span class="n">LOCK_NB</span><span class="p">)</span>
-</span><span class="line">    <span class="n">pid_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">())</span>
-</span><span class="line">    <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">signal_handler</span><span class="p">)</span>
-</span><span class="line">    <span class="k">while</span><span class="p">(</span><span class="bp">True</span><span class="p">):</span>
-</span><span class="line">        <span class="k">print</span> <span class="s">&quot;Hello World&quot;</span>
-</span><span class="line">        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
 ]]></content>
   </entry>
   

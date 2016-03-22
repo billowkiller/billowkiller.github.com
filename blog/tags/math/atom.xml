@@ -4,7 +4,7 @@
   <title><![CDATA[tags: math | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/math/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-03-19T17:19:17+08:00</updated>
+  <updated>2016-03-22T10:40:09+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,140 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[PCA and SVD]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/02/26/pca-svd/"/>
+    <updated>2016-02-26T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/02/26/pca-svd</id>
+    <content type="html"><![CDATA[<p>PCA即为（Principal Components Analysis）主成分分析，SVD是（Singular value decomposition）奇异值分解。从字面上的理解就可以看出这两个并不是在同一语义层面的东西。之所以把这两个放在一块，一是为了文章的完整性，二是为了说明二者在数据转换（基转换）上的共性。</p>
+
+<!--more-->
+
+<h2 id="principal-components-analysis">Principal Components Analysis</h2>
+
+<p>由于采样的受限，我们的观察值并不能最有效的反应出事物的特征，因此我们希望大而全的收集能收集到的所有数据。但是这里面存在两个问题：噪声和冗余。因此在描述事物的时候，我们希望能够排除这些多余的甚至是错误的数据，得到最简洁，最省力的数据。</p>
+
+<p>那么什么是最简洁，最省力的数据呢？把我们的观察值想象成一个向量空间，排除噪声和冗余后，那么这个空间上的点应该可以用一系列的正交单位向量缩放后的向量和表示。这个就是PCA的目的。</p>
+
+<p>在上面的描述中，有一些很重要的假设：</p>
+
+<ul>
+  <li>原有的基是通过线性转化转化为现有空间的基，否则就是Kernel PCA</li>
+  <li>现有空间的基是正交的</li>
+  <li>每个维度数据的均值和方差是充分统计的。</li>
+  <li>数据中方差能够表示数据的重要程度。</li>
+</ul>
+
+<p>第一点比较容易理解，其实是做了一些限制，限制潜在最优基的数目并且相信数据集存在线性的连续性，即我们可以用线性的方式内推出独立的数据点。第二点就比较直接，直觉上是合理的并且可以用线性代数的矩阵分解解决。</p>
+
+<p>第三点比较复杂，充分统计的意思是可以用均值和方差完整的描述数据的概率分布。如果方差为0，只用方差完整的描述概率分布的只有高斯分布。也就是说维度上的数据服从高斯分布，如果不服从呢，这就涉及到ICA算法（Independent Component Analysis）。根据中心极限定理，PCA还是比较robust的一种解决方案。</p>
+
+<p>第四点来自信号处理，认为信号具有较大的方差，噪声有较小的方差，信噪比(Signal-to-noise ratio, SNR)就是信号与噪声的方差比，越大越好。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-24/39988407.jpg" width="600px" /></p>
+
+<p>噪声可以用<em>SNR</em>量化表示，那么冗余呢？冗余可以用协方差表示。如果向量 $a$、向量 $b$ 的协方差为0，则代表 $a$ 和 $b$ 完全没有关系，协方差越大则关联的程度越高。<u>这里对所有的数据集都是*mean deviaton form*，即均值为0。</u>则我们可以得到向量 $a$ 和向量 $b$ 的协方差 $\delta_{ab}^2 = \frac{1}{n-1}ab^T$，之所以除以 $n-1$ 是为了得到无偏估计，因为样本中的最后一个值可以通过均值推到出来。</p>
+
+<p>假设原有的输入是一个 $m \times n$ 的矩阵，m是特征维度，n是样本数量，那么它的协方差矩阵为 $S_x = \frac{1}{n-1}XX^T$. $S_x$ 是 $m \times m$ 的矩阵，<strong>表示特征之间的关联程度</strong>。$S_x$ 量化了原有任意两个维度数据之间的关系。那么既然如此，我们希望 $S_x$ 是什么样的？答案就是非对角元素全为0，表示任意维度之间的数据没有冗余，这个过程叫对角化（Diagonalize）得到的协方差矩阵我们成为 $S_y$。</p>
+
+<p>有很多种方法可以实现对角化，PCA选择特征值分解的方法。现在问题定义如下，找到一个正交矩阵 $P$，$Y=PX$, 使得 $S_y = \frac{1}{n-1}YY^T$ 是对角化的矩阵。这时，$P$ 的每排就是 $X$ 的 principal components。这也是PCA名字的由来，$Y$ 是经过矩阵 $P$ 线性转换后的矩阵。$S_y$ 用 $P$ 表示：</p>
+
+<script type="math/tex; mode=display"> S_y = \frac{1}{n-1}YY^T = \frac{1}{n-1}PXX^TP^T = \frac{1}{n-1}PAP^T </script>
+
+<p>这里 $A=XX^T$ 是一个 $m \times m$  的对称矩阵。对称矩阵可以由特征向量构成的正交矩阵表示 $A=EDE^T$，$D$ 是对角矩阵，$E$ 的列向量为 $A$ 的特征向量。如果 $P=E^T$，即 $P$ 的行向量为 $A$ 的特征向量，则有</p>
+
+<script type="math/tex; mode=display">S_y = \frac{1}{n-1}PAP^T = \frac{1}{n-1}(PP^T)D(PP^T) = \frac{1}{n-1}D</script>
+
+<p>可以看到 $P$ 对角化 $S_y$，这就是PCA要求的。下面我们总结下</p>
+
+<ul>
+  <li>$X$ 的<strong>主成分</strong>也就是 $XX^T$ 的特征向量，或者 $P$ 的行向量。</li>
+  <li>$S_y$ 的第 $i$ 个对角值（特征值）也就是 $X$ 在 $p_i$方向上的方差。</li>
+</ul>
+
+<p>所以PCA的计算很简单，就两个步骤</p>
+
+<ol>
+  <li>计算dataset的<em>mean deviaton form</em></li>
+  <li>计算$XX^T$的特征分解。</li>
+</ol>
+
+<p>PCA可以选择最大的几个特征值降维，也可以防止overfitting，但是经过线性变换后拟合的函数就不好理解了。</p>
+
+<h2 id="singular-value-decomposition">Singular value decomposition</h2>
+
+<p>SVD是另外一种基变换的更通用的方法，二者在使用上通常可以互相的替换。SVD和上文中提到的特征值分解都是一种矩阵的对角化分解方法。</p>
+
+<p>假设 $X$ 是任意 $m \times n$ 矩阵，$XX^T$ 是秩为 $r$ 的对称矩阵，我们定义</p>
+
+<ul>
+  <li>$(v_1, v_2,…v_r)$ 是 $XX^T$ 的 $n \times 1$ 的特征向量，特征值为 $(\lambda_1, \lambda_2,…\lambda_r)$, $(XX^T)v_i = \lambda_i v_i$。</li>
+  <li>$\sigma_i = \sqrt{(n-1) \lambda_i}$ 为正实数，也被成为奇异值。</li>
+  <li>$(u_1, u_2,…u_r)$ 是 $m \times 1$ 的正交向量集，$u_i = \frac{1}{\sigma_i}Xv_i$</li>
+</ul>
+
+<p>重新组织下第三个定义，有 $Xv_i=\sigma_iu_i$, $U = (u_1, u_2,…u_r)，V = (v_1, v_2,…v_r)$ 都是定义在 $r$ 维空间的正交基。用任意的 $(m-r), (n-r)$ 正交向量补充到 $U, V$ 中，得到 $m$ 和 $n$ 维的 $U、V$，我们有下面用一个矩阵乘法：$XV=U \Sigma$, 其中</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-24/86503163.jpg" width="200px" /></p>
+
+<p>因为 $V$ 是正交的，所以上式又可以写成</p>
+
+<script type="math/tex; mode=display"> X=U \Sigma V^T </script>
+
+<p>这个就是奇异值分解，表示任意的矩阵都可以表示一个正交矩阵，一个对角矩阵和另一个正交矩阵的乘积，或者说是旋转、拉伸和另外一个旋转。其中，$U_{m \times m}$ 是左奇异向量矩阵，$V_{n \times n}$ 是右奇异向量矩阵。</p>
+
+<p>关于奇异值分解的问题最常用的算法分为两大类，QR分解和Jacobi选择，这里就不细说。</p>
+
+<h3 id="pcasvd">PCA和SVD的关系</h3>
+
+<p>通常来说，PCA要求计算协方差矩阵的特征值和特征向量，因为协方差矩阵是对称的，因此是可对角化的，特征向量也是正交的。对于SVD，我们有</p>
+
+<script type="math/tex; mode=display">XX^T=(U\Sigma V)(U\Sigma V)^T = U \Sigma^2 U^T</script>
+
+<p>复习下介绍PCA时我们的到的公式：</p>
+
+<script type="math/tex; mode=display">XX^T = (n-1)P^TS_yP</script>
+
+<p>这时二者的关系就很清晰了，$P、U$ 都是正交矩阵：</p>
+
+<ul>
+  <li>
+    <p>$XX^T$ 的特征值 $\lambda=\frac{\sigma^2}{n-1}$</p>
+  </li>
+  <li>
+    <p>$\frac{1}{\sqrt{n-1}}X$ 经过SVD分解后的 $U$ 的列向量也正是PCA中的主成分。</p>
+  </li>
+</ul>
+
+<p>所以我们在PCA的最后一步中可以用SVD或者特征分解。但是SVD在数值上的精确程度会高于特征分解，因为计算 $XX^T$ 可能会带来一些精度的损失。</p>
+
+<h3 id="svd">SVD的说明</h3>
+
+<p>可以对SVD进行一些有趣的变换:</p>
+
+<script type="math/tex; mode=display"> U^TX = \Sigma V^T </script>
+
+<script type="math/tex; mode=display"> U^TX = Z </script>
+
+<p>定义 $Z=\Sigma V^T$ 可以看到 $U^T$ 是改变了 $X$ 的基，使其变成 $Z$, 这里是改变了 $X$ 的列向量。同理对于 $V$ 来说，$V^TX^T = U^T \Sigma$ 这是改变 $X$ 的行向量。而 $\Sigma$ 则表示对某些维度的缩放，之所以说某些维度是 $\Sigma$ 中有为0的奇异值，非0奇异值的个数也就是矩阵的秩的大小。</p>
+
+<p>$\Sigma$中奇异值的大小和特征值有关系，表示特征的重要程度，因此我们可以令奇异值较小的数0，这样重新计算 $X$ 的时候也就进行降噪和去冗余。</p>
+
+<p>总的来说，无论是特征分解还是奇异值分解，都是为了让人们对矩阵（或者线性变换）的作用有一个直观的认识。通过特征分解和奇异值分解我们可以更加明白这些矩阵信息背后的真实含义，简化我们对矩阵的认识。</p>
+
+<p>关于更多对SVD物理意义的说明可以参考<a href="http://www.ams.org/samplings/feature-column/fcarc-svd">http://www.ams.org/samplings/feature-column/fcarc-svd</a>.</p>
+
+<h2 id="limits-and-extensions-of-pca">Limits And Extensions of PCA</h2>
+
+<p>可以看到PCA是无参数分析的，所以只需要做出上文提到的假设，无需对参数进行训练和选择就可以得到结果。但是也正是上述假设所限，如果一个人正好知道数据的一些先验知识，那么他也无法通过这些先验知识得到更好的分析结果，这个时候如果能够将这些先验知识融入有参数的算法中会得到更好的结果。</p>
+
+<p>如果这个先验知识表示需要做些数据的非线性转化（kernel transformation），那么这样的参数算法就是<code>kernel PCA</code>。</p>
+
+<p>有时候需要作出如下假设，主成分不必正交，特征数据的分布也不是高斯分布。那么可以用<code>Idependent Component Analysis</code>解决，它和PCA有同意的目的，降噪和去冗余。</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Gradient Descent and Newton Method]]></title>
