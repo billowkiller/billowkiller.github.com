@@ -45,9 +45,9 @@ data pipeline目的在于获取数据并能够发掘其中的价值。数据工�
 
 以下是前端获取数据后的展示效果图：
 
-<img src="http://i4.tietuku.com/50dd01cd4f5db9c2.png" width="350px"/>
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-1-24/88317070.jpg" width="350px"/>
 
-<img src="http://i4.tietuku.com/93356a3071840b10.png" width="400px"/>
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-23/77070404.jpg" width="400px"/>
 
 接下来通过三步骤对这个解决方案在BMR中的实现进行详细的阐述。
 
