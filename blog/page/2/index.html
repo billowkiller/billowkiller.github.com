@@ -174,6 +174,110 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-02-18T14:00:00+08:00" pubdate data-updated="true">Feb 18<span>th</span>, 2016</time>
+        
+           | <a href="/blog/2016/02/18/ensemble/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2016/02/18/ensemble/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2016/02/18/ensemble/">Ensemble Methods</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>Ensemble<code>|ɒnˈsɒmbl|</code> Methods 称为集成方法，它还有其他类似的名字，meta-algorithm、aggregation model，这些都代表这同一个意思，就是不同弱分类器的组合成一个强分类器。这里的弱分类器要比随机猜测的结果好，错误率小于50%；弱分类器可以是决策树、逻辑回归、朴素贝叶斯等算法。Ensemble的形式有很多种：</p>
+
+<ul>
+  <li>不同算法的集成;</li>
+  <li>同一算法在不同设置下的集成;</li>
+  <li>数据集不同部分分配给不同分类器之后的集成。</li>
+</ul>
+
+<p>那么这多个弱分类器又是如何组合的呢，下面给出一个big picture，后面的文章也是对其的阐述。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-18/38802537.jpg" width="450px" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2016/02/18/ensemble/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-02-17T14:00:00+08:00" pubdate data-updated="true">Feb 17<span>th</span>, 2016</time>
+        
+           | <a href="/blog/2016/02/17/lr-and-lda/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2016/02/17/lr-and-lda/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2016/02/17/lr-and-lda/">Logistic Regression and Linear Discriminant Analysis</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>在回归方法中，我们找一个超平面作为类与类之间的decision boundary。回归方法为每个分类建立一个判别函数 $\sigma_k (x)$, 对任意的 $x$，选出得到最大值的判别函数最为归属类。对于后验概率模型 $Pr(G = k|X = x)$ 也是使用同样的方法。对于$\sigma_k (x) 和 Pr(G = k|X = x)$ 来说，只要它们是线性的，那么得到的decision boundary也是线性的。</p>
+
+<p>虽然无法直接使得 $\sigma_k (x) 和 Pr(G = k|X = x)$ 是线性的，但是如果有一个单调的转化函数能够使得是线性的，那么我们也可以得到一个超平面分割数据点。</p>
+
+<p>Logistic Regression 和 Linear Discriminant Analysis就是基于这样的需求构造的模型。</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2016/02/17/lr-and-lda/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-02-15T14:00:00+08:00" pubdate data-updated="true">Feb 15<span>th</span>, 2016</time>
         
            | <a href="/blog/2016/02/15/gradient-descent-and-newton-method/#disqus_thread"
@@ -542,102 +646,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-07-26T17:23:00+08:00" pubdate data-updated="true">Jul 26<span>th</span>, 2015</time>
-        
-           | <a href="/blog/2015/07/26/mr-design-pattern/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2015/07/26/mr-design-pattern/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2015/07/26/mr-design-pattern/">Design Patterns for MapReduce Algorithms</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix">
-</div>
-  
-  
-
-
-        </article>
-      
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-07-26T17:23:00+08:00" pubdate data-updated="true">Jul 26<span>th</span>, 2015</time>
-        
-           | <a href="/blog/2015/07/26/mapreduce-framework/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2015/07/26/mapreduce-framework/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2015/07/26/mapreduce-framework/">Mapreduce Framework</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><h2 id="mapreduce">MapReduce框架</h2>
-
-<p>mapReduce 的输入是hdfs上存储的一系列文件集。在hadoop中，这些文件被一种定义了如何分割一个文件成分片的input format来分割，一个分片是一个文件基于字节的可以被一个map任务加载的一个块。</p>
-
-<ul>
-  <li>每个map任务被分为以下阶段：<code>record reader</code>，<code>mapper</code>，<code>combiner</code>，<code>partitioner</code>。Map任务的输出叫中间数据，包括keys和values，发送到reduce端。</li>
-  <li>Reduce任务分为以下阶段：<code>shuffle</code>，<code>sort</code>，<code>reduce</code>，<code>output format</code>。运行map任务的节点会尽量选择数据所在的节点。这种情况下，不会出现网络传输，在本地节点就可以完成计算。</li>
-</ul>
-
-<p>过程如图所示，接下来的章节会一一介绍。</p>
-
-<p><img src="https://farm3.static.flickr.com/2275/3529146683_c8247ff6db_o.png" alt="" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2015/07/26/mapreduce-framework/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -661,15 +669,15 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/04/09/recsys-introduction/">Recommender System in a Nutshell</a>
+    
+    <a class="list-group-item " href="/blog/2016/04/06/kafka/">Kafka Introduction</a>
+    
     <a class="list-group-item " href="/blog/2016/03/19/table-join/">Table Join Semantics</a>
     
     <a class="list-group-item " href="/blog/2016/03/19/hmm/">Hidden Markov Model</a>
     
     <a class="list-group-item " href="/blog/2016/03/16/rs-note/">Practice in Recommend System</a>
-    
-    <a class="list-group-item " href="/blog/2016/03/06/apriori/">Apriori and FP-Growth</a>
-    
-    <a class="list-group-item " href="/blog/2016/03/05/em/">Expectation Maximization</a>
     
   </div>
 </section>
@@ -737,6 +745,18 @@ body {
     <a class="list-group-item " href="/blog/categories/big-data/index.html">
         <span class="badge">7</span>
         Big Data
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/big-data/index.html">
+        <span class="badge">1</span>
+        big data
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
+        <span class="badge">1</span>
+        machine learning
       </a>
     
   </div>

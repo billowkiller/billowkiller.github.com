@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: unfinished | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/unfinished/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2016-04-09T15:42:39+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Recommender System in a Nutshell]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/04/09/recsys-introduction/"/>
+    <updated>2016-04-09T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/04/09/recsys-introduction</id>
+    <content type="html"><![CDATA[<p>推荐系统（Recommender System An Introduction）读书笔记。</p>
+
+<!--more-->
+
+<h2 id="section">基于内容的推荐系统</h2>
+
+<p>基于内容的推荐：基于两类信息，<code>物品特征的描述</code>和描述用户兴趣的<code>用户记录</code>（比如喜爱的物品特点）。</p>
+
+<p>一般工作原理是评估用户还没有看到的物品与当前用户过去喜欢的物品的相似度。那么如何表示物品的内容以及相似度？</p>
+
+<p>描述物品目录最简单的方法就是维护每个物品特征的详细列表，<strong>属性集、特征集或物品记录</strong>。另外可以使用<code>关键词列表</code>表示文档内容，好处是能够从文档内容本身自动生成列表。</p>
+
+<p>为了防止<code>通用词</code>和<code>长文档</code>带来的推荐结果偏置，一般会使用TF-IDF计算关键词的权重。给出下列公式：</p>
+
+<script type="math/tex; mode=display"> TF(i, j) = \frac{freq(i,j)}{maxOthers(i,j)},\ IDF(i) = log\frac{N}{n(i)} </script>
+
+<script type="math/tex; mode=display"> TF-IDF(i, j) = TF(i,j) \cdot IDF(i) </script>
+
+<p>$TF(i,j)$ 表示文档 $j$ 中关键词 $i$ 的<code>归一化词频值</code>，$freq(i,j)$ 表示 $i$ 在 $j$ 中出现的绝对频率； $maxOthers(i,j)$ 表示 $j$ 中其他关键词的最大词频。 $N$ 为所有可推荐文档数量，$n(i)$ 为关键词 $i$ 出现过文档的数量。</p>
+
+<p>归一化是针对长文档，IDF 是针对通用词</p>
+
+<p>从文本中抽取关键词并赋予权值的做法局限性为</p>
+
+<ul>
+  <li>向量通常大而稀疏，通过以下几种技术改进：
+    <ul>
+      <li>停用词和词干还原</li>
+      <li>特征选择，仅用信息量最大的一些词来减少文档描述规模，期望删除噪声。</li>
+      <li>选用短语</li>
+    </ul>
+  </li>
+  <li>没有考虑到文档上下文</li>
+</ul>
+
+<p>User-CF为“推荐相似用户喜欢的物品”，基于内容的推荐可以描述成“推荐与用户过去喜欢的物品相似的物品”。通常的基于内容相似度检索技术为：</p>
+
+<ul>
+  <li>KNN
+    <ul>
+      <li>用余弦相似度评估两个文档的向量是否相似；</li>
+      <li>可以考虑用户的短期兴趣和长期兴趣，适合于个性化的新闻推荐；</li>
+      <li>易于实现，能够快速适应新近变化，只需要相对少的评分数据；</li>
+      <li>预测精确度较低。</li>
+    </ul>
+  </li>
+  <li>相关项反馈——Rocchio方法</li>
+</ul>
+
+<p>另外可以将基于内容的推荐看成分类问题。</p>
+
+<p>典型的是朴素贝叶斯方法，基本上有两种对文档及其特征建模的方法：<strong>多项式模型和伯努利模型</strong>，二者都忽略词的<code>位序</code>问题。多元伯努利模型中，文档被处理成一个二进制向量，描述某个词是否包含在文档中；多项式模型中，考虑词出现在文档中的次数，分类结果会比莫努力模型好些。</p>
+
+<p>在多项式模型中，词 $v_i$ 出现在 $c$ 类文档的条件概率为：</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>$$ P(v_i</td>
+      <td>C=c) = \frac{CountTerms(v_i, docs(c))+1}{AllTerms(docs(c))+\vert V \vert}$$</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>上式采用<code>拉普拉斯平滑</code>以防止条件概率为 0，$\vert V \vert$ 为所有文档中不同词的数量。</p>
+
+<p>朴素贝叶斯分类器能够达到很高的精确度，并且其组成部分能够在获得新数据时很容易更新，且学习时间复杂度随样本数量线性增加。</p>
+
+<p>上文提到过<code>特征选择</code>问题，原始的大而稀疏向量会导致性能和内存需求问题，并且容易导致过拟合。典型的可以采用 $\chi^2$ 检验或 Fisher 判别指标。</p>
+
+<p>$\chi^2$ 检验是检测两个时间是否不相干的标准统计方法。在特征选择中，根据训练数据分析某种分类结果是否与某个具体词的出现有联系。基于$\chi^2$ 检验来选择特征，首先按词的$\chi^2$ 值大小降序排列；其次需要确定用于分类器的理想特征数目。</p>
+
+<p>基于内容的推荐系统有许多局限：</p>
+
+<ul>
+  <li><strong>浅层内容分析</strong>。</li>
+  <li>推荐结果缺乏新颖性，倾向于给出相同的推荐。</li>
+  <li>冷启动问题，需要来自用户的初始评分集合。</li>
+</ul>
+
+<h2 id="section-1">协同过滤</h2>
+
+<p>协同过滤推荐方法的主要思想：利用已有用户群过去的行为或意见预测当前用户最可能喜欢那些东西或对那些东西感兴趣。纯粹的协同方法输入只有用户-物品评分矩阵，输出可以为：</p>
+
+<ol>
+  <li>当前用户对物品的评分</li>
+  <li>TopN推荐物品列表</li>
+</ol>
+
+<h3 id="section-2">基于用户的最近邻推荐</h3>
+
+<p>这是一种早期方法，对当前用户没有见过的物品 $p$，利用近邻对物品的评价计算预测值。潜在的假设为：</p>
+
+<ol>
+  <li>如果用户过去有相似的偏好，未来也会有相似的偏好</li>
+  <li>用户偏好不会随着时间而改变</li>
+</ol>
+
+<p>确定相似用户集，通常用的方法是Pearson相关系数。给定评分矩阵R，$\bar{r}_a$ 代表用户a的平均评分，用户a和用户b的相似度 $sim(a,b)$ 表示</p>
+
+<script type="math/tex; mode=display"> sim(a,b) = \frac{\sum_{p \in P}(r_{a,p}-\bar{r}_a)(r_{b,p}-\bar{r}_b)}{\sqrt{\sum_{p \in P}(r_{a,p}-\bar{r}_a)^2}\sqrt{\sum_{p \in P}(r_{b,p}-\bar{r}_b)^2}}</script>
+
+<p>Pearson方法考虑到用户评分标准并不相同的事实，可以发现评分值之间存在的线性相关性。但是对于广受大众欢迎的物品相似度会更高，可以类似TF-IDF，引入反用户频率(IUF)计算。用户a对物品p的预测值如下：</p>
+
+<script type="math/tex; mode=display">pred(a,p) = \bar{r}_a + \frac{\sum_{b \in N}sim(a,b)(r_{b,p}-\bar{r}_b)}{\sum_{b \in N}sim(a,b)}</script>
+
+<p>预测的时候可以降低近邻规模减少计算复杂度，可以将用户相似度定义一个具体的最小阈值，或者将规模大小限制为一个固定值，只考虑K个最近邻。阈值会影响可预测物品的覆盖率，但是K值不会影响，它却会带来bias-variance tradeoff。</p>
+
+<p>对于基于用户的推荐系统，Pearson相关系数比其他方法更胜一筹，但是对于基于物品的推荐技术，余弦相似度会比Pearson相关度量表现更好。</p>
+
+<p>基于物品的算法主要思想是利用物品相似度，而不是用户相似度。</p>
+
+<p>在基于物品的推荐中，通常使用改进版的余弦相似度，在原有的基础上减去评分的平均值，得到的结果类似于Pearson方法，取值在-1到+1之间，公式如下：</p>
+
+<script type="math/tex; mode=display"> sim(a,b) = \frac{\sum_{u \in U}(r_{u,a}-\bar{r}_u)(r_{u,b}-\bar{r}_u)}{\sqrt{\sum_{u \in U}(r_{u,a}-\bar{r}_u)^2}\sqrt{\sum_{u \in U}(r_{u,b}-\bar{r}_u)^2}}</script>
+
+<p>预测公式为加权评分综合：</p>
+
+<script type="math/tex; mode=display">pred(u,p) = \frac{\sum_{i \in ratedItems(u)}sim(i,p) \cdot r_{u,i}}{\sum_{i \in ratedItems(u)}sim(i,p)}</script>
+
+<p>基于物品的推荐可以离线构建一个物品相似度矩阵加速线上预测。在线上，通过确定与p最相似的物品，并计算u对这些领巾物品评分的加权综合得到u对p的预测评分。</p>
+
+<p>原则上这种方法对基于用户的推荐也适用，但是实际情况中，两个用户评分重叠情况非常少见，这就意味着一些其他的评分值可能影响到用户间的相似度。</p>
+
+<p>在协同过滤中，会遇到数据稀疏和冷启动问题。这种挑战就是用相对较少的有效评分得到准确的预测。直接做法就是利用用户的附加信息，比如性别、年龄等帮助分类用户信息，这就涉及到利用矩阵的外部信息，也就是混合系统。</p>
+
+<p>另外处理这些问题的方法还包括，基于图的方法，主要思想是利用假定用户品味的传递性，并由此增强额外信息矩阵；缺省投票；利用相似用户给出相似物品的评分。</p>
+
+<p>冷启动是稀疏问题的一个特例，问题包括：如何处理新用户；如何处理为评分或购买的新物品。这两个问题都是通过混合方法解决，可以在推荐之前要求用户给出最低限度数量的评分。</p>
+
+<p>上述的协同推荐技术是Memory-based CF Algorithm。另外一种是Model-based。包括</p>
+
+<ul>
+  <li>矩阵因子分解</li>
+  <li>关联规则挖掘</li>
+  <li>基于概率分析的推荐方法（预测问题看成分类问题）</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Kafka Introduction]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/04/06/kafka/"/>
+    <updated>2016-04-06T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/04/06/kafka</id>
+    <content type="html"><![CDATA[<p>Kafka最早是由LinkedIn开发的一个分布式发布-订阅消息系统，现在已经是Apache的一个开源项目。它具有以下的一些特点：</p>
+
+<ul>
+  <li>作为分布式系统，很容易 scale out</li>
+  <li>消息以时间复杂度为O(1)的方式持久化到磁盘，支持离线消费和实时消费</li>
+  <li>发布和订阅都支持高吞吐量，单机支持每秒100K条以上消息的传输</li>
+  <li>支持多个订阅端，并且可以在异常情况下自动对这些消费者进行负载均衡</li>
+</ul>
+
+<p><img src="http://kafka.apache.org/images/kafka_logo.png" alt="" /></p>
+
+<!--more-->
+
+<p>消息系统的好处包括：</p>
+
+<ul>
+  <li>解耦生产者和消费者</li>
+  <li>持久化直到消息已经被完全处理</li>
+  <li>扩展性</li>
+  <li>灵活性 &amp; 峰值处理能力</li>
+  <li>可恢复性，系统的一部分组件失效时，不会影响到整个系统。</li>
+  <li>顺序保证</li>
+  <li>缓冲，有助于控制和优化数据流经过系统的速度。</li>
+  <li>异步通信</li>
+</ul>
+
+<h2 id="section">名词解释</h2>
+
+<ul>
+  <li>
+    <p>Broker：Kafka集群包含一个或多个服务器，这种服务器被称为broker</p>
+  </li>
+  <li>
+    <p>Topic：每条发布到Kafka集群的消息都有一个类别，这个类别被称为Topic。（物理上不同Topic的消息分开存储，逻辑上一个Topic的消息虽然保存于一个或多个broker上但用户只需指定消息的Topic即可生产或消费数据而不必关心数据存于何处）</p>
+  </li>
+  <li>
+    <p>Partition：Parition是物理上的概念，每个Topic包含一个或多个Partition.</p>
+  </li>
+  <li>
+    <p>Producer：负责发布消息到Kafka broker</p>
+  </li>
+  <li>
+    <p>Consumer：消息消费者，向Kafka broker读取消息的客户端。</p>
+  </li>
+  <li>
+    <p>Consumer Group：每个Consumer属于一个特定的Consumer Group（可为每个Consumer指定group name，若不指定group name则属于默认的group）。</p>
+  </li>
+</ul>
+
+<h2 id="section-1">架构图</h2>
+
+<p><img src="http://cdn.infoqstatic.com/statics_s1_20160405-0343u1/resource/articles/kafka-analysis-part-1/zh/resources/0310020.png" alt="" /></p>
+
+<p>如上图所示，一个典型的Kafka集群中包含若干Producer（可以是web前端产生的Page View，或者是服务器日志，系统CPU、Memory等），若干broker（Kafka支持水平扩展，一般broker数量越多，集群吞吐率越高），若干Consumer Group，以及一个Zookeeper集群。Kafka通过Zookeeper管理集群配置，选举leader，以及在Consumer Group发生变化时进行rebalance。Producer使用push模式将消息发布到broker，Consumer使用pull模式从broker订阅并消费消息。</p>
+
+<p><img src="http://cdn.infoqstatic.com/statics_s1_20160405-0343u1/resource/articles/kafka-analysis-part-1/zh/resources/0310025.png" alt="" /></p>
+
+<p>上图示意消费者和生产者的工作方式。同一Topic的一条消息只能被同一个Consumer Group内的一个Consumer消费，但多个Consumer Group可同时消费这一消息。实现一个Topic消息的广播（发给所有的Consumer）和单播（发给某一个Consumer）的手段。一个Topic可以对应多个Consumer Group。</p>
+
+<p><img src="http://sookocheff.com/img/kafka/kafka-in-a-nutshell/log-anatomy.png" alt="" /></p>
+
+<p>Topic在逻辑上可以被认为是一个queue，每条消费都必须指定它的Topic。为了使得Kafka的吞吐率可以线性提高，物理上把Topic分成一个或多个Partition，每个Partition在物理上对应一个文件夹，该文件夹下存储这个Partition的所有消息和索引文件。每条消息都被append到某个Partition中，具体存储到哪一个Partition是根据Partition机制。如果Partition机制比较合理，不同的消息可以并行写入不同broker的不同Partition里，能极大的提高了吞吐率。另因为磁盘限制，Kafka提供两种策略删除旧数据：一是基于时间，二是基于Partition文件大小。</p>
+
+<h3 id="kafka-delivery-guarantee">Kafka delivery guarantee</h3>
+
+<p>Producer向broker发送消息时，默认情况下一条消息从Producer到broker是确保了 <code>At least once</code>，但如果设置Producer为异步发送则实现 <code>At most once</code>。<code>Exactly once</code>还未实现（生成一种消息主键，幂等重试）。</p>
+
+<p>Consumer在从broker读取消息后，可以选择<code>autocommit</code>或<code>手动commit</code>。区别在于一个是读完消息先commit再处理消息，一个是读完消息先处理再commit。前者实现 <code>At most once</code>，后者实现 <code>At least once</code>，但如果消息的处理有幂等性，则可以理解为<code>Exactly once</code>。如果要做到严格<code>Exactly once</code>，则让offset和操作输入存在同一个地方，保证数据的输出和offset的更新要么都完成，要么都不完成，参考Spark Kafka的DirectAPI的实现。</p>
+
+<h2 id="high-available">High Available</h2>
+
+<p>Kafka的HA包括Data Replication和Leader Election两方面。</p>
+
+<h3 id="data-replication">Data Replication</h3>
+
+<p><img src="http://cdn4.infoqstatic.com/statics_s2_20160405-0343u1/resource/articles/kafka-analysis-part-2/zh/resources/0416000.png" alt="" /></p>
+
+<p>为了更好的做负载均衡，Kafka尽量将所有的Partition均匀分配到整个集群上。一个典型的部署方式是一个Topic的Partition数量大于Broker的数量。同时为了提高Kafka的容错能力，也需要将同一个Partition的Replica尽量分散到不同的机器。Kafka分配Replica的算法如下：</p>
+
+<ol>
+  <li>将所有Broker（假设共n个Broker）和待分配的Partition排序</li>
+  <li>将第i个Partition分配到第（i mod n）个Broker上</li>
+  <li>将第i个Partition的第j个Replica分配到第（(i + j) mode n）个Broker上</li>
+</ol>
+
+<p>Producer在发布消息到某个Partition时，先通过ZooKeeper找到该Partition的Leader。Leader会将该消息写入其本地Log。每个Follower都从Leader pull数据。这种方式上，Follower存储的数据顺序与Leader保持一致。Follower在收到该消息并写入其Log后，向Leader发送ACK。一旦Leader收到了ISR(in-sync replica)中的所有Replica的ACK，该消息就被认为已经commit了，Leader将增加HW(high watermark)并且向Producer发送ACK。HW会从leader持续发送到follower并被保存到每个broker的磁盘中。</p>
+
+<p>对于Producer而言，它可以选择是否等待消息commit，这可以通过request.required.acks来设置。这种机制确保了只要ISR有一个或以上的Follower，一条被commit的消息就不会丢失。</p>
+
+<p>Consumer读消息也是从Leader读取，只有被commit过的消息（offset低于HW的消息）才会暴露给Consumer。</p>
+
+<h3 id="leader-election">Leader Election</h3>
+
+<p>Kafka在ZooKeeper中动态维护了一个ISR（in-sync replicas），这个ISR里的所有Replica都跟上了leader，只有ISR里的成员才有被选为Leader的可能。在这种模式下，对于f+1个Replica，一个Partition能在保证不丢失已经commit的消息的前提下容忍f个Replica的失败。对比Majority Vote则需要2f+1个Replica。</p>
+
+<p>Kafka中，如果一个Follower宕机，或者落后太多，Leader将把它从ISR中移除，包括两种情况：长时间未向leader发送fetch request，消息lag超过阈值。
+为了防止ISR里面的慢节点，Producer选择是否被commit阻塞。</p>
+
+<p>选举时候，Kafka会在所有broker中选出一个controller，所有Partition的Leader选举都由controller决定。controller会将Leader的改变直接通过RPC的方式通知需为为此作为响应的Broker。同时controller也负责增删Topic以及Replica的重新分配。这种方式改善每个follower都使用zk watch的方法进行选举的问题：</p>
+
+<ul>
+  <li>brain split</li>
+  <li>herd effect 如果宕机的那个Broker上的Partition比较多，会造成多个Watch被触发，造成集群内大量的调整</li>
+  <li>ZooKeeper负载过重 </li>
+</ul>
+
+<h2 id="kafka-clients-operations">Kafka Clients’ Operations</h2>
+
+<p>这一章节介绍一个Kafka client对于Kafka Resources可能的操作类型。</p>
+
+<p>Operation包括以下几种：Read, Write, Create, Delete, Alter, Describe, ClusterAction。</p>
+
+<h3 id="createdelete">Create/Delete</h3>
+
+<p>Create/Delete就是创建和删除Topics。</p>
+
+<p>具体过程如下：</p>
+
+<ol>
+  <li>broker发送<code>TopicMetadataRequest</code>到controller。</li>
+  <li>Controller在ZooKeeper的/brokers/topics节点上注册Watch，一旦某个Topic被创建或删除，则Controller会通过Watch得到新创建/删除的Topic的Partition/Replica分配。</li>
+  <li>对于删除Topic操作，Topic工具会将该Topic名字存于/admin/delete_topics。若delete.topic.enable为true，则Controller注册在/admin/delete_topics上的Watch被fire，Controller通过回调向对应的Broker发送StopReplicaRequest，若为false则Controller不会在/admin/delete_topics上注册Watch，也就不会对该事件作出反应。</li>
+  <li>对于创建Topic操作，Controller从/brokers/ids读取当前所有可用的Broker列表，对于set_p中的每一个Partition：
+    <ul>
+      <li>从分配给该Partition的所有Replica（称为AR）中任选一个可用的Broker作为新的Leader，并将AR设置为新的ISR（因为该Topic是新创建的，所以AR中所有的Replica都没有数据，可认为它们都是同步的，也即都在ISR中，任意一个Replica都可作为Leader）</li>
+      <li>将新的Leader和ISR写入/brokers/topics/[topic]/partitions/[partition]</li>
+    </ul>
+  </li>
+  <li>直接通过RPC向相关的Broker发送LeaderAndISRRequest。</li>
+</ol>
+
+<p>创建Topic顺序图如下所示。</p>
+
+<p><img src="http://cdn4.infoqstatic.com/statics_s1_20160405-0343u1/resource/articles/kafka-analysis-part-3/zh/resources/0606003.png" alt="" /></p>
+
+<p>有两点说明：</p>
+
+<ul>
+  <li>对于<code>auto.create.topics.enable=false</code>的Kafka，如果对未存在的topic进行produce，则会导致producer <code>org.apache.kafka.common.errors.TimeoutException</code>错误。</li>
+  <li>除了使用broker进行创建Topic，还可以通过Kafka的AdminUtils直接指定zk、topic、partitions，replicationFactor，把相关信息写入zk来创建Topic。</li>
+</ul>
+
+<h3 id="alterdescribe">Alter/Describe</h3>
+
+<p>alter/describe 是对配置修改或查看的操作，包括Topic和Client两个部分。改变方法也是通过Kafka的AdminUtils和ConfigCommand，指定zk、topic或要修改的properties。</p>
+
+<h3 id="clusteraction">ClusterAction</h3>
+
+<h3 id="read">Read</h3>
+
+<h3 id="write">Write</h3>
+
+<h2 id="ranger">Ranger</h2>
+
+]]></content>
+  </entry>
+  
+</feed>

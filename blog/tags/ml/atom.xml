@@ -4,7 +4,7 @@
   <title><![CDATA[tags: ml | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/ml/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-03-22T10:40:09+08:00</updated>
+  <updated>2016-04-09T15:42:39+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,152 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Recommender System in a Nutshell]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/04/09/recsys-introduction/"/>
+    <updated>2016-04-09T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/04/09/recsys-introduction</id>
+    <content type="html"><![CDATA[<p>推荐系统（Recommender System An Introduction）读书笔记。</p>
+
+<!--more-->
+
+<h2 id="section">基于内容的推荐系统</h2>
+
+<p>基于内容的推荐：基于两类信息，<code>物品特征的描述</code>和描述用户兴趣的<code>用户记录</code>（比如喜爱的物品特点）。</p>
+
+<p>一般工作原理是评估用户还没有看到的物品与当前用户过去喜欢的物品的相似度。那么如何表示物品的内容以及相似度？</p>
+
+<p>描述物品目录最简单的方法就是维护每个物品特征的详细列表，<strong>属性集、特征集或物品记录</strong>。另外可以使用<code>关键词列表</code>表示文档内容，好处是能够从文档内容本身自动生成列表。</p>
+
+<p>为了防止<code>通用词</code>和<code>长文档</code>带来的推荐结果偏置，一般会使用TF-IDF计算关键词的权重。给出下列公式：</p>
+
+<script type="math/tex; mode=display"> TF(i, j) = \frac{freq(i,j)}{maxOthers(i,j)},\ IDF(i) = log\frac{N}{n(i)} </script>
+
+<script type="math/tex; mode=display"> TF-IDF(i, j) = TF(i,j) \cdot IDF(i) </script>
+
+<p>$TF(i,j)$ 表示文档 $j$ 中关键词 $i$ 的<code>归一化词频值</code>，$freq(i,j)$ 表示 $i$ 在 $j$ 中出现的绝对频率； $maxOthers(i,j)$ 表示 $j$ 中其他关键词的最大词频。 $N$ 为所有可推荐文档数量，$n(i)$ 为关键词 $i$ 出现过文档的数量。</p>
+
+<p>归一化是针对长文档，IDF 是针对通用词</p>
+
+<p>从文本中抽取关键词并赋予权值的做法局限性为</p>
+
+<ul>
+  <li>向量通常大而稀疏，通过以下几种技术改进：
+    <ul>
+      <li>停用词和词干还原</li>
+      <li>特征选择，仅用信息量最大的一些词来减少文档描述规模，期望删除噪声。</li>
+      <li>选用短语</li>
+    </ul>
+  </li>
+  <li>没有考虑到文档上下文</li>
+</ul>
+
+<p>User-CF为“推荐相似用户喜欢的物品”，基于内容的推荐可以描述成“推荐与用户过去喜欢的物品相似的物品”。通常的基于内容相似度检索技术为：</p>
+
+<ul>
+  <li>KNN
+    <ul>
+      <li>用余弦相似度评估两个文档的向量是否相似；</li>
+      <li>可以考虑用户的短期兴趣和长期兴趣，适合于个性化的新闻推荐；</li>
+      <li>易于实现，能够快速适应新近变化，只需要相对少的评分数据；</li>
+      <li>预测精确度较低。</li>
+    </ul>
+  </li>
+  <li>相关项反馈——Rocchio方法</li>
+</ul>
+
+<p>另外可以将基于内容的推荐看成分类问题。</p>
+
+<p>典型的是朴素贝叶斯方法，基本上有两种对文档及其特征建模的方法：<strong>多项式模型和伯努利模型</strong>，二者都忽略词的<code>位序</code>问题。多元伯努利模型中，文档被处理成一个二进制向量，描述某个词是否包含在文档中；多项式模型中，考虑词出现在文档中的次数，分类结果会比莫努力模型好些。</p>
+
+<p>在多项式模型中，词 $v_i$ 出现在 $c$ 类文档的条件概率为：</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>$$ P(v_i</td>
+      <td>C=c) = \frac{CountTerms(v_i, docs(c))+1}{AllTerms(docs(c))+\vert V \vert}$$</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>上式采用<code>拉普拉斯平滑</code>以防止条件概率为 0，$\vert V \vert$ 为所有文档中不同词的数量。</p>
+
+<p>朴素贝叶斯分类器能够达到很高的精确度，并且其组成部分能够在获得新数据时很容易更新，且学习时间复杂度随样本数量线性增加。</p>
+
+<p>上文提到过<code>特征选择</code>问题，原始的大而稀疏向量会导致性能和内存需求问题，并且容易导致过拟合。典型的可以采用 $\chi^2$ 检验或 Fisher 判别指标。</p>
+
+<p>$\chi^2$ 检验是检测两个时间是否不相干的标准统计方法。在特征选择中，根据训练数据分析某种分类结果是否与某个具体词的出现有联系。基于$\chi^2$ 检验来选择特征，首先按词的$\chi^2$ 值大小降序排列；其次需要确定用于分类器的理想特征数目。</p>
+
+<p>基于内容的推荐系统有许多局限：</p>
+
+<ul>
+  <li><strong>浅层内容分析</strong>。</li>
+  <li>推荐结果缺乏新颖性，倾向于给出相同的推荐。</li>
+  <li>冷启动问题，需要来自用户的初始评分集合。</li>
+</ul>
+
+<h2 id="section-1">协同过滤</h2>
+
+<p>协同过滤推荐方法的主要思想：利用已有用户群过去的行为或意见预测当前用户最可能喜欢那些东西或对那些东西感兴趣。纯粹的协同方法输入只有用户-物品评分矩阵，输出可以为：</p>
+
+<ol>
+  <li>当前用户对物品的评分</li>
+  <li>TopN推荐物品列表</li>
+</ol>
+
+<h3 id="section-2">基于用户的最近邻推荐</h3>
+
+<p>这是一种早期方法，对当前用户没有见过的物品 $p$，利用近邻对物品的评价计算预测值。潜在的假设为：</p>
+
+<ol>
+  <li>如果用户过去有相似的偏好，未来也会有相似的偏好</li>
+  <li>用户偏好不会随着时间而改变</li>
+</ol>
+
+<p>确定相似用户集，通常用的方法是Pearson相关系数。给定评分矩阵R，$\bar{r}_a$ 代表用户a的平均评分，用户a和用户b的相似度 $sim(a,b)$ 表示</p>
+
+<script type="math/tex; mode=display"> sim(a,b) = \frac{\sum_{p \in P}(r_{a,p}-\bar{r}_a)(r_{b,p}-\bar{r}_b)}{\sqrt{\sum_{p \in P}(r_{a,p}-\bar{r}_a)^2}\sqrt{\sum_{p \in P}(r_{b,p}-\bar{r}_b)^2}}</script>
+
+<p>Pearson方法考虑到用户评分标准并不相同的事实，可以发现评分值之间存在的线性相关性。但是对于广受大众欢迎的物品相似度会更高，可以类似TF-IDF，引入反用户频率(IUF)计算。用户a对物品p的预测值如下：</p>
+
+<script type="math/tex; mode=display">pred(a,p) = \bar{r}_a + \frac{\sum_{b \in N}sim(a,b)(r_{b,p}-\bar{r}_b)}{\sum_{b \in N}sim(a,b)}</script>
+
+<p>预测的时候可以降低近邻规模减少计算复杂度，可以将用户相似度定义一个具体的最小阈值，或者将规模大小限制为一个固定值，只考虑K个最近邻。阈值会影响可预测物品的覆盖率，但是K值不会影响，它却会带来bias-variance tradeoff。</p>
+
+<p>对于基于用户的推荐系统，Pearson相关系数比其他方法更胜一筹，但是对于基于物品的推荐技术，余弦相似度会比Pearson相关度量表现更好。</p>
+
+<p>基于物品的算法主要思想是利用物品相似度，而不是用户相似度。</p>
+
+<p>在基于物品的推荐中，通常使用改进版的余弦相似度，在原有的基础上减去评分的平均值，得到的结果类似于Pearson方法，取值在-1到+1之间，公式如下：</p>
+
+<script type="math/tex; mode=display"> sim(a,b) = \frac{\sum_{u \in U}(r_{u,a}-\bar{r}_u)(r_{u,b}-\bar{r}_u)}{\sqrt{\sum_{u \in U}(r_{u,a}-\bar{r}_u)^2}\sqrt{\sum_{u \in U}(r_{u,b}-\bar{r}_u)^2}}</script>
+
+<p>预测公式为加权评分综合：</p>
+
+<script type="math/tex; mode=display">pred(u,p) = \frac{\sum_{i \in ratedItems(u)}sim(i,p) \cdot r_{u,i}}{\sum_{i \in ratedItems(u)}sim(i,p)}</script>
+
+<p>基于物品的推荐可以离线构建一个物品相似度矩阵加速线上预测。在线上，通过确定与p最相似的物品，并计算u对这些领巾物品评分的加权综合得到u对p的预测评分。</p>
+
+<p>原则上这种方法对基于用户的推荐也适用，但是实际情况中，两个用户评分重叠情况非常少见，这就意味着一些其他的评分值可能影响到用户间的相似度。</p>
+
+<p>在协同过滤中，会遇到数据稀疏和冷启动问题。这种挑战就是用相对较少的有效评分得到准确的预测。直接做法就是利用用户的附加信息，比如性别、年龄等帮助分类用户信息，这就涉及到利用矩阵的外部信息，也就是混合系统。</p>
+
+<p>另外处理这些问题的方法还包括，基于图的方法，主要思想是利用假定用户品味的传递性，并由此增强额外信息矩阵；缺省投票；利用相似用户给出相似物品的评分。</p>
+
+<p>冷启动是稀疏问题的一个特例，问题包括：如何处理新用户；如何处理为评分或购买的新物品。这两个问题都是通过混合方法解决，可以在推荐之前要求用户给出最低限度数量的评分。</p>
+
+<p>上述的协同推荐技术是Memory-based CF Algorithm。另外一种是Model-based。包括</p>
+
+<ul>
+  <li>矩阵因子分解</li>
+  <li>关联规则挖掘</li>
+  <li>基于概率分析的推荐方法（预测问题看成分类问题）</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Hidden Markov Model]]></title>
@@ -1053,236 +1199,6 @@ n_i(T)=\underset{(u,i,t) \in Train, t<T}{\Sigma} \frac{1}{1+\alpha (T-t)} %]]&gt
 <ul>
   <li>对固定的 $\theta^{(i)}$，求 $\tilde{P}^{(i+1)}$ 使得 $F(\theta^{(i)},  \tilde{P})$ 极大化</li>
   <li>对固定的 $\tilde{P}^{(i+1)}$，求 $\theta^{(i+1)}$ 使得 $F(\theta,  \tilde{P}^{(i+1)})$ 极大化</li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Kernel Logistic Regression versus SVM]]></title>
-    <link href="http://billowkiller.github.io/blog/2016/02/29/klr-svr/"/>
-    <updated>2016-02-29T14:00:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2016/02/29/klr-svr</id>
-    <content type="html"><![CDATA[<p>Logistic Regression和SVM都是分类方法，它们定义线性决策边界（linear decision boundaries）作为划分的依据。但二者在motivation方便完全不同，区别如下</p>
-
-<ul>
-  <li>LR初衷是为了让linear regression能够输出二元分类，估计一个实例属于某一类的概率；线性决策边界也只是回归函数的结果，在回归函数中使用阈值作为分类的标准，一般是0.5。决策边界在SVM中来的更为重要，整个模型的目标就是为了获得最优的决策边界。</li>
-  <li>每个训练样本都对LR的过程有一定的影响，但SVM只依赖于在决策边界附近的某些点。</li>
-  <li>LR适应于低维空间，并且由于使用最大似然估计，所以对噪声不敏感；SVM更适应于高维空间</li>
-  <li>没有正规化的LR无法保证获得最好的分离超平面，只能获得margin附近的较高的置信度; SVM则能获得最优的分离超平面。</li>
-</ul>
-
-<p>那么二者会有什么联系呢，SVM的kernel function又是如何应用到LR模型的呢？</p>
-
-<!--more-->
-
-<h2 id="loss-function">Loss Function</h2>
-
-<p>我们先来看下Loss Function，它是用来衡量学习函数与数据拟合的程度的。回顾对于机器学习来说有一下几个过程：</p>
-
-<ol>
-  <li>假设空间：函数的参数形式，包括lr，svm等</li>
-  <li>拟合的衡量：Loss function，likelihood</li>
-  <li>bias和variance的trade-off：regularization，bayesian estimator (MAP)</li>
-  <li>在假设空间中寻找好的假设：optimization. convex - global. non-convex - multiple starts</li>
-  <li>假设的验证：测试数据的预测，cross validation</li>
-</ol>
-
-<p>在线性学习方法中，通常我们是要找到一个假设 $y=f(\theta^T x)$，选决定f的参数形式，再通过最大化似然函数或者最小化损失函数找到对应的 $\theta$，常见的几个Loss Function：</p>
-
-<p>For classfication $correct \to y \cdot f &gt; 0;\ incorrect \to y \cdot f &lt; 0$</p>
-
-<ol>
-  <li>0/1 loss： $min_\theta \sum_i L_{0/1}(\theta^T x)$. 定义 $L_{0/1}(\theta^T x)=1\ if\ y \cdot f &lt; 0$，其他情况等于0，非凸函数，难以优化。</li>
-  <li>Hinge loss: $min_\theta \sum_i H(\theta^T x)$。接近 0/1 损失函数，定义 $H(\theta^T x) = max (0,1-y \cdot f)$</li>
-  <li>Logistic loss: $min_\theta \sum_i log(1 + exp(-y \cdot \theta^T x))$. </li>
-</ol>
-
-<p>关于3，在逻辑回归中我们最大化似然函数其实就是最小化Logistic loss：</p>
-
-<script type="math/tex; mode=display">\sum_i log \frac{1}{1+exp(-y^{(i)}\cdot \theta^T x^{(i)})} = \sum_i -log (1+exp(-y^{(i)}\cdot \theta^T x^{(i)}))</script>
-
-<script type="math/tex; mode=display">\to min_\theta \sum_i log(1 + exp(-y \cdot \theta^T x))</script>
-
-<p>For regression:</p>
-
-<ol>
-  <li>Square loss: $min_\theta \sum_i | y^{(i)} - \theta^T x^{(i)} |^2$</li>
-</ol>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-22/70940842.jpg" width="400px" /></p>
-
-<p>如上图所示，SVM使用Hinge Loss；Binomial Deviance就是Logistic Loss，因为output是binomial的；Exponential Loss 可以在Gradient Boost中应用到。</p>
-
-<h2 id="connection-between-svm-and-logistic-regression">Connection between SVM and Logistic Regression</h2>
-
-<p>回顾下soft-margin SVM的原始问题：</p>
-
-<script type="math/tex; mode=display"> \underset{b,w,\xi}{min} \frac{1}{2}w^T w  + C\sum_{n=1}\xi_n</script>
-
-<script type="math/tex; mode=display">s.t.\ y_i(w^T z_n + b) \ge 1-\xi_n,\ \xi_n \ge 0\ for\ all\ n</script>
-
-<p>这里的 $\xi_n$ 实际上就是违反 margin 的距离，称为 margin violation。如果 $(x_n, y_n)$ 不违反 margin，那么 $\xi_n=0$，否则为 $\xi_n=1-y_n(w^T z_n + b)$，从这里我们看到实际上 $\xi_n = max(1-y_n(w^T z_n + b), 0)$，所以原来问题可以写成：</p>
-
-<script type="math/tex; mode=display"> \underset{b,w,\xi}{min} \frac{1}{2}w^T w  + C\sum_{n=1}max(1-y_n(w^T z_n + b), 0)</script>
-
-<p>上式写成 $min\ \frac{1}{2} w^Tw + C \sum \hat{err}$ 就比较熟悉了，这个就是L2 regularization: $min\ \lambda w^Tw + C \sum err$ 嘛。对应关系如下：</p>
-
-<ul>
-  <li>soft-margin $\to special\ \hat{err}$</li>
-  <li>large margin $\to$ fewer hyperplanes $\to$ L2 regularization for small $w$</li>
-  <li>larger C or C $\to$ smaller $\lambda\ to$ less regularization</li>
-</ul>
-
-<p>对比于SVM的原始问题，我们发现新的形式并不是凸二次规划问题；不能利用kernel trick；并且max函数不能微分，所以难以解决。那么为什么要变化成这种形式呢？如果设置 linear score: $s=w^T z_n + b$。我们观察下它的损失函数 $\hat{err}_{svm}(s,y) = max(1-ys, 0)$，另外再看下logistic loss: $err_{ll}(ys) = log(1 + exp(-ys))$.</p>
-
-<p>可以对比下上图的损失函数曲线，二者比较接近，并且都是 0/1 损失函数的上限。所以可以把 SVM 当成 L2-regularized logistic regression。以下是几个二分类线性模型的对比：</p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/76344341.jpg" width="600px" /></p>
-
-<h2 id="kernel-logistic-regression">Kernel Logistic Regression</h2>
-
-<p>现在我们知道 SVM 和 Logistic Regression存在联系，那么是否可以综合二者的有点呢：</p>
-
-<ul>
-  <li>SVM flavor: 利用kernel function 得到 $w_{svm}，b_{svm}$ 得到超平面 </li>
-  <li>LR flavor: 通过 scalling(A) 和 shifting(B) 匹配最大似然函数的方法细粒度地调优超平面
-    <ul>
-      <li>often $A &gt; 0$ if $w_{svm}$ reasonably good</li>
-      <li>often $B \approx 0$ if $b_{svm}$ reasonably good</li>
-    </ul>
-  </li>
-</ul>
-
-<p>所以新的LR问题可以看成 two-level learning 问题：LR on SVM-transformed data</p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/6560678.jpg" width="450px" /></p>
-
-<p>于是我们得到Probabilistic SVM for Soft Binary Classification 的算法，因为 LR 是根据概率分类的，过程如下：</p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/75482355.jpg" width="450px" /></p>
-
-<ul>
-  <li>这个 Soft Binary Classifier 得到 bounary 与 SVM 的不同，因为有平移 B。</li>
-  <li>只需要解两个变量，可以使用GD或者SGD等。</li>
-  <li>Kernel SVM 相当于在 $Z$ 空间中进行 LR</li>
-</ul>
-
-<p>Kernel SVM 中有 $w_{svm}^T \phi(x) + b_{svm} = \sum_{SV} \alpha_n y_n K(x_n, x) + b_{svm}$，则最后 Probabilistic SVM 的结果为</p>
-
-<script type="math/tex; mode=display"> g(x) = \theta(\sum_{SV} A\alpha_n y_n K(x_n, x) + Ab_{svm} + B)</script>
-
-<p>但这个方法其实并不是在 $Z$ 空间里的最好的解，只是通过两次 scaling 和 shifting 接近最好的解，那么如何得到最好的解呢。这就是我们要介绍的Kernel Logistic Regression。</p>
-
-<p>先来介绍下 Representer Theorem，它的定义如下：</p>
-
-<blockquote>
-  <p>the solution of regularization and interpolation problems with Hillbertian penalties can be expressed as a linear combination of the data.</p>
-</blockquote>
-
-<p>也就是最优的 $w_* = \sum_{n=1}^N \beta_n z_n$，我们可以把原来在 Hillbertian Space
- 的计算放到低维空间中进行。</p>
-
-<script type="math/tex; mode=display"> w_*z = \sum_{n=1}^N \beta_n z_n^Tz = \sum_{n=1}^N \beta_n K(x_n, x)</script>
-
-<p>证明Representer Theorem如下：</p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/22880811.jpg" width="500px" /></p>
-
-<p>这其实就表明所有的 L2-regularized linear model 都可以被 kernalized。把损失函数替换成 logistic loss，我们就得到 Kernel Logistic Regression 的优化函数。</p>
-
-<script type="math/tex; mode=display"> \underset{w}{min}\ \frac{\lambda}{N}w^Tw + \frac{1}{N} \sum_{n=1}^N log(1+ exp(-y_n w^T z_n)) </script>
-
-<p>利用 Representer Theorem，将原来对 $w$ 的求解转化为对 $\beta$ 求解：</p>
-
-<script type="math/tex; mode=display"> \underset{\beta}{min}\ \frac{\lambda}{N} \sum_{n=1}^N \sum_{m=1}^N \beta_n \beta_m K(x_n, x_m) +  \frac{1}{N} \sum_{n=1}^N log(1+ exp(-y_n \sum_{m=1}^N \beta_m K(x_m, x_n)))</script>
-
-<p>可以用 GD/SGD 等做最优化求解，<strong>解出来的 $\beta$ 并不同于 SVM 的 $\alpha$，基本上是非零的</strong>。综合上述，总结得到 KLR 其实就是</p>
-
-<blockquote>
-  <p>use representer theorem for kernel trick on L2-regularized logistic regression</p>
-</blockquote>
-
-<p>对 KLR 还有另外另外的解释</p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/45320882.jpg" width="450px" /></p>
-
-<h2 id="support-vector-regression">Support Vector Regression</h2>
-
-<p>最后说下SVR，上面提到 regression 的损失函数 squared error $err(y, w^Tz) = (y- w^Tz)^2$，替换下KLR的损失函数我们可以得到</p>
-
-<script type="math/tex; mode=display"> \underset{w}{min}\ \frac{\lambda}{N}w^Tw + \frac{1}{N} \sum_{n=1}^N (y- w^Tz)^2 </script>
-
-<p>这个就是 <strong>kernel ridge regression</strong>，也可以通过解 $\beta$ 得到答案</p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/56123028.jpg" width="500px" /></p>
-
-<p>对 $\beta$ 求导得到</p>
-
-<script type="math/tex; mode=display">\nabla E_{aug}(\beta) = \frac{2}{N}(\lambda K^TI\beta + K^TK\beta - K^Ty) = \frac{2}{N}K^T((\lambda I + K)\beta - y)</script>
-
-<script type="math/tex; mode=display">\nabla E_{aug}(\beta) =0 \to \beta=(\lambda I + K)^{-1}y</script>
-
-<p>因为 Merer’s condition，所以 $K$ 是半正定矩阵，继而上式有解。但是稠密矩阵求反需要 $O(N^3)$ 时间复杂度。可以对比下 linear ridge regression:</p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/7052157.jpg" width="450px" /></p>
-
-<p>根据前面所述的SVM和LR之间的关系，我们这里可以吧 kernel ridge regression 看成 least-squares SVM(LLSVM)。它有什么特点呢：</p>
-
-<ul>
-  <li>对比soft-margin SVM，有这相似的boundary，但是更多的支持向量。导致预测慢，因为 $\beta$ 比较稠密</li>
-</ul>
-
-<p>现在想让 $\beta$ 变得和 soft-margin SVM 的 $\alpha$ 一样稀疏。可以看到 tube regression 的特点，使用 $\epsilon$-insensitive error：</p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/74768649.jpg" width="450px" /></p>
-
-<p>整理下是 L2-regularized tube regression</p>
-
-<script type="math/tex; mode=display"> \underset{w}{min}\ \frac{\lambda}{N}w^Tw + \frac{1}{N} \sum_{n=1}^N\ max(0, \vert w^Tz_n - y \vert - \epsilon)</script>
-
-<p>这个函数没有限制条件，但是max难以微分，并且不能很明显的看出有 sparse $\beta$。发现这个表达式和最开始 soft-SVM 的表示有点像，那么我们可以反向的把它模拟成 standard SVM 形式:</p>
-
-<script type="math/tex; mode=display"> \underset{b,w,\xi^ \vee, \xi ^ \land}{min}\ \frac{1}{2} w^Tw + C \sum_{n=1}^N (\xi_n^ \vee + \xi_n ^ \land)</script>
-
-<script type="math/tex; mode=display">s.t.\ -\epsilon-\xi_n^ \vee \le y_n - w^Tz_n-b \le \epsilon-\xi_n^ \land,\ \xi_n^ \vee \ge 0,\ \xi_n^ \land \ge 0</script>
-
-<p>这就构成 SVR 的原始问题: minimize regularizer + (upper tube violations $\xi_n^ \land$ and lower violations $\xi_n^ \vee$)。这里参数 $C$ 就是 trade-off of regularization and tube violation. 现在要求 SVR 的对偶问题。</p>
-
-<ul>
-  <li>Lagrange multiplier $\alpha_n^ \vee\ for\ -\epsilon-\xi_n^ \vee \le y_n - w^Tz_n-b$</li>
-  <li>Lagrange multiplier $\alpha_n^ \land\ for\ y_n - w^Tz_n-b \le \epsilon-\xi_n^ \land$</li>
-</ul>
-
-<p>一些KTT条件如下：</p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-1/97895297.jpg" width="450px" /></p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-1/34361452.jpg" width="500px" /></p>
-
-<p>在 tube 中我们可以得到 </p>
-
-<p>$\vert w^Tz_n + b- y_n \vert &lt; \epsilon$</p>
-
-<p>$\to \xi_n^ \vee=0,\ \xi_n^ \land=0$</p>
-
-<p>$\to (\epsilon + \xi_n^ \land - y_n + w^Tz_n +b) \neq 0,\ (\epsilon + \xi_n^ \vee + y_n - w^Tz_n -b) \neq 0$</p>
-
-<p>$\to \alpha_n^ \vee =0,\ \alpha_n^ \land=0$</p>
-
-<p>$\to \beta_n=0$</p>
-
-<p>对于support vector来说，$\beta_n \neq 0$，是在tube上或者tube外的。综上可以得到sparse $\beta$。</p>
-
-<u>总结得到的Linear/Kernel Model如下图：</u>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-1/58915472.jpg" width="450px" /></p>
-
-<ul>
-  <li>first row: less used due to worse performance</li>
-  <li>second row: popular in <strong>LIBLINEAR</strong></li>
-  <li>third row: less used due to dense $\beta$</li>
-  <li>fourth row: popular in <strong>LIBSVM</strong></li>
 </ul>
 
 ]]></content>

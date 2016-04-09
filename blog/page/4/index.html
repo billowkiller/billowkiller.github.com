@@ -174,6 +174,136 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-04T09:18:00+08:00" pubdate data-updated="true">Aug 4<span>th</span>, 2014</time>
+        
+           | <a href="/blog/2014/08/04/modules-in-network-programming/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/08/04/modules-in-network-programming/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/04/modules-in-network-programming/">Modules in Network Programming</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>发现自己总喜欢把各种东西混合在一块，所以这又是一篇长文…</p>
+
+<p>本文将会介绍网络编程中的几种模型，包括<strong>I/O模型、服务器编程模型、事件模型、并发模型</strong>。</p>
+
+<hr />
+
+<h2 id="io">I/O模型</h2>
+
+<p>I/O模型包括<strong>阻塞模型、非阻塞模型、信号量驱动模型、多路复用模型、异步模型</strong>。</p>
+
+<p>总体来说包括两大类：</p>
+
+<ol>
+  <li><strong>同步I/O，向程序通知的是I/O就绪事件</strong>，由程序完成读写。包括前四类I/O模型。</li>
+  <li><strong>异步I/O，向程序通知的是I/O完成事件</strong>，读写操作由内核完成。</li>
+</ol>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/08/04/modules-in-network-programming/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-02T02:18:00+08:00" pubdate data-updated="true">Aug 2<span>nd</span>, 2014</time>
+        
+           | <a href="/blog/2014/08/02/probability-problem/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/08/02/probability-problem/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/02/probability-problem/">Probability Problem</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p><strong>概念：贝叶斯公式</strong></p>
+
+<p>贝叶斯定理是关于随机事件$A$和$B$的条件概率（或边缘概率）的一则定理。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/e824b899a9014c086ec5068f097b02087bf4f419_zps22b92ed4.gif" alt="" /></p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>其中$P(A</td>
+      <td>B)$是在$B$发生的情况下$A$发生的可能性。</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="section">一、抛硬币问题</h2>
+
+<p><strong>问题1 有一苹果，两个人抛硬币来决定谁吃这个苹果，先抛到正面者吃。问先抛这吃到苹果的概率是多少？</strong></p>
+
+<p>假设第一个人吃到苹果的概率是P。第一次抛硬币若为正面则先抛者赢；若为负面且后抛者也为负面，则主动权回到先抛者，回到原问题。</p>
+
+<p>得到关系：P = 1/2 + 1/2 * 1/2 * P  </p>
+
+<p>得出 P = 2/3</p>
+
+<p><strong>问题2 游戏规则为，连续2次抛到硬币朝上，则游戏结束。问平均抛多少次游戏可以结束？</strong></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/08/02/probability-problem/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-22T09:18:00+08:00" pubdate data-updated="true">Jul 22<span>nd</span>, 2014</time>
         
            | <a href="/blog/2014/07/22/network-programming/#disqus_thread"
@@ -610,142 +740,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-06-28T02:18:00+08:00" pubdate data-updated="true">Jun 28<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/06/28/signal-status-and-lifecycle/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/06/28/signal-status-and-lifecycle/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/28/signal-status-and-lifecycle/">Signal Status and Lifecycle</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p><i><strong>modified from</strong> <a href="http://blog.csdn.net/sunyubo458/article/details/4484957">http://blog.csdn.net/sunyubo458/article/details/4484957</a></i></p>
-
-<p><em>Lost original source</em></p>
-
-<hr />
-
-<h3 id="section">信号状态</h3>
-
-<p>传送一个信号到目的进程是由两个不同步骤组成的：</p>
-
-<ul>
-  <li><strong>发送信号</strong>。 内核通过更新目的进程上下文中的某个状态，发送一个信号给目的进程。两原因：内核进程到一个系统事件，如除零；进程调用<code>kill</code>函数，显示要求内核发送信号。</li>
-  <li><strong>接收信号</strong>。目的进程被内核强迫以某种方式对信号的发送做出反应，目的进程就接收了信号。</li>
-</ul>
-
-<p>一个只发出但没有被接收的信号叫做<strong>待处理信号</strong>（pending signal）。在任何时候，一种类型至多只会有一个待处理信号。一个进程可以选择性地<strong>阻塞</strong>接收某种信号。当一个信号被阻塞时，它仍可以被发送，但是尝试的待处理信号不会被接收，知道进程取消对这种信号的阻塞。</p>
-
-<p>信号的”未决“是一种状态，指的是从信号的产生到信号被处理前的这一段时间；信号的”阻塞“是一个开关动作，指的是阻止信号被处理，但不是阻止信号产生。 </p>
-
-<p>每个进程都有一个信号屏蔽字，它规定了当前要阻塞地送到该进程的信号集，对于每种可能的信号，该屏蔽字中都有一位与之对应。对于某种信号，若其对应为已设定，则它当前是被阻塞的。进程可以调用<code>sigprocmask</code>来检测和更改当前信号屏蔽字。</p>
-
-<p>APUE例题在<code>sleep</code>前用<code>sigprocmask</code>阻塞了退出信号，然后<code>sleep</code>,然后在<code>sleep</code>的过程中产生一个退出信号，但是此时退出信号被阻塞过，（中文的”阻塞”在这里容易被误解为一种状态，实际上是一种类似于开关的动作，所以说“被阻塞过”，而不是“被阻塞”）所以处于“未决”状态，在 <code>sleep</code>后又用<code>sigprocmask</code>关掉退出信号的阻塞开关，因为之前产生的退出信号一直处于未决状态，当关上阻塞开关后，马上退出“未决”状态，得到处理，这一切发生在<code>sigprocmask</code>返回之前。 </p>
-
-<h3 id="section-1">信号生命周期</h3>
-
-<p>对于一个完整的信号生命周期(从信号发送到相应的处理函数执行完毕)来说，可以分为三个重要的阶段，这三个阶段由四个重要事件来刻画：1.信号诞生；2. 信号在进程中注册完毕；3.信号在进程中的注销完毕；4.信号处理函数执行完毕。相邻两个事件的时间间隔构成信号生命周期的一个阶段。</p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/06/28/signal-status-and-lifecycle/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-05-01T03:18:00+08:00" pubdate data-updated="true">May 1<span>st</span>, 2014</time>
-        
-           | <a href="/blog/2014/05/01/code-snippet/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/05/01/code-snippet/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/01/code-snippet/">Some Code Snippets</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><ol>
-  <li>
-    <p><strong>在一个二叉树中查找值为x的结点，并打印该结点所有祖先结点的算法，也就是根节点到x的路径。</strong></p>
-
-    <p>思路1： 利用<strong>后序遍历</strong>的非递归算法，在访问结点时增加一个判断，若该结点的值等于x，则打印栈中保持的路径，再中断算法。</p>
-
-    <p>思路2： 采用<strong>前序遍历</strong>的递归算法，在典型的便利算法的参数表中增加了x、path[n]等参数。</p>
-
-    <pre><code> template&lt;class T&gt;
- int Find_Print(BinTreeNode&lt;T*&amp; BT, T x, T path[], int level, int &amp;count) {
-     if(BT != NULL) {
-         level++;
-         path[level] = BT-&gt;data;
-         if (BT-&gt;data==x) { count=level; return 1; }
-         if( Find_Print(BT-&gt;left, x, path, level, count) ) return 1;
-         return Find_Print(BT-&gt;right, x, path, level, count);
-     } else 
-         return 0;
- }
-</code></pre>
-  </li>
-</ol>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/05/01/code-snippet/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -769,15 +763,15 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/04/09/recsys-introduction/">Recommender System in a Nutshell</a>
+    
+    <a class="list-group-item " href="/blog/2016/04/06/kafka/">Kafka Introduction</a>
+    
     <a class="list-group-item " href="/blog/2016/03/19/table-join/">Table Join Semantics</a>
     
     <a class="list-group-item " href="/blog/2016/03/19/hmm/">Hidden Markov Model</a>
     
     <a class="list-group-item " href="/blog/2016/03/16/rs-note/">Practice in Recommend System</a>
-    
-    <a class="list-group-item " href="/blog/2016/03/06/apriori/">Apriori and FP-Growth</a>
-    
-    <a class="list-group-item " href="/blog/2016/03/05/em/">Expectation Maximization</a>
     
   </div>
 </section>
@@ -845,6 +839,18 @@ body {
     <a class="list-group-item " href="/blog/categories/big-data/index.html">
         <span class="badge">7</span>
         Big Data
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/big-data/index.html">
+        <span class="badge">1</span>
+        big data
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
+        <span class="badge">1</span>
+        machine learning
       </a>
     
   </div>
