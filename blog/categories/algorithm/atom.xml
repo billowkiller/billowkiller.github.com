@@ -4,7 +4,7 @@
   <title><![CDATA[Category: algorithm | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/algorithm/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-04-09T16:59:19+08:00</updated>
+  <updated>2016-04-09T17:06:30+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -40,7 +40,7 @@
   <p>Average rating works fine if you always have a ton of ratings, but suppose item 1 has 2 positive ratings and 0 negative ratings. Suppose item 2 has 100 positive ratings and 1 negative rating. This algorithm puts item two below item one.</p>
 </blockquote>
 
-<p><strong>Correct Solution: Score = Lower bound of Wilson score confidence interval for a Bernoulli parameter</strong></p>
+<p><strong>Correct Solution: Score = Lower bound of <a href="https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#Wilson_score_interval">Wilson score confidence interval</a> for a Bernoulli parameter</strong></p>
 
 <u>We need to balance the proportion of positive ratings with the uncertainty of a small number of observations. </u>
 
