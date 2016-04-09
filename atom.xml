@@ -4,7 +4,7 @@
   <title><![CDATA[Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-04-09T15:46:29+08:00</updated>
+  <updated>2016-04-09T16:59:19+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,147 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Funny Facts about Rating]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/04/09/rating/"/>
+    <updated>2016-04-09T16:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/04/09/rating</id>
+    <content type="html"><![CDATA[<p>本文分析Wilson score confidence interval，它在Reddit评论评分中的应用，另外分析了Hacker News、Reddit的评分算法。先来看下错误的评分。</p>
+
+<p>Case 1: 网站的内容排名，得分高的排前面，得分低的排后面。如何计算得分。</p>
+
+<p><strong>Solution 1:  Score = (Positive ratings) - (Negative ratings)</strong></p>
+
+<u>未考虑内容的受欢迎程度。</u>
+
+<!--more-->
+
+<blockquote>
+  <p>Suppose one item has 600 positive ratings and 400 negative ratings: 60% positive. Suppose item two has 5,500 positive ratings and 4,500 negative ratings: 55% positive. This algorithm puts item two above item one.</p>
+</blockquote>
+
+<p><strong>Solution 2: Score = Average rating = (Positive ratings) / (Total ratings)</strong></p>
+
+<u>数据较多的时候比较适合，但是数据量少的时候会有比较大的Bias。</u>
+
+<blockquote>
+  <p>Average rating works fine if you always have a ton of ratings, but suppose item 1 has 2 positive ratings and 0 negative ratings. Suppose item 2 has 100 positive ratings and 1 negative rating. This algorithm puts item two below item one.</p>
+</blockquote>
+
+<p><strong>Correct Solution: Score = Lower bound of Wilson score confidence interval for a Bernoulli parameter</strong></p>
+
+<u>We need to balance the proportion of positive ratings with the uncertainty of a small number of observations. </u>
+
+<p><img src="http://www.evanmiller.org/images/rating-equation.png" alt="" /></p>
+
+<p>Here $\hat{p}$ is the observed fraction of positive ratings, $z_{\alpha/2}$ is the $(1-\alpha/2)$ quantile of the standard normal distribution, and $n$ is the total number of ratings. </p>
+
+<p>上式适合于二元评分机制，并不适用于例如5-star评分。</p>
+
+<p>Wilson score confidence interval除了排序问题，还可以应用在如下地方：</p>
+
+<ul>
+  <li>Detect spam/abuse: What percentage of people who see this item will mark it as spam?</li>
+  <li>Create a “best of” list: What percentage of people who see this item will mark it as “best of”?</li>
+  <li>Create a “Most emailed” list: What percentage of people who see this page will click “Email”?</li>
+</ul>
+
+<h3 id="hacker-news-ranking-algorithm">Hacker News ranking algorithm</h3>
+
+<p>Hacker News由Lisp的一种方言Arc实现，代码现在是开源的。它实现的内容得分公式为：</p>
+
+<script type="math/tex; mode=display">Score = \frac{P-1}{(T+2)^G}</script>
+
+<ul>
+  <li>P = points of an item (and -1 is to negate submitters vote)</li>
+  <li>T = time since submission (in hours)</li>
+  <li>G = Gravity, defaults to 1.8</li>
+</ul>
+
+<p>Gravity和Time对内容得分有很大影响：</p>
+
+<ul>
+  <li>T增加导致得分降低，这是新闻老化的效果</li>
+  <li>当Gravity增加的时候，上述降低会来的更快</li>
+</ul>
+
+<p>查看Time和Gravity的影响，在<a href="http://www.wolframalpha.com">Wolfram Alpha</a>的输入框中输入：</p>
+
+<pre><code>plot(
+    (30 - 1) / (t + 2)^1.8, 
+    (60 - 1) / (t + 2)^1.8,
+    (200 - 1) / (t + 2)^1.8
+) where t=0..24
+</code></pre>
+
+<p><img src="https://cdn-images-1.medium.com/max/800/0*hpwwM81bhd6uRSd4.gif" alt="" /></p>
+
+<pre><code>plot(
+    (p - 1) / (t + 2)^1.8, 
+    (p - 1) / (t + 2)^0.5,
+    (p - 1) / (t + 2)^2.0
+) where t=0..24, p=10
+</code></pre>
+
+<p><img src="https://cdn-images-1.medium.com/max/800/0*ENIImch8f5vEo7vB.gif" alt="" /></p>
+
+<h3 id="reddit-ranking-algorithm">Reddit ranking algorithm</h3>
+
+<p>在Hacker News中新闻和评论都是采用同样的评分算法，而在Reddit中，它们采用不同的算法。</p>
+
+<p>Reddit 同样是开源的，并且使用Python实现，为了加速计算，评分算法使用 Pyrex 实现。先来看下新闻的评分算法，hot algorithm：</p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*21Ezm5SbYie_a3oD.png" alt="" /></p>
+
+<ul>
+  <li>同样，submission time对评分的影响很大，人们总是喜欢新鲜的事情</li>
+  <li>和Hacker News不同，新闻评分并不会随着时间流逝而降低，虽然它会比较新的新闻得分低。</li>
+</ul>
+
+<p>对于同样的votes，但是submission time不同的新闻，它们的得分可以参考：</p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*hRkEqhtlfHqfuUse.png" alt="" /></p>
+
+<p>公式中的logarithm表示，最开始的votes拥有比较大的权重：开始的10 upvotes和接下的100 upvotes具有相同的权重，接下是 1000 upvotes。这就是upvotes的平滑效果。</p>
+
+<p>比较有意思的是Reddit中的downvotes，它认为具有比较多upvotes和downvotes的新闻代表争议，它们的得分应该会比只有upvotes的新闻得分低。看看downvotes的影响：</p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*rBNOVl0MIeRrtzio.png" alt="" /></p>
+
+<p>下面看下Reddit的评论的评分算法：</p>
+
+<p>Reddit认为hot algorithm并不适用于comment，原因如下：</p>
+
+<ul>
+  <li>In a comment system you want to rank the best comments highest regardless of their submission time</li>
+</ul>
+
+<p>Reddit用到我们上面提到过的Wilson score interval，由这个interval得到the confidence sort，解释如下：</p>
+
+<ul>
+  <li>The confidence sort treats the vote count as a statistical sampling of a hypothetical full vote by everyone</li>
+  <li>The confidence sort gives a comment a provisional ranking that it is 85% sure it will get to</li>
+  <li>The more votes, the closer the 85% confidence score gets to the actual score</li>
+  <li>Wilson’s interval has good properties for a small number of trials and/or an extreme probability</li>
+</ul>
+
+<blockquote>
+  <p>If a comment has one upvote and zero downvotes, it has a 100% upvote rate, but since there’s not very much data, the system will keep it near the bottom. But if it has 10 upvotes and only 1 downvote, the system might have enough confidence to place it above something with 40 upvotes and 20 downvotes — figuring that by the time it’s also gotten 40 upvotes, it’s almost certain it will have fewer than 20 downvotes. And the best part is that if it’s wrong (which it is 15% of the time), it will quickly get more data, since the comment with less data is near the top.</p>
+</blockquote>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*ZgS3UCp-3RE23rWh.png" alt="" /></p>
+
+<h3 id="references">REFERENCES</h3>
+
+<p><a href="http://www.evanmiller.org/how-not-to-sort-by-average-rating.html">How Not To Sort By Average Rating</a></p>
+
+<p><a href="https://medium.com/hacking-and-gonzo/how-hacker-news-ranking-algorithm-works-1d9b0cf2c08d#.utg0mohjf">How Hacker News ranking algorithm works</a></p>
+
+<p><a href="https://medium.com/hacking-and-gonzo/how-reddit-ranking-algorithms-work-ef111e33d0d9#.ub7osc36n">How Reddit ranking algorithms work</a></p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Recommender System in a Nutshell]]></title>
@@ -3554,104 +3695,6 @@ counts = ones.runningReduce((a, b) =&gt; a+b)
 <p>每一个 job 包含 n 个 stage，最后一个 stage 产生 result。。在提交 job 过程中，DAGScheduler 会首先划分 stage，然后先提交无 parent stage 的 stages，并在提交过程中确定该 stage 的 task 个数及类型，并提交具体的 task。无 parent stage 的 stage 提交完后，依赖该 stage 的 stage 才能够提交。从 stage 和 task 的执行角度来讲，一个 stage 的 parent stages 执行完后，该 stage 才能执行。</p>
 
 <p>Spark就先介绍到这里，没有涉及到spark的具体内部实现，包括job的调度，shuffle的过程、文件的管理、cache和broadcast机制等。</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Compression Format Introduction]]></title>
-    <link href="http://billowkiller.github.io/blog/2015/09/18/compression-format-introduction/"/>
-    <updated>2015-09-18T13:34:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2015/09/18/compression-format-introduction</id>
-    <content type="html"><![CDATA[<h1 id="section">压缩格式</h1>
-<p>最近在做一个日志的压缩策略，在此就记录下几种不同的压缩算法。本文不涉及每种算法的具体实现，只是用于介绍概念。</p>
-
-<!--more-->
-
-<h2 id="gzip">Gzip</h2>
-<p>说到gzip，其实我是不想写的，满满的都是痛苦的回忆啊。在研究生时期曾经写过一个程序，在网关出对用户访问的网页进行hack，在网页的最后加上一个网页跳转的代码。由于网页传输的压缩编码就是gzip，具体做法是获取gzip的头文件后，构造压缩后的数据添加到原始的网页数据上。这里面很有意思的是，gzip是bit-oriented的，所以需要定位去除EOF marker后的数据最后的bit位置，再插入构造好的压缩数据。这里面涉及到的东西比较多，包括对gzip头文件的分析，找到每个单词对应的huffman编码；对压缩数据的反解找到对应的bit位；还有HTTP传输编码替换，所有的编码都改为CHUNKED编码方式。言归正传，那么什么是Gzip压缩编码？</p>
-
-<p>Gzip是基于DEFLATE压缩算法的，它是由LZ77和Huffman编码的组成。LZ77其实很好理解，就是将重复的字符串用数字表示，标记为(length, distance)，相当于建立一个索引，后续出现的数据都可以通过这个索引找到原始的数据。举个简单的例子A A A A A A B A B A A A A A 经过LZ77编码后转化为A A A A A B &lt;2,2&gt; &lt;5,8&gt;, 可以看到A B和A A A A A是重复的，用长度和距离的组合来表示。Huffman编码是一种可变字长编码，依据字符出现概率来构造字符的二进制表示，用于保证了按字符出现概率分配码长，使平均码长最短。</p>
-
-<p>通常我们说的gzip是指gzip文件格式，它的构成如下：</p>
-
-<ul>
-  <li>10字节的头，包括magic number，版本号和时间戳</li>
-  <li>可选的附加字段，例如源文件名</li>
-  <li>正文，也就是经过DEFLATED压缩后的数据</li>
-  <li>8字节的EOF marker，包括CRC-32校验和和原始未压缩数据的长度。</li>
-</ul>
-
-<p>详细的文件格式如下：</p>
-
-<p><img src="http://img-storage.qiniudn.com/15-9-18/30592957.jpg" alt="" /></p>
-
-<h2 id="lzo">lzo</h2>
-
-<p>lzo令人郁闷的一点是压缩算法是定义好的，但是传输和存储的格式并没有定义好。这就导致不同的厂商在lzo文件压缩格式上有不同的解决方案，在查找lzo资料的时候我就曾见过三种不同的传输或存储格式。那么为什么会有这种情况发生呢，原因就在于lzo lib包中只是定义了压缩的算法，且算法有好几十种。lib包关心的是如何将一串文本转成压缩好的字符串数据，而不关心客户端和服务端是否沟通协调好具体的算法，在传输或存储时候是否会有数据损坏的情况，所以在对lzo压缩进行产品化的时候我们需要考虑这些情况。</p>
-
-<p>在hadoop中，lzo所采用的和<em>lzop</em>相同的压缩格式，lzop是神马呢，官网简介如下：
-&gt;lzop is a file compressor which is very similar to gzip. lzop uses the LZO data compression library for compression services, and its main advantages over gzip are much higher compression and decompression speed (at the cost of some compression ratio).</p>
-
-<p>lzop定的的头文件包含的信息如下：</p>
-
-<pre><code>typedef struct {
-    unsigned char magic[9]
-    uint16_t version;
-    uint16_t lib_version;
-    uint16_t version_needed_to_extract;
-    unsigned char method;
-    unsigned char level;                // ignore
-    uint32_t flags;                     
-    uint32_t filter;                    // filter is not supported
-    uint32_t mode;                      // ignore
-    uint32_t mtime_low;                 // ignore
-    uint32_t mtime_high;                // ignore
-    unsigned char filename_len;
-    uint32_t checksum;
-} header_t;
-</code></pre>
-
-<p>在lzop的头文件格式中中还有定义一些extra fields，filename，这些在hadoop的解压算法中就直接给忽略了，所以这里也就没有添加上去，<code>header_t</code>中都是一些必要的占位字段，有些无意义，有些有意义。其中在<code>flags</code>中定义了一些是压缩格式实现的细节，例如压缩前数据的校验和算法，压缩后数据的校验和算法，是否有filter，是否是多文件合并等等。<code>method</code>字段定义了具体的压缩算法，使用的比较多的是M_LZO1X<em>1、M_LZO1X</em>1<em>15、M_LZO1X</em>999. 在官方的lib包中又对各种压缩算法的一个比较，通常情况下使用M_LZO1X_1就足够了。</p>
-
-<p>lzo的压缩是面向块的，所以正文部分也就是由一块一块的压缩块构成，每块的压缩格式如下：</p>
-
-<pre><code>/*
- * uncompressed block size
- * compressed block size
- * uncompressed block checksum
- * compressed block checksum
- * compressed block
- */
-</code></pre>
-
-<p>最后写一个EOF marker，也就是4bytes的0.</p>
-
-<h2 id="snappy">snappy</h2>
-
-<p>Google开发的一个 C++ 的用来压缩和解压缩的开发包，旨在提供高速压缩速度和合理的压缩率，Snappy 比 zlib 更快，但文件相对要大 20% 到 100%。Snappy特地为64位x86处理器做了优化，在单个Intel Core i7处理器内核上能够达到至少每秒250MB的压缩速率和每秒500MB的解压速率。Snappy的压缩是属于LZ77 体系，不同于gzip，它是byte-oriented，也就是说数据块之间是有严格的字节区分的；而gzip由于最后加入了Huffman编码，所以它是bit-oriented。byte-oriented的好处是处理起来比较简单，不需要记录字节中的位占用情况和加入数据的位迁移。</p>
-
-<p>Snappy的压缩方式有一个frame的概念，这个帧并不是Snappy压缩所必须的，这个帧其实也就是Snappy的压缩文本加上一些必要的其他信息，例如checksum。Snappy中帧与帧之间是相互独立的，也就是说在压缩过程中你可以不关心其他帧的情况，只需要压缩好自己的数据然后发送或存储，解压的过程中会根据帧的粒度进行解压。这就意味着在分布式的环境中，你可以很容易的合并各个节点上的压缩数据，无需和其他节点进行同步，这个在其他算法中是无法办到的。</p>
-
-<p>Snappy文件只由一个个连续的chunk构成，每个chunk的构成包括：1字节的chunk标识符，3字节的chunk长度，接着就是数据。chunk长度可以为0，这就表示该chunk的数据不存在。Snappy文件的第一个chunk是stream chunk，固定的6字节长度，其中数据部分为”sNaPpY”。这个chunk可以理解为Snappy的头文件，但是这个头文件可以出现多次，这也就是每个Snappy frame可以独立的原因之一；另外一个原因是Snappy并没有EOF marker。其他chunk的类型还包括：</p>
-
-<ul>
-  <li>Compressed data</li>
-  <li>Uncompressed data</li>
-  <li>padding</li>
-  <li>Reserved unskippable chunks</li>
-  <li>Reserved skippable chunks</li>
-</ul>
-
-<h2 id="section-1">对比</h2>
-<p>以下是在论文中找到的一些资料。</p>
-
-<p><img src="http://img-storage.qiniudn.com/15-9-17/82781797.jpg" alt="" /></p>
-
-<p><img src="http://ww1.sinaimg.cn/large/74311666jw1ew5aeta9loj20w10hfdi2.jpg" alt="" /></p>
-
-<h2 id="section-2">其他</h2>
-<p><a href="https://github.com/billowkiller/Codec">以上三种压缩格式的c++方法</a></p>
 
 ]]></content>
   </entry>

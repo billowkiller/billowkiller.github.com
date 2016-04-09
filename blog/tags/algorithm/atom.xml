@@ -4,7 +4,7 @@
   <title><![CDATA[tags: algorithm | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/algorithm/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-04-09T15:46:29+08:00</updated>
+  <updated>2016-04-09T16:59:19+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,147 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Funny Facts about Rating]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/04/09/rating/"/>
+    <updated>2016-04-09T16:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/04/09/rating</id>
+    <content type="html"><![CDATA[<p>本文分析Wilson score confidence interval，它在Reddit评论评分中的应用，另外分析了Hacker News、Reddit的评分算法。先来看下错误的评分。</p>
+
+<p>Case 1: 网站的内容排名，得分高的排前面，得分低的排后面。如何计算得分。</p>
+
+<p><strong>Solution 1:  Score = (Positive ratings) - (Negative ratings)</strong></p>
+
+<u>未考虑内容的受欢迎程度。</u>
+
+<!--more-->
+
+<blockquote>
+  <p>Suppose one item has 600 positive ratings and 400 negative ratings: 60% positive. Suppose item two has 5,500 positive ratings and 4,500 negative ratings: 55% positive. This algorithm puts item two above item one.</p>
+</blockquote>
+
+<p><strong>Solution 2: Score = Average rating = (Positive ratings) / (Total ratings)</strong></p>
+
+<u>数据较多的时候比较适合，但是数据量少的时候会有比较大的Bias。</u>
+
+<blockquote>
+  <p>Average rating works fine if you always have a ton of ratings, but suppose item 1 has 2 positive ratings and 0 negative ratings. Suppose item 2 has 100 positive ratings and 1 negative rating. This algorithm puts item two below item one.</p>
+</blockquote>
+
+<p><strong>Correct Solution: Score = Lower bound of Wilson score confidence interval for a Bernoulli parameter</strong></p>
+
+<u>We need to balance the proportion of positive ratings with the uncertainty of a small number of observations. </u>
+
+<p><img src="http://www.evanmiller.org/images/rating-equation.png" alt="" /></p>
+
+<p>Here $\hat{p}$ is the observed fraction of positive ratings, $z_{\alpha/2}$ is the $(1-\alpha/2)$ quantile of the standard normal distribution, and $n$ is the total number of ratings. </p>
+
+<p>上式适合于二元评分机制，并不适用于例如5-star评分。</p>
+
+<p>Wilson score confidence interval除了排序问题，还可以应用在如下地方：</p>
+
+<ul>
+  <li>Detect spam/abuse: What percentage of people who see this item will mark it as spam?</li>
+  <li>Create a “best of” list: What percentage of people who see this item will mark it as “best of”?</li>
+  <li>Create a “Most emailed” list: What percentage of people who see this page will click “Email”?</li>
+</ul>
+
+<h3 id="hacker-news-ranking-algorithm">Hacker News ranking algorithm</h3>
+
+<p>Hacker News由Lisp的一种方言Arc实现，代码现在是开源的。它实现的内容得分公式为：</p>
+
+<script type="math/tex; mode=display">Score = \frac{P-1}{(T+2)^G}</script>
+
+<ul>
+  <li>P = points of an item (and -1 is to negate submitters vote)</li>
+  <li>T = time since submission (in hours)</li>
+  <li>G = Gravity, defaults to 1.8</li>
+</ul>
+
+<p>Gravity和Time对内容得分有很大影响：</p>
+
+<ul>
+  <li>T增加导致得分降低，这是新闻老化的效果</li>
+  <li>当Gravity增加的时候，上述降低会来的更快</li>
+</ul>
+
+<p>查看Time和Gravity的影响，在<a href="http://www.wolframalpha.com">Wolfram Alpha</a>的输入框中输入：</p>
+
+<pre><code>plot(
+    (30 - 1) / (t + 2)^1.8, 
+    (60 - 1) / (t + 2)^1.8,
+    (200 - 1) / (t + 2)^1.8
+) where t=0..24
+</code></pre>
+
+<p><img src="https://cdn-images-1.medium.com/max/800/0*hpwwM81bhd6uRSd4.gif" alt="" /></p>
+
+<pre><code>plot(
+    (p - 1) / (t + 2)^1.8, 
+    (p - 1) / (t + 2)^0.5,
+    (p - 1) / (t + 2)^2.0
+) where t=0..24, p=10
+</code></pre>
+
+<p><img src="https://cdn-images-1.medium.com/max/800/0*ENIImch8f5vEo7vB.gif" alt="" /></p>
+
+<h3 id="reddit-ranking-algorithm">Reddit ranking algorithm</h3>
+
+<p>在Hacker News中新闻和评论都是采用同样的评分算法，而在Reddit中，它们采用不同的算法。</p>
+
+<p>Reddit 同样是开源的，并且使用Python实现，为了加速计算，评分算法使用 Pyrex 实现。先来看下新闻的评分算法，hot algorithm：</p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*21Ezm5SbYie_a3oD.png" alt="" /></p>
+
+<ul>
+  <li>同样，submission time对评分的影响很大，人们总是喜欢新鲜的事情</li>
+  <li>和Hacker News不同，新闻评分并不会随着时间流逝而降低，虽然它会比较新的新闻得分低。</li>
+</ul>
+
+<p>对于同样的votes，但是submission time不同的新闻，它们的得分可以参考：</p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*hRkEqhtlfHqfuUse.png" alt="" /></p>
+
+<p>公式中的logarithm表示，最开始的votes拥有比较大的权重：开始的10 upvotes和接下的100 upvotes具有相同的权重，接下是 1000 upvotes。这就是upvotes的平滑效果。</p>
+
+<p>比较有意思的是Reddit中的downvotes，它认为具有比较多upvotes和downvotes的新闻代表争议，它们的得分应该会比只有upvotes的新闻得分低。看看downvotes的影响：</p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*rBNOVl0MIeRrtzio.png" alt="" /></p>
+
+<p>下面看下Reddit的评论的评分算法：</p>
+
+<p>Reddit认为hot algorithm并不适用于comment，原因如下：</p>
+
+<ul>
+  <li>In a comment system you want to rank the best comments highest regardless of their submission time</li>
+</ul>
+
+<p>Reddit用到我们上面提到过的Wilson score interval，由这个interval得到the confidence sort，解释如下：</p>
+
+<ul>
+  <li>The confidence sort treats the vote count as a statistical sampling of a hypothetical full vote by everyone</li>
+  <li>The confidence sort gives a comment a provisional ranking that it is 85% sure it will get to</li>
+  <li>The more votes, the closer the 85% confidence score gets to the actual score</li>
+  <li>Wilson’s interval has good properties for a small number of trials and/or an extreme probability</li>
+</ul>
+
+<blockquote>
+  <p>If a comment has one upvote and zero downvotes, it has a 100% upvote rate, but since there’s not very much data, the system will keep it near the bottom. But if it has 10 upvotes and only 1 downvote, the system might have enough confidence to place it above something with 40 upvotes and 20 downvotes — figuring that by the time it’s also gotten 40 upvotes, it’s almost certain it will have fewer than 20 downvotes. And the best part is that if it’s wrong (which it is 15% of the time), it will quickly get more data, since the comment with less data is near the top.</p>
+</blockquote>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*ZgS3UCp-3RE23rWh.png" alt="" /></p>
+
+<h3 id="references">REFERENCES</h3>
+
+<p><a href="http://www.evanmiller.org/how-not-to-sort-by-average-rating.html">How Not To Sort By Average Rating</a></p>
+
+<p><a href="https://medium.com/hacking-and-gonzo/how-hacker-news-ranking-algorithm-works-1d9b0cf2c08d#.utg0mohjf">How Hacker News ranking algorithm works</a></p>
+
+<p><a href="https://medium.com/hacking-and-gonzo/how-reddit-ranking-algorithms-work-ef111e33d0d9#.ub7osc36n">How Reddit ranking algorithms work</a></p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[QuickSort and Derivatives]]></title>
@@ -964,36 +1105,6 @@ int getUglyNumber(int index) {
     <p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/empty_string_zps15c77190.png" alt="" /></p>
   </li>
 </ol>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[最小生成树]]></title>
-    <link href="http://billowkiller.github.io/blog/2013/05/14/zui-xiao-sheng-cheng-shu/"/>
-    <updated>2013-05-14T01:09:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2013/05/14/zui-xiao-sheng-cheng-shu</id>
-    <content type="html"><![CDATA[<p>算法使用的是二叉堆，时间为O(ElgV)。如果V小于E的话，使用Prim更好。</p>
-
-<p>Kruskal算法：</p>
-
-<p>O(ElgE): E&lt;V<sup>2&nbsp;</sup>,所以有 lgE=O(lgV)</p>
-
-<p>集合A是一个森林，加入集合A中的安全边总是图中连接两个不同连通分支的最小权边。</p>
-
-<p>使用不相交集合数据结构。</p>
-
-<p>测试边时，即测试两端点是否在同一棵树上。</p>
-
-<p>若不在则可以对集合进行合并。</p>
-
-<!--more-->
-<p>Prim算法：</p>
-
-<p>集合A形成单棵树，添加集合A的安全边总是连接树与一个不在树中的顶点的最小权边。</p>
-
-<p>使用最小优先队列。优先队列基于Key值，key[v]是所有将v与树中某一顶点相连的边中的最小权值。</p>
-
-<p>一开始除了根节点，其他节点的key为无穷大。</p>
 ]]></content>
   </entry>
   

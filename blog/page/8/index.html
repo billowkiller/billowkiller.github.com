@@ -176,6 +176,85 @@ body {
 
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
         
+           | <a href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/">Linux下解决中文乱码——文件，标签</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>文件是在WIndows 下创建的,Windows
+的文件名中文编码默认为GBK,而Linux中默认文件名编码为UTF8,由于编码不一致所以导致了文件名乱码的问题，解决这个问题需要对文件名进行转码。</p>
+
+<ul>
+  <li><strong>文件与文件夹乱码，使用convmv来解决</strong></li>
+</ul>
+
+<p>convmv 使用方法：</p>
+
+<p>convmv -f 源编码 -t 新编码 [选项] 文件名</p>
+
+<p>常用参数：</p>
+
+<ul>
+  <li>-r 递归处理子文件夹</li>
+  <li>–notest 真正进行操作，默认情况下是不对文件进行真实操作</li>
+  <li>–list 显示所有支持的编码</li>
+  <li>–unescap 可以做一下转义，比如把%20变成空格</li>
+</ul>
+
+<p>举例：</p>
+
+<p>在当前目录下</p>
+
+<pre><code>convmv -f GBK -t UTF-8 --notest * //所有文件转gbk为utf8
+</code></pre>
+
+<ul>
+  <li><strong>转换 mp3 标签编码，使用mutagen</strong></li>
+</ul>
+
+<p>安装：</p>
+
+<pre><code>sudo apt-get install python-mutagen
+</code></pre>
+
+<p>举例：</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
            | <a href="/blog/2013/05/14/linuxxia-dhcpfu-wu-qi-pei-zhi/#disqus_thread"
              data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/linuxxia-dhcpfu-wu-qi-pei-zhi/">Comments</a>
         
@@ -818,70 +897,6 @@ bytes。MBR是系统在启动的时候会主动去读取的内容，多系统就
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/googlelun-wen-mapreduce/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-mapreduce/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/googlelun-wen-mapreduce/">google论文：MapReduce</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>论文：<a href="http://static.googleusercontent.com/external_content/untrusted_dlcp/research.google.com/en//archive/mapreduce-osdi04.pdf">英文版</a>，<a href="http://blademaster.ixiezi.com/2010/03/27/google-mapreduce%E4%B8%AD%E6%96%87%E7%89%88/">中文版</a></p>
-
-<hr />
-
-<ol>
-  <li>
-    <h2 id="section">导论</h2>
-  </li>
-</ol>
-
-<h3 id="section-1">1.1 定义</h3>
-
-<p>先给个定义：
-MapReduce是一个编程模型，也是一个处理和生成超大数据集的算法模型的相关实现。用户首先创建一个Map函数处理一个基于key/value
-pair的数据集合，输出中间的基于key/value
-pair的数据集合；然后再创建一个Reduce函数用来合并所有的具有相同中间key值的中间value值。</p>
-
-<p>使用这个抽象模型，我们只要表述我们想要执行的简单运算即可，而不必关心并行计算、容错、数据分布、负载均衡等复杂的细节，这些问题都被封装在了一个库里面。设计这个抽象模型的灵感来自Lisp和许多其他函数式语言的Map和Reduce的原语。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr2_zps9c617225.png" alt="big picture of MapReduce" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/googlelun-wen-mapreduce/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -905,6 +920,8 @@ pair的数据集合；然后再创建一个Reduce函数用来合并所有的具�
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/04/09/rating/">Funny Facts About Rating</a>
+    
     <a class="list-group-item " href="/blog/2016/04/09/recsys-introduction/">Recommender System in a Nutshell</a>
     
     <a class="list-group-item " href="/blog/2016/04/06/kafka/">Kafka Introduction</a>
@@ -912,8 +929,6 @@ pair的数据集合；然后再创建一个Reduce函数用来合并所有的具�
     <a class="list-group-item " href="/blog/2016/03/19/table-join/">Table Join Semantics</a>
     
     <a class="list-group-item " href="/blog/2016/03/19/hmm/">Hidden Markov Model</a>
-    
-    <a class="list-group-item " href="/blog/2016/03/16/rs-note/">Practice in Recommend System</a>
     
   </div>
 </section>
@@ -967,7 +982,7 @@ pair的数据集合；然后再创建一个Reduce函数用来合并所有的具�
     
     
     <a class="list-group-item " href="/blog/categories/algorithm/index.html">
-        <span class="badge">6</span>
+        <span class="badge">7</span>
         algorithm
       </a>
     
