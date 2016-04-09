@@ -3,7 +3,7 @@ layout: post
 title: "Recommender System in a Nutshell"
 date: 2016-04-09 14:00
 comments: true
-category: "machine learning"
+category: "Machine Learning"
 tags: [ml, intro, unfinished]
 ---
 

@@ -3,7 +3,7 @@ layout: post
 title: "Kafka Introduction"
 date: 2016-04-06 14:00
 comments: true
-category: "big data"
+category: "Big Data"
 tags: [kafka, intro, unfinished]
 ---
 
