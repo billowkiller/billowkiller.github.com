@@ -1,0 +1,124 @@
+---
+layout: post
+title: "Funny Facts about Rating"
+date: 2016-04-09 16:00
+comments: true
+category: "algorithm"
+tags: [algorithm, rating]
+---
+
+本文分析Wilson score confidence interval，它在Reddit评论评分中的应用，另外分析了Hacker News、Reddit的评分算法。先来看下错误的评分。
+
+Case 1: 网站的内容排名，得分高的排前面，得分低的排后面。如何计算得分。
+
+**Solution 1:  Score = (Positive ratings) - (Negative ratings)**
+
+<u>未考虑内容的受欢迎程度。</u>
+
+<!--more-->
+
+>  Suppose one item has 600 positive ratings and 400 negative ratings: 60% positive. Suppose item two has 5,500 positive ratings and 4,500 negative ratings: 55% positive. This algorithm puts item two above item one.
+
+**Solution 2: Score = Average rating = (Positive ratings) / (Total ratings)**
+
+<u>数据较多的时候比较适合，但是数据量少的时候会有比较大的Bias。</u>
+
+> Average rating works fine if you always have a ton of ratings, but suppose item 1 has 2 positive ratings and 0 negative ratings. Suppose item 2 has 100 positive ratings and 1 negative rating. This algorithm puts item two below item one.
+
+**Correct Solution: Score = Lower bound of [Wilson score confidence interval](https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#Wilson_score_interval) for a Bernoulli parameter**
+
+<u>We need to balance the proportion of positive ratings with the uncertainty of a small number of observations. </u>
+
+![](http://www.evanmiller.org/images/rating-equation.png)
+
+Here $\hat{p}$ is the observed fraction of positive ratings, $z_{\alpha/2}$ is the $(1-\alpha/2)$ quantile of the standard normal distribution, and $n$ is the total number of ratings. 
+
+上式适合于二元评分机制，并不适用于例如5-star评分。
+
+Wilson score confidence interval除了排序问题，还可以应用在如下地方：
+
+* Detect spam/abuse: What percentage of people who see this item will mark it as spam?
+* Create a "best of" list: What percentage of people who see this item will mark it as "best of"?
+* Create a "Most emailed" list: What percentage of people who see this page will click "Email"?
+
+### Hacker News ranking algorithm
+
+Hacker News由Lisp的一种方言Arc实现，代码现在是开源的。它实现的内容得分公式为：
+
+$$Score = \frac{P-1}{(T+2)^G}$$
+
+* P = points of an item (and -1 is to negate submitters vote)
+* T = time since submission (in hours)
+* G = Gravity, defaults to 1.8
+
+Gravity和Time对内容得分有很大影响：
+
+* T增加导致得分降低，这是新闻老化的效果
+* 当Gravity增加的时候，上述降低会来的更快
+
+查看Time和Gravity的影响，在[Wolfram Alpha](http://www.wolframalpha.com)的输入框中输入：
+
+    plot(
+        (30 - 1) / (t + 2)^1.8, 
+        (60 - 1) / (t + 2)^1.8,
+        (200 - 1) / (t + 2)^1.8
+    ) where t=0..24
+
+![](https://cdn-images-1.medium.com/max/800/0*hpwwM81bhd6uRSd4.gif)
+
+
+    plot(
+        (p - 1) / (t + 2)^1.8, 
+        (p - 1) / (t + 2)^0.5,
+        (p - 1) / (t + 2)^2.0
+    ) where t=0..24, p=10
+    
+![](https://cdn-images-1.medium.com/max/800/0*ENIImch8f5vEo7vB.gif)
+
+### Reddit ranking algorithm
+
+在Hacker News中新闻和评论都是采用同样的评分算法，而在Reddit中，它们采用不同的算法。
+
+Reddit 同样是开源的，并且使用Python实现，为了加速计算，评分算法使用 Pyrex 实现。先来看下新闻的评分算法，hot algorithm：
+
+![](https://cdn-images-1.medium.com/max/1600/0*21Ezm5SbYie_a3oD.png)
+
+* 同样，submission time对评分的影响很大，人们总是喜欢新鲜的事情
+* 和Hacker News不同，新闻评分并不会随着时间流逝而降低，虽然它会比较新的新闻得分低。
+
+对于同样的votes，但是submission time不同的新闻，它们的得分可以参考：
+
+![](https://cdn-images-1.medium.com/max/1600/0*hRkEqhtlfHqfuUse.png)
+
+公式中的logarithm表示，最开始的votes拥有比较大的权重：开始的10 upvotes和接下的100 upvotes具有相同的权重，接下是 1000 upvotes。这就是upvotes的平滑效果。
+
+比较有意思的是Reddit中的downvotes，它认为具有比较多upvotes和downvotes的新闻代表争议，它们的得分应该会比只有upvotes的新闻得分低。看看downvotes的影响：
+
+![](https://cdn-images-1.medium.com/max/1600/0*rBNOVl0MIeRrtzio.png)
+
+下面看下Reddit的评论的评分算法：
+
+Reddit认为hot algorithm并不适用于comment，原因如下：
+
+* In a comment system you want to rank the best comments highest regardless of their submission time
+
+Reddit用到我们上面提到过的Wilson score interval，由这个interval得到the confidence sort，解释如下：
+
+* The confidence sort treats the vote count as a statistical sampling of a hypothetical full vote by everyone
+* The confidence sort gives a comment a provisional ranking that it is 85% sure it will get to
+* The more votes, the closer the 85% confidence score gets to the actual score
+* Wilson’s interval has good properties for a small number of trials and/or an extreme probability
+
+>If a comment has one upvote and zero downvotes, it has a 100% upvote rate, but since there’s not very much data, the system will keep it near the bottom. But if it has 10 upvotes and only 1 downvote, the system might have enough confidence to place it above something with 40 upvotes and 20 downvotes — figuring that by the time it’s also gotten 40 upvotes, it’s almost certain it will have fewer than 20 downvotes. And the best part is that if it’s wrong (which it is 15% of the time), it will quickly get more data, since the comment with less data is near the top.
+
+![](https://cdn-images-1.medium.com/max/1600/0*ZgS3UCp-3RE23rWh.png)
+
+### REFERENCES
+
+[How Not To Sort By Average Rating](http://www.evanmiller.org/how-not-to-sort-by-average-rating.html)
+
+[How Hacker News ranking algorithm works](https://medium.com/hacking-and-gonzo/how-hacker-news-ranking-algorithm-works-1d9b0cf2c08d#.utg0mohjf)
+
+[How Reddit ranking algorithms work](https://medium.com/hacking-and-gonzo/how-reddit-ranking-algorithms-work-ef111e33d0d9#.ub7osc36n)
+
+
