@@ -4,7 +4,7 @@
   <title><![CDATA[tags: intro | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/intro/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-04-12T20:20:07+08:00</updated>
+  <updated>2016-04-12T20:30:33+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -407,7 +407,7 @@ For each topic T that C_i subscribes to {
 
 <p>Ranger的policy engine分为role based和tag based，kafka中使用的是tag based，evaluae的流程图如下：</p>
 
-<p><img src="https://cwiki.apache.org/confluence/download/attachments/61322361/Ranger-Policy-Evaluation-Flow-with-Tags.png?version=2&amp;modificationDate=1444869949000&amp;api=v2" width="500px" /></p>
+<p><img src="https://cwiki.apache.org/confluence/download/attachments/61322361/Ranger-Policy-Evaluation-Flow-with-Tags.png?version=2&amp;modificationDate=1444869949000&amp;api=v2" width="600px" /></p>
 
 <p>Ranger Kafka 目前支持的功能还是比较少的，如下图：</p>
 
@@ -500,6 +500,8 @@ For each topic T that C_i subscribes to {
 <p><a href="https://kafka.apache.org/090/security.html">https://kafka.apache.org/090/security.html</a></p>
 
 <p><a href="http://kafka.apache.org/documentation.html">http://kafka.apache.org/documentation.html</a></p>
+
+<p><a href="http://people.csail.mit.edu/matei/courses/2015/6.S897/readings/kafka.pdf">Kafka: A distributed messaging system for log processing</a></p>
 
 ]]></content>
   </entry>
