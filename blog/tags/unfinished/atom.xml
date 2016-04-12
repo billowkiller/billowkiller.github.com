@@ -4,7 +4,7 @@
   <title><![CDATA[tags: unfinished | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/unfinished/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-04-09T17:06:30+08:00</updated>
+  <updated>2016-04-12T20:20:07+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -173,10 +173,6 @@
   <li>支持多个订阅端，并且可以在异常情况下自动对这些消费者进行负载均衡</li>
 </ul>
 
-<p><img src="http://kafka.apache.org/images/kafka_logo.png" alt="" /></p>
-
-<!--more-->
-
 <p>消息系统的好处包括：</p>
 
 <ul>
@@ -215,15 +211,15 @@
 
 <h2 id="section-1">架构图</h2>
 
-<p><img src="http://cdn.infoqstatic.com/statics_s1_20160405-0343u1/resource/articles/kafka-analysis-part-1/zh/resources/0310020.png" alt="" /></p>
+<p><img src="http://cdn.infoqstatic.com/statics_s1_20160405-0343u1/resource/articles/kafka-analysis-part-1/zh/resources/0310020.png" width="500px" /></p>
 
 <p>如上图所示，一个典型的Kafka集群中包含若干Producer（可以是web前端产生的Page View，或者是服务器日志，系统CPU、Memory等），若干broker（Kafka支持水平扩展，一般broker数量越多，集群吞吐率越高），若干Consumer Group，以及一个Zookeeper集群。Kafka通过Zookeeper管理集群配置，选举leader，以及在Consumer Group发生变化时进行rebalance。Producer使用push模式将消息发布到broker，Consumer使用pull模式从broker订阅并消费消息。</p>
 
-<p><img src="http://cdn.infoqstatic.com/statics_s1_20160405-0343u1/resource/articles/kafka-analysis-part-1/zh/resources/0310025.png" alt="" /></p>
+<p><img src="http://cdn.infoqstatic.com/statics_s1_20160405-0343u1/resource/articles/kafka-analysis-part-1/zh/resources/0310025.png" width="500px" /></p>
 
 <p>上图示意消费者和生产者的工作方式。同一Topic的一条消息只能被同一个Consumer Group内的一个Consumer消费，但多个Consumer Group可同时消费这一消息。实现一个Topic消息的广播（发给所有的Consumer）和单播（发给某一个Consumer）的手段。一个Topic可以对应多个Consumer Group。</p>
 
-<p><img src="http://sookocheff.com/img/kafka/kafka-in-a-nutshell/log-anatomy.png" alt="" /></p>
+<p><img src="http://sookocheff.com/img/kafka/kafka-in-a-nutshell/log-anatomy.png" width="500px" /></p>
 
 <p>Topic在逻辑上可以被认为是一个queue，每条消费都必须指定它的Topic。为了使得Kafka的吞吐率可以线性提高，物理上把Topic分成一个或多个Partition，每个Partition在物理上对应一个文件夹，该文件夹下存储这个Partition的所有消息和索引文件。每条消息都被append到某个Partition中，具体存储到哪一个Partition是根据Partition机制。如果Partition机制比较合理，不同的消息可以并行写入不同broker的不同Partition里，能极大的提高了吞吐率。另因为磁盘限制，Kafka提供两种策略删除旧数据：一是基于时间，二是基于Partition文件大小。</p>
 
@@ -239,7 +235,7 @@
 
 <h3 id="data-replication">Data Replication</h3>
 
-<p><img src="http://cdn4.infoqstatic.com/statics_s2_20160405-0343u1/resource/articles/kafka-analysis-part-2/zh/resources/0416000.png" alt="" /></p>
+<p><img src="http://cdn4.infoqstatic.com/statics_s2_20160405-0343u1/resource/articles/kafka-analysis-part-2/zh/resources/0416000.png" width="500px" /></p>
 
 <p>为了更好的做负载均衡，Kafka尽量将所有的Partition均匀分配到整个集群上。一个典型的部署方式是一个Topic的Partition数量大于Broker的数量。同时为了提高Kafka的容错能力，也需要将同一个Partition的Replica尽量分散到不同的机器。Kafka分配Replica的算法如下：</p>
 
@@ -270,11 +266,23 @@
   <li>ZooKeeper负载过重 </li>
 </ul>
 
+<h2 id="kafka-">Kafka 网络模型</h2>
+
+<p>Kafka使用的网络模型是典型的reactor模式，一个acceptor处理新来的连接请求，分配给N个processor处理，每个processor都有selector从socket中读取数据，生成request对象放到requestChannel中。requestChannel包含一个requestQueue和一个responseQueues，requestQueue是一个blocking queue，它的大小为<code>queued.max.requests</code>；responseQueues 包含N个blocking queue，对应每个processor。Kafka会有M个Handler threads用于处理responseQueues中的request，并且生成response放到对应的response队列中，处理过程如下：KafkaRequestHandler循环从RequestChannel中取Request并交给kafka.server.KafkaApis处理具体的业务逻辑。。</p>
+
+<p>这里面涉及的数目在配置文件中都有体现，上述的每个acceptor包括processor在Kafka中称为NIO socket server，数量在<code>listeners</code>中定义，例如<code>PLAINTEXT://myhost:9092, SSL://:9091 </code>。N 取值 <code>background.threads</code>，M 取值 <code>num.io.threads</code>。</p>
+
+<p>在 NIO socket server 中会给每个processor的responseQueue都注册一个ResponseListener，一旦有Response产生就会通知对应的processor发送Response到客户端。</p>
+
 <h2 id="kafka-clients-operations">Kafka Clients’ Operations</h2>
 
 <p>这一章节介绍一个Kafka client对于Kafka Resources可能的操作类型。</p>
 
 <p>Operation包括以下几种：Read, Write, Create, Delete, Alter, Describe, ClusterAction。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-4-12/80246194.jpg" width="450px" /></p>
+
+<p><a href="https://cwiki.apache.org/confluence/display/KAFKA/KIP-4+-+Command+line+and+centralized+administrative+operations">KIP-4</a></p>
 
 <h3 id="createdelete">Create/Delete</h3>
 
@@ -297,7 +305,7 @@
 
 <p>创建Topic顺序图如下所示。</p>
 
-<p><img src="http://cdn4.infoqstatic.com/statics_s1_20160405-0343u1/resource/articles/kafka-analysis-part-3/zh/resources/0606003.png" alt="" /></p>
+<p><img src="http://cdn4.infoqstatic.com/statics_s1_20160405-0343u1/resource/articles/kafka-analysis-part-3/zh/resources/0606003.png" width="500px" /></p>
 
 <p>有两点说明：</p>
 
@@ -312,11 +320,186 @@
 
 <h3 id="clusteraction">ClusterAction</h3>
 
+<p>包括LeaderAndIsrRequest，StopReplicaRequest，UpdateMetadataRequest，ControlledShutdownRequest</p>
+
 <h3 id="read">Read</h3>
+
+<p>consumer 订阅Topic数据。consumer根据consumer group的分配算法如下</p>
+
+<pre><code>rebalance process for consumer C_i in group G
+For each topic T that C_i subscribes to {
+ remove partitions owned by C_i from the ownership registry
+ read the broker and the consumer registries from Zookeeper
+ compute P_T = partitions available in all brokers under topic T
+ compute C_T = all consumers in G that subscribe to topic T
+ sort P_T and C_T
+ let j be the index position of C_i in C_T and let N = |P_T|/|C_T|
+ assign partitions from j*N to (j+1)*N - 1 in P_T to consumer C_i
+ for each assigned partition p {
+ set the owner of p to C_i in the ownership registry
+ let O_p = the offset of partition p stored in the offset registry
+ invoke a thread to pull data in partition p from offset O_p
+ }
+}
+</code></pre>
+
+<p>当订阅topic的时候，kafka会注册一个ConsumerRebalanceListener，当发生以下任何一个事件的时候，会引发上述的rebalance算法：</p>
+
+<ul>
+  <li>Number of partitions change for any of the subscribed list of topics</li>
+  <li>Topic is created or deleted</li>
+  <li>An existing member of the consumer group dies</li>
+  <li>A new member is added to an existing consumer group via the join API</li>
+</ul>
+
+<p>Kafka的Consumer API可以透明地处理上述情况，另外还包括server的fail，partition的聚合。</p>
+
+<p>读取数据发生在<code>poll</code>函数中，每次调用时，consumer都会使用上次消费的offset作为这次的起始offset，并且顺序的读取记录。当然上次消费的offset也可以由<code>seek</code>函数直接指定。</p>
+
+<p>读取数据在Kafka内部是一个FetchRequest，处理的过程为
+* authorize
+* FetchResponse
+* recordAndMaybeThrottle(quota控制)</p>
 
 <h3 id="write">Write</h3>
 
-<h2 id="ranger">Ranger</h2>
+<p>producer 发布数据的动作。produce的api接口可以选择同步或异步，默认情况下<code>send</code>接口是异步的，它将数据放到缓冲区后就立即返回，等到数据到达一定带下后再发送出去，节约IO开销。可以直接在send()后调用get()，这样可以达到同步的效果。另外一个重要的参数是acks，用来设置produce 请求完成的标准，也就是数据要写到几个broker中才算是完成。</p>
+
+<p>发布数据在Kafka内部是一个ProducerRequest，处理过程为：</p>
+
+<ul>
+  <li>authorize</li>
+  <li>produceResponse</li>
+  <li>recordAndMaybeThrottle(quota控制)</li>
+</ul>
+
+<h3 id="partition-and-key">Partition and Key</h3>
+
+<p>这里说下partition和key的关系。注意到，在kafka的api中会有一个key的概念，而实际上kafka只是一个消息的订阅和发布系统，和key应该扯不上一点关系，那么这个key有什么用呢，不用key会有什么影响。</p>
+
+<p>看下没有指定key或者key为null的时候kafka是怎么处理的。首先kafka会随机选择一个partition，然后在一个默认的时间（10min）内所有的数据都会写到这个partition内。这会造成数据不均衡的分布在各个partition中。这时可以通过减少metadata refresh interval 缩短这个默认时间来减轻数据不均衡的现象。</p>
+
+<p>不过更实际的还是指定一个key，因为kafka默认的是使用hashing-based partitioner，可能还会造成数据不均衡。这时候就需要使用自定义的partition，并指定<code>partitioner.class</code>。</p>
+
+<h2 id="authorize">Authorize</h2>
+
+<h3 id="authorizer">Authorizer接口</h3>
+
+<p>Kafka带有Authorizer接口，这个是所有实现授权的插件都必须要实现的接口。启动的时候会读<code>authorizer.class</code>配置，<code>authorizer.class</code>就是实现授权的具体类。</p>
+
+<p>Kafka的授权逻辑是<code>Principal P is [Allowed/Denied] Operation O From Host H On Resource R</code>，P是用户，O是上文提到的各种Operation，Host就是client地址，R是Kafka资源，包括cluster、topic、consumer-group。</p>
+
+<p>Kafka本身自带一个<code>SimpleAclAuthorizer</code>，用它来实现一些简单资源的访问，例如</p>
+
+<blockquote>
+  <p>Principals User:Bob and User:Alice are allowed to perform Operation Read and Write on Topic Test-Topic from IP 198.51.100.0 and IP 198.51.100.1</p>
+</blockquote>
+
+<h3 id="ranger">Ranger</h3>
+
+<p>Ranger的Kafka plugin也是实现了Authorizer接口。Ranger的实现机制简单的介绍下，Ranger整体分为Admin和Plugin：</p>
+
+<ol>
+  <li>Ranger Plugin运行在服务进程内，在Kafka中，Ranger plugin代码就运行在broker内。</li>
+  <li>Policy通过Ranger Admin存储在database中，plugin轮询地向admin请求最新的policy；policy存储在本地的一个文件中。</li>
+  <li>在service请求到来的时候，ranger plugin中的policy engine会evaluate request，判断是否合法。</li>
+</ol>
+
+<p>Ranger的policy engine分为role based和tag based，kafka中使用的是tag based，evaluae的流程图如下：</p>
+
+<p><img src="https://cwiki.apache.org/confluence/download/attachments/61322361/Ranger-Policy-Evaluation-Flow-with-Tags.png?version=2&amp;modificationDate=1444869949000&amp;api=v2" width="500px" /></p>
+
+<p>Ranger Kafka 目前支持的功能还是比较少的，如下图：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-4-12/11458053.jpg" width="600px" /></p>
+
+<p>这些功能在Kafka自带的<code>SimpleAclAuthorizer</code>都是可以实现的。</p>
+
+<h2 id="saslkerberos-and-ssl-implementation">Sasl/Kerberos and SSL implementation</h2>
+
+<p>sasl 是broker的认证机制，ssl是数据传输的加密和认证机制。从协议的角度来说，kafka支持以下四种：</p>
+
+<ul>
+  <li>
+    <p>PLAINTEXT (non-authenticated, non-encrypted)</p>
+
+    <p>This channel will provide exact behavior for communication channels as previous releases</p>
+  </li>
+  <li>
+    <p>SSL</p>
+
+    <p>SSL  implementation. Authenticated principal in the session will be from the certificate presented or the peer host. </p>
+  </li>
+  <li>
+    <p>SASL+PLAINTEXT</p>
+
+    <p>SASL authentication will be used over plaintext channel. Once the sasl authentication established between client and server . Session will have client’s principal as authenticated user. There won’t be any wire encryption in this case as all the channel communication will be over plain text .</p>
+  </li>
+  <li>
+    <p>SASL+SSL</p>
+
+    <p>SSL will be established initially and  SASL authentication will be done over SSL. Once SASL authentication is established users principal will be used as authenticated user .  This option is useful if users want to use SASL authentication ( for example kerberos ) with wire encryption.</p>
+  </li>
+</ul>
+
+<p>实现SSL需要做如下配置：</p>
+
+<ol>
+  <li>Generate SSL key and certificate for each Kafka broker
+    <ul>
+      <li>Ensure that common name (CN) matches exactly with the fully qualified domain name (FQDN) of the server. The client compares the CN with the DNS domain name to ensure that it is indeed connecting to the desired server, not the malicious one.</li>
+    </ul>
+  </li>
+  <li>Creating your own CA</li>
+  <li>Signing the certificate</li>
+  <li>Configuring Kafka Brokers</li>
+  <li>Configuring Kafka Clients
+    <ul>
+      <li>需要将生成的<code>kafka.client.truststore.jks</code>拷贝到client</li>
+      <li>如果进行双向认证则还需要生成和配置<code>kafka.client.keystore.jks</code></li>
+    </ul>
+  </li>
+</ol>
+
+<p>实现SASL需要：</p>
+
+<ol>
+  <li>Kerberos
+    <ul>
+      <li>客户端需要安装 kerberos client</li>
+    </ul>
+  </li>
+  <li>Create Kerberos Principals
+    <ul>
+      <li>需要对应的用户principal</li>
+    </ul>
+  </li>
+  <li>Make sure all hosts can be reachable using hostnames</li>
+</ol>
+
+<p>具体过程参考<a href="http://kafka.apache.org/documentation.html#security">http://kafka.apache.org/documentation.html#security</a></p>
+
+<p><strong>zookeeper安全性</strong></p>
+
+<ol>
+  <li>不开通ibgw（端口），bcc无法直接访问</li>
+  <li>zookeeper限制ip段，</li>
+  <li>增加zookeeper authentication</li>
+</ol>
+
+<p>对每个resource都应该能够实现管理和控制。</p>
+
+<h2 id="references">REFERENCES:</h2>
+
+<p><a href="https://cwiki.apache.org/confluence/display/RANGER/Kafka+Plugin">https://cwiki.apache.org/confluence/display/RANGER/Kafka+Plugin</a></p>
+
+<p><a href="https://kafka.apache.org/090/configuration.html">https://kafka.apache.org/090/configuration.html</a></p>
+
+<p><a href="https://kafka.apache.org/090/ops.html">https://kafka.apache.org/090/ops.html</a></p>
+
+<p><a href="https://kafka.apache.org/090/security.html">https://kafka.apache.org/090/security.html</a></p>
+
+<p><a href="http://kafka.apache.org/documentation.html">http://kafka.apache.org/documentation.html</a></p>
 
 ]]></content>
   </entry>
