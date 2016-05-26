@@ -254,7 +254,7 @@ body {
 ) where t=0..24
 </code></pre>
 
-<p><img src="https://cdn-images-1.medium.com/max/800/0*hpwwM81bhd6uRSd4.gif" alt="" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-5-26/75012257.jpg" alt="" /></p>
 
 <pre><code>plot(
     (p - 1) / (t + 2)^1.8, 
@@ -263,7 +263,7 @@ body {
 ) where t=0..24, p=10
 </code></pre>
 
-<p><img src="https://cdn-images-1.medium.com/max/800/0*ENIImch8f5vEo7vB.gif" alt="" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-5-26/43469961.jpg" alt="" /></p>
 
 <h3 id="reddit-ranking-algorithm">Reddit ranking algorithm</h3>
 
@@ -271,7 +271,7 @@ body {
 
 <p>Reddit 同样是开源的，并且使用Python实现，为了加速计算，评分算法使用 Pyrex 实现。先来看下新闻的评分算法，hot algorithm：</p>
 
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*21Ezm5SbYie_a3oD.png" alt="" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-5-26/36257254.jpg" alt="" /></p>
 
 <ul>
   <li>同样，submission time对评分的影响很大，人们总是喜欢新鲜的事情</li>
@@ -280,13 +280,13 @@ body {
 
 <p>对于同样的votes，但是submission time不同的新闻，它们的得分可以参考：</p>
 
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*hRkEqhtlfHqfuUse.png" alt="" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-5-26/83965192.jpg" alt="" /></p>
 
 <p>公式中的logarithm表示，最开始的votes拥有比较大的权重：开始的10 upvotes和接下的100 upvotes具有相同的权重，接下是 1000 upvotes。这就是upvotes的平滑效果。</p>
 
 <p>比较有意思的是Reddit中的downvotes，它认为具有比较多upvotes和downvotes的新闻代表争议，它们的得分应该会比只有upvotes的新闻得分低。看看downvotes的影响：</p>
 
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*rBNOVl0MIeRrtzio.png" alt="" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-5-26/95155391.jpg" alt="" /></p>
 
 <p>下面看下Reddit的评论的评分算法：</p>
 
@@ -309,7 +309,7 @@ body {
   <p>If a comment has one upvote and zero downvotes, it has a 100% upvote rate, but since there’s not very much data, the system will keep it near the bottom. But if it has 10 upvotes and only 1 downvote, the system might have enough confidence to place it above something with 40 upvotes and 20 downvotes — figuring that by the time it’s also gotten 40 upvotes, it’s almost certain it will have fewer than 20 downvotes. And the best part is that if it’s wrong (which it is 15% of the time), it will quickly get more data, since the comment with less data is near the top.</p>
 </blockquote>
 
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*ZgS3UCp-3RE23rWh.png" alt="" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-5-26/41802353.jpg" alt="" /></p>
 
 <h3 id="references">REFERENCES</h3>
 

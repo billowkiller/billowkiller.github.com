@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Big Data | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/big-data/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-04-12T20:30:33+08:00</updated>
+  <updated>2016-05-26T10:47:10+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -39,6 +39,8 @@
   <li>缓冲，有助于控制和优化数据流经过系统的速度。</li>
   <li>异步通信</li>
 </ul>
+
+<!--more-->
 
 <h2 id="section">名词解释</h2>
 
@@ -197,7 +199,7 @@ For each topic T that C_i subscribes to {
 }
 </code></pre>
 
-<p>当订阅topic的时候，kafka会注册一个ConsumerRebalanceListener，当发生以下任何一个事件的时候，会引发上述的rebalance算法：</p>
+<p>当订阅topic的时候，kafka会注册一个<code>ConsumerRebalanceListener</code>，当发生以下任何一个事件的时候，会引发上述的rebalance算法：</p>
 
 <ul>
   <li>Number of partitions change for any of the subscribed list of topics</li>

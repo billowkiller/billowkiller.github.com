@@ -208,6 +208,8 @@ body {
   <li>异步通信</li>
 </ul>
 
+<!--more-->
+
 <h2 id="section">名词解释</h2>
 
 <ul>
@@ -365,7 +367,7 @@ For each topic T that C_i subscribes to {
 }
 </code></pre>
 
-<p>当订阅topic的时候，kafka会注册一个ConsumerRebalanceListener，当发生以下任何一个事件的时候，会引发上述的rebalance算法：</p>
+<p>当订阅topic的时候，kafka会注册一个<code>ConsumerRebalanceListener</code>，当发生以下任何一个事件的时候，会引发上述的rebalance算法：</p>
 
 <ul>
   <li>Number of partitions change for any of the subscribed list of topics</li>
