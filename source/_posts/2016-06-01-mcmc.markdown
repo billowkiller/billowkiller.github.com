@@ -1,0 +1,202 @@
+---
+layout: post
+title: "MCMC Methods"
+date: 2016-06-01 16:00
+comments: true
+category: "algorithm"
+tags: [sampling, mcmc]
+---
+
+解释下题目中的MCMC，全名是Markov Chain Monte Carlo，这里面有两个词，Markov Chain、Monte Carlo。第一个词是马尔可夫链，可以参考[http://billowkiller.com/blog/2016/05/09/random-process/](http://billowkiller.com/blog/2016/05/09/random-process/)。第二个是蒙特卡罗，是一种模拟方法，可以从一个分布中模拟出点来估计我们感兴趣的参数，例如用来估计密度函数的定积分，称为 Monte Carlo Integration。
+
+<!--more-->
+
+譬如现在有个分布 $p(\theta)$，我们想知道一下积分：
+
+$$ I = \int_{\Theta} g(\theta)p(\theta) d\theta $$
+
+通过从 $p(\theta)$ 中模拟出 $M$ 个值，我们可以估计 $I$，公式如下：
+
+$$ \hat{I}_M = \frac{1}{M} \sum_{i=1}^M g(\theta^{(i)}) $$
+
+于是统计 $Beta(3,3)$ 的期望可以通过一下代码得到：
+
+```r
+M <- 10000
+beta.sims <- rbeta(M, 3, 3) 
+sum(beta.sims)/M
+```
+    
+还有一个经典的例子是计算 $\pi$:
+
+```r
+M <- 1000000
+x <- runif(N, min= -1, max= 1)
+y <- runif(N, min= -1, max= 1)
+is.inside <- (x^2 + y^2) <= 1
+pi.estimate <- 4 * sum(is.inside) / M
+pi.estimate
+```
+
+通过大数定律我们其实是可以知道，当 $M \to \infty$，$\hat{I}_M \to I$。
+
+大数定律要求的是独立同分布的随机变量，上述的例子都是从同一分布中得到独立的变量，但是如果我们不能产生独立的变量又该怎么办呢？
+
+例如，我们想要从后验分布 $p(\theta \vert y)$ 中抽样，但是我们不能产生独立的变量，因为我们通常不知道 normalizing constant。我们却可以产生稍微有点依赖的变量，这时可以应用 Markov chain 得到我们感兴趣的值。
+
+一旦马尔可夫链收敛到了平稳分布，这时候对马尔可夫链的抽样就类似于对 $p(\theta \vert y)$ 的抽样。但是还是没有解决抽样不是独立。
+
+这时候我们祭出大神 `Ergodic Theorem`，可以让马尔可夫链模拟大数定律，定义如下：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/86848502.jpg" width="500px"/>
+
+下面分别解释下 aperiodic, irreducible, positive recurrent。
+
+**aperiodic**
+
+马尔可夫链的周期性可以用下图表示
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/33403945.jpg" width="400px"/>
+
+只要整个链不是重复一个完整的圆圈，则为 aperiodic。
+
+**irreducibility**
+
+马尔可夫链的不可约表示为可以从任意一个状态到另外一个状态。
+
+以下的链表示的是可约的：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/75995726.jpg" width="400px"/>
+
+**positive recurrent**
+
+positive recurrent表示经过有限次数步骤，可以从任意给定的状态最终返回这个状态。
+
+如果马尔可夫链满足以上这三个条件，则可以忽略抽样之间的依赖关系，进行 Monte Carlo Integration。
+
+知道了上述的知识，我们可以得到 MCMC 的定义：
+
+>MCMC is a class of methods in which we can **simulate draws** that are **slightly dependent** and are approximately from a (posterior) distribution.
+
+在贝叶斯统计中，我们通常会使用两种 MCMC 算法：the Gibbs Sampler 和 Metropolis-Hastings algorithm。
+
+## Gibbs Sampling
+
+假设我们想从联合概率分布 $p(\theta_1,...\theta_k)$ 中得到抽样，那么我们需要知道的是**每个参数的条件分布** $p(\theta_j \vert \theta_{-j},y)$。
+
+从条件概率是如何得到联合概率的呢？具体是根据 `The Hammersley-Clifford Theorem`。有个例子如下：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/41685068.jpg" width="500px"/>
+
+于是右边就可以得到 $f(y \vert x) f(x) = f(x,y)$。
+
+接下来我们要确认的是如何得到每个参数的条件概率分布，full conditional probability.
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/33580254.jpg" width="500px"/>
+
+得到了 full conditional probability 就可以进行 Gibbs Sampling.
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/5179470.jpg" width="500px"/>
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/18003635.jpg" width="500px"/>
+
+通过对后验概率的近似抽样我们其实是在模拟马尔可夫链。所以也就可以通过这些抽样得到估计值。
+
+<u>Example:</u>
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/34647596.jpg" width="500px"/>
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/6225347.jpg" width="500px"/>
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/68667610.jpg" width="500px"/>
+
+```r
+gibbs <- function(n.sims, beta.start, alpha, gamma, delta,
+        y, t, burnin=0, thin=1) {
+        beta.draws <- c()
+        lambda.draws <- matrix(NA, nrow = n.sims, ncol = length(y))
+        beta.cur <- beta.start
+        lambda.update <- function(alpha, beta, y, t) {
+           rgamma(length(y), y + alpha, t + beta)
+        }
+        beta.update <- function(alpha, gamma, delta, lambda, y) {
+           rgamma(1, length(y) * alpha + gamma, delta + sum(lambda))
+        }
+        for (i in 1:n.sims) {
+            lambda.cur <- lambda.update(alpha = alpha, beta = beta.cur,
+                y = y, t = t)
+            beta.cur <- beta.update(alpha = alpha, gamma = gamma,
+                delta = delta, lambda = lambda.cur, y = y)
+            if (i > burnin & (i - burnin)%%thin == 0) {
+                lambda.draws[(i - burnin)/thin, ] <- lambda.cur
+                beta.draws[(i - burnin)/thin] <- beta.cur
+            }
+        }
+        return(list(lambda.draws = lambda.draws, beta.draws = beta.draws))
+}
+```
+
+下面实验得到上述例子的参数估计
+
+```r
+y <- c(5, 1, 5, 14, 3, 19, 1, 1, 4, 22)
+t <- c(94, 16, 63, 126, 5, 31, 1, 1, 2, 10)
+posterior <- gibbs(n.sims = 10000, beta.start = 1, alpha = 1.8, gamma = 0.01, delta = 1, y = y, t = t)
+# 大数定律
+colMeans(posterior$lambda.draws) 
+mean(posterior$beta.draws)
+apply(posterior$lambda.draws, 2, sd)
+sd(posterior$beta.draws)
+```
+
+## Metropolis-Hastings Algorithm
+
+Metropolis-Hastings 算法适用于这种情况：
+
+* 后验概率并不像任何我们知晓的分布（没有共轭分布）
+* 参数的条件概率并不像任何我们知晓的分布（没法用Gibbs sampling）
+* 后验概率拥有三个以上的参数（grid approximations 不可解）
+
+具体的算法有以下步骤：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/92275724.jpg" width="500px"/> 
+
+细分下每个步骤：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/86212406.jpg" width="500px"/>
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/28170626.jpg" width="500px"/>
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/32187111.jpg" width="500px"/>
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/28671748.jpg" width="500px"/>
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/28650748.jpg" width="500px"/>
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/73904716.jpg" width="500px"/>
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/8969349.jpg" width="500px">
+
+<u>Example:</u>
+
+使用随机游走Metropolis算法从Gamma(1.7, 4.4)分布抽样，jumping distribution是一个标准差为2的正太分布。
+
+```r
+mh.gamma <- function(n.sims, start, burnin, cand.sd, shape, rate) {
+    theta.cur <- start
+    draws <- c()
+    theta.update <- function(theta.cur, shape, rate) {
+        theta.can <- rnorm(1, mean = theta.cur, sd = cand.sd)
+        accept.prob <- dgamma(theta.can, shape = shape, rate = rate) /
+            dgamma(theta.cur, shape = shape, rate = rate)
+        if (runif(1) <= accept.prob) theta.can else theta.cur
+    }
+    for (i in 1:n.sims) {
+        draws[i] <- theta.cur <- theta.update(theta.cur, shape = shape, rate = rate)
+    }
+    return(draws[(burnin + 1):n.sims])
+}
+mh.draws <- mh.gamma(10000, start = 1, burnin = 1000, cand.sd = 2, shape = 1.7, rate = 4.4)
+```
+
+
