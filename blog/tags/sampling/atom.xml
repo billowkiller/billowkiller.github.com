@@ -4,7 +4,7 @@
   <title><![CDATA[tags: sampling | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/sampling/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-06-01T23:05:53+08:00</updated>
+  <updated>2016-06-01T23:07:54+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[MCMC Methods]]></title>
-    <link href="http://billowkiller.github.io/blog/2016/05/09/mcmc/"/>
-    <updated>2016-05-09T16:00:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2016/05/09/mcmc</id>
+    <link href="http://billowkiller.github.io/blog/2016/06/01/mcmc/"/>
+    <updated>2016-06-01T16:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/06/01/mcmc</id>
     <content type="html"><![CDATA[<p>解释下题目中的MCMC，全名是Markov Chain Monte Carlo，这里面有两个词，Markov Chain、Monte Carlo。第一个词是马尔可夫链，可以参考<a href="http://billowkiller.com/blog/2016/05/09/random-process/">http://billowkiller.com/blog/2016/05/09/random-process/</a>。第二个是蒙特卡罗，是一种模拟方法，可以从一个分布中模拟出点来估计我们感兴趣的参数，例如用来估计密度函数的定积分，称为 Monte Carlo Integration。</p>
 
 <!--more-->
