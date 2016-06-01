@@ -174,6 +174,53 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-02-27T14:00:00+08:00" pubdate data-updated="true">Feb 27<span>th</span>, 2016</time>
+        
+           | <a href="/blog/2016/02/27/svm/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2016/02/27/svm/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2016/02/27/svm/">Support Vector Machine</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>支持向量机(support vector machine, SVM)是一种二类分类模型，其基本模型定义为特征空间上的间隔最大的线性分类器，其学习策略便是间隔最大化，可以形式化为凸二次规划问题的求解，也等价于正则化的合页损失函数的最小化问题。SVM还包括kernel trick，使得它可以成为实质上的非线性分类器。下面就介绍Perceptron到三种类型的SVM模型。</p>
+
+<p><img src="http://research.microsoft.com/en-us/um/people/manik/projects/trade-off/figs/svm2.PNG" width="400px" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2016/02/27/svm/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-02-26T14:00:00+08:00" pubdate data-updated="true">Feb 26<span>th</span>, 2016</time>
         
            | <a href="/blog/2016/02/26/pca-svd/#disqus_thread"
@@ -598,53 +645,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-10-27T21:00:00+08:00" pubdate data-updated="true">Oct 27<span>th</span>, 2015</time>
-        
-           | <a href="/blog/2015/10/27/spark-introduction/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2015/10/27/spark-introduction/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2015/10/27/spark-introduction/">Spark Introduction</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>简单介绍下Spark。Spark是分布式的内存计算模型，对于两类计算形式能够极大地提升处理的效率：迭代计算，和交互式的数据挖掘工具。迭代计算例如PageRank、K-means聚类、逻辑回归等要求计算结果的重新利用，交互式的数据挖掘例如针对一份的数据集进行多次特定查询也要求原始数据的重复利用。对比于MR作业，它不需要外部存储的介入，从而提升处理速度。接下来将会从Spark的数据模型、编程模型和架构来介绍Spark。</p>
-
-<p><img src="https://spark.apache.org/images/spark-logo.png" alt="image" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2015/10/27/spark-introduction/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -668,6 +668,8 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/05/09/random-process/">Random Process</a>
+    
     <a class="list-group-item " href="/blog/2016/04/09/rating/">Funny Facts About Rating</a>
     
     <a class="list-group-item " href="/blog/2016/04/09/recsys-introduction/">Recommender System in a Nutshell</a>
@@ -675,8 +677,6 @@ body {
     <a class="list-group-item " href="/blog/2016/04/06/kafka/">Kafka Introduction</a>
     
     <a class="list-group-item " href="/blog/2016/03/19/table-join/">Table Join Semantics</a>
-    
-    <a class="list-group-item " href="/blog/2016/03/19/hmm/">Hidden Markov Model</a>
     
   </div>
 </section>
@@ -744,6 +744,12 @@ body {
     <a class="list-group-item " href="/blog/categories/big-data/index.html">
         <span class="badge">8</span>
         Big Data
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/math/index.html">
+        <span class="badge">1</span>
+        math
       </a>
     
   </div>
