@@ -4,7 +4,7 @@
   <title><![CDATA[Category: algorithm | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/algorithm/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-06-01T23:07:54+08:00</updated>
+  <updated>2016-06-01T23:11:37+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -59,7 +59,7 @@ pi.estimate
 
 <p>这时候我们祭出大神 <code>Ergodic Theorem</code>，可以让马尔可夫链模拟大数定律，定义如下：</p>
 
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/86848502.jpg" width="500px" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/86848502.jpg" width="600px" /></p>
 
 <p>下面分别解释下 aperiodic, irreducible, positive recurrent。</p>
 
@@ -99,29 +99,29 @@ pi.estimate
 
 <p>从条件概率是如何得到联合概率的呢？具体是根据 <code>The Hammersley-Clifford Theorem</code>。有个例子如下：</p>
 
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/41685068.jpg" width="500px" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/41685068.jpg" width="600px" /></p>
 
 <p>于是右边就可以得到 $f(y \vert x) f(x) = f(x,y)$。</p>
 
 <p>接下来我们要确认的是如何得到每个参数的条件概率分布，full conditional probability.</p>
 
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/33580254.jpg" width="500px" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/33580254.jpg" width="600px" /></p>
 
 <p>得到了 full conditional probability 就可以进行 Gibbs Sampling.</p>
 
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/5179470.jpg" width="500px" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/5179470.jpg" width="600px" /></p>
 
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/18003635.jpg" width="500px" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/18003635.jpg" width="600px" /></p>
 
 <p>通过对后验概率的近似抽样我们其实是在模拟马尔可夫链。所以也就可以通过这些抽样得到估计值。</p>
 
 <u>Example:</u>
 
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/34647596.jpg" width="500px" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/34647596.jpg" width="600px" /></p>
 
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/6225347.jpg" width="500px" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/6225347.jpg" width="600px" /></p>
 
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/68667610.jpg" width="500px" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/68667610.jpg" width="600px" /></p>
 
 <p><code>r
 gibbs &lt;- function(n.sims, beta.start, alpha, gamma, delta,
@@ -174,23 +174,23 @@ sd(posterior$beta.draws)
 
 <p>具体的算法有以下步骤：</p>
 
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/92275724.jpg" width="500px" /> </p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/92275724.jpg" width="600px" /> </p>
 
 <p>细分下每个步骤：</p>
 
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/86212406.jpg" width="500px" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/86212406.jpg" width="600px" /></p>
 
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/28170626.jpg" width="500px" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/28170626.jpg" width="600px" /></p>
 
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/32187111.jpg" width="500px" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/32187111.jpg" width="600px" /></p>
 
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/28671748.jpg" width="500px" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/28671748.jpg" width="600px" /></p>
 
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/28650748.jpg" width="500px" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/28650748.jpg" width="600px" /></p>
 
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/73904716.jpg" width="500px" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/73904716.jpg" width="600px" /></p>
 
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/8969349.jpg" width="500px" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/8969349.jpg" width="600px" /></p>
 
 <u>Example:</u>
 
