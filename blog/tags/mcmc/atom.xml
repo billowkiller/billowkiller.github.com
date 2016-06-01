@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: mcmc | Billowkiller's Blog]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/mcmc/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2016-06-01T23:05:53+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[MCMC Methods]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/05/09/mcmc/"/>
+    <updated>2016-05-09T16:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/05/09/mcmc</id>
+    <content type="html"><![CDATA[<p>解释下题目中的MCMC，全名是Markov Chain Monte Carlo，这里面有两个词，Markov Chain、Monte Carlo。第一个词是马尔可夫链，可以参考<a href="http://billowkiller.com/blog/2016/05/09/random-process/">http://billowkiller.com/blog/2016/05/09/random-process/</a>。第二个是蒙特卡罗，是一种模拟方法，可以从一个分布中模拟出点来估计我们感兴趣的参数，例如用来估计密度函数的定积分，称为 Monte Carlo Integration。</p>
+
+<!--more-->
+
+<p>譬如现在有个分布 $p(\theta)$，我们想知道一下积分：</p>
+
+<script type="math/tex; mode=display"> I = \int_{\Theta} g(\theta)p(\theta) d\theta </script>
+
+<p>通过从 $p(\theta)$ 中模拟出 $M$ 个值，我们可以估计 $I$，公式如下：</p>
+
+<script type="math/tex; mode=display"> \hat{I}_M = \frac{1}{M} \sum_{i=1}^M g(\theta^{(i)}) </script>
+
+<p>于是统计 $Beta(3,3)$ 的期望可以通过一下代码得到：</p>
+
+<p><code>r
+M &lt;- 10000
+beta.sims &lt;- rbeta(M, 3, 3) 
+sum(beta.sims)/M
+</code></p>
+
+<p>还有一个经典的例子是计算 $\pi$:</p>
+
+<p><code>r
+M &lt;- 1000000
+x &lt;- runif(N, min= -1, max= 1)
+y &lt;- runif(N, min= -1, max= 1)
+is.inside &lt;- (x^2 + y^2) &lt;= 1
+pi.estimate &lt;- 4 * sum(is.inside) / M
+pi.estimate
+</code></p>
+
+<p>通过大数定律我们其实是可以知道，当 $M \to \infty$，$\hat{I}_M \to I$。</p>
+
+<p>大数定律要求的是独立同分布的随机变量，上述的例子都是从同一分布中得到独立的变量，但是如果我们不能产生独立的变量又该怎么办呢？</p>
+
+<p>例如，我们想要从后验分布 $p(\theta \vert y)$ 中抽样，但是我们不能产生独立的变量，因为我们通常不知道 normalizing constant。我们却可以产生稍微有点依赖的变量，这时可以应用 Markov chain 得到我们感兴趣的值。</p>
+
+<p>一旦马尔可夫链收敛到了平稳分布，这时候对马尔可夫链的抽样就类似于对 $p(\theta \vert y)$ 的抽样。但是还是没有解决抽样不是独立。</p>
+
+<p>这时候我们祭出大神 <code>Ergodic Theorem</code>，可以让马尔可夫链模拟大数定律，定义如下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/86848502.jpg" width="500px" /></p>
+
+<p>下面分别解释下 aperiodic, irreducible, positive recurrent。</p>
+
+<p><strong>aperiodic</strong></p>
+
+<p>马尔可夫链的周期性可以用下图表示</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/33403945.jpg" width="400px" /></p>
+
+<p>只要整个链不是重复一个完整的圆圈，则为 aperiodic。</p>
+
+<p><strong>irreducibility</strong></p>
+
+<p>马尔可夫链的不可约表示为可以从任意一个状态到另外一个状态。</p>
+
+<p>以下的链表示的是可约的：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/75995726.jpg" width="400px" /></p>
+
+<p><strong>positive recurrent</strong></p>
+
+<p>positive recurrent表示经过有限次数步骤，可以从任意给定的状态最终返回这个状态。</p>
+
+<p>如果马尔可夫链满足以上这三个条件，则可以忽略抽样之间的依赖关系，进行 Monte Carlo Integration。</p>
+
+<p>知道了上述的知识，我们可以得到 MCMC 的定义：</p>
+
+<blockquote>
+  <p>MCMC is a class of methods in which we can <strong>simulate draws</strong> that are <strong>slightly dependent</strong> and are approximately from a (posterior) distribution.</p>
+</blockquote>
+
+<p>在贝叶斯统计中，我们通常会使用两种 MCMC 算法：the Gibbs Sampler 和 Metropolis-Hastings algorithm。</p>
+
+<h2 id="gibbs-sampling">Gibbs Sampling</h2>
+
+<p>假设我们想从联合概率分布 $p(\theta<em>1,…\theta_k)$ 中得到抽样，那么我们需要知道的是<strong>每个参数的条件分布</strong> $p(\theta_j \vert \theta</em>{-j},y)$。</p>
+
+<p>从条件概率是如何得到联合概率的呢？具体是根据 <code>The Hammersley-Clifford Theorem</code>。有个例子如下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/41685068.jpg" width="500px" /></p>
+
+<p>于是右边就可以得到 $f(y \vert x) f(x) = f(x,y)$。</p>
+
+<p>接下来我们要确认的是如何得到每个参数的条件概率分布，full conditional probability.</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/33580254.jpg" width="500px" /></p>
+
+<p>得到了 full conditional probability 就可以进行 Gibbs Sampling.</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/5179470.jpg" width="500px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/18003635.jpg" width="500px" /></p>
+
+<p>通过对后验概率的近似抽样我们其实是在模拟马尔可夫链。所以也就可以通过这些抽样得到估计值。</p>
+
+<u>Example:</u>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/34647596.jpg" width="500px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/6225347.jpg" width="500px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/68667610.jpg" width="500px" /></p>
+
+<p><code>r
+gibbs &lt;- function(n.sims, beta.start, alpha, gamma, delta,
+        y, t, burnin=0, thin=1) {
+        beta.draws &lt;- c()
+        lambda.draws &lt;- matrix(NA, nrow = n.sims, ncol = length(y))
+        beta.cur &lt;- beta.start
+        lambda.update &lt;- function(alpha, beta, y, t) {
+           rgamma(length(y), y + alpha, t + beta)
+        }
+        beta.update &lt;- function(alpha, gamma, delta, lambda, y) {
+           rgamma(1, length(y) * alpha + gamma, delta + sum(lambda))
+        }
+        for (i in 1:n.sims) {
+            lambda.cur &lt;- lambda.update(alpha = alpha, beta = beta.cur,
+                y = y, t = t)
+            beta.cur &lt;- beta.update(alpha = alpha, gamma = gamma,
+                delta = delta, lambda = lambda.cur, y = y)
+            if (i &gt; burnin &amp; (i - burnin)%%thin == 0) {
+                lambda.draws[(i - burnin)/thin, ] &lt;- lambda.cur
+                beta.draws[(i - burnin)/thin] &lt;- beta.cur
+            }
+        }
+        return(list(lambda.draws = lambda.draws, beta.draws = beta.draws))
+}
+</code></p>
+
+<p>下面实验得到上述例子的参数估计</p>
+
+<p><code>r
+y &lt;- c(5, 1, 5, 14, 3, 19, 1, 1, 4, 22)
+t &lt;- c(94, 16, 63, 126, 5, 31, 1, 1, 2, 10)
+posterior &lt;- gibbs(n.sims = 10000, beta.start = 1, alpha = 1.8, gamma = 0.01, delta = 1, y = y, t = t)
+# 大数定律
+colMeans(posterior$lambda.draws) 
+mean(posterior$beta.draws)
+apply(posterior$lambda.draws, 2, sd)
+sd(posterior$beta.draws)
+</code></p>
+
+<h2 id="metropolis-hastings-algorithm">Metropolis-Hastings Algorithm</h2>
+
+<p>Metropolis-Hastings 算法适用于这种情况：</p>
+
+<ul>
+  <li>后验概率并不像任何我们知晓的分布（没有共轭分布）</li>
+  <li>参数的条件概率并不像任何我们知晓的分布（没法用Gibbs sampling）</li>
+  <li>后验概率拥有三个以上的参数（grid approximations 不可解）</li>
+</ul>
+
+<p>具体的算法有以下步骤：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/92275724.jpg" width="500px" /> </p>
+
+<p>细分下每个步骤：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/86212406.jpg" width="500px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/28170626.jpg" width="500px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/32187111.jpg" width="500px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/28671748.jpg" width="500px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/28650748.jpg" width="500px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/73904716.jpg" width="500px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/8969349.jpg" width="500px" /></p>
+
+<u>Example:</u>
+
+<p>使用随机游走Metropolis算法从Gamma(1.7, 4.4)分布抽样，jumping distribution是一个标准差为2的正太分布。</p>
+
+<p><code>r
+mh.gamma &lt;- function(n.sims, start, burnin, cand.sd, shape, rate) {
+    theta.cur &lt;- start
+    draws &lt;- c()
+    theta.update &lt;- function(theta.cur, shape, rate) {
+        theta.can &lt;- rnorm(1, mean = theta.cur, sd = cand.sd)
+        accept.prob &lt;- dgamma(theta.can, shape = shape, rate = rate) /
+            dgamma(theta.cur, shape = shape, rate = rate)
+        if (runif(1) &lt;= accept.prob) theta.can else theta.cur
+    }
+    for (i in 1:n.sims) {
+        draws[i] &lt;- theta.cur &lt;- theta.update(theta.cur, shape = shape, rate = rate)
+    }
+    return(draws[(burnin + 1):n.sims])
+}
+mh.draws &lt;- mh.gamma(10000, start = 1, burnin = 1000, cand.sd = 2, shape = 1.7, rate = 4.4)
+</code></p>
+
+]]></content>
+  </entry>
+  
+</feed>

@@ -207,71 +207,57 @@ body {
 
 <p>下面讨论几个随机过程。</p>
 
-<h2 id="section">伯努利过程和泊松过程</h2>
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2016/05/09/random-process/">Read on &rarr;</a>
+    </footer>
+  
 
-<p>这两个过程重点研究的是<strong>相邻到达时间是互相独立的随机变量</strong>的模型。区别在于：</p>
 
-<ul>
-  <li>伯努利（Bernoulli）过程考虑到达时间是<code>离散</code>的情形，相邻时间服从<code>几何分布</code>。</li>
-  <li>泊松（Poisson）过程考虑到达时间是<code>连续</code>的情形，相邻时间服从<code>指数分布</code>。</li>
-</ul>
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
 
-<h3 id="section-1">伯努利过程</h3>
 
-<p>通常将伯努利过程视为独立投币序列，正面朝上的概率是 $p,\ 0&lt;p&lt;1$。这里把硬币朝上视为“到达”，连续投币产生伯努利过程。下面给出伯努利过程相关的随机变量和性质：</p>
 
-<ul>
-  <li>服从参数为 $n$ 和 $p$ 的二项分布。这是 $n$ 次相继独立的实验成功的总次数 $S$ 的分布，有</li>
-</ul>
 
-<script type="math/tex; mode=display"> P_S(k) =  \binom{k}{n} p^k (1-p)^{n-k},\ k = 0,1,..n </script>
 
-<script type="math/tex; mode=display">E(S) = np,\ var(S)=np(1-p)</script>
 
-<ul>
-  <li>服从参数为 $p$ 的集合分布。这是相互独立重复的伯努利试验首次成功时刻T的分布，有</li>
-</ul>
 
-<script type="math/tex; mode=display"> P_T(t) = p(1-p)^{t-1},\ t=1,2,...</script>
 
-<script type="math/tex; mode=display"> E(T) = \frac{1}{p},\ var(T) = \frac{1-p}{p^2}</script>
 
-<p>伯努利过程有<strong>独立性</strong>和<strong>无记忆性</strong>。假设我们观测过程 $n$ 步，但是还没有成功。那么余下的 $T-n$ 有什么结论呢？</p>
 
-<script type="math/tex; mode=display"> P(T-n=t \vert T>n) = (1-p)^{t-1}p = P(T=t),\ t=1,2,...</script>
 
-<p>可以看到未来试验次数仍然是相同的集合分布。</p>
 
-<p>当 $n$ 充分大，而 $p$ 很小，均值 $np$ 始终。数学上，我们可以让 $n$ 增大，但是同时缩小 $p$，这样可以保值 $np$ 是一个固定值 $\lambda$，从极值意义上看，二项分布的分布列可以简化为泊松分布。</p>
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-05-09T16:00:00+08:00" pubdate data-updated="true">May 9<span>th</span>, 2016</time>
+        
+           | <a href="/blog/2016/05/09/mcmc/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2016/05/09/mcmc/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2016/05/09/mcmc/">MCMC Methods</a></h1>
+    
+  </header>
 
-<h3 id="section-2">泊松分布</h3>
 
-<p>跟伯努利过程相比，泊松过程是连续时间轴上的到达时间。</p>
-
-<p>伯努利过程无法刻画相同时间段内，发生两次或者多次到达事件，虽然可以通过将时间段选的非常小，但是无法选择一个准确的小时间段。这时候考虑时间段长度趋近于零的情况，即连续时间模型。</p>
-
-<p>泊松过程相关的随机变量和性质：</p>
-
-<ul>
-  <li>服从参数为 $\lambda \tau$ 的<strong>泊松分布</strong>。这是泊松过程的强度为 $\lambda$，在时间长度为 $\tau$ 的区间内到达的总次数 $N_\tau$ 的分布，有</li>
-</ul>
-
-<script type="math/tex; mode=display"> P_{N_\tau}(k) = P(k,\tau) = e^{-\lambda \tau} \frac{(\lambda \tau)^k}{k!},\ k=0,1,...</script>
-
-<script type="math/tex; mode=display"> E(N_\tau) = \lambda \tau,\ var(N_\tau) = \lambda \tau</script>
-
-<ul>
-  <li>服从参数为 $\lambda$ 的<strong>指数分布</strong>，这是首次达到的时间 $T$ 的分布，有</li>
-</ul>
-
-<script type="math/tex; mode=display">f_T(t) = \lambda e^{-\lambda t},\ t \ge 0,\ E(T)=\frac{1}{\lambda},\ var(T)=\frac{1}{\lambda^2}</script>
-
-<p>上式可以将一个固定长度为 $\tau$ 的时间区间分成一个个小区间，将小区间看成伯努利过程来近似。</p>
-
-<h3 id="section-3">马尔可夫链</h3>
+  <div class="entry-content clearfix"><p>解释下题目中的MCMC，全名是Markov Chain Monte Carlo，这里面有两个词，Markov Chain、Monte Carlo。第一个词是马尔可夫链，可以参考<a href="http://billowkiller.com/blog/2016/05/09/random-process/">http://billowkiller.com/blog/2016/05/09/random-process/</a>。第二个是蒙特卡罗，是一种模拟方法，可以从一个分布中模拟出点来估计我们感兴趣的参数，例如用来估计密度函数的定积分，称为 Monte Carlo Integration。</p>
 
 </div>
   
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2016/05/09/mcmc/">Read on &rarr;</a>
+    </footer>
   
 
 
@@ -691,60 +677,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-02-29T14:00:00+08:00" pubdate data-updated="true">Feb 29<span>th</span>, 2016</time>
-        
-           | <a href="/blog/2016/02/29/klr-svr/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2016/02/29/klr-svr/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2016/02/29/klr-svr/">Kernel Logistic Regression Versus SVM</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>Logistic Regression和SVM都是分类方法，它们定义线性决策边界（linear decision boundaries）作为划分的依据。但二者在motivation方便完全不同，区别如下</p>
-
-<ul>
-  <li>LR初衷是为了让linear regression能够输出二元分类，估计一个实例属于某一类的概率；线性决策边界也只是回归函数的结果，在回归函数中使用阈值作为分类的标准，一般是0.5。决策边界在SVM中来的更为重要，整个模型的目标就是为了获得最优的决策边界。</li>
-  <li>每个训练样本都对LR的过程有一定的影响，但SVM只依赖于在决策边界附近的某些点。</li>
-  <li>LR适应于低维空间，并且由于使用最大似然估计，所以对噪声不敏感；SVM更适应于高维空间</li>
-  <li>没有正规化的LR无法保证获得最好的分离超平面，只能获得margin附近的较高的置信度; SVM则能获得最优的分离超平面。</li>
-</ul>
-
-<p>那么二者会有什么联系呢，SVM的kernel function又是如何应用到LR模型的呢？</p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2016/02/29/klr-svr/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -770,13 +702,13 @@ body {
     
     <a class="list-group-item " href="/blog/2016/05/09/random-process/">Random Process</a>
     
+    <a class="list-group-item " href="/blog/2016/05/09/mcmc/">MCMC Methods</a>
+    
     <a class="list-group-item " href="/blog/2016/04/09/rating/">Funny Facts About Rating</a>
     
     <a class="list-group-item " href="/blog/2016/04/09/recsys-introduction/">Recommender System in a Nutshell</a>
     
     <a class="list-group-item " href="/blog/2016/04/06/kafka/">Kafka Introduction</a>
-    
-    <a class="list-group-item " href="/blog/2016/03/19/table-join/">Table Join Semantics</a>
     
   </div>
 </section>
@@ -830,7 +762,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/algorithm/index.html">
-        <span class="badge">7</span>
+        <span class="badge">8</span>
         algorithm
       </a>
     

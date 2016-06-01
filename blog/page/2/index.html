@@ -174,6 +174,60 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-02-29T14:00:00+08:00" pubdate data-updated="true">Feb 29<span>th</span>, 2016</time>
+        
+           | <a href="/blog/2016/02/29/klr-svr/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2016/02/29/klr-svr/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2016/02/29/klr-svr/">Kernel Logistic Regression Versus SVM</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>Logistic Regression和SVM都是分类方法，它们定义线性决策边界（linear decision boundaries）作为划分的依据。但二者在motivation方便完全不同，区别如下</p>
+
+<ul>
+  <li>LR初衷是为了让linear regression能够输出二元分类，估计一个实例属于某一类的概率；线性决策边界也只是回归函数的结果，在回归函数中使用阈值作为分类的标准，一般是0.5。决策边界在SVM中来的更为重要，整个模型的目标就是为了获得最优的决策边界。</li>
+  <li>每个训练样本都对LR的过程有一定的影响，但SVM只依赖于在决策边界附近的某些点。</li>
+  <li>LR适应于低维空间，并且由于使用最大似然估计，所以对噪声不敏感；SVM更适应于高维空间</li>
+  <li>没有正规化的LR无法保证获得最好的分离超平面，只能获得margin附近的较高的置信度; SVM则能获得最优的分离超平面。</li>
+</ul>
+
+<p>那么二者会有什么联系呢，SVM的kernel function又是如何应用到LR模型的呢？</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2016/02/29/klr-svr/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-02-27T14:00:00+08:00" pubdate data-updated="true">Feb 27<span>th</span>, 2016</time>
         
            | <a href="/blog/2016/02/27/svm/#disqus_thread"
@@ -590,61 +644,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-10-27T21:04:00+08:00" pubdate data-updated="true">Oct 27<span>th</span>, 2015</time>
-        
-           | <a href="/blog/2015/10/27/spark-streaming/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2015/10/27/spark-streaming/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2015/10/27/spark-streaming/">Spark Streaming</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>流式计算通常是为了满足日益增长的数据的实时获取和低延时计算的需求。通常来说，一个优秀的流式计算引擎需要满足一下的一些需求：</p>
-
-<ol>
-  <li>不重不丢的保证（在节点或计算失败的时候，内存中的计算状态能被正确的恢复）</li>
-  <li>低延迟</li>
-  <li>高吞吐量</li>
-  <li>强大的计算模型</li>
-  <li>容错机制的低开销</li>
-  <li>流控</li>
-</ol>
-
-<p><img src="http://spark.apache.org/images/spark-logo.png" alt="image" />
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2015/10/27/spark-streaming/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -670,13 +669,13 @@ body {
     
     <a class="list-group-item " href="/blog/2016/05/09/random-process/">Random Process</a>
     
+    <a class="list-group-item " href="/blog/2016/05/09/mcmc/">MCMC Methods</a>
+    
     <a class="list-group-item " href="/blog/2016/04/09/rating/">Funny Facts About Rating</a>
     
     <a class="list-group-item " href="/blog/2016/04/09/recsys-introduction/">Recommender System in a Nutshell</a>
     
     <a class="list-group-item " href="/blog/2016/04/06/kafka/">Kafka Introduction</a>
-    
-    <a class="list-group-item " href="/blog/2016/03/19/table-join/">Table Join Semantics</a>
     
   </div>
 </section>
@@ -730,7 +729,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/algorithm/index.html">
-        <span class="badge">7</span>
+        <span class="badge">8</span>
         algorithm
       </a>
     

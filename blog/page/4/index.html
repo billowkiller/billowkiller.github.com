@@ -174,6 +174,59 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-14T02:18:00+08:00" pubdate data-updated="true">Aug 14<span>th</span>, 2014</time>
+        
+           | <a href="/blog/2014/08/14/linux-memory-management/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/08/14/linux-memory-management/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/14/linux-memory-management/">Linux Memory Management</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>reprint from <a href="http://www.kerneltravel.net/journal/v/mem.htm">http://www.kerneltravel.net/journal/v/mem.htm</a></p>
+
+<hr />
+
+<p>看到一篇介绍linux内存管理的好文，忍不住转载，做个记录。内容作了部分删改。</p>
+
+<h2 id="section">摘要</h2>
+
+<p>本章首先以应用程序开发者的角度审视Linux的进程内存管理，在此基础上逐步深入到内核中讨论系统物理内存管理和内核内存的使用方法。力求从外到内、水到渠成地引导网友分析Linux的内存管理与使用。在本章最后，我们给出一个内存映射的实例，帮助网友们理解内核内存管理与用户内存管理之间的关系，希望大家最终能驾驭Linux内存管理。</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/08/14/linux-memory-management/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-09T03:18:00+08:00" pubdate data-updated="true">Aug 9<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/08/09/quicksort/#disqus_thread"
@@ -697,55 +750,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-15T02:18:00+08:00" pubdate data-updated="true">Jul 15<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/07/15/linux-epoll-module/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/07/15/linux-epoll-module/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/15/linux-epoll-module/">Linux Epoll Module</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>综合了几个blog以及自己查到的一些资料，总结下Linux中的IO多路复用，主要是<code>epoll</code>模型。</p>
-
-<p><code>select</code>，<code>poll</code>，<code>epoll</code>都是Linux下IO多路复用的机制。Windows下为<code>IOCP</code>模型。I/O多路复用就通过一种机制，可以监视多个描述符，一旦某个文件描述符就绪，能够通知程序进行相应的读写操作。其中文件描述符是一个简单的整数，用以标明每一个被进程所打开的文件和socket，包括<code>filefd</code>、<code>socketfd</code>、<code>signalfd</code>、<code>timerfd</code>、<code>eventfd</code>等。<code>eventfd</code> 是一个比 <code>pipe </code>更高效的线程间事件通知机制。</p>
-
-<p>但<code>select</code>，<code>poll</code>，<code>epoll</code>本质上都是<strong>同步I/O</strong>，因为他们都需要在读写事件就绪后自己负责进行读写，也就是说这个读写过程是阻塞的，而<strong>异步I/O</strong>则无需自己负责进行读写，异步I/O的实现会负责把数据从内核拷贝到用户空间。</p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/07/15/linux-epoll-module/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -771,13 +775,13 @@ body {
     
     <a class="list-group-item " href="/blog/2016/05/09/random-process/">Random Process</a>
     
+    <a class="list-group-item " href="/blog/2016/05/09/mcmc/">MCMC Methods</a>
+    
     <a class="list-group-item " href="/blog/2016/04/09/rating/">Funny Facts About Rating</a>
     
     <a class="list-group-item " href="/blog/2016/04/09/recsys-introduction/">Recommender System in a Nutshell</a>
     
     <a class="list-group-item " href="/blog/2016/04/06/kafka/">Kafka Introduction</a>
-    
-    <a class="list-group-item " href="/blog/2016/03/19/table-join/">Table Join Semantics</a>
     
   </div>
 </section>
@@ -831,7 +835,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/algorithm/index.html">
-        <span class="badge">7</span>
+        <span class="badge">8</span>
         algorithm
       </a>
     

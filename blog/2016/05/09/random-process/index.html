@@ -206,6 +206,8 @@ body {
 
 <p>下面讨论几个随机过程。</p>
 
+<!--more-->
+
 <h2 id="section">伯努利过程和泊松过程</h2>
 
 <p>这两个过程重点研究的是<strong>相邻到达时间是互相独立的随机变量</strong>的模型。区别在于：</p>
@@ -269,6 +271,18 @@ body {
 
 <h3 id="section-3">马尔可夫链</h3>
 
+<p>马尔可夫链的定义是一种随机过程，它描述了一种状态序列，其每个状态值取决于前面的状态。用以下公式表示马尔可夫性质：</p>
+
+<script type="math/tex; mode=display">p(\theta^{(t+1)} \vert \theta^{(1)},\theta^{(2)},..\theta^{(t)}) = p(\theta^{(t+1)} \vert \theta^{(t)}) </script>
+
+<p>状态之间的转换通过 transition kernel，这是一个 $k \times k$ 矩阵，$k$ 表示状态数。一个 $3 \times 3$ 的转换矩阵 $P$ 如下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/92862152.jpg" alt="" /></p>
+
+<p>马尔可夫链有一个平稳分布，stationary distribution $\pi$，定义为：$\pi = \pi P$。无论起始状态是什么样，马尔可夫链通常会收敛到 $\pi$ 上。</p>
+
+<p>通常会根据所选的起始状态，有这不同的收敛时间。在利用马尔可夫链进行抽样时，在收敛之前的一段时间，比如前 $n-1$ 次迭代，各个状态的边际分布还不能认为是稳定分布，所以在进行估计的时候，应该把前面的这$n-1$ 个迭代值去掉。这个过程称为 <code>burn-in</code>。这样会使我们的抽样更加接近平稳分布，减少对起始位置的依赖。</p>
+
 </div>
 
 
@@ -317,7 +331,7 @@ body {
         
           <ul class="meta text-muted pager">
             
-            <li class="previous"><a href="/blog/2016/04/09/rating/" title="Previous Post: Funny Facts about Rating">&laquo; Funny Facts about Rating</a></li>
+            <li class="previous"><a href="/blog/2016/05/09/mcmc/" title="Previous Post: MCMC Methods">&laquo; MCMC Methods</a></li>
             
             
           </ul>
@@ -345,13 +359,13 @@ body {
     
     <a class="list-group-item active" href="/blog/2016/05/09/random-process/">Random Process</a>
     
+    <a class="list-group-item " href="/blog/2016/05/09/mcmc/">MCMC Methods</a>
+    
     <a class="list-group-item " href="/blog/2016/04/09/rating/">Funny Facts About Rating</a>
     
     <a class="list-group-item " href="/blog/2016/04/09/recsys-introduction/">Recommender System in a Nutshell</a>
     
     <a class="list-group-item " href="/blog/2016/04/06/kafka/">Kafka Introduction</a>
-    
-    <a class="list-group-item " href="/blog/2016/03/19/table-join/">Table Join Semantics</a>
     
   </div>
 </section>
@@ -405,7 +419,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/algorithm/index.html">
-        <span class="badge">7</span>
+        <span class="badge">8</span>
         algorithm
       </a>
     
