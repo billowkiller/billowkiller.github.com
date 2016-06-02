@@ -4,7 +4,7 @@
   <title><![CDATA[Category: algorithm | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/algorithm/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-06-01T23:20:53+08:00</updated>
+  <updated>2016-06-02T09:15:34+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -97,7 +97,7 @@ pi.estimate
 
 <h2 id="gibbs-sampling">Gibbs Sampling</h2>
 
-<p>假设我们想从联合概率分布 $p(\theta<em>1,…\theta_k)$ 中得到抽样，那么我们需要知道的是<strong>每个参数的条件分布</strong> $p(\theta_j \vert \theta</em>{-j},y)$。</p>
+<p>假设我们想从联合概率分布 $p(\theta_1,…\theta_k)$ 中得到抽样，那么我们需要知道的是<strong>每个参数的条件分布</strong> $p(\theta_j \vert \theta_{-j},y)$。</p>
 
 <p>从条件概率是如何得到联合概率的呢？具体是根据 <code>The Hammersley-Clifford Theorem</code>。有个例子如下：</p>
 
