@@ -569,31 +569,73 @@ body {
 
 
 
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-12-01T09:50:00+08:00" pubdate data-updated="true">Dec 1<span>st</span>, 2015</time>
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-12-20T17:23:00+08:00" pubdate data-updated="true">Dec 20<span>th</span>, 2015</time>
         
-           | <a href="/blog/2015/12/01/hadoop-tunning/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2015/12/01/hadoop-tunning/">Comments</a>
+           | <a href="/blog/2015/12/20/hadoop-intro/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2015/12/20/hadoop-intro/">Comments</a>
         
       </p>
     
     
-      <h1 class="entry-title"><a href="/blog/2015/12/01/hadoop-tunning/">Hadoop Tunning</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/12/20/hadoop-intro/">Hadoop Introduction</a></h1>
     
   </header>
 
 
-  <div class="entry-content clearfix"><p>Hadoop的调优涉及到整个MapReduce的各个过程，并且要对每个参数的意义和Counter信息有一定的了解。也就是说，根据Counter的信息推测哪些MapReduce阶段可能存在性能瓶颈，并且根据这个瓶颈理解对应的Hadoop 框架中的处理逻辑，进而可以调整相关参数的大小或程序的行为。</p>
+  <div class="entry-content clearfix"><p>看图说话，用一些图表来记录Hadoop。</p>
 
-<p>从大面上来看，MapReduce的瓶颈可能存在以下图中的各个部分。</p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/22389512.jpg" width="500px" /></p>
 
-<p><img src="http://ww2.sinaimg.cn/large/74311666jw1eyjx8zpfz2j20rq0cegna.jpg" width="500px" /></p>
+<h3 id="mapreduce">MapReduce</h3>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/71525619.jpg" width="500px" /></p>
+
+<p>schema-on-read表示hadoop更容易处理非结构化或半结构化的数据，因为可以在数据处理的时候进行解析，因此在加载数据的时候更加轻量化。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/99564088.jpg" width="500px" /></p>
+
+<h3 id="hdfs">HDFS</h3>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/60582298.jpg" width="500px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/98566811.jpg" width="500px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/1953976.jpg" width="500px" /></p>
+
+<p>NameNode维护整个文件系统的文件目录树，文件目录的元信息和文件的数据块索引。这些信息以 FSImage 和 EditLog 方式存储在本地文件系统中。 FSImage 是某一时刻的镜像，后续修改都是放在 EditLog 中。 Second NameNode 会间隔将 FSImage 和 EditLog 进行合并后放在 NameNode 上。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/94295030.jpg" width="500px" /></p>
+
+<h3 id="yarn">Yarn</h3>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/80769446.jpg" width="500px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/31902359.jpg" width="400px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/37369292.jpg" width="500px" /></p>
+
+<h3 id="hadoop-io">HADOOP IO</h3>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/15159126.jpg" width="500px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/90632065.jpg" width="500px" /></p>
+
+<p>其他流行的兼容Hadoop的序列化框架还有：Avro、Thrift、google protobuf</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/11927837.jpg" width="500px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/70087429.jpg" width="500px" /></p>
+
+<h3 id="hadoop-jobs">HADOOP JOBS</h3>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/38335644.jpg" width="500px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/37931472.jpg" width="500px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/10857296.jpg" width="500px" /></p>
 
 </div>
   
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2015/12/01/hadoop-tunning/">Read on &rarr;</a>
-    </footer>
   
 
 
@@ -618,26 +660,30 @@ body {
 
 
 
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-11-22T17:27:00+08:00" pubdate data-updated="true">Nov 22<span>nd</span>, 2015</time>
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-12-01T09:50:00+08:00" pubdate data-updated="true">Dec 1<span>st</span>, 2015</time>
         
-           | <a href="/blog/2015/11/22/hadoop-secondary-sorting/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2015/11/22/hadoop-secondary-sorting/">Comments</a>
+           | <a href="/blog/2015/12/01/hadoop-tunning/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2015/12/01/hadoop-tunning/">Comments</a>
         
       </p>
     
     
-      <h1 class="entry-title"><a href="/blog/2015/11/22/hadoop-secondary-sorting/">Hadoop Secondary Sorting</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/12/01/hadoop-tunning/">Hadoop Tunning</a></h1>
     
   </header>
 
 
-  <div class="entry-content clearfix"><p>Hadoop MapReduce的神奇之处发生在mapper和reducer之间，将所有相同key的map输出记录聚集在一块，使得用户可以方便的处理聚合在一起的数据。Hadoop内部使用了partition、sort和merge（shuffle的一部分），在每个reducer中流式地得到排序后的key和value集合。在MapReduce Sorting中有个特别的部分是secondary sort，也就是对value进行排序。</p>
+  <div class="entry-content clearfix"><p>Hadoop的调优涉及到整个MapReduce的各个过程，并且要对每个参数的意义和Counter信息有一定的了解。也就是说，根据Counter的信息推测哪些MapReduce阶段可能存在性能瓶颈，并且根据这个瓶颈理解对应的Hadoop 框架中的处理逻辑，进而可以调整相关参数的大小或程序的行为。</p>
+
+<p>从大面上来看，MapReduce的瓶颈可能存在以下图中的各个部分。</p>
+
+<p><img src="http://ww2.sinaimg.cn/large/74311666jw1eyjx8zpfz2j20rq0cegna.jpg" width="500px" /></p>
 
 </div>
   
   
     <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2015/11/22/hadoop-secondary-sorting/">Read on &rarr;</a>
+      <a class="btn btn-default" rel="full-article" href="/blog/2015/12/01/hadoop-tunning/">Read on &rarr;</a>
     </footer>
   
 
@@ -693,13 +739,13 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/tools/index.html">
-        <span class="badge">10</span>
+        <span class="badge">7</span>
         tools
       </a>
     
     
     <a class="list-group-item " href="/blog/categories/book/index.html">
-        <span class="badge">8</span>
+        <span class="badge">7</span>
         book
       </a>
     
@@ -711,20 +757,20 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/linux/index.html">
-        <span class="badge">14</span>
+        <span class="badge">13</span>
         linux
-      </a>
-    
-    
-    <a class="list-group-item " href="/blog/categories/rework/index.html">
-        <span class="badge">14</span>
-        rework
       </a>
     
     
     <a class="list-group-item " href="/blog/categories/film/index.html">
         <span class="badge">3</span>
         film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">12</span>
+        rework
       </a>
     
     
@@ -741,7 +787,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/big-data/index.html">
-        <span class="badge">8</span>
+        <span class="badge">9</span>
         Big Data
       </a>
     

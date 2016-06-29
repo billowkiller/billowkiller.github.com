@@ -61,12 +61,6 @@
         <lastmod>2015-02-18T20:18:40+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://billowkiller.github.io/blog/2013/05/14/hu-lian-wang-fa-zhan-fang-xiang-si-kao/
-        </loc>
-        <lastmod>2015-02-18T20:18:40+08:00</lastmod>
-    </url>
-    <url>
         <loc>http://billowkiller.github.io/blog/2013/05/14/hugo/</loc>
         <lastmod>2015-02-18T20:18:40+08:00</lastmod>
     </url>
@@ -89,22 +83,8 @@
         <lastmod>2015-02-18T20:18:40+08:00</lastmod>
     </url>
     <url>
-        <loc>http://billowkiller.github.io/blog/2013/05/14/linuxxia-dhcpfu-wu-qi-pei-zhi/</loc>
-        <lastmod>2015-02-18T20:18:40+08:00</lastmod>
-    </url>
-    <url>
         <loc>
             http://billowkiller.github.io/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/
-        </loc>
-        <lastmod>2015-02-18T20:18:40+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://billowkiller.github.io/blog/2013/05/14/linuxxia-shuang-wang-qia-pei-zhi/</loc>
-        <lastmod>2015-02-18T20:18:40+08:00</lastmod>
-    </url>
-    <url>
-        <loc>
-            http://billowkiller.github.io/blog/2013/05/14/p2pliu-mei-ti-shi-pin-dian-bo-xi-tong-de-ge-ren-ji-zhu-bao-gao/
         </loc>
         <lastmod>2015-02-18T20:18:40+08:00</lastmod>
     </url>
@@ -123,21 +103,7 @@
         <lastmod>2015-02-18T20:18:40+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://billowkiller.github.io/blog/2013/05/14/shi-ge-ni-ke-neng-mei-yong-guo-de-linuxming-ling/
-        </loc>
-        <lastmod>2015-02-18T20:18:40+08:00</lastmod>
-    </url>
-    <url>
         <loc>http://billowkiller.github.io/blog/2013/05/14/the-film-mona-lisa-smile/</loc>
-        <lastmod>2015-02-18T20:18:40+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://billowkiller.github.io/blog/2013/05/14/ubuntuliang-du-diao-jie/</loc>
-        <lastmod>2015-02-18T20:18:40+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://billowkiller.github.io/blog/2013/05/14/xiao-yan-zhong-de-scrumhe-xp/</loc>
         <lastmod>2015-02-18T20:18:40+08:00</lastmod>
     </url>
     <url>
@@ -325,6 +291,10 @@
         <lastmod>2016-03-19T17:24:47+08:00</lastmod>
     </url>
     <url>
+        <loc>http://billowkiller.github.io/blog/2015/12/20/hadoop-intro/</loc>
+        <lastmod>2016-06-29T23:53:19+08:00</lastmod>
+    </url>
+    <url>
         <loc>http://billowkiller.github.io/blog/2016/01/13/etl/</loc>
         <lastmod>2016-03-23T11:24:01+08:00</lastmod>
     </url>
@@ -364,7 +334,7 @@
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/2016/03/06/apriori/</loc>
-        <lastmod>2016-03-19T17:23:25+08:00</lastmod>
+        <lastmod>2016-06-27T09:49:51+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/2016/03/16/rs-note/</loc>
@@ -400,23 +370,23 @@
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/archives/</loc>
-        <lastmod>2016-06-02T09:15:28+08:00</lastmod>
+        <lastmod>2016-06-29T23:53:19+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/categories/</loc>
-        <lastmod>2016-06-02T09:15:28+08:00</lastmod>
+        <lastmod>2016-06-29T23:53:19+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/category/</loc>
-        <lastmod>2016-06-02T09:15:28+08:00</lastmod>
+        <lastmod>2016-06-29T23:53:19+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/tags/</loc>
-        <lastmod>2016-06-02T09:15:28+08:00</lastmod>
+        <lastmod>2016-06-29T23:53:19+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/</loc>
-        <lastmod>2016-06-02T09:15:28+08:00</lastmod>
+        <lastmod>2016-06-29T23:53:19+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/components.html</loc>
@@ -438,7 +408,7 @@
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/</loc>
-        <lastmod>2016-06-02T09:15:28+08:00</lastmod>
+        <lastmod>2016-06-29T23:53:19+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/javascript.html</loc>

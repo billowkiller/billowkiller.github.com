@@ -4,7 +4,7 @@
   <title><![CDATA[tags: apriori | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/apriori/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-06-02T09:15:34+08:00</updated>
+  <updated>2016-06-29T23:53:41+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -50,6 +50,8 @@
 <p>下面我们给出关联规则形式化的定义：</p>
 
 <p>假设 $I = \lbrace i_1, i_2…i_n \rbrace $ 表示items，$i_n$ 是binary attribute，表示商品买或不买。$T = \lbrace t_1, t_2…t_n \rbrace $ 是交易的集合，成为 database。每个交易都有唯一的标示，并且为 $I$ 的一个子集。规则就是 $X \to Y,\ where\ X,Y \subseteq I, X \cap Y = \varnothing$，这里 $X$ 称为 antecedent， $Y$ 称为 consequent.</p>
+
+<p>现有的关联规则的挖掘算法需要使用支持度和置信度来出去没有意义的模式。支持度的缺点在于许多潜在的有意义的模式由于包含支持度小的项而被删去。置信度的缺陷在于该度量忽略了规则后件中项集的支持度。</p>
 
 <h2 id="apriori-algorithm">Apriori Algorithm</h2>
 
