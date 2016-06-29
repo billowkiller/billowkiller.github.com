@@ -36,6 +36,8 @@ tags: [ml, apriori]
 
 假设 $I = \lbrace i\_1, i\_2...i\_n \rbrace $ 表示items，$i\_n$ 是binary attribute，表示商品买或不买。$T = \lbrace t\_1, t\_2...t\_n \rbrace $ 是交易的集合，成为 database。每个交易都有唯一的标示，并且为 $I$ 的一个子集。规则就是 $X \to Y,\ where\ X,Y \subseteq I, X \cap Y = \varnothing$，这里 $X$ 称为 antecedent， $Y$ 称为 consequent.
 
+现有的关联规则的挖掘算法需要使用支持度和置信度来出去没有意义的模式。支持度的缺点在于许多潜在的有意义的模式由于包含支持度小的项而被删去。置信度的缺陷在于该度量忽略了规则后件中项集的支持度。
+
 ## Apriori Algorithm
 
 关联规则的生成过程可以分为两步：
