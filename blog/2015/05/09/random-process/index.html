@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Random Process - Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2015/05/09/random-process">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<style type="text/css">
+body {
+  font-family: Lucida Grande,Helvetica, arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background-color: white;
+  padding: 30px; }
+
+    table {
+  padding: 0; }
+  table tr {
+    border-top: 1px solid #cccccc;
+    background-color: white;
+    margin: 0;
+    padding: 0; }
+    table tr:nth-child(2n) {
+      background-color: #f8f8f8; }
+    table tr th {
+      font-weight: bold;
+      border: 1px solid #cccccc;
+      text-align: left;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr td {
+      border: 1px solid #cccccc;
+      text-align: left;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr th :first-child, table tr td :first-child {
+      margin-top: 0; }
+    table tr th :last-child, table tr td :last-child {
+      margin-bottom: 0; }
+    }
+</style>
+
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-05-09T16:00:00+08:00" pubdate data-updated="true">May 9<span>th</span>, 2015</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        Random Process
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><p>本文用来记录一些随机过程。随机过程是处理包含时间以及数据序列的概率模型。可用于一下数据序列的建模：</p>
+
+<ul>
+  <li>每天的股票价格数据序列</li>
+  <li>交通网络中的每个点的交通负荷数据序列</li>
+  <li>雷达对飞机的定位数据序列</li>
+</ul>
+
+<p>序列中的每个数据都视为一个随机变量，所以随机序列就是一串有限或无限的随机变量序列，但是更加强调：</p>
+
+<ul>
+  <li>过程中产生的数据序列之间的<strong>相关</strong>关系。比如股票的未来价格与历史价格关系。</li>
+  <li>对整个过程中<strong>长期均值</strong>感兴趣。比如有多大比例的时间机器出于闲置。</li>
+  <li>需要刻画某些<strong>边界事件</strong>的似然或频率。在给定时间内，线路同时出于忙碌的概率，计算机网络中缓冲器数据溢出的频率。</li>
+</ul>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-4-16/62147816.jpg" width="500px" /></p>
+
+<p>下面讨论几个随机过程。</p>
+
+<!--more-->
+
+<h2 id="section">伯努利过程和泊松过程</h2>
+
+<p>这两个过程重点研究的是<strong>相邻到达时间是互相独立的随机变量</strong>的模型。区别在于：</p>
+
+<ul>
+  <li>伯努利（Bernoulli）过程考虑到达时间是<code>离散</code>的情形，相邻时间服从<code>几何分布</code>。</li>
+  <li>泊松（Poisson）过程考虑到达时间是<code>连续</code>的情形，相邻时间服从<code>指数分布</code>。</li>
+</ul>
+
+<h3 id="section-1">伯努利过程</h3>
+
+<p>通常将伯努利过程视为独立投币序列，正面朝上的概率是 $p,\ 0&lt;p&lt;1$。这里把硬币朝上视为“到达”，连续投币产生伯努利过程。下面给出伯努利过程相关的随机变量和性质：</p>
+
+<ul>
+  <li>服从参数为 $n$ 和 $p$ 的二项分布。这是 $n$ 次相继独立的实验成功的总次数 $S$ 的分布，有</li>
+</ul>
+
+<script type="math/tex; mode=display"> P_S(k) =  \binom{k}{n} p^k (1-p)^{n-k},\ k = 0,1,..n </script>
+
+<script type="math/tex; mode=display">E(S) = np,\ var(S)=np(1-p)</script>
+
+<ul>
+  <li>服从参数为 $p$ 的集合分布。这是相互独立重复的伯努利试验首次成功时刻T的分布，有</li>
+</ul>
+
+<script type="math/tex; mode=display"> P_T(t) = p(1-p)^{t-1},\ t=1,2,...</script>
+
+<script type="math/tex; mode=display"> E(T) = \frac{1}{p},\ var(T) = \frac{1-p}{p^2}</script>
+
+<p>伯努利过程有<strong>独立性</strong>和<strong>无记忆性</strong>。假设我们观测过程 $n$ 步，但是还没有成功。那么余下的 $T-n$ 有什么结论呢？</p>
+
+<script type="math/tex; mode=display"> P(T-n=t \vert T>n) = (1-p)^{t-1}p = P(T=t),\ t=1,2,...</script>
+
+<p>可以看到未来试验次数仍然是相同的集合分布。</p>
+
+<p>当 $n$ 充分大，而 $p$ 很小，均值 $np$ 始终。数学上，我们可以让 $n$ 增大，但是同时缩小 $p$，这样可以保值 $np$ 是一个固定值 $\lambda$，从极值意义上看，二项分布的分布列可以简化为泊松分布。</p>
+
+<h3 id="section-2">泊松分布</h3>
+
+<p>跟伯努利过程相比，泊松过程是连续时间轴上的到达时间。</p>
+
+<p>伯努利过程无法刻画相同时间段内，发生两次或者多次到达事件，虽然可以通过将时间段选的非常小，但是无法选择一个准确的小时间段。这时候考虑时间段长度趋近于零的情况，即连续时间模型。</p>
+
+<p>泊松过程相关的随机变量和性质：</p>
+
+<ul>
+  <li>服从参数为 $\lambda \tau$ 的<strong>泊松分布</strong>。这是泊松过程的强度为 $\lambda$，在时间长度为 $\tau$ 的区间内到达的总次数 $N_\tau$ 的分布，有</li>
+</ul>
+
+<script type="math/tex; mode=display"> P_{N_\tau}(k) = P(k,\tau) = e^{-\lambda \tau} \frac{(\lambda \tau)^k}{k!},\ k=0,1,...</script>
+
+<script type="math/tex; mode=display"> E(N_\tau) = \lambda \tau,\ var(N_\tau) = \lambda \tau</script>
+
+<ul>
+  <li>服从参数为 $\lambda$ 的<strong>指数分布</strong>，这是首次达到的时间 $T$ 的分布，有</li>
+</ul>
+
+<script type="math/tex; mode=display">f_T(t) = \lambda e^{-\lambda t},\ t \ge 0,\ E(T)=\frac{1}{\lambda},\ var(T)=\frac{1}{\lambda^2}</script>
+
+<p>上式可以将一个固定长度为 $\tau$ 的时间区间分成一个个小区间，将小区间看成伯努利过程来近似。</p>
+
+<h3 id="section-3">马尔可夫链</h3>
+
+<p>马尔可夫链的定义是一种随机过程，它描述了一种状态序列，其每个状态值取决于前面的状态。用以下公式表示马尔可夫性质：</p>
+
+<script type="math/tex; mode=display">p(\theta^{(t+1)} \vert \theta^{(1)},\theta^{(2)},..\theta^{(t)}) = p(\theta^{(t+1)} \vert \theta^{(t)}) </script>
+
+<p>状态之间的转换通过 transition kernel，这是一个 $k \times k$ 矩阵，$k$ 表示状态数。一个 $3 \times 3$ 的转换矩阵 $P$ 如下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/92862152.jpg" alt="" /></p>
+
+<p>马尔可夫链有一个平稳分布，stationary distribution $\pi$，定义为：$\pi = \pi P$。无论起始状态是什么样，马尔可夫链通常会收敛到 $\pi$ 上。</p>
+
+<p>通常会根据所选的起始状态，有这不同的收敛时间。在利用马尔可夫链进行抽样时，在收敛之前的一段时间，比如前 $n-1$ 次迭代，各个状态的边际分布还不能认为是稳定分布，所以在进行估计的时候，应该把前面的这$n-1$ 个迭代值去掉。这个过程称为 <code>burn-in</code>。这样会使我们的抽样更加接近平稳分布，减少对起始位置的依赖。</p>
+
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-05-09T16:00:00+08:00" pubdate data-updated="true">May 9<span>th</span>, 2015</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/math/'>math</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2015/05/09/random-process/" data-via="" data-counturl="http://billowkiller.github.io/blog/2015/05/09/random-process/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2015/04/10/recsys-introduction/" title="Previous Post: Recommender System in a Nutshell">&laquo; Recommender System in a Nutshell</a></li>
+            
+            
+            <li class="next"><a href="/blog/2015/06/30/jvm/" title="Next Post: Java Virtual Machine">Java Virtual Machine &raquo;</a></li>
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item " href="/blog/2016/04/09/rating/">Funny Facts About Rating</a>
+    
+    <a class="list-group-item " href="/blog/2016/04/06/kafka/">Kafka Introduction</a>
+    
+    <a class="list-group-item " href="/blog/2016/03/19/table-join/">Table Join Semantics</a>
+    
+    <a class="list-group-item " href="/blog/2016/01/13/etl/">Extract-Transform-Load Application Scenarios</a>
+    
+    <a class="list-group-item " href="/blog/2015/12/20/hadoop-intro/">Hadoop Introduction</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">9</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">7</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">7</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">13</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">12</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">8</span>
+        algorithm
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
+        <span class="badge">13</span>
+        Machine Learning
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/math/index.html">
+        <span class="badge">1</span>
+        math
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/big-data/index.html">
+        <span class="badge">9</span>
+        Big Data
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2016 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2015/05/09/random-process/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2015/05/09/random-process/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>

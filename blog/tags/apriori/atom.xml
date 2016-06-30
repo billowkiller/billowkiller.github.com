@@ -4,7 +4,7 @@
   <title><![CDATA[tags: apriori | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/apriori/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-06-30T21:53:25+08:00</updated>
+  <updated>2016-06-30T22:22:09+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Apriori and FP-Growth]]></title>
-    <link href="http://billowkiller.github.io/blog/2016/03/06/apriori/"/>
-    <updated>2016-03-06T14:00:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2016/03/06/apriori</id>
+    <link href="http://billowkiller.github.io/blog/2015/03/06/apriori/"/>
+    <updated>2015-03-06T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/03/06/apriori</id>
     <content type="html"><![CDATA[<p>如果说监督学习的形式化表达是 $Pr(Y \vert X)$, 找到最佳的参数最小化每个 $x$ 的epxected error： $argmin_{\theta}\ E_{Y \vert X} L(Y, \theta)$。那么非监督学习的形式化表达就是 $Pr(X)$，目标是在没有 $Y$ 引导的情况下，推测出 $Pr(X)$ 的潜在属性。本文要提到的apriori算法也是一种非监督学习算法，wiki的定义为</p>
 
 <blockquote>

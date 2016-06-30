@@ -4,7 +4,7 @@
   <title><![CDATA[tags: math | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/math/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-06-30T21:53:25+08:00</updated>
+  <updated>2016-06-30T22:22:09+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Random Process]]></title>
-    <link href="http://billowkiller.github.io/blog/2016/05/09/random-process/"/>
-    <updated>2016-05-09T16:00:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2016/05/09/random-process</id>
+    <link href="http://billowkiller.github.io/blog/2015/05/09/random-process/"/>
+    <updated>2015-05-09T16:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/05/09/random-process</id>
     <content type="html"><![CDATA[<p>本文用来记录一些随机过程。随机过程是处理包含时间以及数据序列的概率模型。可用于一下数据序列的建模：</p>
 
 <ul>
@@ -120,9 +120,9 @@
   
   <entry>
     <title type="html"><![CDATA[PCA and SVD]]></title>
-    <link href="http://billowkiller.github.io/blog/2016/02/26/pca-svd/"/>
-    <updated>2016-02-26T14:00:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2016/02/26/pca-svd</id>
+    <link href="http://billowkiller.github.io/blog/2015/02/26/pca-svd/"/>
+    <updated>2015-02-26T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/02/26/pca-svd</id>
     <content type="html"><![CDATA[<p>PCA即为（Principal Components Analysis）主成分分析，SVD是（Singular value decomposition）奇异值分解。从字面上的理解就可以看出这两个并不是在同一语义层面的东西。之所以把这两个放在一块，一是为了文章的完整性，二是为了说明二者在数据转换（基转换）上的共性。</p>
 
 <!--more-->
@@ -254,9 +254,9 @@
   
   <entry>
     <title type="html"><![CDATA[Gradient Descent and Newton Method]]></title>
-    <link href="http://billowkiller.github.io/blog/2016/02/15/gradient-descent-and-newton-method/"/>
-    <updated>2016-02-15T14:00:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2016/02/15/gradient-descent-and-newton-method</id>
+    <link href="http://billowkiller.github.io/blog/2015/02/15/gradient-descent-and-newton-method/"/>
+    <updated>2015-02-15T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/02/15/gradient-descent-and-newton-method</id>
     <content type="html"><![CDATA[<p>梯度下降和牛顿法都是最优化算法，二者都是求解无约束优化问题的方法，通过递归地逼近最优值来达到求解值。区别在于梯度下降是一阶收敛，而牛顿法是二阶收敛的，所以牛顿法通常会更快，因为牛顿法是用一个二次曲面去拟合当前所处位置的局部曲面，而梯度下降法是用一个平面去拟合当前的局部曲面。wiki上有张图形象地说明了这个问题：</p>
 
 <p><img src="https://upload.wikimedia.org/wikipedia/commons/d/da/Newton_optimization_vs_grad_descent.svg" width="200px" /></p>

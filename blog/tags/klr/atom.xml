@@ -4,7 +4,7 @@
   <title><![CDATA[tags: klr | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/klr/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-06-30T21:53:25+08:00</updated>
+  <updated>2016-06-30T22:22:09+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Kernel Logistic Regression versus SVM]]></title>
-    <link href="http://billowkiller.github.io/blog/2016/02/29/klr-svr/"/>
-    <updated>2016-02-29T14:00:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2016/02/29/klr-svr</id>
+    <link href="http://billowkiller.github.io/blog/2015/03/01/klr-svr/"/>
+    <updated>2015-03-01T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/03/01/klr-svr</id>
     <content type="html"><![CDATA[<p>Logistic Regression和SVM都是分类方法，它们定义线性决策边界（linear decision boundaries）作为划分的依据。但二者在motivation方便完全不同，区别如下</p>
 
 <ul>

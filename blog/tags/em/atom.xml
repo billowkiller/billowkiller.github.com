@@ -4,7 +4,7 @@
   <title><![CDATA[tags: em | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/em/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-06-30T21:53:25+08:00</updated>
+  <updated>2016-06-30T22:22:09+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Hidden Markov Model]]></title>
-    <link href="http://billowkiller.github.io/blog/2016/03/19/hmm/"/>
-    <updated>2016-03-19T14:00:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2016/03/19/hmm</id>
+    <link href="http://billowkiller.github.io/blog/2015/03/19/hmm/"/>
+    <updated>2015-03-19T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/03/19/hmm</id>
     <content type="html"><![CDATA[<p>隐马尔可夫模型（Hidden Markov Model，HMM）是统计模型，它用来描述一个含有隐含未知参数的马尔可夫过程（Markov process）。HMM 被用来对有序的序列数据建模，例如句子中的单词，基因中的基本序列，所以常被应用在语音识别、信息提取、基因测序、股票预测等领域。</p>
 
 <p>在 HMM 中，马尔可夫过程是一类随机过程，原始模型是马尔可夫链。它包含一个状态的有限集，状态的变化只依赖于上一个时间点，而与再之前的时间无任何关系，且状态的轮换是有一定的概率发生。所以可以把马尔可夫过程当成是一个有限状态自动机的概率变种。PageRank 其实也是一种马尔可夫过程。</p>
@@ -158,9 +158,9 @@
   
   <entry>
     <title type="html"><![CDATA[Expectation Maximization]]></title>
-    <link href="http://billowkiller.github.io/blog/2016/03/05/em/"/>
-    <updated>2016-03-05T14:00:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2016/03/05/em</id>
+    <link href="http://billowkiller.github.io/blog/2015/03/05/em/"/>
+    <updated>2015-03-05T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/03/05/em</id>
     <content type="html"><![CDATA[<p>Expectation Maximization, EM算法在参数估计里面有极大的用处，它用于含有隐变量的概率模型参数的极大似然估计，或极大后验概率（MAP）估计。隐变量的概率模型参数的极大似然估计可以理解为，使用的方法还是的极大似然估计，但是要处理隐变量。极大后验概率是一种Beyesian Inference，其实就是把极大似然估计中的参数赋予权值，这个权值是预先定义好的先验概率。可以来看下下表中Frequentist-Bayesian对峙的部分，来感受下EM算法的应用范围：</p>
 
 <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-5/88568881.jpg" width="500px" /></p>

@@ -4,7 +4,7 @@
   <title><![CDATA[tags: svm | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/svm/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-06-30T21:53:25+08:00</updated>
+  <updated>2016-06-30T22:22:09+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Kernel Logistic Regression versus SVM]]></title>
-    <link href="http://billowkiller.github.io/blog/2016/02/29/klr-svr/"/>
-    <updated>2016-02-29T14:00:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2016/02/29/klr-svr</id>
+    <link href="http://billowkiller.github.io/blog/2015/03/01/klr-svr/"/>
+    <updated>2015-03-01T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/03/01/klr-svr</id>
     <content type="html"><![CDATA[<p>Logistic Regression和SVM都是分类方法，它们定义线性决策边界（linear decision boundaries）作为划分的依据。但二者在motivation方便完全不同，区别如下</p>
 
 <ul>
@@ -245,9 +245,9 @@
   
   <entry>
     <title type="html"><![CDATA[Support Vector Machine]]></title>
-    <link href="http://billowkiller.github.io/blog/2016/02/27/svm/"/>
-    <updated>2016-02-27T14:00:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2016/02/27/svm</id>
+    <link href="http://billowkiller.github.io/blog/2015/02/27/svm/"/>
+    <updated>2015-02-27T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/02/27/svm</id>
     <content type="html"><![CDATA[<p>支持向量机(support vector machine, SVM)是一种二类分类模型，其基本模型定义为特征空间上的间隔最大的线性分类器，其学习策略便是间隔最大化，可以形式化为凸二次规划问题的求解，也等价于正则化的合页损失函数的最小化问题。SVM还包括kernel trick，使得它可以成为实质上的非线性分类器。下面就介绍Perceptron到三种类型的SVM模型。</p>
 
 <p><img src="http://research.microsoft.com/en-us/um/people/manik/projects/trade-off/figs/svm2.PNG" width="400px" /></p>

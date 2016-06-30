@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Kernel Logistic Regression versus SVM - Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2015/03/01/klr-svr">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<style type="text/css">
+body {
+  font-family: Lucida Grande,Helvetica, arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background-color: white;
+  padding: 30px; }
+
+    table {
+  padding: 0; }
+  table tr {
+    border-top: 1px solid #cccccc;
+    background-color: white;
+    margin: 0;
+    padding: 0; }
+    table tr:nth-child(2n) {
+      background-color: #f8f8f8; }
+    table tr th {
+      font-weight: bold;
+      border: 1px solid #cccccc;
+      text-align: left;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr td {
+      border: 1px solid #cccccc;
+      text-align: left;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr th :first-child, table tr td :first-child {
+      margin-top: 0; }
+    table tr th :last-child, table tr td :last-child {
+      margin-bottom: 0; }
+    }
+</style>
+
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-03-01T14:00:00+08:00" pubdate data-updated="true">Mar 1<span>st</span>, 2015</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        Kernel Logistic Regression Versus SVM
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><p>Logistic Regression和SVM都是分类方法，它们定义线性决策边界（linear decision boundaries）作为划分的依据。但二者在motivation方便完全不同，区别如下</p>
+
+<ul>
+  <li>LR初衷是为了让linear regression能够输出二元分类，估计一个实例属于某一类的概率；线性决策边界也只是回归函数的结果，在回归函数中使用阈值作为分类的标准，一般是0.5。决策边界在SVM中来的更为重要，整个模型的目标就是为了获得最优的决策边界。</li>
+  <li>每个训练样本都对LR的过程有一定的影响，但SVM只依赖于在决策边界附近的某些点。</li>
+  <li>LR适应于低维空间，并且由于使用最大似然估计，所以对噪声不敏感；SVM更适应于高维空间</li>
+  <li>没有正规化的LR无法保证获得最好的分离超平面，只能获得margin附近的较高的置信度; SVM则能获得最优的分离超平面。</li>
+</ul>
+
+<p>那么二者会有什么联系呢，SVM的kernel function又是如何应用到LR模型的呢？</p>
+
+<!--more-->
+
+<h2 id="loss-function">Loss Function</h2>
+
+<p>我们先来看下Loss Function，它是用来衡量学习函数与数据拟合的程度的。回顾对于机器学习来说有一下几个过程：</p>
+
+<ol>
+  <li>假设空间：函数的参数形式，包括lr，svm等</li>
+  <li>拟合的衡量：Loss function，likelihood</li>
+  <li>bias和variance的trade-off：regularization，bayesian estimator (MAP)</li>
+  <li>在假设空间中寻找好的假设：optimization. convex - global. non-convex - multiple starts</li>
+  <li>假设的验证：测试数据的预测，cross validation</li>
+</ol>
+
+<p>在线性学习方法中，通常我们是要找到一个假设 $y=f(\theta^T x)$，选决定f的参数形式，再通过最大化似然函数或者最小化损失函数找到对应的 $\theta$，常见的几个Loss Function：</p>
+
+<p>For classfication $correct \to y \cdot f &gt; 0;\ incorrect \to y \cdot f &lt; 0$</p>
+
+<ol>
+  <li>0/1 loss： $min_\theta \sum_i L_{0/1}(\theta^T x)$. 定义 $L_{0/1}(\theta^T x)=1\ if\ y \cdot f &lt; 0$，其他情况等于0，非凸函数，难以优化。</li>
+  <li>Hinge loss: $min_\theta \sum_i H(\theta^T x)$。接近 0/1 损失函数，定义 $H(\theta^T x) = max (0,1-y \cdot f)$</li>
+  <li>Logistic loss: $min_\theta \sum_i log(1 + exp(-y \cdot \theta^T x))$. </li>
+</ol>
+
+<p>关于3，在逻辑回归中我们最大化似然函数其实就是最小化Logistic loss：</p>
+
+<script type="math/tex; mode=display">\sum_i log \frac{1}{1+exp(-y^{(i)}\cdot \theta^T x^{(i)})} = \sum_i -log (1+exp(-y^{(i)}\cdot \theta^T x^{(i)}))</script>
+
+<script type="math/tex; mode=display">\to min_\theta \sum_i log(1 + exp(-y \cdot \theta^T x))</script>
+
+<p>For regression:</p>
+
+<ol>
+  <li>Square loss: $min_\theta \sum_i | y^{(i)} - \theta^T x^{(i)} |^2$</li>
+</ol>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-22/70940842.jpg" width="400px" /></p>
+
+<p>如上图所示，SVM使用Hinge Loss；Binomial Deviance就是Logistic Loss，因为output是binomial的；Exponential Loss 可以在Gradient Boost中应用到。</p>
+
+<h2 id="connection-between-svm-and-logistic-regression">Connection between SVM and Logistic Regression</h2>
+
+<p>回顾下soft-margin SVM的原始问题：</p>
+
+<script type="math/tex; mode=display"> \underset{b,w,\xi}{min} \frac{1}{2}w^T w  + C\sum_{n=1}\xi_n</script>
+
+<script type="math/tex; mode=display">s.t.\ y_i(w^T z_n + b) \ge 1-\xi_n,\ \xi_n \ge 0\ for\ all\ n</script>
+
+<p>这里的 $\xi_n$ 实际上就是违反 margin 的距离，称为 margin violation。如果 $(x_n, y_n)$ 不违反 margin，那么 $\xi_n=0$，否则为 $\xi_n=1-y_n(w^T z_n + b)$，从这里我们看到实际上 $\xi_n = max(1-y_n(w^T z_n + b), 0)$，所以原来问题可以写成：</p>
+
+<script type="math/tex; mode=display"> \underset{b,w,\xi}{min} \frac{1}{2}w^T w  + C\sum_{n=1}max(1-y_n(w^T z_n + b), 0)</script>
+
+<p>上式写成 $min\ \frac{1}{2} w^Tw + C \sum \hat{err}$ 就比较熟悉了，这个就是L2 regularization: $min\ \lambda w^Tw + C \sum err$ 嘛。对应关系如下：</p>
+
+<ul>
+  <li>soft-margin $\to special\ \hat{err}$</li>
+  <li>large margin $\to$ fewer hyperplanes $\to$ L2 regularization for small $w$</li>
+  <li>larger C or C $\to$ smaller $\lambda\ to$ less regularization</li>
+</ul>
+
+<p>对比于SVM的原始问题，我们发现新的形式并不是凸二次规划问题；不能利用kernel trick；并且max函数不能微分，所以难以解决。那么为什么要变化成这种形式呢？如果设置 linear score: $s=w^T z_n + b$。我们观察下它的损失函数 $\hat{err}_{svm}(s,y) = max(1-ys, 0)$，另外再看下logistic loss: $err_{ll}(ys) = log(1 + exp(-ys))$.</p>
+
+<p>可以对比下上图的损失函数曲线，二者比较接近，并且都是 0/1 损失函数的上限。所以可以把 SVM 当成 L2-regularized logistic regression。以下是几个二分类线性模型的对比：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/76344341.jpg" width="600px" /></p>
+
+<h2 id="kernel-logistic-regression">Kernel Logistic Regression</h2>
+
+<p>现在我们知道 SVM 和 Logistic Regression存在联系，那么是否可以综合二者的有点呢：</p>
+
+<ul>
+  <li>SVM flavor: 利用kernel function 得到 $w_{svm}，b_{svm}$ 得到超平面 </li>
+  <li>LR flavor: 通过 scalling(A) 和 shifting(B) 匹配最大似然函数的方法细粒度地调优超平面
+    <ul>
+      <li>often $A &gt; 0$ if $w_{svm}$ reasonably good</li>
+      <li>often $B \approx 0$ if $b_{svm}$ reasonably good</li>
+    </ul>
+  </li>
+</ul>
+
+<p>所以新的LR问题可以看成 two-level learning 问题：LR on SVM-transformed data</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/6560678.jpg" width="450px" /></p>
+
+<p>于是我们得到Probabilistic SVM for Soft Binary Classification 的算法，因为 LR 是根据概率分类的，过程如下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/75482355.jpg" width="450px" /></p>
+
+<ul>
+  <li>这个 Soft Binary Classifier 得到 bounary 与 SVM 的不同，因为有平移 B。</li>
+  <li>只需要解两个变量，可以使用GD或者SGD等。</li>
+  <li>Kernel SVM 相当于在 $Z$ 空间中进行 LR</li>
+</ul>
+
+<p>Kernel SVM 中有 $w_{svm}^T \phi(x) + b_{svm} = \sum_{SV} \alpha_n y_n K(x_n, x) + b_{svm}$，则最后 Probabilistic SVM 的结果为</p>
+
+<script type="math/tex; mode=display"> g(x) = \theta(\sum_{SV} A\alpha_n y_n K(x_n, x) + Ab_{svm} + B)</script>
+
+<p>但这个方法其实并不是在 $Z$ 空间里的最好的解，只是通过两次 scaling 和 shifting 接近最好的解，那么如何得到最好的解呢。这就是我们要介绍的Kernel Logistic Regression。</p>
+
+<p>先来介绍下 Representer Theorem，它的定义如下：</p>
+
+<blockquote>
+  <p>the solution of regularization and interpolation problems with Hillbertian penalties can be expressed as a linear combination of the data.</p>
+</blockquote>
+
+<p>也就是最优的 $w_* = \sum_{n=1}^N \beta_n z_n$，我们可以把原来在 Hillbertian Space
+ 的计算放到低维空间中进行。</p>
+
+<script type="math/tex; mode=display"> w_*z = \sum_{n=1}^N \beta_n z_n^Tz = \sum_{n=1}^N \beta_n K(x_n, x)</script>
+
+<p>证明Representer Theorem如下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/22880811.jpg" width="500px" /></p>
+
+<p>这其实就表明所有的 L2-regularized linear model 都可以被 kernalized。把损失函数替换成 logistic loss，我们就得到 Kernel Logistic Regression 的优化函数。</p>
+
+<script type="math/tex; mode=display"> \underset{w}{min}\ \frac{\lambda}{N}w^Tw + \frac{1}{N} \sum_{n=1}^N log(1+ exp(-y_n w^T z_n)) </script>
+
+<p>利用 Representer Theorem，将原来对 $w$ 的求解转化为对 $\beta$ 求解：</p>
+
+<script type="math/tex; mode=display"> \underset{\beta}{min}\ \frac{\lambda}{N} \sum_{n=1}^N \sum_{m=1}^N \beta_n \beta_m K(x_n, x_m) +  \frac{1}{N} \sum_{n=1}^N log(1+ exp(-y_n \sum_{m=1}^N \beta_m K(x_m, x_n)))</script>
+
+<p>可以用 GD/SGD 等做最优化求解，<strong>解出来的 $\beta$ 并不同于 SVM 的 $\alpha$，基本上是非零的</strong>。综合上述，总结得到 KLR 其实就是</p>
+
+<blockquote>
+  <p>use representer theorem for kernel trick on L2-regularized logistic regression</p>
+</blockquote>
+
+<p>对 KLR 还有另外另外的解释</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/45320882.jpg" width="450px" /></p>
+
+<h2 id="support-vector-regression">Support Vector Regression</h2>
+
+<p>最后说下SVR，上面提到 regression 的损失函数 squared error $err(y, w^Tz) = (y- w^Tz)^2$，替换下KLR的损失函数我们可以得到</p>
+
+<script type="math/tex; mode=display"> \underset{w}{min}\ \frac{\lambda}{N}w^Tw + \frac{1}{N} \sum_{n=1}^N (y- w^Tz)^2 </script>
+
+<p>这个就是 <strong>kernel ridge regression</strong>，也可以通过解 $\beta$ 得到答案</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/56123028.jpg" width="500px" /></p>
+
+<p>对 $\beta$ 求导得到</p>
+
+<script type="math/tex; mode=display">\nabla E_{aug}(\beta) = \frac{2}{N}(\lambda K^TI\beta + K^TK\beta - K^Ty) = \frac{2}{N}K^T((\lambda I + K)\beta - y)</script>
+
+<script type="math/tex; mode=display">\nabla E_{aug}(\beta) =0 \to \beta=(\lambda I + K)^{-1}y</script>
+
+<p>因为 Merer’s condition，所以 $K$ 是半正定矩阵，继而上式有解。但是稠密矩阵求反需要 $O(N^3)$ 时间复杂度。可以对比下 linear ridge regression:</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/7052157.jpg" width="450px" /></p>
+
+<p>根据前面所述的SVM和LR之间的关系，我们这里可以吧 kernel ridge regression 看成 least-squares SVM(LLSVM)。它有什么特点呢：</p>
+
+<ul>
+  <li>对比soft-margin SVM，有这相似的boundary，但是更多的支持向量。导致预测慢，因为 $\beta$ 比较稠密</li>
+</ul>
+
+<p>现在想让 $\beta$ 变得和 soft-margin SVM 的 $\alpha$ 一样稀疏。可以看到 tube regression 的特点，使用 $\epsilon$-insensitive error：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-2-29/74768649.jpg" width="450px" /></p>
+
+<p>整理下是 L2-regularized tube regression</p>
+
+<script type="math/tex; mode=display"> \underset{w}{min}\ \frac{\lambda}{N}w^Tw + \frac{1}{N} \sum_{n=1}^N\ max(0, \vert w^Tz_n - y \vert - \epsilon)</script>
+
+<p>这个函数没有限制条件，但是max难以微分，并且不能很明显的看出有 sparse $\beta$。发现这个表达式和最开始 soft-SVM 的表示有点像，那么我们可以反向的把它模拟成 standard SVM 形式:</p>
+
+<script type="math/tex; mode=display"> \underset{b,w,\xi^ \vee, \xi ^ \land}{min}\ \frac{1}{2} w^Tw + C \sum_{n=1}^N (\xi_n^ \vee + \xi_n ^ \land)</script>
+
+<script type="math/tex; mode=display">s.t.\ -\epsilon-\xi_n^ \vee \le y_n - w^Tz_n-b \le \epsilon-\xi_n^ \land,\ \xi_n^ \vee \ge 0,\ \xi_n^ \land \ge 0</script>
+
+<p>这就构成 SVR 的原始问题: minimize regularizer + (upper tube violations $\xi_n^ \land$ and lower violations $\xi_n^ \vee$)。这里参数 $C$ 就是 trade-off of regularization and tube violation. 现在要求 SVR 的对偶问题。</p>
+
+<ul>
+  <li>Lagrange multiplier $\alpha_n^ \vee\ for\ -\epsilon-\xi_n^ \vee \le y_n - w^Tz_n-b$</li>
+  <li>Lagrange multiplier $\alpha_n^ \land\ for\ y_n - w^Tz_n-b \le \epsilon-\xi_n^ \land$</li>
+</ul>
+
+<p>一些KTT条件如下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-1/97895297.jpg" width="450px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-1/34361452.jpg" width="500px" /></p>
+
+<p>在 tube 中我们可以得到 </p>
+
+<p>$\vert w^Tz_n + b- y_n \vert &lt; \epsilon$</p>
+
+<p>$\to \xi_n^ \vee=0,\ \xi_n^ \land=0$</p>
+
+<p>$\to (\epsilon + \xi_n^ \land - y_n + w^Tz_n +b) \neq 0,\ (\epsilon + \xi_n^ \vee + y_n - w^Tz_n -b) \neq 0$</p>
+
+<p>$\to \alpha_n^ \vee =0,\ \alpha_n^ \land=0$</p>
+
+<p>$\to \beta_n=0$</p>
+
+<p>对于support vector来说，$\beta_n \neq 0$，是在tube上或者tube外的。综上可以得到sparse $\beta$。</p>
+
+<u>总结得到的Linear/Kernel Model如下图：</u>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-1/58915472.jpg" width="450px" /></p>
+
+<ul>
+  <li>first row: less used due to worse performance</li>
+  <li>second row: popular in <strong>LIBLINEAR</strong></li>
+  <li>third row: less used due to dense $\beta$</li>
+  <li>fourth row: popular in <strong>LIBSVM</strong></li>
+</ul>
+
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-03-01T14:00:00+08:00" pubdate data-updated="true">Mar 1<span>st</span>, 2015</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/machine-learning/'>Machine Learning</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2015/03/01/klr-svr/" data-via="" data-counturl="http://billowkiller.github.io/blog/2015/03/01/klr-svr/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2015/02/27/svm/" title="Previous Post: Support Vector Machine">&laquo; Support Vector Machine</a></li>
+            
+            
+            <li class="next"><a href="/blog/2015/03/05/em/" title="Next Post: Expectation Maximization">Expectation Maximization &raquo;</a></li>
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item " href="/blog/2016/04/09/rating/">Funny Facts About Rating</a>
+    
+    <a class="list-group-item " href="/blog/2016/04/06/kafka/">Kafka Introduction</a>
+    
+    <a class="list-group-item " href="/blog/2016/03/19/table-join/">Table Join Semantics</a>
+    
+    <a class="list-group-item " href="/blog/2016/01/13/etl/">Extract-Transform-Load Application Scenarios</a>
+    
+    <a class="list-group-item " href="/blog/2015/12/20/hadoop-intro/">Hadoop Introduction</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">9</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">7</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">7</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">13</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">12</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">8</span>
+        algorithm
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
+        <span class="badge">13</span>
+        Machine Learning
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/math/index.html">
+        <span class="badge">1</span>
+        math
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/big-data/index.html">
+        <span class="badge">9</span>
+        Big Data
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2016 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2015/03/01/klr-svr/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2015/03/01/klr-svr/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>

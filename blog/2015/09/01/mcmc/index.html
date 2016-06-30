@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>MCMC Methods - Billowkiller's Blog</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2015/09/01/mcmc">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<style type="text/css">
+body {
+  font-family: Lucida Grande,Helvetica, arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background-color: white;
+  padding: 30px; }
+
+    table {
+  padding: 0; }
+  table tr {
+    border-top: 1px solid #cccccc;
+    background-color: white;
+    margin: 0;
+    padding: 0; }
+    table tr:nth-child(2n) {
+      background-color: #f8f8f8; }
+    table tr th {
+      font-weight: bold;
+      border: 1px solid #cccccc;
+      text-align: left;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr td {
+      border: 1px solid #cccccc;
+      text-align: left;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr th :first-child, table tr td :first-child {
+      margin-top: 0; }
+    table tr th :last-child, table tr td :last-child {
+      margin-bottom: 0; }
+    }
+</style>
+
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-09-01T16:00:00+08:00" pubdate data-updated="true">Sep 1<span>st</span>, 2015</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        MCMC Methods
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><p>解释下题目中的MCMC，全名是Markov Chain Monte Carlo，这里面有两个词，Markov Chain、Monte Carlo。第一个词是马尔可夫链，可以参考<a href="http://billowkiller.com/blog/2016/05/09/random-process/">http://billowkiller.com/blog/2016/05/09/random-process/</a>。第二个是蒙特卡罗，是一种模拟方法，可以从一个分布中模拟出点来估计我们感兴趣的参数，例如用来估计密度函数的定积分，称为 Monte Carlo Integration。</p>
+
+<!--more-->
+
+<h2 id="monte-carlo-integration">Monte Carlo Integration</h2>
+
+<p>譬如现在有个分布 $p(\theta)$，我们想知道一下积分：</p>
+
+<script type="math/tex; mode=display"> I = \int_{\Theta} g(\theta)p(\theta) d\theta </script>
+
+<p>通过从 $p(\theta)$ 中模拟出 $M$ 个值，我们可以估计 $I$，公式如下：</p>
+
+<script type="math/tex; mode=display"> \hat{I}_M = \frac{1}{M} \sum_{i=1}^M g(\theta^{(i)}) </script>
+
+<p>于是统计 $Beta(3,3)$ 的期望可以通过一下代码得到：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="r"><span class="line">M <span class="o">&lt;-</span> <span class="m">10000</span>
+</span><span class="line">beta.sims <span class="o">&lt;-</span> rbeta<span class="p">(</span>M<span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="m">3</span><span class="p">)</span>
+</span><span class="line">sum<span class="p">(</span>beta.sims<span class="p">)</span><span class="o">/</span>M
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>还有一个经典的例子是计算 $\pi$:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="r"><span class="line">M <span class="o">&lt;-</span> <span class="m">1000000</span>
+</span><span class="line">x <span class="o">&lt;-</span> runif<span class="p">(</span>N<span class="p">,</span> min<span class="o">=</span> <span class="m">-1</span><span class="p">,</span> max<span class="o">=</span> <span class="m">1</span><span class="p">)</span>
+</span><span class="line">y <span class="o">&lt;-</span> runif<span class="p">(</span>N<span class="p">,</span> min<span class="o">=</span> <span class="m">-1</span><span class="p">,</span> max<span class="o">=</span> <span class="m">1</span><span class="p">)</span>
+</span><span class="line">is.inside <span class="o">&lt;-</span> <span class="p">(</span>x<span class="o">^</span><span class="m">2</span> <span class="o">+</span> y<span class="o">^</span><span class="m">2</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="m">1</span>
+</span><span class="line">pi.estimate <span class="o">&lt;-</span> <span class="m">4</span> <span class="o">*</span> sum<span class="p">(</span>is.inside<span class="p">)</span> <span class="o">/</span> M
+</span><span class="line">pi.estimate
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>通过大数定律我们其实是可以知道，当 $M \to \infty$，$\hat{I}_M \to I$。</p>
+
+<p>大数定律要求的是独立同分布的随机变量，上述的例子都是从同一分布中得到独立的变量，但是如果我们不能产生独立的变量又该怎么办呢？</p>
+
+<p>例如，我们想要从后验分布 $p(\theta \vert y)$ 中抽样，但是我们不能产生独立的变量，因为我们通常不知道 normalizing constant。我们却可以产生稍微有点依赖的变量，这时可以应用 Markov chain 得到我们感兴趣的值。</p>
+
+<p>一旦马尔可夫链收敛到了平稳分布，这时候对马尔可夫链的抽样就类似于对 $p(\theta \vert y)$ 的抽样。但是还是没有解决抽样不是独立。</p>
+
+<p>这时候我们祭出大神 <code>Ergodic Theorem</code>，可以让马尔可夫链模拟大数定律，定义如下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/86848502.jpg" width="600px" /></p>
+
+<p>下面分别解释下 aperiodic, irreducible, positive recurrent。</p>
+
+<p><strong>aperiodic</strong></p>
+
+<p>马尔可夫链的周期性可以用下图表示</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/33403945.jpg" width="400px" /></p>
+
+<p>只要整个链不是重复一个完整的圆圈，则为 aperiodic。</p>
+
+<p><strong>irreducibility</strong></p>
+
+<p>马尔可夫链的不可约表示为可以从任意一个状态到另外一个状态。</p>
+
+<p>以下的链表示的是可约的：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/75995726.jpg" width="400px" /></p>
+
+<p><strong>positive recurrent</strong></p>
+
+<p>positive recurrent表示经过有限次数步骤，可以从任意给定的状态最终返回这个状态。</p>
+
+<p>如果马尔可夫链满足以上这三个条件，则可以忽略抽样之间的依赖关系，进行 Monte Carlo Integration。</p>
+
+<p>知道了上述的知识，我们可以得到 MCMC 的定义：</p>
+
+<blockquote>
+  <p>MCMC is a class of methods in which we can <strong>simulate draws</strong> that are <strong>slightly dependent</strong> and are approximately from a (posterior) distribution.</p>
+</blockquote>
+
+<p>在贝叶斯统计中，我们通常会使用两种 MCMC 算法：the Gibbs Sampler 和 Metropolis-Hastings algorithm。</p>
+
+<h2 id="gibbs-sampling">Gibbs Sampling</h2>
+
+<p>假设我们想从联合概率分布 $p(\theta_1,…\theta_k)$ 中得到抽样，那么我们需要知道的是<strong>每个参数的条件分布</strong> $p(\theta_j \vert \theta_{-j},y)$。</p>
+
+<p>从条件概率是如何得到联合概率的呢？具体是根据 <code>The Hammersley-Clifford Theorem</code>。有个例子如下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/41685068.jpg" width="600px" /></p>
+
+<p>于是右边就可以得到 $f(y \vert x) f(x) = f(x,y)$。</p>
+
+<p>接下来我们要确认的是如何得到每个参数的条件概率分布，full conditional probability.</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/33580254.jpg" width="600px" /></p>
+
+<p>得到了 full conditional probability 就可以进行 Gibbs Sampling.</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/5179470.jpg" width="600px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/18003635.jpg" width="600px" /></p>
+
+<p>通过对后验概率的近似抽样我们其实是在模拟马尔可夫链。所以也就可以通过这些抽样得到估计值。</p>
+
+<u>Example:</u>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/34647596.jpg" width="600px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/6225347.jpg" width="600px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/68667610.jpg" width="600px" /></p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+</pre></td><td class="code"><pre><code class="r"><span class="line">gibbs <span class="o">&lt;-</span> <span class="kr">function</span><span class="p">(</span>n.sims<span class="p">,</span> beta.start<span class="p">,</span> alpha<span class="p">,</span> gamma<span class="p">,</span> delta<span class="p">,</span>
+</span><span class="line">        y<span class="p">,</span> t<span class="p">,</span> burnin<span class="o">=</span><span class="m">0</span><span class="p">,</span> thin<span class="o">=</span><span class="m">1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">        beta.draws <span class="o">&lt;-</span> c<span class="p">()</span>
+</span><span class="line">        lambda.draws <span class="o">&lt;-</span> matrix<span class="p">(</span><span class="kc">NA</span><span class="p">,</span> nrow <span class="o">=</span> n.sims<span class="p">,</span> ncol <span class="o">=</span> length<span class="p">(</span>y<span class="p">))</span>
+</span><span class="line">        beta.cur <span class="o">&lt;-</span> beta.start
+</span><span class="line">        lambda.update <span class="o">&lt;-</span> <span class="kr">function</span><span class="p">(</span>alpha<span class="p">,</span> beta<span class="p">,</span> y<span class="p">,</span> t<span class="p">)</span> <span class="p">{</span>
+</span><span class="line">           rgamma<span class="p">(</span>length<span class="p">(</span>y<span class="p">),</span> y <span class="o">+</span> alpha<span class="p">,</span> t <span class="o">+</span> beta<span class="p">)</span>
+</span><span class="line">        <span class="p">}</span>
+</span><span class="line">        beta.update <span class="o">&lt;-</span> <span class="kr">function</span><span class="p">(</span>alpha<span class="p">,</span> gamma<span class="p">,</span> delta<span class="p">,</span> lambda<span class="p">,</span> y<span class="p">)</span> <span class="p">{</span>
+</span><span class="line">           rgamma<span class="p">(</span><span class="m">1</span><span class="p">,</span> length<span class="p">(</span>y<span class="p">)</span> <span class="o">*</span> alpha <span class="o">+</span> gamma<span class="p">,</span> delta <span class="o">+</span> sum<span class="p">(</span>lambda<span class="p">))</span>
+</span><span class="line">        <span class="p">}</span>
+</span><span class="line">        <span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span>n.sims<span class="p">)</span> <span class="p">{</span>
+</span><span class="line">            lambda.cur <span class="o">&lt;-</span> lambda.update<span class="p">(</span>alpha <span class="o">=</span> alpha<span class="p">,</span> beta <span class="o">=</span> beta.cur<span class="p">,</span>
+</span><span class="line">                y <span class="o">=</span> y<span class="p">,</span> t <span class="o">=</span> t<span class="p">)</span>
+</span><span class="line">            beta.cur <span class="o">&lt;-</span> beta.update<span class="p">(</span>alpha <span class="o">=</span> alpha<span class="p">,</span> gamma <span class="o">=</span> gamma<span class="p">,</span>
+</span><span class="line">                delta <span class="o">=</span> delta<span class="p">,</span> lambda <span class="o">=</span> lambda.cur<span class="p">,</span> y <span class="o">=</span> y<span class="p">)</span>
+</span><span class="line">            <span class="kr">if</span> <span class="p">(</span>i <span class="o">&gt;</span> burnin <span class="o">&amp;</span> <span class="p">(</span>i <span class="o">-</span> burnin<span class="p">)</span><span class="o">%%</span>thin <span class="o">==</span> <span class="m">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">                lambda.draws<span class="p">[(</span>i <span class="o">-</span> burnin<span class="p">)</span><span class="o">/</span>thin<span class="p">,</span> <span class="p">]</span> <span class="o">&lt;-</span> lambda.cur
+</span><span class="line">                beta.draws<span class="p">[(</span>i <span class="o">-</span> burnin<span class="p">)</span><span class="o">/</span>thin<span class="p">]</span> <span class="o">&lt;-</span> beta.cur
+</span><span class="line">            <span class="p">}</span>
+</span><span class="line">        <span class="p">}</span>
+</span><span class="line">        <span class="kr">return</span><span class="p">(</span>list<span class="p">(</span>lambda.draws <span class="o">=</span> lambda.draws<span class="p">,</span> beta.draws <span class="o">=</span> beta.draws<span class="p">))</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>下面实验得到上述例子的参数估计</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="r"><span class="line">y <span class="o">&lt;-</span> c<span class="p">(</span><span class="m">5</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">5</span><span class="p">,</span> <span class="m">14</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="m">19</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">4</span><span class="p">,</span> <span class="m">22</span><span class="p">)</span>
+</span><span class="line">t <span class="o">&lt;-</span> c<span class="p">(</span><span class="m">94</span><span class="p">,</span> <span class="m">16</span><span class="p">,</span> <span class="m">63</span><span class="p">,</span> <span class="m">126</span><span class="p">,</span> <span class="m">5</span><span class="p">,</span> <span class="m">31</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">10</span><span class="p">)</span>
+</span><span class="line">posterior <span class="o">&lt;-</span> gibbs<span class="p">(</span>n.sims <span class="o">=</span> <span class="m">10000</span><span class="p">,</span> beta.start <span class="o">=</span> <span class="m">1</span><span class="p">,</span> alpha <span class="o">=</span> <span class="m">1.8</span><span class="p">,</span> gamma <span class="o">=</span> <span class="m">0.01</span><span class="p">,</span> delta <span class="o">=</span> <span class="m">1</span><span class="p">,</span> y <span class="o">=</span> y<span class="p">,</span> t <span class="o">=</span> t<span class="p">)</span>
+</span><span class="line"><span class="c1"># 大数定律</span>
+</span><span class="line">colMeans<span class="p">(</span>posterior<span class="o">$</span>lambda.draws<span class="p">)</span>
+</span><span class="line">mean<span class="p">(</span>posterior<span class="o">$</span>beta.draws<span class="p">)</span>
+</span><span class="line">apply<span class="p">(</span>posterior<span class="o">$</span>lambda.draws<span class="p">,</span> <span class="m">2</span><span class="p">,</span> sd<span class="p">)</span>
+</span><span class="line">sd<span class="p">(</span>posterior<span class="o">$</span>beta.draws<span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="metropolis-hastings-algorithm">Metropolis-Hastings Algorithm</h2>
+
+<p>Metropolis-Hastings 算法适用于这种情况：</p>
+
+<ul>
+  <li>后验概率并不像任何我们知晓的分布（没有共轭分布）</li>
+  <li>参数的条件概率并不像任何我们知晓的分布（没法用Gibbs sampling）</li>
+  <li>后验概率拥有三个以上的参数（grid approximations 不可解）</li>
+</ul>
+
+<p>具体的算法有以下步骤：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/92275724.jpg" width="600px" /> </p>
+
+<p>细分下每个步骤：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/86212406.jpg" width="600px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/28170626.jpg" width="600px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/32187111.jpg" width="600px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/28671748.jpg" width="600px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/28650748.jpg" width="600px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/73904716.jpg" width="600px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/8969349.jpg" width="600px" /></p>
+
+<u>Example:</u>
+
+<p>使用随机游走Metropolis算法从Gamma(1.7, 4.4)分布抽样，jumping distribution是一个标准差为2的正太分布。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+</pre></td><td class="code"><pre><code class="r"><span class="line">mh.gamma <span class="o">&lt;-</span> <span class="kr">function</span><span class="p">(</span>n.sims<span class="p">,</span> start<span class="p">,</span> burnin<span class="p">,</span> cand.sd<span class="p">,</span> shape<span class="p">,</span> rate<span class="p">)</span> <span class="p">{</span>
+</span><span class="line">    theta.cur <span class="o">&lt;-</span> start
+</span><span class="line">    draws <span class="o">&lt;-</span> c<span class="p">()</span>
+</span><span class="line">    theta.update <span class="o">&lt;-</span> <span class="kr">function</span><span class="p">(</span>theta.cur<span class="p">,</span> shape<span class="p">,</span> rate<span class="p">)</span> <span class="p">{</span>
+</span><span class="line">        theta.can <span class="o">&lt;-</span> rnorm<span class="p">(</span><span class="m">1</span><span class="p">,</span> mean <span class="o">=</span> theta.cur<span class="p">,</span> sd <span class="o">=</span> cand.sd<span class="p">)</span>
+</span><span class="line">        accept.prob <span class="o">&lt;-</span> dgamma<span class="p">(</span>theta.can<span class="p">,</span> shape <span class="o">=</span> shape<span class="p">,</span> rate <span class="o">=</span> rate<span class="p">)</span> <span class="o">/</span>
+</span><span class="line">            dgamma<span class="p">(</span>theta.cur<span class="p">,</span> shape <span class="o">=</span> shape<span class="p">,</span> rate <span class="o">=</span> rate<span class="p">)</span>
+</span><span class="line">        <span class="kr">if</span> <span class="p">(</span>runif<span class="p">(</span><span class="m">1</span><span class="p">)</span> <span class="o">&lt;=</span> accept.prob<span class="p">)</span> theta.can <span class="kr">else</span> theta.cur
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">    <span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span>n.sims<span class="p">)</span> <span class="p">{</span>
+</span><span class="line">        draws<span class="p">[</span>i<span class="p">]</span> <span class="o">&lt;-</span> theta.cur <span class="o">&lt;-</span> theta.update<span class="p">(</span>theta.cur<span class="p">,</span> shape <span class="o">=</span> shape<span class="p">,</span> rate <span class="o">=</span> rate<span class="p">)</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">    <span class="kr">return</span><span class="p">(</span>draws<span class="p">[(</span>burnin <span class="o">+</span> <span class="m">1</span><span class="p">)</span><span class="o">:</span>n.sims<span class="p">])</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">mh.draws <span class="o">&lt;-</span> mh.gamma<span class="p">(</span><span class="m">10000</span><span class="p">,</span> start <span class="o">=</span> <span class="m">1</span><span class="p">,</span> burnin <span class="o">=</span> <span class="m">1000</span><span class="p">,</span> cand.sd <span class="o">=</span> <span class="m">2</span><span class="p">,</span> shape <span class="o">=</span> <span class="m">1.7</span><span class="p">,</span> rate <span class="o">=</span> <span class="m">4.4</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-09-01T16:00:00+08:00" pubdate data-updated="true">Sep 1<span>st</span>, 2015</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/algorithm/'>algorithm</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2015/09/01/mcmc/" data-via="" data-counturl="http://billowkiller.github.io/blog/2015/09/01/mcmc/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2015/07/26/mr-design-pattern/" title="Previous Post: Design Patterns for MapReduce Algorithms">&laquo; Design Patterns for MapReduce Algorithms</a></li>
+            
+            
+            <li class="next"><a href="/blog/2015/09/18/compression-format-introduction/" title="Next Post: Compression Format Introduction">Compression Format Introduction &raquo;</a></li>
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item " href="/blog/2016/04/09/rating/">Funny Facts About Rating</a>
+    
+    <a class="list-group-item " href="/blog/2016/04/06/kafka/">Kafka Introduction</a>
+    
+    <a class="list-group-item " href="/blog/2016/03/19/table-join/">Table Join Semantics</a>
+    
+    <a class="list-group-item " href="/blog/2016/01/13/etl/">Extract-Transform-Load Application Scenarios</a>
+    
+    <a class="list-group-item " href="/blog/2015/12/20/hadoop-intro/">Hadoop Introduction</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">9</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">7</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">7</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/google/index.html">
+        <span class="badge">4</span>
+        google
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">13</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">12</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">8</span>
+        algorithm
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
+        <span class="badge">13</span>
+        Machine Learning
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/math/index.html">
+        <span class="badge">1</span>
+        math
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/big-data/index.html">
+        <span class="badge">9</span>
+        Big Data
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2016 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2015/09/01/mcmc/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2015/09/01/mcmc/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>

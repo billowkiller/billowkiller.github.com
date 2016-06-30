@@ -4,7 +4,7 @@
   <title><![CDATA[tags: unfinished | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/unfinished/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-06-30T21:53:25+08:00</updated>
+  <updated>2016-06-30T22:22:09+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Random Process]]></title>
-    <link href="http://billowkiller.github.io/blog/2016/05/09/random-process/"/>
-    <updated>2016-05-09T16:00:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2016/05/09/random-process</id>
+    <link href="http://billowkiller.github.io/blog/2015/05/09/random-process/"/>
+    <updated>2015-05-09T16:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/05/09/random-process</id>
     <content type="html"><![CDATA[<p>本文用来记录一些随机过程。随机过程是处理包含时间以及数据序列的概率模型。可用于一下数据序列的建模：</p>
 
 <ul>
@@ -120,9 +120,9 @@
   
   <entry>
     <title type="html"><![CDATA[Recommender System in a Nutshell]]></title>
-    <link href="http://billowkiller.github.io/blog/2016/04/09/recsys-introduction/"/>
-    <updated>2016-04-09T14:00:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2016/04/09/recsys-introduction</id>
+    <link href="http://billowkiller.github.io/blog/2015/04/10/recsys-introduction/"/>
+    <updated>2015-04-10T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/04/10/recsys-introduction</id>
     <content type="html"><![CDATA[<p>推荐系统（Recommender System An Introduction）读书笔记。</p>
 
 <!--more-->

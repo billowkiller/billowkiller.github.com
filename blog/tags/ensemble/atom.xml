@@ -4,7 +4,7 @@
   <title><![CDATA[tags: ensemble | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/ensemble/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-06-30T21:53:25+08:00</updated>
+  <updated>2016-06-30T22:22:09+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ensemble Methods]]></title>
-    <link href="http://billowkiller.github.io/blog/2016/02/18/ensemble/"/>
-    <updated>2016-02-18T14:00:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2016/02/18/ensemble</id>
+    <link href="http://billowkiller.github.io/blog/2015/02/18/ensemble/"/>
+    <updated>2015-02-18T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/02/18/ensemble</id>
     <content type="html"><![CDATA[<p>Ensemble<code>|ɒnˈsɒmbl|</code> Methods 称为集成方法，它还有其他类似的名字，meta-algorithm、aggregation model，这些都代表这同一个意思，就是不同弱分类器的组合成一个强分类器。这里的弱分类器要比随机猜测的结果好，错误率小于50%；弱分类器可以是决策树、逻辑回归、朴素贝叶斯等算法。Ensemble的形式有很多种：</p>
 
 <ul>
