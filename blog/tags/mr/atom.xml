@@ -4,7 +4,7 @@
   <title><![CDATA[tags: mr | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/mr/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-06-29T23:53:41+08:00</updated>
+  <updated>2016-06-30T20:03:25+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -284,6 +284,12 @@ job.setProfileTaskRange(false, "");
 <p>可以看出来第一个问题是在<code>String.split</code>这个方法的使用上，它采用正则表达式来分割字符串，这个是相当耗时的一个举措，可以用Apache Commons Lang library的<code>StringUtils.split</code>来替换。另外一个是发生在Text的构造上，可以只构造一个Text实例，采用<code>set</code>方法进行设置，这样会更加有效率。</p>
 
 <p>需要注意，使用HPROF会给程序的执行带来额外的负担，需要持续的收集profiling的信息，所以在正常的运行过程中不应该加上。</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>一些在工作中实际用到的调优方法：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-30/24054724.jpg" width="700px" /></p>
 
 ]]></content>
   </entry>
