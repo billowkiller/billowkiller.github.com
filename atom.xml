@@ -4,7 +4,7 @@
   <title><![CDATA[Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-07-01T14:32:36+08:00</updated>
+  <updated>2016-07-01T15:02:45+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -589,7 +589,7 @@ For each topic T that C_i subscribes to {
   <entry>
     <title type="html"><![CDATA[Spark Tunning]]></title>
     <link href="http://billowkiller.github.io/blog/2016/02/01/spark-tunning/"/>
-    <updated>2016-02-01T00:00:00+08:00</updated>
+    <updated>2016-02-01T17:23:00+08:00</updated>
     <id>http://billowkiller.github.io/blog/2016/02/01/spark-tunning</id>
     <content type="html"><![CDATA[<p>记录一些spark的调优参数</p>
 

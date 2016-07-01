@@ -4,7 +4,7 @@
   <title><![CDATA[tags: spark | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/spark/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-07-01T14:32:36+08:00</updated>
+  <updated>2016-07-01T15:02:45+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,102 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Spark Tunning]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/02/01/spark-tunning/"/>
+    <updated>2016-02-01T17:23:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/02/01/spark-tunning</id>
+    <content type="html"><![CDATA[<p>记录一些spark的调优参数</p>
+
+<!--more-->
+
+<ol>
+  <li>一个集群有N个节点，每个拥有a cores，mGB的memory
+    <ul>
+      <li>num-executor N*3-1， 每个节点包含3个executor，AM的那个节点两个</li>
+      <li>executor-cores min(5, a-1)</li>
+      <li>executor-memory   (m-1)/3 *  (1-spark.yarn.executor.memoryOverhead)，  默认为0.07。</li>
+    </ul>
+  </li>
+  <li>
+    <p>driver默认内存改成2G（原先1G）；</p>
+  </li>
+  <li>
+    <p>默认开启预测执行：</p>
+
+ 	spark.speculation true
+ 	spark.speculation.quantile 0.75
+ 	spark.speculation.multiplier 1.5
+  </li>
+  <li>
+    <p>调高默认parallelism 数量</p>
+
+ 	spark.default.parallelism 300
+  </li>
+  <li>
+    <p>调整默认GC策略至G1 GC </p>
+
+    <p>需要测试一些数据来看一下环境里最适合的GC策略，测试结果显示G1没有提升</p>
+
+ 	CMS vs parallel GC vs G1 GC
+ 	G1 GC: InitiatingHeapOccupancyPercent、 ConcGCThreads
+  </li>
+  <li>
+    <p>timeout参数优化</p>
+
+ 	spark.core.connection.ack.wait.timeout 
+ 	spark.core.connection.auth.wait.timeout
+ 	spark.akka.timeout 
+ 	spark.akka.askTimeout 
+ 	spark.shuffle.io.connectionTimeout 
+  </li>
+  <li>
+    <p>frameSize 优化</p>
+
+ 	spark.akka.frameSize 100
+  </li>
+  <li>
+    <p>codec 优化</p>
+
+ 	spark.io.compression.codec org.apache.spark.io.LZ4CompressionCodec
+  </li>
+  <li>
+    <p>gc log打印</p>
+
+    <pre><code>	-verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintHeapAtGC -Xloggc:/var/logs/spark/spark_gc.log   
+</code></pre>
+  </li>
+  <li>heap dump</li>
+</ol>
+
+ 		-xx:+HeapDumpOnOutOfMemoryError
+
+<ol>
+  <li>调整permsize</li>
+</ol>
+
+ 		–driver-java-options “-XX:MaxPermSize=512m”
+
+<ol>
+  <li>
+    <p>native lzo</p>
+  </li>
+  <li>
+    <p>减小数据结构内存</p>
+
+    <p>内存少于32G，设置JVM参数-XX:+UseCompressedOops以便将8字节指针修改成4字节，设置JVM参数-XX:+UseCompressedStrings以便采用8比特来编码每一个ASCII字符</p>
+  </li>
+</ol>
+
+<h3 id="spark-terasort-by-databricks">Spark Terasort by Databricks</h3>
+
+<p>Spark sorted the same data <strong>3X faster using 10X fewer machines</strong>. All the sorting took place on disk (HDFS), without using Spark’s in-memory cache. </p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-7-1/9096505.jpg" width="600px" /></p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Spark Streaming]]></title>

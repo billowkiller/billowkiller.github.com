@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Big Data | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/categories/big-data/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-07-01T14:32:36+08:00</updated>
+  <updated>2016-07-01T15:02:45+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -358,6 +358,102 @@ For each topic T that C_i subscribes to {
 <p><a href="http://kafka.apache.org/documentation.html">http://kafka.apache.org/documentation.html</a></p>
 
 <p><a href="http://people.csail.mit.edu/matei/courses/2015/6.S897/readings/kafka.pdf">Kafka: A distributed messaging system for log processing</a></p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Spark Tunning]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/02/01/spark-tunning/"/>
+    <updated>2016-02-01T17:23:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/02/01/spark-tunning</id>
+    <content type="html"><![CDATA[<p>记录一些spark的调优参数</p>
+
+<!--more-->
+
+<ol>
+  <li>一个集群有N个节点，每个拥有a cores，mGB的memory
+    <ul>
+      <li>num-executor N*3-1， 每个节点包含3个executor，AM的那个节点两个</li>
+      <li>executor-cores min(5, a-1)</li>
+      <li>executor-memory   (m-1)/3 *  (1-spark.yarn.executor.memoryOverhead)，  默认为0.07。</li>
+    </ul>
+  </li>
+  <li>
+    <p>driver默认内存改成2G（原先1G）；</p>
+  </li>
+  <li>
+    <p>默认开启预测执行：</p>
+
+ 	spark.speculation true
+ 	spark.speculation.quantile 0.75
+ 	spark.speculation.multiplier 1.5
+  </li>
+  <li>
+    <p>调高默认parallelism 数量</p>
+
+ 	spark.default.parallelism 300
+  </li>
+  <li>
+    <p>调整默认GC策略至G1 GC </p>
+
+    <p>需要测试一些数据来看一下环境里最适合的GC策略，测试结果显示G1没有提升</p>
+
+ 	CMS vs parallel GC vs G1 GC
+ 	G1 GC: InitiatingHeapOccupancyPercent、 ConcGCThreads
+  </li>
+  <li>
+    <p>timeout参数优化</p>
+
+ 	spark.core.connection.ack.wait.timeout 
+ 	spark.core.connection.auth.wait.timeout
+ 	spark.akka.timeout 
+ 	spark.akka.askTimeout 
+ 	spark.shuffle.io.connectionTimeout 
+  </li>
+  <li>
+    <p>frameSize 优化</p>
+
+ 	spark.akka.frameSize 100
+  </li>
+  <li>
+    <p>codec 优化</p>
+
+ 	spark.io.compression.codec org.apache.spark.io.LZ4CompressionCodec
+  </li>
+  <li>
+    <p>gc log打印</p>
+
+    <pre><code>	-verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintHeapAtGC -Xloggc:/var/logs/spark/spark_gc.log   
+</code></pre>
+  </li>
+  <li>heap dump</li>
+</ol>
+
+ 		-xx:+HeapDumpOnOutOfMemoryError
+
+<ol>
+  <li>调整permsize</li>
+</ol>
+
+ 		–driver-java-options “-XX:MaxPermSize=512m”
+
+<ol>
+  <li>
+    <p>native lzo</p>
+  </li>
+  <li>
+    <p>减小数据结构内存</p>
+
+    <p>内存少于32G，设置JVM参数-XX:+UseCompressedOops以便将8字节指针修改成4字节，设置JVM参数-XX:+UseCompressedStrings以便采用8比特来编码每一个ASCII字符</p>
+  </li>
+</ol>
+
+<h3 id="spark-terasort-by-databricks">Spark Terasort by Databricks</h3>
+
+<p>Spark sorted the same data <strong>3X faster using 10X fewer machines</strong>. All the sorting took place on disk (HDFS), without using Spark’s in-memory cache. </p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-7-1/9096505.jpg" width="600px" /></p>
 
 ]]></content>
   </entry>
@@ -860,168 +956,6 @@ job.setProfileTaskRange(false, "");
 <p>一些在工作中实际用到的调优方法：</p>
 
 <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-30/1330399.jpg" width="900px" /></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Hadoop Secondary Sorting]]></title>
-    <link href="http://billowkiller.github.io/blog/2015/11/22/hadoop-secondary-sorting/"/>
-    <updated>2015-11-22T17:27:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2015/11/22/hadoop-secondary-sorting</id>
-    <content type="html"><![CDATA[<p>Hadoop MapReduce的神奇之处发生在mapper和reducer之间，将所有相同key的map输出记录聚集在一块，使得用户可以方便的处理聚合在一起的数据。Hadoop内部使用了partition、sort和merge（shuffle的一部分），在每个reducer中流式地得到排序后的key和value集合。在MapReduce Sorting中有个特别的部分是secondary sort，也就是对value进行排序。</p>
-
-<!--more-->
-
-<p>Secondary sort在两种情况下特别有用：</p>
-
-<ul>
-  <li>需要某一部分的数据比其他数据更快的到达reducer。</li>
-  <li>希望job的输出按照两个key进行排序。</li>
-</ul>
-
-<p>实现Secondary sort需要对MapReduce中的数据流和处理有一定的了解，下图展示了对reducer中出现的数据有影响的三个部分。</p>
-
-<p><img src="http://i5.tietuku.com/7ad3ad872415c4b6.png" width="600px" /></p>
-
-<p><code>partitioner</code>决定哪个reducer接收该mapper数据记录；<code>sorting RawComparator</code>用于在各自的分片中排序输出的结果，map和reduce阶段都有它，其中map阶段的sorting是对reduce阶段sorting的一个优化，让reducer的sorting更高效；最后，<code>grouping RawComparator</code>用于决定reducer处理排序后记录的边界，发生在reducer从本地磁盘读取数据的时候，也就是说，你可以用这个方法决定数据记录是如何聚集起来调用一个reduce方法的。MapReduce默认把这个三个方法作用于map方法输出的key上。</p>
-
-<p>要实现Secondary sorting，我们需要重写partitioner、sort comparator和grouping comparator。</p>
-
-<p>下面，通过对人名的排序来说明如何使用Secondary sorting。使用primary sort排序last name，secondary sort排序first name。</p>
-
-<p>我们需要构建一个由map方法输出的Composite key，这个key由两部分组成：</p>
-
-<ul>
-  <li>Natural Key</li>
-  <li>Secondary Key</li>
-</ul>
-
-<p><img src="http://i5.tietuku.com/25eedf0319e92775.png" width="430px" /></p>
-
-<p>``` java
-public class Person implements WritableComparable<person> {</person></p>
-
-<p>private String firstName;
-  private String lastName;</p>
-
-<p>@Override
-  public void readFields(DataInput in) throws IOException {
-    this.firstName = in.readUTF();
-    this.lastName = in.readUTF();
-  }</p>
-
-<p>@Override
-  public void write(DataOutput out) throws IOException {
-    out.writeUTF(firstName);
-    out.writeUTF(lastName);
-  }
-…
-```</p>
-
-<p>下图说明hadoop框架配置中用于设置partitioning、sorting和grouping类的名字和方法。</p>
-
-<p><img src="http://i5.tietuku.com/520e7242cd6ecc43.png" width="530px" /></p>
-
-<h3 id="partitioner">Partitioner</h3>
-
-<p>默认的partitioner使用对key进行hash后取reducer个数的模。但是默认的partitioner使用整个key，会导致相同的natural key发往不同的reducer。所以需要实现自己的partitioner。</p>
-
-<p>``` java
-public class PersonNamePartitioner extends
-    Partitioner&lt;Person, Text&gt; {</p>
-
-<p>@Override
-  public int getPartition(Person key, Text value, int numPartitions) {
-    return Math.abs(key.getLastName().hashCode() * 127) %
-        numPartitions;
-  }
-} 
-```</p>
-
-<h3 id="sorting">Sorting</h3>
-
-<p>``` java
-public class PersonComparator extends WritableComparator {
-  protected PersonComparator() {
-    super(Person.class, true);
-  }</p>
-
-<p>@Override
-  public int compare(WritableComparable w1, WritableComparable w2) {</p>
-
-<pre><code>Person p1 = (Person) w1;
-Person p2 = (Person) w2;
-
-
-int cmp = p1.getLastName().compareTo(p2.getLastName());
-if (cmp != 0) {
-  return cmp;
-}
-
-return p1.getFirstName().compareTo(p2.getFirstName());   } } ```
-</code></pre>
-
-<h3 id="grouping">grouping</h3>
-
-<p>grouping阶段所有的数据记录已经是secondary sort了，grouping comparator需要将相同的last name聚合在一起。</p>
-
-<p>``` java
-public class PersonNameComparator extends WritableComparator {</p>
-
-<p>protected PersonNameComparator() {
-    super(Person.class, true);
-  }</p>
-
-<p>@Override
-  public int compare(WritableComparable o1, WritableComparable o2) {</p>
-
-<pre><code>Person p1 = (Person) o1;
-Person p2 = (Person) o2;
-
-return p1.getLastName().compareTo(p2.getLastName());
-</code></pre>
-
-<p>}
-}
-```</p>
-
-<h3 id="mapreduce">MapReduce</h3>
-
-<p>最后在driver中，需要设置上文提到的三个类：</p>
-
-<p>``` java
-job.setPartitionerClass(PersonNamePartitioner.class);
-job.setSortComparatorClass(PersonComparator.class);
-job.setGroupingComparatorClass(PersonNameComparator.class);</p>
-
-<p>public static class Map extends Mapper&lt;Text, Text, Person, Text&gt; {
-  private Person outputKey = new Person();</p>
-
-<p>@Override
-  protected void map(Text lastName, Text firstName, Context context)
-      throws IOException, InterruptedException {
-    outputKey.set(lastName.toString(), firstName.toString());
-    context.write(outputKey, firstName);
-  }
-}</p>
-
-<p>public static class Reduce extends Reducer&lt;Person, Text, Text, Text&gt; {</p>
-
-<p>Text lastName = new Text();
-  @Override
-  public void reduce(Person key, Iterable<text> values,
-                     Context context)
-      throws IOException, InterruptedException {
-    lastName.set(key.getLastName());
-    for (Text firstName : values) {
-      context.write(lastName, firstName);
-    }
-  }
-}   
-```</text></p>
-
-<p>Secondary sort涉及到的自定义的partitioner、sorter和grouper，还是比较复杂的。可以考虑<a href="http://htuple.org">htuple</a>对简单类型进行secondary sort。</p>
 
 ]]></content>
   </entry>
