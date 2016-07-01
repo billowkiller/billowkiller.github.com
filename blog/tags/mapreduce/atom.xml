@@ -4,7 +4,7 @@
   <title><![CDATA[tags: mapreduce | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/mapreduce/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-06-30T22:40:33+08:00</updated>
+  <updated>2016-07-01T14:32:36+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -21,6 +21,8 @@
     <content type="html"><![CDATA[<p>看图说话，用一些图表来记录Hadoop。</p>
 
 <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/22389512.jpg" width="500px" /></p>
+
+<!--more-->
 
 <h3 id="mapreduce">MapReduce</h3>
 

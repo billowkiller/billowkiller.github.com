@@ -174,6 +174,57 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-10-13T00:28:00+08:00" pubdate data-updated="true">Oct 13<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/10/13/nginx-architecture-1-overview/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/10/13/nginx-architecture-1-overview/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/10/13/nginx-architecture-1-overview/">Nginx architecture(1)&#8211;Overview</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>从04年发布以来，Nginx已经成为多个国内外互联网具体首选的高性能Web服务器。其特点是占有内存少，并发能力强，并且由于Nginx使用基于事件驱动的架构能够最有效的利用多核CPU的处理能力，进程可以无阻塞的运行。</p>
+
+<p>特别是Nginx可以利用当前操作系统特有的一些高校API来提高自己的性能，例如Linux上的<code>epoll</code>、Solaris上的event ports和Free BSD上的kqueue。又如对于Linux，Nginx支持其独有的sendfile系统调用，可以高效的讲硬盘中的数据发送到网络上（无需将硬盘数据先复制到用户态内存中）。</p>
+
+<p>所以通过分析Nginx的架构设计，可以怎样充分利用服务器上的硬件资源，以及学习到更为先进的理念。下面就来分析和学习Nginx的架构设计。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx_zps7d735b88.jpg" alt="Nginx logo" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/10/13/nginx-architecture-1-overview/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-10-12T16:12:00+08:00" pubdate data-updated="true">Oct 12<span>th</span>, 2013</time>
         
            | <a href="/blog/2013/10/12/deep-c-and-c-plus-plus/#disqus_thread"
@@ -733,85 +784,6 @@ name of the output file:</p>
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/">Linux下解决中文乱码——文件，标签</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>文件是在WIndows 下创建的,Windows
-的文件名中文编码默认为GBK,而Linux中默认文件名编码为UTF8,由于编码不一致所以导致了文件名乱码的问题，解决这个问题需要对文件名进行转码。</p>
-
-<ul>
-  <li><strong>文件与文件夹乱码，使用convmv来解决</strong></li>
-</ul>
-
-<p>convmv 使用方法：</p>
-
-<p>convmv -f 源编码 -t 新编码 [选项] 文件名</p>
-
-<p>常用参数：</p>
-
-<ul>
-  <li>-r 递归处理子文件夹</li>
-  <li>–notest 真正进行操作，默认情况下是不对文件进行真实操作</li>
-  <li>–list 显示所有支持的编码</li>
-  <li>–unescap 可以做一下转义，比如把%20变成空格</li>
-</ul>
-
-<p>举例：</p>
-
-<p>在当前目录下</p>
-
-<pre><code>convmv -f GBK -t UTF-8 --notest * //所有文件转gbk为utf8
-</code></pre>
-
-<ul>
-  <li><strong>转换 mp3 标签编码，使用mutagen</strong></li>
-</ul>
-
-<p>安装：</p>
-
-<pre><code>sudo apt-get install python-mutagen
-</code></pre>
-
-<p>举例：</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -841,9 +813,9 @@ name of the output file:</p>
     
     <a class="list-group-item " href="/blog/2016/03/19/table-join/">Table Join Semantics</a>
     
-    <a class="list-group-item " href="/blog/2016/01/13/etl/">Extract-Transform-Load Application Scenarios</a>
+    <a class="list-group-item " href="/blog/2016/02/01/spark-tunning/">Spark Tunning</a>
     
-    <a class="list-group-item " href="/blog/2015/12/20/hadoop-intro/">Hadoop Introduction</a>
+    <a class="list-group-item " href="/blog/2016/01/13/etl/">Extract-Transform-Load Application Scenarios</a>
     
   </div>
 </section>

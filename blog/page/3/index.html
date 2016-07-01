@@ -174,6 +174,57 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-03-19T14:00:00+08:00" pubdate data-updated="true">Mar 19<span>th</span>, 2015</time>
+        
+           | <a href="/blog/2015/03/19/hmm/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2015/03/19/hmm/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2015/03/19/hmm/">Hidden Markov Model</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>隐马尔可夫模型（Hidden Markov Model，HMM）是统计模型，它用来描述一个含有隐含未知参数的马尔可夫过程（Markov process）。HMM 被用来对有序的序列数据建模，例如句子中的单词，基因中的基本序列，所以常被应用在语音识别、信息提取、基因测序、股票预测等领域。</p>
+
+<p>在 HMM 中，马尔可夫过程是一类随机过程，原始模型是马尔可夫链。它包含一个状态的有限集，状态的变化只依赖于上一个时间点，而与再之前的时间无任何关系，且状态的轮换是有一定的概率发生。所以可以把马尔可夫过程当成是一个有限状态自动机的概率变种。PageRank 其实也是一种马尔可夫过程。</p>
+
+<p>但是在 HMM 中，状态是未知的，这就是 hidden 的由来，我们只能看到观察值，也就是由状态产生的结果。下图是一个 HMM 的例子。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/24496294.jpg" width="300px" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2015/03/19/hmm/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-03-06T14:00:00+08:00" pubdate data-updated="true">Mar 6<span>th</span>, 2015</time>
         
            | <a href="/blog/2015/03/06/apriori/#disqus_thread"
@@ -599,55 +650,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-29T02:18:00+08:00" pubdate data-updated="true">Aug 29<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/08/29/static-and-dynamic-library/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/08/29/static-and-dynamic-library/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/29/static-and-dynamic-library/">Static and Dynamic Library</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>库是写好的现有的，成熟的，可以复用的代码。现实中每个程序都要依赖很多基础的底层库。C默认使用的库就是<code>libc.so</code>。</p>
-
-<p>本质上来说库是一种可执行代码的二进制形式，可以被操作系统载入内存执行。库有两种：静态库（.a、.lib）和动态库（.so、.dll）。</p>
-
-<p>所谓静态、动态是指链接。</p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/08/29/static-and-dynamic-library/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -677,9 +679,9 @@ body {
     
     <a class="list-group-item " href="/blog/2016/03/19/table-join/">Table Join Semantics</a>
     
-    <a class="list-group-item " href="/blog/2016/01/13/etl/">Extract-Transform-Load Application Scenarios</a>
+    <a class="list-group-item " href="/blog/2016/02/01/spark-tunning/">Spark Tunning</a>
     
-    <a class="list-group-item " href="/blog/2015/12/20/hadoop-intro/">Hadoop Introduction</a>
+    <a class="list-group-item " href="/blog/2016/01/13/etl/">Extract-Transform-Load Application Scenarios</a>
     
   </div>
 </section>
