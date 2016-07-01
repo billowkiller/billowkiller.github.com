@@ -208,4 +208,9 @@ profile.out包括一些stack traces，还包括内存和CPU时间的信息。以
 
 需要注意，使用HPROF会给程序的执行带来额外的负担，需要持续的收集profiling的信息，所以在正常的运行过程中不应该加上。
 
+## Conclusion
+
+一些在工作中实际用到的调优方法：
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-30/1330399.jpg" width="900px"/>
 

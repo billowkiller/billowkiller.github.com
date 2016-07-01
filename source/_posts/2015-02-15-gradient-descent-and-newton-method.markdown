@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Gradient Descent and Newton Method"
-date: 2016-02-15 14:00
+date: 2015-02-15 14:00
 comments: true
 category: "Machine Learning"
 tags: [ml, math]

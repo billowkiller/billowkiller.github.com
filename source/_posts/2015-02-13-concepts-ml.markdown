@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Some Pre-Concepts in Machine Learning"
-date: 2016-02-13 14:00
+date: 2015-02-13 14:00
 comments: true
 category: "Machine Learning"
 tags: ml

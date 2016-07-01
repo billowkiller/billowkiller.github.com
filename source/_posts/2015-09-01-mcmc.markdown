@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "MCMC Methods"
-date: 2016-06-01 16:00
+date: 2015-09-01 16:00
 comments: true
 category: "algorithm"
 tags: [sampling, mcmc]

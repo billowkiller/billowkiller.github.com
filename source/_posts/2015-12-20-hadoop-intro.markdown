@@ -12,6 +12,8 @@ tags: [mapreduce, hadoop]
 
 <img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/22389512.jpg" width="500px"/>
 
+<!--more-->
+
 ### MapReduce
 
 <img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-29/71525619.jpg" width="500px"/>
