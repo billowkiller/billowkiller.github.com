@@ -186,28 +186,30 @@ body {
   </header>
 
 
-<div class="entry-content clearfix"><p>简单介绍下Spark。Spark是分布式的内存计算模型，对于两类计算形式能够极大地提升处理的效率：迭代计算，和交互式的数据挖掘工具。迭代计算例如PageRank、K-means聚类、逻辑回归等要求计算结果的重新利用，交互式的数据挖掘例如针对一份的数据集进行多次特定查询也要求原始数据的重复利用。对比于MR作业，它不需要外部存储的介入，从而提升处理速度。接下来将会从Spark的数据模型、编程模型和架构来介绍Spark。</p>
+<div class="entry-content clearfix"><p>简单介绍下Spark。Spark是分布式的<code>内存计算模型</code>，对于两类计算形式能够极大地提升处理的效率：<code>迭代计算</code>，和<code>交互式的数据挖掘工具</code>。迭代计算例如PageRank、K-means聚类、逻辑回归等要求计算结果的重新利用，交互式的数据挖掘例如针对一份的数据集进行多次特定查询也要求原始数据的重复利用。对比于MR作业，<strong>它不需要外部存储的介入，从而提升处理速度</strong>。接下来将会从Spark的数据模型、编程模型和架构来介绍Spark。</p>
 
 <p><img src="https://spark.apache.org/images/spark-logo.png" alt="image" /></p>
 
 <!--more-->
 
 <h3 id="rdd-data-model">RDD Data Model</h3>
-<p>那么如何利用多个节点的内存进行分布式的计算呢，这就是Spark的核心RDD（Resilient Distributed Dataset）。RDD是一个个记录的集合，只读和分片的。它只能通过外部存储或者其他RDD生成。RDD的这些变化操作名称为<em>transformation</em>，在Spark编程中还有另外一个操作需要知道，<em>action</em>，意思是返回一个值或者将数据导出到外部存储，像<code>count</code>、<code>collect</code>、<code>save</code>。一个spark程序往往是从外部存储中定义一个或多个RDD开始的，接着经过各种<em>transformation</em>，最后<em>action</em>。同时<em>action</em>也是计算的开始，在spark中计算是延迟的，各种<em>transformation</em>形成了computation pipeline在<em>action</em>中进行计算。</p>
+<p>那么如何利用多个节点的内存进行分布式的计算呢，这就是Spark的核心RDD（Resilient Distributed Dataset）。<u>RDD是一个个记录的集合，只读和分片的。它只能通过外部存储或者其他RDD生成</u>。RDD的这些变化操作名称为<em>transformation</em>，在Spark编程中还有另外一个操作需要知道，<em>action</em>，意思是返回一个值或者将数据导出到外部存储，像<code>count</code>、<code>collect</code>、<code>save</code>。一个spark程序往往是从外部存储中定义一个或多个RDD开始的，接着经过各种<em>transformation</em>，最后<em>action</em>。同时<em>action</em>也是计算的开始，在spark中计算是延迟的，各种<em>transformation</em>形成了computation pipeline在<em>action</em>中进行计算。</p>
 
 <p>下表是对RDD中的<em>transformation</em>和<em>action</em>操作：
 <img src="http://ww2.sinaimg.cn/large/74311666jw1ex310kinr3j210c0fujwg.jpg" alt="" /></p>
 
 <p>RDD还有两个操作：<em>persistence</em>和<em>partitioning</em>。其实顾名思义，<em>persistence</em>即RDD的持久化操作，这是为了避免重复计算。<em>partitioning</em>是重新分区，为了得到更好的执行并发度。</p>
 
-<p>合理的分区可以有效减少shuffle的数据量，根据特定的应用场景执行不同的<em>partitioning</em>。例如在PageRank中根据域名来对URL进行Hash，因为很多链接都是内部的。下图表示<em>partitioning</em>的效果。</p>
+<p><strong>合理的分区可以有效减少shuffle的数据量</strong>，根据特定的应用场景执行不同的<em>partitioning</em>。例如在PageRank中根据域名来对URL进行Hash，因为很多链接都是内部的。下图表示<em>partitioning</em>的效果。</p>
 
 <p><img src="http://img-storage.qiniudn.com/15-10-16/6543188.jpg" alt="" /></p>
 
-<p>持久化操作是也是为了更高的计算效率。例如在下图中，Spark有两个action，所以产生两个job。两个job各自计算RDD1和RDD2，对于数据量大的RDD无疑会影响性能，所以可以将RDD进行<em>persistence</em>操作，可以存入内存、硬盘或者二者结合。后续缓存的资源可以手动清除或者通过LRU算法自动清除。
+<p><strong>持久化操作是也是为了更高的计算效率</strong>。例如在下图中，Spark有两个action，所以产生两个job。两个job各自计算RDD1和RDD2，对于数据量大的RDD无疑会影响性能，所以可以将RDD进行<em>persistence</em>操作，可以存入内存、硬盘或者二者结合。后续缓存的资源可以手动清除或者通过LRU算法自动清除。
 <img src="http://ww2.sinaimg.cn/large/74311666jw1ex30g3zpazj20u60f2tb9.jpg" alt="" /></p>
 
-<p>在上文中我们提到RDD是有<code>transformation</code>和<code>lazy compute</code>的特性的。这两个特性使得RDD不需要一直被实例化，只需要保存这个RDD是如何产生的，在延迟计算的时候便可以通过这些dependence信息进行RDD transformation操作。以上就是RDD lineage，一个RDD的血统关系图。RDD的只读特性也是为了更好地描述这个lineage graph。在上图中两个Output的产生也可以直观地看到RDD的lineage信息。那么这个linage究竟有什么好处呢，RDD可以根据dependency信息直接追踪到在外存中的数据，在发生错误的时候直接通过外存的原始数据计算丢失或错误的RDD分片信息。</p>
+<p>在上文中我们提到RDD是有<code>transformation</code>和<code>lazy compute</code>的特性的。这两个特性使得RDD不需要一直被实例化，只需要保存这个RDD是如何产生的，在延迟计算的时候便可以通过这些dependence信息进行RDD transformation操作。以上就是RDD lineage，一个RDD的血统关系图。RDD的只读特性也是为了更好地描述这个lineage graph（由于RDD是只读的，Spark的RDD计算中一致性不是主要关心的内容，内存相对容易管理）。在上图中两个Output的产生也可以直观地看到RDD的lineage信息。那么这个linage究竟有什么好处呢，<strong>RDD可以根据dependency信息直接追踪到在外存中的数据，在发生错误的时候直接通过外存的原始数据计算丢失或错误的RDD分片信息</strong>。</p>
+
+<p>这里再简单插入下分布式数据集的容错性方式：<strong>数据检查点和记录数据的更新</strong>。这个在HDFS上都可以看到。RDD的lineage就是记录更新的方式，只不过这个粒度比较大，恢复方式又和接下来要说的窄依赖和宽依赖有关。但是对于稍纵即逝的数据，又会采用什么方式，可以参考<a href="http://billowkiller.com/blog/2015/10/27/spark-streaming">spark streaming</a>。</p>
 
 <h3 id="rdd-programming-model">RDD Programming Model</h3>
 
@@ -224,22 +226,43 @@ body {
 
 <p>在第3个方法中，也就是根据父RDD分片计算本RDD的分片有两种情况：每个父RDD分片最多被一个子RDD分片依赖；父RDD分片被多个子RDD分片依赖。这两种情况分别对应<em>narrow dependency</em>和<em>wide dependency</em>。为什么区分这两种依赖关系呢，这和RDD的延迟计算特性有关系。</p>
 
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-7-1/72855711.jpg" width="550px" /></p>
+
 <ul>
   <li>在<em>narrow dependency</em>中，一个节点上的RDD分片可以通过pipeline的方式从原始数据开始计算，多个分片可以并行的进行。而对于<em>wide dependency</em>需要所有父RDD的分片可用，而且涉及到data shuffle。</li>
-  <li><em>narrow dependency</em>在节点失效后的恢复的效率更高，因为可以并行地在不同的节点上计算丢失的分片。而在<em>wide dependency</em>中，一个父RDD分片可能被多个子RDD分片使用，所以可能导致这些子RDD的祖先分片都有丢失，所以需要重新完整的计算。</li>
+  <li><em>narrow dependency</em>在节点失效后的恢复的效率更高，因为可以并行地在不同的节点上计算丢失的分片。而在<em>wide dependency</em>中，一个父RDD分片可能被多个子RDD分片使用，因为父分片数据只有一部分是需要重算子分片的，其余数据重算就造成了冗余计算；另外，对于<em>wide dependency</em>, Stage计算的输入和输出在不同的节点上，对于输入节点完好，而输出节点死机的情况，通过重新计算恢复数据这种情况下，这种方法容错是有效的，否则无效，因为无法重试，需要向上追溯其祖先看是否可以重试，所以更加消耗资源。</li>
 </ul>
 
-<p>整个spark作业的执行调度也是和这两种dependency有关。当一个用户执行一个<em>action</em>操作的时候，spark的调度器检测RDD的lineage graph，建立一个DAG图来执行，DAG图中的每个节点就是一个<em>stage</em>。在每个<em>stage</em>中包含了多个pipeline的<em>transformation</em>操作，这些RDD的关系全都是
+<p>总结下：</p>
+
+<ol>
+  <li>
+    <p>窄依赖可以在某个计算节点上直接通过计算父RDD的某块数据计算得到子RDD对应的某块数据；宽依赖则要等到父RDD所有数据都计算完成之后，并且父RDD的计算结果进行hash并传到对应节点上之后才能计算子RDD。</p>
+  </li>
+  <li>
+    <p>数据丢失时，对于窄依赖只需要重新计算丢失的那一块数据来恢复；对于宽依赖则要将祖先RDD中的所有数据块全部重新计算来恢复。所以在长“血统”链特别是有宽依赖的时候，需要在适当的时机设置数据检查点。</p>
+  </li>
+</ol>
+
+<p>通过上述分析可以看出在以下两种情况下，RDD需要加检查点：</p>
+
+<ul>
+  <li>DAG中的Lineage过长，如果重算，则开销太大（如在PageRank中）。</li>
+  <li>在宽依赖上做Checkpoint获得的收益更大。</li>
+</ul>
+
+<p>不仅是<code>容错</code>，整个spark作业的<code>执行调度</code>也是和这两种dependency有关。当一个用户执行一个<em>action</em>操作的时候，spark的调度器检测RDD的lineage graph，建立一个DAG图来执行，DAG图中的每个节点就是一个<em>stage</em>。在每个<em>stage</em>中包含了多个pipeline的<em>transformation</em>操作，这些RDD的关系全都是
 <em>narrow dependency</em>。每个<em>stage</em>的边界都是由<em>wide dependency</em>的shuffle操作，或者已经计算好的分片。调度器这时候就可以建立执行任务计算每个stage中缺失的<em>partitions</em>，直到得到最终的RDD。</p>
 
-<p>那么如何合理划分 stage，并确定 task 的类型和个数？
+<p>stage中每个数据分片的窄依赖计算都是一个task，也就是最后RDD有几个分区就是几个task。那么如何合理划分 stage，并确定 task 的类型和个数？
 <img src="http://img-storage.qiniudn.com/15-10-16/48846624.jpg" alt="" /></p>
 
-<p>可以看到在上图中，每个stage中的数据都是形成了pipeline计算的，这里的pipeline思想是：<strong>数据用的时候再算，而且数据是流到要计算的位置的</strong>。有两层意思，一是延迟计算，二是计算本地化。比如在第一个 task 中，从 FlatMappedValuesRDD 中的 partition 向前推算，只计算要用的（依赖的） RDDs 及 partitions。在第二个 task 中，从 CoGroupedRDD 到 FlatMappedValuesRDD 计算过程中，不需要存储中间结果（MappedValuesRDD 中 partition 的全部数据）。</p>
+<p>可以看到在上图中，每个stage中的数据都是形成了pipeline计算的，这里的pipeline思想是：<strong>数据用的时候再算，而且数据是流到要计算的位置的</strong>。有两层意思，一是<code>延迟计算</code>，二是<code>计算本地化</code>。比如在第一个 task 中，从 FlatMappedValuesRDD 中的 partition 向前推算，只计算要用的（依赖的） RDDs 及 partitions。在第二个 task 中，从 CoGroupedRDD 到 FlatMappedValuesRDD 计算过程中，不需要存储中间结果（MappedValuesRDD 中 partition 的全部数据）。</p>
 
 <p>在有<em>wide dependency</em>的时候需要Shuffle后无法进行pipeline。那么我们可以<strong>从后往前推算，遇到 <em>wide dependency</em>就断开，遇到<em>narrow dependency</em>就将其加入该stage。每个stage里面task 的数目由该stage最后一个RDD中的partition个数决定</strong>。因此上图中最后一个stage的id是0，stage 1  stage 2都是stage 0的parents。</p>
 
-<p>整个的computing chain也是根据数据依赖关系自后向前建立，遇到<em>wide dependency</em>后形成 stage。computing chain从后到前建立，而实际计算出的数据从前到后流动，那么RDD内部是如何实现计算的呢。在每个stage中，每个RDD中的compute()调用parentRDD.iter()来将parent RDDs中的 records一个个fetch过来。</p>
+<u>整个的computing chain也是根据数据依赖关系自后向前建立，遇到*wide dependency*后形成 stage</u>
+<p>。computing chain从后到前建立，而实际计算出的数据从前到后流动，那么RDD内部是如何实现计算的呢？在每个stage中，每个RDD中的compute()调用parentRDD.iter()来将parent RDDs中的 records一个个fetch过来。</p>
 
 <blockquote>
   <p>代码实现：每个 RDD 包含的 getDependency() 负责确立 RDD 的数据依赖，compute() 方法负责接收 parent RDDs 或者 data block 流入的 records，进行计算，然后输出 record。经常可以在 RDD 中看到这样的代码firstParent[T].iterator(split, context).map(f)。firstParent 表示该 RDD 依赖的第一个 parent RDD，iterator() 表示 parentRDD 中的 records 是一个一个流入该 RDD 的，map(f) 表示每流入一个 recod 就对其进行 f(record) 操作，输出 record。为了统一接口，这段 compute() 仍然返回一个 iterator，来迭代 map(f) 输出的 records。</p>
@@ -329,9 +352,9 @@ body {
 
 <p>用户的 driver 程序中一旦出现 action()，就会生成一个 job，比如 foreach() 会调用sc.runJob(this, (iter: Iterator[T]) =&gt; iter.foreach(f))，向 DAGScheduler 提交 job。如果 driver 程序后面还有 action()，那么其他 action() 也会生成 job 提交。所以，driver 有多少个 action()，就会生成多少个 job。这就是 Spark 称 driver 程序为 application（可能包含多个 job）而不是 job 的原因。</p>
 
-<p>每一个 job 包含 n 个 stage，最后一个 stage 产生 result。。在提交 job 过程中，DAGScheduler 会首先划分 stage，然后先提交无 parent stage 的 stages，并在提交过程中确定该 stage 的 task 个数及类型，并提交具体的 task。无 parent stage 的 stage 提交完后，依赖该 stage 的 stage 才能够提交。从 stage 和 task 的执行角度来讲，一个 stage 的 parent stages 执行完后，该 stage 才能执行。</p>
+<p>每一个 job 包含 n 个 stage，最后一个 stage 产生 result。在提交 job 过程中，DAGScheduler 会首先划分 stage，然后先提交无 parent stage 的 stages，并在提交过程中确定该 stage 的 task 个数及类型，并提交具体的 task。无 parent stage 的 stage 提交完后，依赖该 stage 的 stage 才能够提交。从 stage 和 task 的执行角度来讲，一个 stage 的 parent stages 执行完后，该 stage 才能执行。</p>
 
-<p>Spark就先介绍到这里，没有涉及到spark的具体内部实现，包括job的调度，shuffle的过程、文件的管理、cache和broadcast机制等。</p>
+<p>Spark就先介绍到这里，没有涉及到spark的具体内部实现，包括job的调度，shuffle的过程、文件的管理、cache和broadcast机制等。可以参考(http://spark-internals.books.yourtion.com/markdown/4-shuffleDetails.html)[http://spark-internals.books.yourtion.com/markdown/4-shuffleDetails.html].</p>
 
 </div>
 
