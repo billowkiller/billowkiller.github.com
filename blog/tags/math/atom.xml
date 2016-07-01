@@ -4,7 +4,7 @@
   <title><![CDATA[tags: math | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/math/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-07-01T15:07:25+08:00</updated>
+  <updated>2016-07-01T15:18:48+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,111 +12,6 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
-  
-  <entry>
-    <title type="html"><![CDATA[Random Process]]></title>
-    <link href="http://billowkiller.github.io/blog/2015/05/09/random-process/"/>
-    <updated>2015-05-09T16:00:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2015/05/09/random-process</id>
-    <content type="html"><![CDATA[<p>本文用来记录一些随机过程。随机过程是处理包含时间以及数据序列的概率模型。可用于一下数据序列的建模：</p>
-
-<ul>
-  <li>每天的股票价格数据序列</li>
-  <li>交通网络中的每个点的交通负荷数据序列</li>
-  <li>雷达对飞机的定位数据序列</li>
-</ul>
-
-<p>序列中的每个数据都视为一个随机变量，所以随机序列就是一串有限或无限的随机变量序列，但是更加强调：</p>
-
-<ul>
-  <li>过程中产生的数据序列之间的<strong>相关</strong>关系。比如股票的未来价格与历史价格关系。</li>
-  <li>对整个过程中<strong>长期均值</strong>感兴趣。比如有多大比例的时间机器出于闲置。</li>
-  <li>需要刻画某些<strong>边界事件</strong>的似然或频率。在给定时间内，线路同时出于忙碌的概率，计算机网络中缓冲器数据溢出的频率。</li>
-</ul>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-4-16/62147816.jpg" width="500px" /></p>
-
-<p>下面讨论几个随机过程。</p>
-
-<!--more-->
-
-<h2 id="section">伯努利过程和泊松过程</h2>
-
-<p>这两个过程重点研究的是<strong>相邻到达时间是互相独立的随机变量</strong>的模型。区别在于：</p>
-
-<ul>
-  <li>伯努利（Bernoulli）过程考虑到达时间是<code>离散</code>的情形，相邻时间服从<code>几何分布</code>。</li>
-  <li>泊松（Poisson）过程考虑到达时间是<code>连续</code>的情形，相邻时间服从<code>指数分布</code>。</li>
-</ul>
-
-<h3 id="section-1">伯努利过程</h3>
-
-<p>通常将伯努利过程视为独立投币序列，正面朝上的概率是 $p,\ 0&lt;p&lt;1$。这里把硬币朝上视为“到达”，连续投币产生伯努利过程。下面给出伯努利过程相关的随机变量和性质：</p>
-
-<ul>
-  <li>服从参数为 $n$ 和 $p$ 的二项分布。这是 $n$ 次相继独立的实验成功的总次数 $S$ 的分布，有</li>
-</ul>
-
-<script type="math/tex; mode=display"> P_S(k) =  \binom{k}{n} p^k (1-p)^{n-k},\ k = 0,1,..n </script>
-
-<script type="math/tex; mode=display">E(S) = np,\ var(S)=np(1-p)</script>
-
-<ul>
-  <li>服从参数为 $p$ 的集合分布。这是相互独立重复的伯努利试验首次成功时刻T的分布，有</li>
-</ul>
-
-<script type="math/tex; mode=display"> P_T(t) = p(1-p)^{t-1},\ t=1,2,...</script>
-
-<script type="math/tex; mode=display"> E(T) = \frac{1}{p},\ var(T) = \frac{1-p}{p^2}</script>
-
-<p>伯努利过程有<strong>独立性</strong>和<strong>无记忆性</strong>。假设我们观测过程 $n$ 步，但是还没有成功。那么余下的 $T-n$ 有什么结论呢？</p>
-
-<script type="math/tex; mode=display"> P(T-n=t \vert T>n) = (1-p)^{t-1}p = P(T=t),\ t=1,2,...</script>
-
-<p>可以看到未来试验次数仍然是相同的集合分布。</p>
-
-<p>当 $n$ 充分大，而 $p$ 很小，均值 $np$ 始终。数学上，我们可以让 $n$ 增大，但是同时缩小 $p$，这样可以保值 $np$ 是一个固定值 $\lambda$，从极值意义上看，二项分布的分布列可以简化为泊松分布。</p>
-
-<h3 id="section-2">泊松分布</h3>
-
-<p>跟伯努利过程相比，泊松过程是连续时间轴上的到达时间。</p>
-
-<p>伯努利过程无法刻画相同时间段内，发生两次或者多次到达事件，虽然可以通过将时间段选的非常小，但是无法选择一个准确的小时间段。这时候考虑时间段长度趋近于零的情况，即连续时间模型。</p>
-
-<p>泊松过程相关的随机变量和性质：</p>
-
-<ul>
-  <li>服从参数为 $\lambda \tau$ 的<strong>泊松分布</strong>。这是泊松过程的强度为 $\lambda$，在时间长度为 $\tau$ 的区间内到达的总次数 $N_\tau$ 的分布，有</li>
-</ul>
-
-<script type="math/tex; mode=display"> P_{N_\tau}(k) = P(k,\tau) = e^{-\lambda \tau} \frac{(\lambda \tau)^k}{k!},\ k=0,1,...</script>
-
-<script type="math/tex; mode=display"> E(N_\tau) = \lambda \tau,\ var(N_\tau) = \lambda \tau</script>
-
-<ul>
-  <li>服从参数为 $\lambda$ 的<strong>指数分布</strong>，这是首次达到的时间 $T$ 的分布，有</li>
-</ul>
-
-<script type="math/tex; mode=display">f_T(t) = \lambda e^{-\lambda t},\ t \ge 0,\ E(T)=\frac{1}{\lambda},\ var(T)=\frac{1}{\lambda^2}</script>
-
-<p>上式可以将一个固定长度为 $\tau$ 的时间区间分成一个个小区间，将小区间看成伯努利过程来近似。</p>
-
-<h3 id="section-3">马尔可夫链</h3>
-
-<p>马尔可夫链的定义是一种随机过程，它描述了一种状态序列，其每个状态值取决于前面的状态。用以下公式表示马尔可夫性质：</p>
-
-<script type="math/tex; mode=display">p(\theta^{(t+1)} \vert \theta^{(1)},\theta^{(2)},..\theta^{(t)}) = p(\theta^{(t+1)} \vert \theta^{(t)}) </script>
-
-<p>状态之间的转换通过 transition kernel，这是一个 $k \times k$ 矩阵，$k$ 表示状态数。一个 $3 \times 3$ 的转换矩阵 $P$ 如下：</p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/92862152.jpg" alt="" /></p>
-
-<p>马尔可夫链有一个平稳分布，stationary distribution $\pi$，定义为：$\pi = \pi P$。无论起始状态是什么样，马尔可夫链通常会收敛到 $\pi$ 上。</p>
-
-<p>通常会根据所选的起始状态，有这不同的收敛时间。在利用马尔可夫链进行抽样时，在收敛之前的一段时间，比如前 $n-1$ 次迭代，各个状态的边际分布还不能认为是稳定分布，所以在进行估计的时候，应该把前面的这$n-1$ 个迭代值去掉。这个过程称为 <code>burn-in</code>。这样会使我们的抽样更加接近平稳分布，减少对起始位置的依赖。</p>
-
-]]></content>
-  </entry>
   
   <entry>
     <title type="html"><![CDATA[PCA and SVD]]></title>
@@ -338,6 +233,111 @@
   <li>BFGS算法使用 $B_k$ 逼近Hesse矩阵。</li>
   <li>Broyden类算法。</li>
 </ol>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Random Process]]></title>
+    <link href="http://billowkiller.github.io/blog/2014/05/09/random-process/"/>
+    <updated>2014-05-09T16:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2014/05/09/random-process</id>
+    <content type="html"><![CDATA[<p>本文用来记录一些随机过程。随机过程是处理包含时间以及数据序列的概率模型。可用于一下数据序列的建模：</p>
+
+<ul>
+  <li>每天的股票价格数据序列</li>
+  <li>交通网络中的每个点的交通负荷数据序列</li>
+  <li>雷达对飞机的定位数据序列</li>
+</ul>
+
+<p>序列中的每个数据都视为一个随机变量，所以随机序列就是一串有限或无限的随机变量序列，但是更加强调：</p>
+
+<ul>
+  <li>过程中产生的数据序列之间的<strong>相关</strong>关系。比如股票的未来价格与历史价格关系。</li>
+  <li>对整个过程中<strong>长期均值</strong>感兴趣。比如有多大比例的时间机器出于闲置。</li>
+  <li>需要刻画某些<strong>边界事件</strong>的似然或频率。在给定时间内，线路同时出于忙碌的概率，计算机网络中缓冲器数据溢出的频率。</li>
+</ul>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-4-16/62147816.jpg" width="500px" /></p>
+
+<p>下面讨论几个随机过程。</p>
+
+<!--more-->
+
+<h2 id="section">伯努利过程和泊松过程</h2>
+
+<p>这两个过程重点研究的是<strong>相邻到达时间是互相独立的随机变量</strong>的模型。区别在于：</p>
+
+<ul>
+  <li>伯努利（Bernoulli）过程考虑到达时间是<code>离散</code>的情形，相邻时间服从<code>几何分布</code>。</li>
+  <li>泊松（Poisson）过程考虑到达时间是<code>连续</code>的情形，相邻时间服从<code>指数分布</code>。</li>
+</ul>
+
+<h3 id="section-1">伯努利过程</h3>
+
+<p>通常将伯努利过程视为独立投币序列，正面朝上的概率是 $p,\ 0&lt;p&lt;1$。这里把硬币朝上视为“到达”，连续投币产生伯努利过程。下面给出伯努利过程相关的随机变量和性质：</p>
+
+<ul>
+  <li>服从参数为 $n$ 和 $p$ 的二项分布。这是 $n$ 次相继独立的实验成功的总次数 $S$ 的分布，有</li>
+</ul>
+
+<script type="math/tex; mode=display"> P_S(k) =  \binom{k}{n} p^k (1-p)^{n-k},\ k = 0,1,..n </script>
+
+<script type="math/tex; mode=display">E(S) = np,\ var(S)=np(1-p)</script>
+
+<ul>
+  <li>服从参数为 $p$ 的集合分布。这是相互独立重复的伯努利试验首次成功时刻T的分布，有</li>
+</ul>
+
+<script type="math/tex; mode=display"> P_T(t) = p(1-p)^{t-1},\ t=1,2,...</script>
+
+<script type="math/tex; mode=display"> E(T) = \frac{1}{p},\ var(T) = \frac{1-p}{p^2}</script>
+
+<p>伯努利过程有<strong>独立性</strong>和<strong>无记忆性</strong>。假设我们观测过程 $n$ 步，但是还没有成功。那么余下的 $T-n$ 有什么结论呢？</p>
+
+<script type="math/tex; mode=display"> P(T-n=t \vert T>n) = (1-p)^{t-1}p = P(T=t),\ t=1,2,...</script>
+
+<p>可以看到未来试验次数仍然是相同的集合分布。</p>
+
+<p>当 $n$ 充分大，而 $p$ 很小，均值 $np$ 始终。数学上，我们可以让 $n$ 增大，但是同时缩小 $p$，这样可以保值 $np$ 是一个固定值 $\lambda$，从极值意义上看，二项分布的分布列可以简化为泊松分布。</p>
+
+<h3 id="section-2">泊松分布</h3>
+
+<p>跟伯努利过程相比，泊松过程是连续时间轴上的到达时间。</p>
+
+<p>伯努利过程无法刻画相同时间段内，发生两次或者多次到达事件，虽然可以通过将时间段选的非常小，但是无法选择一个准确的小时间段。这时候考虑时间段长度趋近于零的情况，即连续时间模型。</p>
+
+<p>泊松过程相关的随机变量和性质：</p>
+
+<ul>
+  <li>服从参数为 $\lambda \tau$ 的<strong>泊松分布</strong>。这是泊松过程的强度为 $\lambda$，在时间长度为 $\tau$ 的区间内到达的总次数 $N_\tau$ 的分布，有</li>
+</ul>
+
+<script type="math/tex; mode=display"> P_{N_\tau}(k) = P(k,\tau) = e^{-\lambda \tau} \frac{(\lambda \tau)^k}{k!},\ k=0,1,...</script>
+
+<script type="math/tex; mode=display"> E(N_\tau) = \lambda \tau,\ var(N_\tau) = \lambda \tau</script>
+
+<ul>
+  <li>服从参数为 $\lambda$ 的<strong>指数分布</strong>，这是首次达到的时间 $T$ 的分布，有</li>
+</ul>
+
+<script type="math/tex; mode=display">f_T(t) = \lambda e^{-\lambda t},\ t \ge 0,\ E(T)=\frac{1}{\lambda},\ var(T)=\frac{1}{\lambda^2}</script>
+
+<p>上式可以将一个固定长度为 $\tau$ 的时间区间分成一个个小区间，将小区间看成伯努利过程来近似。</p>
+
+<h3 id="section-3">马尔可夫链</h3>
+
+<p>马尔可夫链的定义是一种随机过程，它描述了一种状态序列，其每个状态值取决于前面的状态。用以下公式表示马尔可夫性质：</p>
+
+<script type="math/tex; mode=display">p(\theta^{(t+1)} \vert \theta^{(1)},\theta^{(2)},..\theta^{(t)}) = p(\theta^{(t+1)} \vert \theta^{(t)}) </script>
+
+<p>状态之间的转换通过 transition kernel，这是一个 $k \times k$ 矩阵，$k$ 表示状态数。一个 $3 \times 3$ 的转换矩阵 $P$ 如下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/92862152.jpg" alt="" /></p>
+
+<p>马尔可夫链有一个平稳分布，stationary distribution $\pi$，定义为：$\pi = \pi P$。无论起始状态是什么样，马尔可夫链通常会收敛到 $\pi$ 上。</p>
+
+<p>通常会根据所选的起始状态，有这不同的收敛时间。在利用马尔可夫链进行抽样时，在收敛之前的一段时间，比如前 $n-1$ 次迭代，各个状态的边际分布还不能认为是稳定分布，所以在进行估计的时候，应该把前面的这$n-1$ 个迭代值去掉。这个过程称为 <code>burn-in</code>。这样会使我们的抽样更加接近平稳分布，减少对起始位置的依赖。</p>
 
 ]]></content>
   </entry>

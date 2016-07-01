@@ -4,7 +4,7 @@
   <title><![CDATA[Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-07-01T15:07:25+08:00</updated>
+  <updated>2016-07-01T15:18:48+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -3406,111 +3406,6 @@ n_i(T)=\underset{(u,i,t) \in Train, t<T}{\Sigma} \frac{1}{1+\alpha (T-t)} %]]&gt
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Random Process]]></title>
-    <link href="http://billowkiller.github.io/blog/2015/05/09/random-process/"/>
-    <updated>2015-05-09T16:00:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2015/05/09/random-process</id>
-    <content type="html"><![CDATA[<p>本文用来记录一些随机过程。随机过程是处理包含时间以及数据序列的概率模型。可用于一下数据序列的建模：</p>
-
-<ul>
-  <li>每天的股票价格数据序列</li>
-  <li>交通网络中的每个点的交通负荷数据序列</li>
-  <li>雷达对飞机的定位数据序列</li>
-</ul>
-
-<p>序列中的每个数据都视为一个随机变量，所以随机序列就是一串有限或无限的随机变量序列，但是更加强调：</p>
-
-<ul>
-  <li>过程中产生的数据序列之间的<strong>相关</strong>关系。比如股票的未来价格与历史价格关系。</li>
-  <li>对整个过程中<strong>长期均值</strong>感兴趣。比如有多大比例的时间机器出于闲置。</li>
-  <li>需要刻画某些<strong>边界事件</strong>的似然或频率。在给定时间内，线路同时出于忙碌的概率，计算机网络中缓冲器数据溢出的频率。</li>
-</ul>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-4-16/62147816.jpg" width="500px" /></p>
-
-<p>下面讨论几个随机过程。</p>
-
-<!--more-->
-
-<h2 id="section">伯努利过程和泊松过程</h2>
-
-<p>这两个过程重点研究的是<strong>相邻到达时间是互相独立的随机变量</strong>的模型。区别在于：</p>
-
-<ul>
-  <li>伯努利（Bernoulli）过程考虑到达时间是<code>离散</code>的情形，相邻时间服从<code>几何分布</code>。</li>
-  <li>泊松（Poisson）过程考虑到达时间是<code>连续</code>的情形，相邻时间服从<code>指数分布</code>。</li>
-</ul>
-
-<h3 id="section-1">伯努利过程</h3>
-
-<p>通常将伯努利过程视为独立投币序列，正面朝上的概率是 $p,\ 0&lt;p&lt;1$。这里把硬币朝上视为“到达”，连续投币产生伯努利过程。下面给出伯努利过程相关的随机变量和性质：</p>
-
-<ul>
-  <li>服从参数为 $n$ 和 $p$ 的二项分布。这是 $n$ 次相继独立的实验成功的总次数 $S$ 的分布，有</li>
-</ul>
-
-<script type="math/tex; mode=display"> P_S(k) =  \binom{k}{n} p^k (1-p)^{n-k},\ k = 0,1,..n </script>
-
-<script type="math/tex; mode=display">E(S) = np,\ var(S)=np(1-p)</script>
-
-<ul>
-  <li>服从参数为 $p$ 的集合分布。这是相互独立重复的伯努利试验首次成功时刻T的分布，有</li>
-</ul>
-
-<script type="math/tex; mode=display"> P_T(t) = p(1-p)^{t-1},\ t=1,2,...</script>
-
-<script type="math/tex; mode=display"> E(T) = \frac{1}{p},\ var(T) = \frac{1-p}{p^2}</script>
-
-<p>伯努利过程有<strong>独立性</strong>和<strong>无记忆性</strong>。假设我们观测过程 $n$ 步，但是还没有成功。那么余下的 $T-n$ 有什么结论呢？</p>
-
-<script type="math/tex; mode=display"> P(T-n=t \vert T>n) = (1-p)^{t-1}p = P(T=t),\ t=1,2,...</script>
-
-<p>可以看到未来试验次数仍然是相同的集合分布。</p>
-
-<p>当 $n$ 充分大，而 $p$ 很小，均值 $np$ 始终。数学上，我们可以让 $n$ 增大，但是同时缩小 $p$，这样可以保值 $np$ 是一个固定值 $\lambda$，从极值意义上看，二项分布的分布列可以简化为泊松分布。</p>
-
-<h3 id="section-2">泊松分布</h3>
-
-<p>跟伯努利过程相比，泊松过程是连续时间轴上的到达时间。</p>
-
-<p>伯努利过程无法刻画相同时间段内，发生两次或者多次到达事件，虽然可以通过将时间段选的非常小，但是无法选择一个准确的小时间段。这时候考虑时间段长度趋近于零的情况，即连续时间模型。</p>
-
-<p>泊松过程相关的随机变量和性质：</p>
-
-<ul>
-  <li>服从参数为 $\lambda \tau$ 的<strong>泊松分布</strong>。这是泊松过程的强度为 $\lambda$，在时间长度为 $\tau$ 的区间内到达的总次数 $N_\tau$ 的分布，有</li>
-</ul>
-
-<script type="math/tex; mode=display"> P_{N_\tau}(k) = P(k,\tau) = e^{-\lambda \tau} \frac{(\lambda \tau)^k}{k!},\ k=0,1,...</script>
-
-<script type="math/tex; mode=display"> E(N_\tau) = \lambda \tau,\ var(N_\tau) = \lambda \tau</script>
-
-<ul>
-  <li>服从参数为 $\lambda$ 的<strong>指数分布</strong>，这是首次达到的时间 $T$ 的分布，有</li>
-</ul>
-
-<script type="math/tex; mode=display">f_T(t) = \lambda e^{-\lambda t},\ t \ge 0,\ E(T)=\frac{1}{\lambda},\ var(T)=\frac{1}{\lambda^2}</script>
-
-<p>上式可以将一个固定长度为 $\tau$ 的时间区间分成一个个小区间，将小区间看成伯努利过程来近似。</p>
-
-<h3 id="section-3">马尔可夫链</h3>
-
-<p>马尔可夫链的定义是一种随机过程，它描述了一种状态序列，其每个状态值取决于前面的状态。用以下公式表示马尔可夫性质：</p>
-
-<script type="math/tex; mode=display">p(\theta^{(t+1)} \vert \theta^{(1)},\theta^{(2)},..\theta^{(t)}) = p(\theta^{(t+1)} \vert \theta^{(t)}) </script>
-
-<p>状态之间的转换通过 transition kernel，这是一个 $k \times k$ 矩阵，$k$ 表示状态数。一个 $3 \times 3$ 的转换矩阵 $P$ 如下：</p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-6-1/92862152.jpg" alt="" /></p>
-
-<p>马尔可夫链有一个平稳分布，stationary distribution $\pi$，定义为：$\pi = \pi P$。无论起始状态是什么样，马尔可夫链通常会收敛到 $\pi$ 上。</p>
-
-<p>通常会根据所选的起始状态，有这不同的收敛时间。在利用马尔可夫链进行抽样时，在收敛之前的一段时间，比如前 $n-1$ 次迭代，各个状态的边际分布还不能认为是稳定分布，所以在进行估计的时候，应该把前面的这$n-1$ 个迭代值去掉。这个过程称为 <code>burn-in</code>。这样会使我们的抽样更加接近平稳分布，减少对起始位置的依赖。</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
     <title type="html"><![CDATA[Recommender System in a Nutshell]]></title>
     <link href="http://billowkiller.github.io/blog/2015/04/10/recsys-introduction/"/>
     <updated>2015-04-10T14:00:00+08:00</updated>
@@ -3652,6 +3547,149 @@ n_i(T)=\underset{(u,i,t) \in Train, t<T}{\Sigma} \frac{1}{1+\alpha (T-t)} %]]&gt
   <li>关联规则挖掘</li>
   <li>基于概率分析的推荐方法（预测问题看成分类问题）</li>
 </ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Hidden Markov Model]]></title>
+    <link href="http://billowkiller.github.io/blog/2015/03/19/hmm/"/>
+    <updated>2015-03-19T14:00:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2015/03/19/hmm</id>
+    <content type="html"><![CDATA[<p>隐马尔可夫模型（Hidden Markov Model，HMM）是统计模型，它用来描述一个含有隐含未知参数的马尔可夫过程（Markov process）。HMM 被用来对有序的序列数据建模，例如句子中的单词，基因中的基本序列，所以常被应用在语音识别、信息提取、基因测序、股票预测等领域。</p>
+
+<p>在 HMM 中，马尔可夫过程是一类随机过程，原始模型是马尔可夫链。它包含一个状态的有限集，状态的变化只依赖于上一个时间点，而与再之前的时间无任何关系，且状态的轮换是有一定的概率发生。所以可以把马尔可夫过程当成是一个有限状态自动机的概率变种。PageRank 其实也是一种马尔可夫过程。</p>
+
+<p>但是在 HMM 中，状态是未知的，这就是 hidden 的由来，我们只能看到观察值，也就是由状态产生的结果。下图是一个 HMM 的例子。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/24496294.jpg" width="300px" /></p>
+
+<!--more-->
+
+<h2 id="hmm-">1. HMM 模型</h2>
+
+<p>HMM 包含三种假设：</p>
+
+<ul>
+  <li>The Markov assumption：现在的状态只依赖于上一个时刻的状态。</li>
+  <li>The stationarity assumption：状态的转换概率并不依赖于转换发送的时刻。</li>
+  <li>The output independence assumption：观察值生成事件是独立的。</li>
+</ul>
+
+<p>HMM 模型由三元组 $&lt;S, O, \theta&gt;$ 组成。$S$ 是有限状态，产生一个观察值 $o, o \in O$。另外 $\theta$ 是另外一个三元组 $&lt;A, B, \pi&gt;$，$A$ 是一个 $\vert S \vert \times \vert S \vert$ 的隐含状态转移概率矩阵，$A_q (r)$ 就表示从状态 $q$ 到 $r$ 的概率；$B$ 是一个 $\vert S \vert \times \vert O \vert$ 的观测状态转移概率矩阵，$B_q(o)$ 表示由状态 $q$ 生成 观察值 $o$ 的概率；$\pi$ 是一个 $\vert S \vert$ 的向量，$\pi_q$ 表示 HMM 开始于状态 $q$ 的概率。</p>
+
+<p>在大部分应用中，稀疏矩阵就够用了，现在我们规定 $A_q(r) \ge 0, B_q(o) \ge 0, \pi_q \ge 0$，并且有</p>
+
+<p><script type="math/tex"> \underset{r \in S}{\Sigma} A_q(r)=1\ \forall q, \underset{o \in O}{\Sigma} B_q(o)=1\ \forall q, \underset{q \in S}{\Sigma} \pi_q=1</script>。</p>
+
+<p>一个观察序列的生成如下：</p>
+
+<ol>
+  <li>$t=1$，从 $\pi$ 的分布中选择一个初始状态 $q$</li>
+  <li>观察值 $o \in O$ 从 $B_q$ 的分布中生成</li>
+  <li>新的状态 $r$ 根据上一个状态的分布 $A_q$ 得到</li>
+  <li>重复上述过程直到生成的观察值达到指定长度</li>
+</ol>
+
+<p>下图表示一个 part-of speech tagging 的例子，即给单词标记词的词义属性 (determiner, adjective, noun, and verb)。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/24593933.jpg" width="500px" /></p>
+
+<h2 id="hmm--1">2. HMM 的三个问题</h2>
+
+<p>有以下几个关于 HMM 的基础问题。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/12179682.jpg" width="520px" /></p>
+
+<h3 id="the-forward-algorithm">2.1 The Forward Algorithm</h3>
+
+<p>现在我们解答第一个问题，观察值 $x$ 的概率也就是关于 $x$ 和所有可能的词性 $y$ 组合的联合概率之和。$y$ 的个数是关于 $x$ 长度的指数级别，所以这种方法并不现实。那么有什么其他方法？</p>
+
+<p>现在提出另外一个相关的问题，在时间 $t$ 的状态为 $q$，那么我们观察到的序列为 $&lt;x_1, x_2…x_t&gt;$ 的概率为多大？假设这个概率是 $\alpha_t(q)$，可以看到 $\alpha_t(q)$ 是一个 $\vert x \vert \times \vert S \vert$ 的矩阵，称为 trellis，容易知道 $\alpha_1(q) = \pi_q \cdot B_q(x_1)$。根据时刻 $t$ 的 trellis，我们可以很容易地得到 $t+1$ 时刻的 trellis。</p>
+
+<script type="math/tex; mode=display"> \alpha_{t+1}(r) = B_r(x_{t+1}) \cdot \underset{q \in S}{\Sigma} \alpha_t(q) \cdot A_q(r) </script>
+
+<p>所以，最后我们可以在多项式时间内得到时刻 $\vert x \vert$ 的观察值概率：</p>
+
+<script type="math/tex; mode=display"> Pr(x; \theta) = \underset{q \in S}{\Sigma} \alpha_{\vert x \vert}(q)</script>
+
+<p>上面例子的示例为：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/14971721.jpg" width="300px" /></p>
+
+<h3 id="the-viterbi-algorithm">2.2 The Viterbi Algorithm</h3>
+
+<p>现在回答第二个问题，也就是求最有可能产生观察值的状态序列。</p>
+
+<p>从 Forward Algorithm 得到启发，我们可以定义 Viterbi Probability $\gamma_t(q)$，表示在时刻 $t$ 产生观察值并且最后的状态为 $q$ 的状态序列的概率。因为最后要重新构造状态序列，所以我们另外定义 backpointer, $bp_t(q)$，表示在时刻 $t-1$ 的状态。可以得到以下公式：</p>
+
+<script type="math/tex; mode=display"> \gamma_1(q) = \pi_q \cdot B_q(x_1),\ bp_1(q) = -1</script>
+
+<script type="math/tex; mode=display"> \gamma_t(q) = \underset{q \in S}{max}\ \gamma_{t-1}(q) \cdot A_q(r) \cdot B_r(x_t)</script>
+
+<script type="math/tex; mode=display"> bp_t(r) = \underset{q \in S}{argmax}\ \gamma_{t-1}(q) \cdot A_q(r) \cdot B_r(x_t)</script>
+
+<p>最后为了得到最有可能的状态序列 $y^*$，我们选择时刻 $\vert x \vert$ 概率最高的 viterbi probability。整个序列可以根据 backpointer 递归求出来：</p>
+
+<script type="math/tex; mode=display"> y_{\vert x \vert}^* = \underset{q \in S}{argmax}\ \gamma_{\vert x \vert}(q),\ y_{t-1}^* = bp_t(y_t)</script>
+
+<h3 id="parameter-estimation-for-hmms">2.3 Parameter Estimation for HMMs</h3>
+
+<p>现在来看问题3，已知 $S,O$，要求最有可能生成观察序列的参数 $\pi^*$。观察值是由未知的状态序列产生的，这时可以通过 EM 算法最优化观察值的 marginal likelihood 得到参数估计。</p>
+
+<p>假设未知的状态是已知的，那么参数的最大似然估计可以根据测试集的得到：在所有测试集中从状态 $q$ 转移到状态 $r$ 的比例，$T(q \to r)$；状态 $q$ 生成观察值 $o$ 的次数 $O(q \uparrow o)$；起始状态 $q$ 的次数 $I(q)$。下面给出 fully observable case 的参数最大似然估计，$N(q)$ 表示马尔可夫过程进入状态 $q$ 的次数：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/64200477.jpg" width="500px" /></p>
+
+<p>那么又怎样才能在未知状态序列的情况下做参数估计呢？ 可以看到在 fully observable case ，每个马尔可夫过程中的状态转换记为 1，这样就可以统计参数的最大似然估计。但是未知状态序列的情况下，我们可以想象每个状态转换的发生都是有一定概率，这个概率其实就是 “posterior probability of the transition, given the model and an observation sequence”。根据这个概率，可以计算特定状态转换的期望次数。于是我们得到如下的公式：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/47910145.jpg" width="500px" /> </p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/15960296.jpg" width="400px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/46548481.jpg" width="400px" /></p>
+
+<p>因为马尔可夫过程的独立假设，我们其实包含的是 $2 \vert S \vert +1$ 个独立的优化问题：求解 $\pi$ 是一个；$\vert S \vert$ 个解决 $A_q(\cdot)$；$\vert S \vert$ 个解决 $B_q(\cdot)$。</p>
+
+<p>解释下上面的后验概率。这个后验概率其实就是关于 $\theta$ 的先验概率加上观察值这个 evidence 形成的，包含有状态转移的后验概率和观察值生成的后验概率。这两个概率又都可以由 forward probabilities $\alpha_t(\cdot)$ 和 backward probabilities $\beta_t(\cdot)$ 得到。</p>
+
+<ul>
+  <li>forward probabilities：在时刻 $t$ 到达某个状态时生成观察值序列 $&lt;x_1, x_2….x_t&gt;$ 的概率</li>
+  <li>backward probabilities：在时刻 $t$ 到达某个状态后生成观察值序列 $&lt;x_{t+1}, x_{t+2}….x_{\vert x \vert}&gt;$ 的概率</li>
+</ul>
+
+<p>这时候两个后验概率就可以写成</p>
+
+<script type="math/tex; mode=display">Pr(y_i = q \vert x;\theta) = \alpha_i(q) \cdot \beta_i(q)</script>
+
+<script type="math/tex; mode=display">Pr(y_i=q, y_{i+1}=r \vert x;\theta) = \alpha_i(q) \cdot A_q(r) \cdot B_r(x_{i+1}) \cdot \beta_{i+1}(q)</script>
+
+<p><strong>The backward algorithm.</strong> 类似于forward 和 Viterbi algorithms， backward algorithm 也可以用动态规划算法计算，在时刻 $\vert x \vert$ 初始公式为 $\beta_{\vert x \vert}(q) = 1$，递归如下：</p>
+
+<script type="math/tex; mode=display">\beta_t(q) = \underset{r \in S}{\Sigma} \beta_{t+1}(r) \cdot A_q(r) \cdot B_r(x_{t+1}) </script>
+
+<p><strong>重新总结下。</strong>在 EM 迭代中，我们想要根据 $M=&lt;S,O,\theta^{(i)}&gt;$ 得到 $\theta^{(i+1)}$。每个训练实例都可以独立计算，根据上述的算法计算 forward 和 backward probabilities，这些后验概率就用来计算状态转换、观察值生成和初始状态的期望次数。各个训练实例中的期望值之和也就是 E-step。M-step 就是进行 normalizing，计算 $\pi_q,A_q(r),B_q(o)$。HMM 的 EM 参数估计中有几点需要注意：</p>
+
+<ul>
+  <li>HMM 的似然函数是非凸的，EM 只能找到局部最优值，所以算法依赖于初始值。</li>
+  <li>如果一个参数在 EM 过程中变为 0，那么接下来就会一直为 0.</li>
+  <li>计算过程容易造成 arithmetic underflow，可以用概率对数化进行解决。</li>
+</ul>
+
+<h2 id="hmm-in-mr">3. HMM in MR</h2>
+
+<p>HMM 的参数估计很有效地在 MR 中进行并行化：</p>
+
+<ul>
+  <li>计算量比较大的为 forward 和 backward 算法，而每个训练实例都可以单独计算，所以理论上可以为每个实例都分配一个 mapper</li>
+  <li>M-step 其实就是 $2 \vert S \vert +1$ 个优化问题，因此可以用相应个数的 reducer 进行计算。</li>
+</ul>
+
+<p>对应的算法如下：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/53556849.jpg" width="500px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/60561193.jpg" width="500px" /></p>
 
 ]]></content>
   </entry>

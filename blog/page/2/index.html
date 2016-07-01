@@ -676,44 +676,26 @@ body {
 
 
 
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-05-09T16:00:00+08:00" pubdate data-updated="true">May 9<span>th</span>, 2015</time>
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-04-10T14:00:00+08:00" pubdate data-updated="true">Apr 10<span>th</span>, 2015</time>
         
-           | <a href="/blog/2015/05/09/random-process/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2015/05/09/random-process/">Comments</a>
+           | <a href="/blog/2015/04/10/recsys-introduction/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2015/04/10/recsys-introduction/">Comments</a>
         
       </p>
     
     
-      <h1 class="entry-title"><a href="/blog/2015/05/09/random-process/">Random Process</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/04/10/recsys-introduction/">Recommender System in a Nutshell</a></h1>
     
   </header>
 
 
-  <div class="entry-content clearfix"><p>本文用来记录一些随机过程。随机过程是处理包含时间以及数据序列的概率模型。可用于一下数据序列的建模：</p>
-
-<ul>
-  <li>每天的股票价格数据序列</li>
-  <li>交通网络中的每个点的交通负荷数据序列</li>
-  <li>雷达对飞机的定位数据序列</li>
-</ul>
-
-<p>序列中的每个数据都视为一个随机变量，所以随机序列就是一串有限或无限的随机变量序列，但是更加强调：</p>
-
-<ul>
-  <li>过程中产生的数据序列之间的<strong>相关</strong>关系。比如股票的未来价格与历史价格关系。</li>
-  <li>对整个过程中<strong>长期均值</strong>感兴趣。比如有多大比例的时间机器出于闲置。</li>
-  <li>需要刻画某些<strong>边界事件</strong>的似然或频率。在给定时间内，线路同时出于忙碌的概率，计算机网络中缓冲器数据溢出的频率。</li>
-</ul>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-4-16/62147816.jpg" width="500px" /></p>
-
-<p>下面讨论几个随机过程。</p>
+  <div class="entry-content clearfix"><p>推荐系统（Recommender System An Introduction）读书笔记。</p>
 
 </div>
   
   
     <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2015/05/09/random-process/">Read on &rarr;</a>
+      <a class="btn btn-default" rel="full-article" href="/blog/2015/04/10/recsys-introduction/">Read on &rarr;</a>
     </footer>
   
 
@@ -739,26 +721,32 @@ body {
 
 
 
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-04-10T14:00:00+08:00" pubdate data-updated="true">Apr 10<span>th</span>, 2015</time>
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-03-19T14:00:00+08:00" pubdate data-updated="true">Mar 19<span>th</span>, 2015</time>
         
-           | <a href="/blog/2015/04/10/recsys-introduction/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2015/04/10/recsys-introduction/">Comments</a>
+           | <a href="/blog/2015/03/19/hmm/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2015/03/19/hmm/">Comments</a>
         
       </p>
     
     
-      <h1 class="entry-title"><a href="/blog/2015/04/10/recsys-introduction/">Recommender System in a Nutshell</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/03/19/hmm/">Hidden Markov Model</a></h1>
     
   </header>
 
 
-  <div class="entry-content clearfix"><p>推荐系统（Recommender System An Introduction）读书笔记。</p>
+  <div class="entry-content clearfix"><p>隐马尔可夫模型（Hidden Markov Model，HMM）是统计模型，它用来描述一个含有隐含未知参数的马尔可夫过程（Markov process）。HMM 被用来对有序的序列数据建模，例如句子中的单词，基因中的基本序列，所以常被应用在语音识别、信息提取、基因测序、股票预测等领域。</p>
+
+<p>在 HMM 中，马尔可夫过程是一类随机过程，原始模型是马尔可夫链。它包含一个状态的有限集，状态的变化只依赖于上一个时间点，而与再之前的时间无任何关系，且状态的轮换是有一定的概率发生。所以可以把马尔可夫过程当成是一个有限状态自动机的概率变种。PageRank 其实也是一种马尔可夫过程。</p>
+
+<p>但是在 HMM 中，状态是未知的，这就是 hidden 的由来，我们只能看到观察值，也就是由状态产生的结果。下图是一个 HMM 的例子。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/24496294.jpg" width="300px" /></p>
 
 </div>
   
   
     <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2015/04/10/recsys-introduction/">Read on &rarr;</a>
+      <a class="btn btn-default" rel="full-article" href="/blog/2015/03/19/hmm/">Read on &rarr;</a>
     </footer>
   
 
@@ -850,7 +838,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/algorithm/index.html">
-        <span class="badge">8</span>
+        <span class="badge">9</span>
         algorithm
       </a>
     
@@ -858,12 +846,6 @@ body {
     <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
         <span class="badge">13</span>
         Machine Learning
-      </a>
-    
-    
-    <a class="list-group-item " href="/blog/categories/math/index.html">
-        <span class="badge">1</span>
-        math
       </a>
     
     
