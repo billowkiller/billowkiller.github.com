@@ -4,7 +4,7 @@
   <title><![CDATA[tags: java | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/java/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-07-01T23:15:21+08:00</updated>
+  <updated>2016-07-01T23:39:11+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -261,6 +261,40 @@ private void runMe(String parameter){
   <li>扩展类加载器(extensions class loader):它用来加载 Java 的扩展库。Java 虚拟机的实现会提供一个扩展库目录。该类加载器在此目录里面查找并加载 Java 类。</li>
   <li>系统类加载器（system class loader）：它根据 Java 应用的类路径（CLASSPATH）来加载 Java 类。一般来说，Java 应用的类都是由它来完成加载的。可以通过<code>ClassLoader.getSystemClassLoader()</code>来获取它。</li>
   <li>用户自定义类加载器，通过继承 java.lang.ClassLoader类的方式实现。类似一些静态类UT类就是采用这种方式。</li>
+</ol>
+
+<h2 id="section-1">内存分析命令</h2>
+
+<ol>
+  <li>
+    <p>jps: 查看所有的jvm进程，包括进程ID，进程启动的路径等等。</p>
+  </li>
+  <li>
+    <p>jinfo: 观察进程运行环境参数，包括Java System属性和JVM命令行参数</p>
+
+    <ul>
+      <li>查看Java进程的栈空间大小:sudo -u tomcat /home/java/default/bin/jinfo - ThreadStackSize 14750</li>
+      <li>查看是否使用了压缩指针:sudo -u tomcat /home/java/default/bin/jinfo -flag UseCompressedOops 14750</li>
+      <li>查看系统属性:sudo -u tomcat /home/java/default/bin/jinfo -sysprops 14750</li>
+    </ul>
+  </li>
+  <li>
+    <p>jstack: 观察jvm中当前所有线程的运行情况和线程当前状态。</p>
+
+    <ul>
+      <li>查看一个指定的Java进程中的线程的状态:sudo -u tomcat /home/java/default/bin/jstack 14750</li>
+    </ul>
+  </li>
+  <li>
+    <p>jmap: 监视进程运行中的jvm物理内存的占用情况，该进程内存内，所有对象的情况，例如产生了哪些对象，对象数量</p>
+
+    <ul>
+      <li>空间中各个年龄段的空间的使用情况:sudo -u tomcat /home/java/default/bin/jmap -heap 14750</li>
+    </ul>
+  </li>
+  <li>
+    <p>jstat: Java应用程序的资源和性能进行实时的命令行的监控</p>
+  </li>
 </ol>
 
 ]]></content>
