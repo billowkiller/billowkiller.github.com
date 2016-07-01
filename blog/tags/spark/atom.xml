@@ -4,7 +4,7 @@
   <title><![CDATA[tags: spark | Billowkiller's Blog]]></title>
   <link href="http://billowkiller.github.io/blog/tags/spark/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-07-01T23:39:11+08:00</updated>
+  <updated>2016-07-01T23:57:22+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -18,7 +18,9 @@
     <link href="http://billowkiller.github.io/blog/2016/02/01/spark-tunning/"/>
     <updated>2016-02-01T17:23:00+08:00</updated>
     <id>http://billowkiller.github.io/blog/2016/02/01/spark-tunning</id>
-    <content type="html"><![CDATA[<p>记录一些spark的调优参数</p>
+    <content type="html"><![CDATA[<p>记录一些spark的调优参数。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-7-1/51172915.jpg" width="500px" /></p>
 
 <!--more-->
 
@@ -33,19 +35,51 @@
     </ul>
   </li>
   <li>
+    <p>并行化调优</p>
+
+    <pre><code> 一个stage中task的数量，也就是处理数据的并行度。通常的配置为分配的core数目的2-3倍。task的数量过少会影响：
+	
+ * 在聚合操作上会产生更大的内存压力
+ * 垃圾回收
+ * 当记录在内存中无法装载时会spill to disk，磁盘IO和排序。
+
+ 解决办法：
+	
+ * 配置INputFormat产生更多的splits。
+ * 用更小的block size将输入数据写到HDFS上。
+ * repartition transformation, triggering a shuffle: `var rdd2 = rdd2.reduceByKey(_ + _, numPartitions = X)`
+</code></pre>
+
+    <ul>
+      <li>Spark的RDD的partition个数创建task的个数是对应的</li>
+      <li>Partition的个数在spark的RDD中由block的个数决定的</li>
+      <li>尽可能地增加task的数量使得每个task的数据可以装入分配的内存中。
+ Spark能够非常有效的支持段时间任务（例如200ms)，因为他会对所有的任务复用JVM，这样能减小任务启动的消耗。所以，可以放心的使任务的并行度远大于集群的CPU核数。</li>
+    </ul>
+
+    <p>spark.default.parallelism: 控制Spark中的分布式shuffle过程默认使用的task数量，默认为8个。如果不做调整，数据量大时，就容易运行时间很长，甚至是出Exception，因为8个task无法handle那么多的数据。</p>
+
+    <pre><code>     spark.default.parallelism 300
+</code></pre>
+  </li>
+  <li>
+    <p>减少Java数据结构的消耗，内存中存储未序列化的java对象，硬盘和网络用序列化的数据。</p>
+
+    <ul>
+      <li>使用org.apache.spark.serializer.KryoSerializer</li>
+      <li>fastutil库为原始数据类型提供方便的集合类，且兼容Java标准类库。</li>
+      <li>内存少于32G，设置JVM参数-XX:+UseCompressedOops以便将8字节指针修改成4字节，设置JVM参数-XX:+UseCompressedStrings以便采用8比特来编码每一个ASCII字符。</li>
+    </ul>
+  </li>
+  <li>
     <p>driver默认内存改成2G（原先1G）；</p>
   </li>
   <li>
-    <p>默认开启预测执行：</p>
+    <p>默认开启预测执行，缓解慢节点带来的计算任务慢的问题：</p>
 
  		spark.speculation true
  		spark.speculation.quantile 0.75
  		spark.speculation.multiplier 1.5
-  </li>
-  <li>
-    <p>调高默认parallelism 数量</p>
-
- 		spark.default.parallelism 300
   </li>
   <li>
     <p>调整默认GC策略至G1 GC </p>
@@ -65,12 +99,12 @@
  		spark.shuffle.io.connectionTimeout 
   </li>
   <li>
-    <p>frameSize 优化</p>
+    <p>frameSize 优化（控制Spark中通信消息的最大容量如 task 的输出结果，默认为10M）</p>
 
  		spark.akka.frameSize 100
   </li>
   <li>
-    <p>codec 优化</p>
+    <p>codec 优化（Cache和Shuffle数据压缩所采用的算法）</p>
 
  		spark.io.compression.codec org.apache.spark.io.LZ4CompressionCodec
   </li>
