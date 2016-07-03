@@ -4,7 +4,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Billowkiller's Blog</title>
+  <title>Tech Digging and Sharing</title>
   <meta name="author" content="wutao">
 
   
@@ -18,7 +18,7 @@
   
   <link rel="canonical" href="http://billowkiller.github.io/blog/page/2">
   <link href="/favicon.png" type="image/png" rel="icon">
-  <link href="/atom.xml" rel="alternate" title="Billowkiller's Blog" type="application/atom+xml">
+  <link href="/atom.xml" rel="alternate" title="Tech Digging and Sharing" type="application/atom+xml">
 
   <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
 <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
@@ -110,7 +110,7 @@ body {
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/">Billowkiller's Blog</a>
+            <a class="navbar-brand" href="/">Tech Digging and Sharing</a>
         </div>
 
         <div class="navbar-collapse collapse">
@@ -278,7 +278,117 @@ body {
   </header>
 
 
-  <div class="entry-content clearfix">
+  <div class="entry-content clearfix"><p>参考《MapReduce设计模式》，做个总结。</p>
+
+<h2 id="section">概要模式</h2>
+
+<h3 id="section-1">数值概要</h3>
+
+<p><strong>问题描述：</strong>求一堆数据的一个高层次展示，平均值，中位数，最大，最小，标准差这类的特征值。</p>
+
+<p>假设θ是我们想要执行的聚合方法，要计算的值是列表values（v1, v2, v3,…, vn)），要想求出聚合值λ， 令：λ=θ(v1, v2, v3, …, vn) 。</p>
+
+<p><strong>解决方案：</strong></p>
+
+<ul>
+  <li>
+    <p>使用combiner</p>
+
+    <p>如果函数θ满足结合律和交换律，那么就可以使用combiner来减少中间数据的传输量。</p>
+
+    <p>为了得到最终要的那个统计值，是否一定要把所有的数据都传递给reduce，是不是可以先小范围的做些汇总。比如求最大值。 得出每一part的最大值后，再比较得出最大值。那么任意打乱顺序（交换律），任意将数据组成part（结合律），都不会影响最终结果</p>
+
+    <p>再比如算中位数，那么可能就无法使用combiner优化了。中位数不满足交换律和结合律。比如θ函数表示求中位数，那么显然 （1,1,1,1,1,2,2,3,3）这组数据不同的组合结果不同：</p>
+
+    <pre><code>  θ( θ(1,1,1), θ(1,2,2), θ(1,3,3) ) = 2
+  θ( θ(1,1,1), θ(1,1,2), θ(2,3,3) ) = 1
+</code></pre>
+  </li>
+  <li>
+    <p>定制partition</p>
+
+    <p>数据倾斜严重的会造成reduce处理的数据量差异很大。建议采样分析或者根据之前的经验重新实现partition。</p>
+
+    <p>该策略也适用于其他任何mapreduce程序，线上也时常能碰到partition分桶严重不均的情况，曾经发现一个任务其余reduce都是在秒级跑完，而其中一个reduce跑了10几个小时，查看该任务的partition分布，发现这个reduce处理的量比其他的多好几个数量级。</p>
+  </li>
+  <li>
+    <p>内存优化版的中位数和标准差程序</p>
+
+    <p>前面提到，求中位数的函数不满足交换律和结合律。 因此无法简单的使用combiner。因此就设计了一种新的存储方式。</p>
+
+    <p>(1,1,1,1,2,2,3,4,5,5,5)这样的数据集合可以存储为：(1→4, 2→2, 3→1, 4→1, 5→3)</p>
+
+    <p>实际情况下，这种优化在数据重复率高的情况下，收益明显。另外，考虑到reduce端需要排序，而combiner内排序无意义，因此重新实现下combiner用hashmap来存储上面的数据结构。（reduce端用SortedMapWritable）</p>
+  </li>
+</ul>
+
+<h2 id="section-2">过滤模式</h2>
+
+<h3 id="section-3">过滤</h3>
+
+<p><strong>问题描述：</strong>针对每一条记录，基于某个条件作出判断，决定这条记录是应该保留还是放弃。</p>
+
+<p><strong>解决方案：</strong></p>
+
+<ul>
+  <li>
+    <p>可以不使用reduce</p>
+
+    <p>如果只是为了过滤，那么可以不加reduce。结果会输出多个part-m-文件。</p>
+
+    <p>但是，如果保留下的数据量很小，就会造成大量小文件。如果是永久存储的，为了节省inode以及后续处理这些文件时不至于浪费大量map去处理。那么可以考虑用一定数量的reduce收集结果。</p>
+  </li>
+  <li>
+    <p>布隆过滤</p>
+
+    <p>利用布隆过滤器来替代字典，每条记录查询布隆过滤器来决定去留。</p>
+
+    <p>其优点是省内存。缺点或者说特点是：只能判断no或者maybe，但是不能判断yes。(有一定概率的fase-positive)</p>
+
+    <p>而对于线上实际，可以采用分层的架构，在布隆过滤器下游再加一个精确的过滤来处理。如果需求仅仅是要判断不存在或可以容忍fase-positive，那就可以直接使用。</p>
+
+    <p>布隆过滤器训练的结果如果不是经常变更，那么可以保存下来每次复用。然后将该结果作为分布式cache分发到各个map端。</p>
+  </li>
+</ul>
+
+<h3 id="top10">Top10</h3>
+
+<p><strong>问题描述：</strong>求一个大数据集合的的top 10的数据。</p>
+
+<p><strong>解决方案：</strong></p>
+
+<ul>
+  <li>
+    <p>key设置为null，每个map数据拼接到一行。</p>
+
+    <p>mapper遍历数据拿到top 10之后，将这10个数据拼接，组成一个value, 然后设置key为null。这样，key都是null，节省了shuffle排序的开销。 </p>
+  </li>
+</ul>
+
+<p><strong>性能分析：</strong></p>
+
+<ul>
+  <li>由于reduce只能有一个，因此这个单点在数据不断增长的情况下迟早会成为瓶颈。</li>
+  <li>对于 Top K的模型，K值很大时，reduce会更快的达到瓶颈。</li>
+  <li>可以多跑几轮map的逻辑。比如reduce设置多个，每个也是产出top 10，然后再起一轮mapreduce。</li>
+  <li>ChainMapper/ChainReducer</li>
+  <li>使用全排序，运行成本要看具体情况</li>
+</ul>
+
+<h3 id="section-4">去重</h3>
+
+<p><strong>解决方案：</strong></p>
+
+<pre><code>	map(key,record):
+	emit record,null
+	reduce(key,records):
+	emit key
+</code></pre>
+
+<p>这种去重方法是无法保持数据原来的顺序的</p>
+
+<h2 id="section-5">数据组织模式</h2>
+
 </div>
   
   

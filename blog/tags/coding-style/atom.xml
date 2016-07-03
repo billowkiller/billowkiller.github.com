@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[tags: coding style | Billowkiller's Blog]]></title>
+  <title><![CDATA[tags: coding style | Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/blog/tags/coding-style/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-07-01T23:57:22+08:00</updated>
+  <updated>2016-07-03T15:52:00+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
