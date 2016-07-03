@@ -4,7 +4,7 @@
   <title><![CDATA[Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-07-03T22:42:16+08:00</updated>
+  <updated>2016-07-03T23:19:03+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -2366,7 +2366,7 @@ counts = ones.runningReduce((a, b) =&gt; a+b)
 
 <p>过程如图所示，接下来的章节会一一介绍。</p>
 
-<p><img src="https://farm3.static.flickr.com/2275/3529146683_c8247ff6db_o.png" alt="" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-7-3/75294350.jpg" alt="" /></p>
 
 <!--more-->
 
