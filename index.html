@@ -174,6 +174,57 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-07-13T17:23:00+08:00" pubdate data-updated="true">Jul 13<span>th</span>, 2016</time>
+        
+           | <a href="/blog/2016/07/13/realtime-data-processing-at-facebook/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2016/07/13/realtime-data-processing-at-facebook/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2016/07/13/realtime-data-processing-at-facebook/">Realtime Data Processing at Facebook</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>Chen et al. SIGMOD 2016</p>
+
+<p>论文说明Facebook是如何建立实时系统的。有段话说明batch和stream的关系：</p>
+
+<blockquote>
+  <p>Streaming versus batch processing is not an either/or decision. Originally, all data warehouse processing at Facebook was batch processing. We began developing [some of our streaming systems] about five years ago… using a mix of streaming and batch processing can speed up long pipelines by hours. Furthermore, streaming-only systems can be authoritative. We do not need to treat realtime system results as an approximation and batch results as “the truth.”</p>
+</blockquote>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2016/07/13/realtime-data-processing-at-facebook/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-04-09T16:00:00+08:00" pubdate data-updated="true">Apr 9<span>th</span>, 2016</time>
         
            | <a href="/blog/2016/04/09/rating/#disqus_thread"
@@ -617,53 +668,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-10-27T21:00:00+08:00" pubdate data-updated="true">Oct 27<span>th</span>, 2015</time>
-        
-           | <a href="/blog/2015/10/27/spark-introduction/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2015/10/27/spark-introduction/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2015/10/27/spark-introduction/">Spark Introduction</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>简单介绍下Spark。Spark是分布式的<code>内存计算模型</code>，对于两类计算形式能够极大地提升处理的效率：<code>迭代计算</code>，和<code>交互式的数据挖掘工具</code>。迭代计算例如PageRank、K-means聚类、逻辑回归等要求计算结果的重新利用，交互式的数据挖掘例如针对一份的数据集进行多次特定查询也要求原始数据的重复利用。对比于MR作业，<strong>它不需要外部存储的介入，从而提升处理速度</strong>。接下来将会从Spark的数据模型、编程模型和架构来介绍Spark。</p>
-
-<p><img src="https://spark.apache.org/images/spark-logo.png" width="200px" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2015/10/27/spark-introduction/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -687,6 +691,8 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/07/13/realtime-data-processing-at-facebook/">Realtime Data Processing at Facebook</a>
+    
     <a class="list-group-item " href="/blog/2016/04/09/rating/">Funny Facts About Rating</a>
     
     <a class="list-group-item " href="/blog/2016/04/06/kafka/">Kafka Introduction</a>
@@ -694,8 +700,6 @@ body {
     <a class="list-group-item " href="/blog/2016/03/19/table-join/">Table Join Semantics</a>
     
     <a class="list-group-item " href="/blog/2016/02/01/spark-tunning/">Spark Tunning</a>
-    
-    <a class="list-group-item " href="/blog/2016/01/13/etl/">Extract-Transform-Load Application Scenarios</a>
     
   </div>
 </section>
@@ -763,6 +767,12 @@ body {
     <a class="list-group-item " href="/blog/categories/big-data/index.html">
         <span class="badge">10</span>
         Big Data
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/paper-weekend/index.html">
+        <span class="badge">1</span>
+        Paper Weekend
       </a>
     
   </div>
