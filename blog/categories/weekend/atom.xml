@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: google | Tech Digging and Sharing]]></title>
-  <link href="http://billowkiller.github.io/blog/categories/google/atom.xml" rel="self"/>
+  <title><![CDATA[Category: Weekend | Tech Digging and Sharing]]></title>
+  <link href="http://billowkiller.github.io/blog/categories/weekend/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-07-13T15:12:22+08:00</updated>
+  <updated>2016-07-14T12:02:43+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -1270,6 +1270,8 @@ Brin和Larry Page选择了0.85。
  
 
 ![](http://www.ams.org/featurecolumn/images/december2006/index_54.gif)
+
+
 </p></p></p></p>
 ]]></content>
   </entry>

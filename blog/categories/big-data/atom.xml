@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Big Data | Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/blog/categories/big-data/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-07-13T15:12:22+08:00</updated>
+  <updated>2016-07-14T12:02:43+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -83,7 +83,12 @@
 
 <p>Producer向broker发送消息时，默认情况下一条消息从Producer到broker是确保了 <code>At least once</code>，但如果设置Producer为异步发送则实现 <code>At most once</code>。<code>Exactly once</code>还未实现（生成一种消息主键，幂等重试）。</p>
 
-<p>Consumer在从broker读取消息后，可以选择<code>autocommit</code>或<code>手动commit</code>。区别在于一个是读完消息先commit再处理消息，一个是读完消息先处理再commit。前者实现 <code>At most once</code>，后者实现 <code>At least once</code>，但如果消息的处理有幂等性，则可以理解为<code>Exactly once</code>。如果要做到严格<code>Exactly once</code>，则让offset和操作输入存在同一个地方，保证数据的输出和offset的更新要么都完成，要么都不完成，参考Spark Kafka的DirectAPI的实现。</p>
+<p>Consumer在从broker读取消息后，可以选择<code>autocommit</code>或<code>手动commit</code>。区别在于一个是读完消息先commit再处理消息，一个是读完消息先处理再commit。前者实现 <code>At most once</code>，后者实现 <code>At least once</code>，但如果消息的处理有幂等性，则可以理解为<code>Exactly once</code>。如果要做到严格<code>Exactly once</code>，则让offset和操作输入存在同一个地方，<strong>保证数据的输出和offset的更新要么都完成，要么都不完成</strong>，参考Spark Kafka的<code>DirectAPI</code>的实现以及<code>Druid</code>。</p>
+
+<p>Kafka允许的<code>Exactly once</code>语义其实和它的特性有很大关系：
+* 每条消息有序和不可变的放在partition中，同时分配一个递增的offset。这样通过&lt;partition, offset&gt;就可以确定一条消息，并且它的前辈和后辈都是不变的。
+* 消费者拉数据，从而由消费者自身进行流控。
+* 消费者可以根据&lt;partition, offset&gt;寻找消息，允许message rewind，并且根据消息的metadata可以保证消息接收的不重不丢。</p>
 
 <h2 id="high-available">High Available</h2>
 
