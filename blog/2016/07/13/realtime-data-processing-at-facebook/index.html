@@ -206,7 +206,7 @@ body {
   <li>正确性：ACID保证？</li>
 </ol>
 
-<p>数据处理需求允许秒级的延迟，所以fb中的数据传输是通过一个持久存储的；分离传输和处理带来的好处是义勇、容错和可扩展以及一部分正确性保证。</p>
+<p>数据处理需求允许秒级的延迟，所以fb中的数据传输是通过一个持久存储的；分离传输和处理带来的好处是易用、容错和可扩展以及一部分正确性保证。</p>
 
 <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-7-13/63234135.jpg" width="500px" /></p>
 
@@ -252,24 +252,36 @@ body {
   <li>
     <p>Processing semantics</p>
 
-    <p>stream processor有三种行为：
-  * 处理input event，反序列化输入event，查询外部系统，更新内存状态，并没有side-effect
-  * 输出产生，根据input event和内存状态，向下游产生输出。可以在检查点之前或之后。
-  * 保存检查点，内存状态、input stream offset、output value</p>
+    <p>stream processor有三种行为：</p>
 
-    <p>根据这些行为的实现方式，有两种语义信息：
-  * 状态语义，input event是at-least once, at-most once, exactly
-  * 输出语义，output value….</p>
+    <ul>
+      <li>处理input event，反序列化输入event，查询外部系统，更新内存状态，并没有side-effect</li>
+      <li>输出产生，根据input event和内存状态，向下游产生输出。可以在检查点之前或之后。</li>
+      <li>保存检查点，内存状态、input stream offset、output value</li>
+    </ul>
 
-    <p>无状态的处理器只有输出语义，有状态的有两种语义。状态语义只依赖于保存offset和内存状态的顺序。
-  * at-least-once，先内存状态后offset
-  * at-most-once，先offset，再内存状态
-  * exactly，原子的</p>
+    <p>根据这些行为的实现方式，有两种语义信息：</p>
 
-    <p>输出语义依赖数据保存到checkpint的顺序：
-  * at-least-once，先emit output再offset和内存状态
-  * at-most-once，先offset和内存状态，再emit output
-  * exactly，原子的事务性</p>
+    <ul>
+      <li>状态语义，input event是at-least once, at-most once, exactly</li>
+      <li>输出语义，output value….</li>
+    </ul>
+
+    <p>无状态的处理器只有输出语义，有状态的有两种语义。状态语义只依赖于保存offset和内存状态的顺序。</p>
+
+    <ul>
+      <li>at-least-once，先内存状态后offset</li>
+      <li>at-most-once，先offset，再内存状态</li>
+      <li>exactly，原子的</li>
+    </ul>
+
+    <p>输出语义依赖数据保存到checkpint的顺序：</p>
+
+    <ul>
+      <li>at-least-once，先emit output再offset和内存状态</li>
+      <li>at-most-once，先offset和内存状态，再emit output</li>
+      <li>exactly，原子的事务性</li>
+    </ul>
 
     <p>可以做一些side-effect-free的操作加速吞吐量，例如保存checkpoint的同时进行反序列化。</p>
   </li>
