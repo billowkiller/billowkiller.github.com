@@ -4,7 +4,7 @@
   <title><![CDATA[Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-07-20T13:08:22+08:00</updated>
+  <updated>2016-07-31T23:08:45+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -14,11 +14,162 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Column-Stores vs. Row-Stores]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/07/31/column-stores-row-stores/"/>
+    <updated>2016-07-31T17:23:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/07/31/column-stores-row-stores</id>
+    <content type="html"><![CDATA[<blockquote>
+  <p>Abadi et al. SIGMOD 2008</p>
+</blockquote>
+
+<p>在数据分析领域，例如数据仓库、决策支持、BI应用等，面向列的存储结构通常会比面向行的存储结构表现要好一个数量级以上，因为只需要读取需要的属性，列存储对于只读的查询 IO 更高效。本文否定了用列存储的思想优化行存储的方式，提出对两种存储方式都有效的优化，并探讨列存储真正高效的原因。</p>
+
+<!--more-->
+
+<h3 id="row-vs-column">Row vs. column</h3>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-7-31/39462037.jpg" width="500px" /></p>
+
+<p>Row store 更加适合添加和修改一条记录，但读取不必要的数据；Column Store 适合读取相关数据，但写的时候需要多次磁盘IO。所以 Column stores 适合读密集型的数据集。对比如下：</p>
+
+<table border="1" cellspacing="0" cellpadding="0"> <tbody><tr>  <td valign="top" style="background:#5B9BD5;"><p align="left"><strong><span style="color:white;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></strong></p></td>  <td valign="top" style="background:#5B9BD5;"><p align="center"><strong><span style="color:white;">行式存储</span></strong></p></td>  <td valign="top" style="background:#5B9BD5;"><p align="center"><strong><span style="color:white;">列式存储</span></strong></p></td> </tr> <tr>  <td valign="top" style="background:#DEEAF6;"><p align="center"><strong>优点</strong></p></td>  <td valign="top" style="background:#DEEAF6;"><p align="left">Ø&nbsp; 数据被保存在一起</p>  <p align="left">Ø&nbsp; INSERT/UPDATE容易</p></td>  <td valign="top" style="background:#DEEAF6;"><p>Ø&nbsp; 查询时只有涉及到的列会被读取</p>  <p>Ø&nbsp; 投影(projection)很高效</p>  <p>Ø&nbsp; 任何列都能作为索引</p></td> </tr> <tr>  <td valign="top"><p align="center"><strong>缺点</strong></p></td>  <td valign="top"><p align="left">Ø&nbsp; 选择(Selection)时即使只涉及某几列，所有数据也都会被读取</p></td>  <td valign="top"><p>Ø&nbsp; 选择完成时，被选择的列要重新组装</p>  <p>Ø&nbsp; INSERT/UPDATE比较麻烦</p></td> </tr></tbody></table>
+
+<p>通常来说它比 Row store 在某些应用中更快的原因有：</p>
+
+<ul>
+  <li>只读取需要的列</li>
+  <li>更好的缓存有效性</li>
+  <li>适合压缩</li>
+</ul>
+
+<h3 id="row-oriented-execution">Row-oriented Execution</h3>
+
+<p>首先看下在商用的行存储DBMS中如何实现列数据库：</p>
+
+<ol>
+  <li>
+    <p>Vertical Partitioning</p>
+
+    <blockquote>
+      <p>The most straightforward way to emulate a column-store approach in a row-store is to fully vertically partition each relation.</p>
+    </blockquote>
+
+    <p>垂直切割表格形成两列的tuple表（table key, attribute）, 查询的时候直接访问必要的列。</p>
+
+    <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-7-31/64076524.jpg" width="450px" /></p>
+
+    <p>遇到的问题： 需要添加 Position 列，浪费磁盘和带宽；Tuple 有额外 Header，例如 PostgreSQL 里有 24 bytes。</p>
+  </li>
+  <li>
+    <p>Index-only Plan</p>
+
+    <blockquote>
+      <p>base relations are stored using a standard, row-oriented design, but an additional unclustered B+Tree index is added on every column of every table.</p>
+    </blockquote>
+
+    <p>构造在query中所需要用到的所有列的数据块的集合，所以查询的时候根本不需要查询底层的（按行存储的）表。</p>
+
+    <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-7-31/2612463.jpg" width="450px" /></p>
+
+    <p>遇到的问题：分开的数据块如果需要全表扫表的话，会很慢。</p>
+  </li>
+  <li>
+    <p>Materialized Views</p>
+
+    <blockquote>
+      <p>Create optimal set of MVs for given query workload to provide just the required data, avoid overheads and perform better.</p>
+    </blockquote>
+
+    <p>使用query中所需要用到的列的物化视图集合，尽管使用很多空间，但是可以得到更好的效率，典型的空间换时间。</p>
+
+    <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-7-31/44662651.jpg" width="300px" /></p>
+
+    <p>遇到的问题：适用性比较窄；需要知道查询的先验知识。</p>
+  </li>
+</ol>
+
+<h3 id="column-oriented-execution">Column-oriented Execution</h3>
+
+<p>下面来看下面向列存储的一些优化方法：</p>
+
+<ol>
+  <li>
+    <p>Compression</p>
+
+    <blockquote>
+      <p>Low information entropy (high data value locality) leads to High compression ratio.</p>
+    </blockquote>
+
+    <p>这个比较重要，有结果显示压缩和不压缩性能上会差别一个数量级，具体的好处是：</p>
+
+    <ul>
+      <li>节省磁盘空间</li>
+      <li>减少磁盘和网络IO</li>
+      <li>如果能在压缩数据上面做计算，那 CPU 消耗也可以降低</li>
+    </ul>
+
+    <p>几个注意点：</p>
+
+    <ul>
+      <li>注意压缩率和解压效率的权衡，使用轻量级的压缩算法，牺牲一些压缩率。</li>
+      <li>使用类似run-length encoding (1,1,1,2,2 -&gt; 1<em>3,2</em>2)，可以直接在压缩数据上做计算。</li>
+      <li>特别是对于排好序的数据，压缩效率会更高。</li>
+    </ul>
+  </li>
+  <li>
+    <p>Late Materialization</p>
+
+    <p>通常来说，查询结果是要得到一个 entity，而不是一个 column，所以需要对多个列进行 join。比较朴素的做法是，数据按列存储在磁盘上，当一个query需要多个 column 的时候，会从这些属性中构造 tuples，接着进行一些其他操作（select，aggregate，join…）。虽然这样做仍然会优于 row-oriented 的存储，但是会有许多优化空间，使用延迟物化就是一个。</p>
+
+    <p>举一个例子，<code>SELECT R.a FROM R WHERE R.c = 5 AND R.b = 10</code>。首先，<code>R.c</code> 和 <code>R.b</code> 的输出是一个 bit string，这个其实就是中间结果 position lists，对着两个结果进行 <code>bitwise and</code>，最后这个 final position list 提取 <code>R.a</code>。</p>
+
+    <p>带来的好处有：</p>
+
+    <ul>
+      <li>非必要的 tuple 构建省略了（selection 和 aggregation带来的）</li>
+      <li>可以直接对着压缩数据进行操作</li>
+      <li>更好的 cache performance，没有其他属性的数据污染 cache</li>
+      <li>可以结合下一个优化点</li>
+    </ul>
+  </li>
+  <li>
+    <p>Block Iteration</p>
+
+    <blockquote>
+      <p>Operators operate on blocks of tuples at once like batch processing.</p>
+    </blockquote>
+
+    <p>对 Block 而不是 Tuple 进行操作，这个同样可以应用在 Row-oriented stores 上，带来的好处有：</p>
+
+    <ul>
+      <li>如果列是固定宽度的，则可以变成对数组的操作</li>
+      <li>减少 tuple 的 overhead</li>
+      <li>有效利用并行化</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="section">结论</h3>
+
+<p>Vertical portioning 和 Index only plan 并不能起到很好的效果，Materialized view 表现的最好。</p>
+
+<ul>
+  <li>Block processing improves the performance by a factor of 5% to 50%</li>
+  <li>Compression improves the performance by almost a factor of two on avg</li>
+  <li>Late materialization improves performance by almost a factor of three</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Realtime Data Processing at Facebook]]></title>
     <link href="http://billowkiller.github.io/blog/2016/07/13/realtime-data-processing-at-facebook/"/>
     <updated>2016-07-13T17:23:00+08:00</updated>
     <id>http://billowkiller.github.io/blog/2016/07/13/realtime-data-processing-at-facebook</id>
-    <content type="html"><![CDATA[<p>Chen et al. SIGMOD 2016</p>
+    <content type="html"><![CDATA[<blockquote>
+  <p>Chen et al. SIGMOD 2016</p>
+</blockquote>
 
 <p>论文说明Facebook是如何建立实时系统的。有段话说明batch和stream的关系：</p>
 
@@ -3830,152 +3981,6 @@ n_i(T)=\underset{(u,i,t) \in Train, t<T}{\Sigma} \frac{1}{1+\alpha (T-t)} %]]&gt
     <p>jstat: Java应用程序的资源和性能进行实时的命令行的监控</p>
   </li>
 </ol>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Recommender System in a Nutshell]]></title>
-    <link href="http://billowkiller.github.io/blog/2015/04/10/recsys-introduction/"/>
-    <updated>2015-04-10T14:00:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2015/04/10/recsys-introduction</id>
-    <content type="html"><![CDATA[<p>推荐系统（Recommender System An Introduction）读书笔记。</p>
-
-<!--more-->
-
-<h2 id="section">基于内容的推荐系统</h2>
-
-<p>基于内容的推荐：基于两类信息，<code>物品特征的描述</code>和描述用户兴趣的<code>用户记录</code>（比如喜爱的物品特点）。</p>
-
-<p>一般工作原理是评估用户还没有看到的物品与当前用户过去喜欢的物品的相似度。那么如何表示物品的内容以及相似度？</p>
-
-<p>描述物品目录最简单的方法就是维护每个物品特征的详细列表，<strong>属性集、特征集或物品记录</strong>。另外可以使用<code>关键词列表</code>表示文档内容，好处是能够从文档内容本身自动生成列表。</p>
-
-<p>为了防止<code>通用词</code>和<code>长文档</code>带来的推荐结果偏置，一般会使用TF-IDF计算关键词的权重。给出下列公式：</p>
-
-<script type="math/tex; mode=display"> TF(i, j) = \frac{freq(i,j)}{maxOthers(i,j)},\ IDF(i) = log\frac{N}{n(i)} </script>
-
-<script type="math/tex; mode=display"> TF-IDF(i, j) = TF(i,j) \cdot IDF(i) </script>
-
-<p>$TF(i,j)$ 表示文档 $j$ 中关键词 $i$ 的<code>归一化词频值</code>，$freq(i,j)$ 表示 $i$ 在 $j$ 中出现的绝对频率； $maxOthers(i,j)$ 表示 $j$ 中其他关键词的最大词频。 $N$ 为所有可推荐文档数量，$n(i)$ 为关键词 $i$ 出现过文档的数量。</p>
-
-<p>归一化是针对长文档，IDF 是针对通用词</p>
-
-<p>从文本中抽取关键词并赋予权值的做法局限性为</p>
-
-<ul>
-  <li>向量通常大而稀疏，通过以下几种技术改进：
-    <ul>
-      <li>停用词和词干还原</li>
-      <li>特征选择，仅用信息量最大的一些词来减少文档描述规模，期望删除噪声。</li>
-      <li>选用短语</li>
-    </ul>
-  </li>
-  <li>没有考虑到文档上下文</li>
-</ul>
-
-<p>User-CF为“推荐相似用户喜欢的物品”，基于内容的推荐可以描述成“推荐与用户过去喜欢的物品相似的物品”。通常的基于内容相似度检索技术为：</p>
-
-<ul>
-  <li>KNN
-    <ul>
-      <li>用余弦相似度评估两个文档的向量是否相似；</li>
-      <li>可以考虑用户的短期兴趣和长期兴趣，适合于个性化的新闻推荐；</li>
-      <li>易于实现，能够快速适应新近变化，只需要相对少的评分数据；</li>
-      <li>预测精确度较低。</li>
-    </ul>
-  </li>
-  <li>相关项反馈——Rocchio方法</li>
-</ul>
-
-<p>另外可以将基于内容的推荐看成分类问题。</p>
-
-<p>典型的是朴素贝叶斯方法，基本上有两种对文档及其特征建模的方法：<strong>多项式模型和伯努利模型</strong>，二者都忽略词的<code>位序</code>问题。多元伯努利模型中，文档被处理成一个二进制向量，描述某个词是否包含在文档中；多项式模型中，考虑词出现在文档中的次数，分类结果会比莫努力模型好些。</p>
-
-<p>在多项式模型中，词 $v_i$ 出现在 $c$ 类文档的条件概率为：</p>
-
-<table>
-  <tbody>
-    <tr>
-      <td>$$ P(v_i</td>
-      <td>C=c) = \frac{CountTerms(v_i, docs(c))+1}{AllTerms(docs(c))+\vert V \vert}$$</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>上式采用<code>拉普拉斯平滑</code>以防止条件概率为 0，$\vert V \vert$ 为所有文档中不同词的数量。</p>
-
-<p>朴素贝叶斯分类器能够达到很高的精确度，并且其组成部分能够在获得新数据时很容易更新，且学习时间复杂度随样本数量线性增加。</p>
-
-<p>上文提到过<code>特征选择</code>问题，原始的大而稀疏向量会导致性能和内存需求问题，并且容易导致过拟合。典型的可以采用 $\chi^2$ 检验或 Fisher 判别指标。</p>
-
-<p>$\chi^2$ 检验是检测两个时间是否不相干的标准统计方法。在特征选择中，根据训练数据分析某种分类结果是否与某个具体词的出现有联系。基于$\chi^2$ 检验来选择特征，首先按词的$\chi^2$ 值大小降序排列；其次需要确定用于分类器的理想特征数目。</p>
-
-<p>基于内容的推荐系统有许多局限：</p>
-
-<ul>
-  <li><strong>浅层内容分析</strong>。</li>
-  <li>推荐结果缺乏新颖性，倾向于给出相同的推荐。</li>
-  <li>冷启动问题，需要来自用户的初始评分集合。</li>
-</ul>
-
-<h2 id="section-1">协同过滤</h2>
-
-<p>协同过滤推荐方法的主要思想：利用已有用户群过去的行为或意见预测当前用户最可能喜欢那些东西或对那些东西感兴趣。纯粹的协同方法输入只有用户-物品评分矩阵，输出可以为：</p>
-
-<ol>
-  <li>当前用户对物品的评分</li>
-  <li>TopN推荐物品列表</li>
-</ol>
-
-<h3 id="section-2">基于用户的最近邻推荐</h3>
-
-<p>这是一种早期方法，对当前用户没有见过的物品 $p$，利用近邻对物品的评价计算预测值。潜在的假设为：</p>
-
-<ol>
-  <li>如果用户过去有相似的偏好，未来也会有相似的偏好</li>
-  <li>用户偏好不会随着时间而改变</li>
-</ol>
-
-<p>确定相似用户集，通常用的方法是Pearson相关系数。给定评分矩阵R，$\bar{r}_a$ 代表用户a的平均评分，用户a和用户b的相似度 $sim(a,b)$ 表示</p>
-
-<script type="math/tex; mode=display"> sim(a,b) = \frac{\sum_{p \in P}(r_{a,p}-\bar{r}_a)(r_{b,p}-\bar{r}_b)}{\sqrt{\sum_{p \in P}(r_{a,p}-\bar{r}_a)^2}\sqrt{\sum_{p \in P}(r_{b,p}-\bar{r}_b)^2}}</script>
-
-<p>Pearson方法考虑到用户评分标准并不相同的事实，可以发现评分值之间存在的线性相关性。但是对于广受大众欢迎的物品相似度会更高，可以类似TF-IDF，引入反用户频率(IUF)计算。用户a对物品p的预测值如下：</p>
-
-<script type="math/tex; mode=display">pred(a,p) = \bar{r}_a + \frac{\sum_{b \in N}sim(a,b)(r_{b,p}-\bar{r}_b)}{\sum_{b \in N}sim(a,b)}</script>
-
-<p>预测的时候可以降低近邻规模减少计算复杂度，可以将用户相似度定义一个具体的最小阈值，或者将规模大小限制为一个固定值，只考虑K个最近邻。阈值会影响可预测物品的覆盖率，但是K值不会影响，它却会带来bias-variance tradeoff。</p>
-
-<p>对于基于用户的推荐系统，Pearson相关系数比其他方法更胜一筹，但是对于基于物品的推荐技术，余弦相似度会比Pearson相关度量表现更好。</p>
-
-<p>基于物品的算法主要思想是利用物品相似度，而不是用户相似度。</p>
-
-<p>在基于物品的推荐中，通常使用改进版的余弦相似度，在原有的基础上减去评分的平均值，得到的结果类似于Pearson方法，取值在-1到+1之间，公式如下：</p>
-
-<script type="math/tex; mode=display"> sim(a,b) = \frac{\sum_{u \in U}(r_{u,a}-\bar{r}_u)(r_{u,b}-\bar{r}_u)}{\sqrt{\sum_{u \in U}(r_{u,a}-\bar{r}_u)^2}\sqrt{\sum_{u \in U}(r_{u,b}-\bar{r}_u)^2}}</script>
-
-<p>预测公式为加权评分综合：</p>
-
-<script type="math/tex; mode=display">pred(u,p) = \frac{\sum_{i \in ratedItems(u)}sim(i,p) \cdot r_{u,i}}{\sum_{i \in ratedItems(u)}sim(i,p)}</script>
-
-<p>基于物品的推荐可以离线构建一个物品相似度矩阵加速线上预测。在线上，通过确定与p最相似的物品，并计算u对这些领巾物品评分的加权综合得到u对p的预测评分。</p>
-
-<p>原则上这种方法对基于用户的推荐也适用，但是实际情况中，两个用户评分重叠情况非常少见，这就意味着一些其他的评分值可能影响到用户间的相似度。</p>
-
-<p>在协同过滤中，会遇到数据稀疏和冷启动问题。这种挑战就是用相对较少的有效评分得到准确的预测。直接做法就是利用用户的附加信息，比如性别、年龄等帮助分类用户信息，这就涉及到利用矩阵的外部信息，也就是混合系统。</p>
-
-<p>另外处理这些问题的方法还包括，基于图的方法，主要思想是利用假定用户品味的传递性，并由此增强额外信息矩阵；缺省投票；利用相似用户给出相似物品的评分。</p>
-
-<p>冷启动是稀疏问题的一个特例，问题包括：如何处理新用户；如何处理为评分或购买的新物品。这两个问题都是通过混合方法解决，可以在推荐之前要求用户给出最低限度数量的评分。</p>
-
-<p>上述的协同推荐技术是Memory-based CF Algorithm。另外一种是Model-based。包括</p>
-
-<ul>
-  <li>矩阵因子分解</li>
-  <li>关联规则挖掘</li>
-  <li>基于概率分析的推荐方法（预测问题看成分类问题）</li>
-</ul>
 
 ]]></content>
   </entry>

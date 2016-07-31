@@ -4,7 +4,7 @@
   <title><![CDATA[tags: realtime | Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/blog/tags/realtime/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-07-20T13:08:22+08:00</updated>
+  <updated>2016-07-31T23:08:45+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -18,7 +18,9 @@
     <link href="http://billowkiller.github.io/blog/2016/07/13/realtime-data-processing-at-facebook/"/>
     <updated>2016-07-13T17:23:00+08:00</updated>
     <id>http://billowkiller.github.io/blog/2016/07/13/realtime-data-processing-at-facebook</id>
-    <content type="html"><![CDATA[<p>Chen et al. SIGMOD 2016</p>
+    <content type="html"><![CDATA[<blockquote>
+  <p>Chen et al. SIGMOD 2016</p>
+</blockquote>
 
 <p>论文说明Facebook是如何建立实时系统的。有段话说明batch和stream的关系：</p>
 

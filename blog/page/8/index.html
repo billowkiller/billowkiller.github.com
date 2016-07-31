@@ -176,6 +176,93 @@ body {
 
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
         
+           | <a href="/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan/">Python特殊语法：filter、map、reduce、lambda [转]</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p><i><strong>from</strong> <a href="http://www.cnblogs.com/longdouhzt/archive/2012/05/19/2508844.html">http://www.cnblogs.com/longdouhzt/archive/2012/05/19/2508844.html</a></i></p>
+
+<hr />
+
+<p>Python内置了一些非常有趣但非常有用的函数，充分体现了Python的语言魅力！</p>
+
+<p><strong>filter(function,
+sequence)</strong> ：对sequence中的item依次执行function(item)，将执行结果为True的item组成一个List/String/Tuple（取决于sequence的类型）返回：</p>
+
+<p>&gt;&gt;&gt; def f(x): return x % 2 != 0 and x % 3 != 0 </p>
+
+<p>&gt;&gt;&gt; filter(f, range(2, 25)) 
+[5, 7, 11, 13, 17, 19, 23]</p>
+
+<p>&gt;&gt;&gt; def f(x): return x != ‘a’ </p>
+
+<p>&gt;&gt;&gt; filter(f, “abcdef”) </p>
+
+<p>‘bcdef’</p>
+
+<p><strong>map(function,
+sequence)</strong> ：对sequence中的item依次执行function(item)，见执行结果组成一个List返回：</p>
+
+<p>&gt;&gt;&gt; def cube(x): return x<em>x</em>x </p>
+
+<p>&gt;&gt;&gt; map(cube, range(1, 11)) </p>
+
+<p>[1, 8, 27, 64, 125, 216, 343, 512, 729, 1000]</p>
+
+<p>&gt;&gt;&gt; def cube(x) : return x + x </p>
+
+<p>… </p>
+
+<p>&gt;&gt;&gt; map(cube , “abcde”) </p>
+
+<p>[‘aa’, ‘bb’, ‘cc’, ‘dd’, ‘ee’]</p>
+
+<p>另外map也支持多个sequence，这就要求function也支持相应数量的参数输入：
+&gt;&gt;&gt; def add(x, y): return x+y </p>
+
+<p>&gt;&gt;&gt; map(add, range(8), range(8))</p>
+
+<p>[0, 2, 4, 6, 8, 10, 12, 14]</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/pythonte-shu-yu-fa-filter-map-reduce-lambda-zhuan/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
            | <a href="/blog/2013/05/14/pandoc-example/#disqus_thread"
              data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/pandoc-example/">Comments</a>
         
@@ -818,70 +905,6 @@ bytes。MBR是系统在启动的时候会主动去读取的内容，多系统就
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/googlelun-wen-mapreduce/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-mapreduce/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/googlelun-wen-mapreduce/">google论文：MapReduce</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>论文：<a href="http://static.googleusercontent.com/external_content/untrusted_dlcp/research.google.com/en//archive/mapreduce-osdi04.pdf">英文版</a>，<a href="http://blademaster.ixiezi.com/2010/03/27/google-mapreduce%E4%B8%AD%E6%96%87%E7%89%88/">中文版</a></p>
-
-<hr />
-
-<ol>
-  <li>
-    <h2 id="section">导论</h2>
-  </li>
-</ol>
-
-<h3 id="section-1">1.1 定义</h3>
-
-<p>先给个定义：
-MapReduce是一个编程模型，也是一个处理和生成超大数据集的算法模型的相关实现。用户首先创建一个Map函数处理一个基于key/value
-pair的数据集合，输出中间的基于key/value
-pair的数据集合；然后再创建一个Reduce函数用来合并所有的具有相同中间key值的中间value值。</p>
-
-<p>使用这个抽象模型，我们只要表述我们想要执行的简单运算即可，而不必关心并行计算、容错、数据分布、负载均衡等复杂的细节，这些问题都被封装在了一个库里面。设计这个抽象模型的灵感来自Lisp和许多其他函数式语言的Map和Reduce的原语。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr2_zps9c617225.png" alt="big picture of MapReduce" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/googlelun-wen-mapreduce/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -905,6 +928,8 @@ pair的数据集合；然后再创建一个Reduce函数用来合并所有的具�
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/07/31/column-stores-row-stores/">Column-Stores vs. Row-Stores</a>
+    
     <a class="list-group-item " href="/blog/2016/07/13/realtime-data-processing-at-facebook/">Realtime Data Processing at Facebook</a>
     
     <a class="list-group-item " href="/blog/2016/04/09/rating/">Funny Facts About Rating</a>
@@ -912,8 +937,6 @@ pair的数据集合；然后再创建一个Reduce函数用来合并所有的具�
     <a class="list-group-item " href="/blog/2016/04/06/kafka/">Kafka Introduction</a>
     
     <a class="list-group-item " href="/blog/2016/03/19/table-join/">Table Join Semantics</a>
-    
-    <a class="list-group-item " href="/blog/2016/02/01/spark-tunning/">Spark Tunning</a>
     
   </div>
 </section>
@@ -943,7 +966,7 @@ pair的数据集合；然后再创建一个Reduce函数用来合并所有的具�
     
     
     <a class="list-group-item " href="/blog/categories/paper-weekend/index.html">
-        <span class="badge">5</span>
+        <span class="badge">6</span>
         Paper Weekend
       </a>
     
