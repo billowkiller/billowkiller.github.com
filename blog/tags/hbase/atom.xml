@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: hbase | Tech Digging and Sharing]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/hbase/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2016-08-03T20:40:25+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Hbase Introduction]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/07/20/hbase/"/>
+    <updated>2016-07-20T17:23:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/07/20/hbase</id>
+    <content type="html"><![CDATA[<p>犯懒了，留两篇好文章，基本的东西也都在这文章里面。得空再补补吧。</p>
+
+<p><a href="http://www.blogjava.net/DLevin/archive/2015/08/22/426877.html">深入HBase架构解析（一）</a></p>
+
+<p><a href="http://www.blogjava.net/DLevin/archive/2015/08/22/426950.html">深入HBase架构解析（二）</a></p>
+
+]]></content>
+  </entry>
+  
+</feed>

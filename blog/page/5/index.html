@@ -174,6 +174,65 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-22T09:18:00+08:00" pubdate data-updated="true">Jul 22<span>nd</span>, 2014</time>
+        
+           | <a href="/blog/2014/07/22/network-programming/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/07/22/network-programming/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/22/network-programming/">Unix Network Programming Notes</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>记录Linux网络编程中的一些知识点…</p>
+
+<hr />
+
+<h3 id="section">网络编程可能会遇到的三种情况</h3>
+
+<ol>
+  <li>当<code>fork</code>子进程时，必须捕获<code>SIGCHLD</code>信号。</li>
+  <li>当捕获信号时，必须处理被中断的系统调用；</li>
+  <li>
+    <p><code>SIGCHLD</code>的信号处理函数必须正确编写，应使用<code>waitpid</code>函数以免留下僵死进程。</p>
+
+    <p><code>waitpid</code>是可以非阻塞的等待信号终止，因此可以使用循环调用。</p>
+  </li>
+</ol>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/07/22/network-programming/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-18T09:18:00+08:00" pubdate data-updated="true">Jul 18<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/07/18/TCP-IP/#disqus_thread"
@@ -684,72 +743,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-05-01T03:18:00+08:00" pubdate data-updated="true">May 1<span>st</span>, 2014</time>
-        
-           | <a href="/blog/2014/05/01/code-snippet/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/05/01/code-snippet/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/01/code-snippet/">Some Code Snippets</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><ol>
-  <li>
-    <p><strong>在一个二叉树中查找值为x的结点，并打印该结点所有祖先结点的算法，也就是根节点到x的路径。</strong></p>
-
-    <p>思路1： 利用<strong>后序遍历</strong>的非递归算法，在访问结点时增加一个判断，若该结点的值等于x，则打印栈中保持的路径，再中断算法。</p>
-
-    <p>思路2： 采用<strong>前序遍历</strong>的递归算法，在典型的便利算法的参数表中增加了x、path[n]等参数。</p>
-
-    <pre><code> template&lt;class T&gt;
- int Find_Print(BinTreeNode&lt;T*&amp; BT, T x, T path[], int level, int &amp;count) {
-     if(BT != NULL) {
-         level++;
-         path[level] = BT-&gt;data;
-         if (BT-&gt;data==x) { count=level; return 1; }
-         if( Find_Print(BT-&gt;left, x, path, level, count) ) return 1;
-         return Find_Print(BT-&gt;right, x, path, level, count);
-     } else 
-         return 0;
- }
-</code></pre>
-  </li>
-</ol>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/05/01/code-snippet/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -775,13 +768,13 @@ body {
     
     <a class="list-group-item " href="/blog/2016/07/31/column-stores-row-stores/">Column-Stores vs. Row-Stores</a>
     
+    <a class="list-group-item " href="/blog/2016/07/20/hbase/">Hbase Introduction</a>
+    
     <a class="list-group-item " href="/blog/2016/07/13/realtime-data-processing-at-facebook/">Realtime Data Processing at Facebook</a>
     
     <a class="list-group-item " href="/blog/2016/04/09/rating/">Funny Facts About Rating</a>
     
     <a class="list-group-item " href="/blog/2016/04/06/kafka/">Kafka Introduction</a>
-    
-    <a class="list-group-item " href="/blog/2016/03/19/table-join/">Table Join Semantics</a>
     
   </div>
 </section>
@@ -847,7 +840,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/big-data/index.html">
-        <span class="badge">10</span>
+        <span class="badge">11</span>
         Big Data
       </a>
     
