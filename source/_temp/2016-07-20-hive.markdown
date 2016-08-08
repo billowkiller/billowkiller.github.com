@@ -1,0 +1,23 @@
+介绍下hive。
+
+Hive 是Facebook开源的基于Hadoop的一个数据仓库工具，可以将结构化的数据文件映射为一张数据库表，并提供简单的sql查询功能，可以将sql语句转换为MapReduce任务进行运行。
+
+Hive是建立在 Hadoop 上的数据仓库基础构架，可以用来进行数据ETL。Hive 定义了简单的类 SQL 查询语言，称为 HQL，它允许熟悉 SQL 的用户查询数据。同时，这个语言也允许熟悉 MapReduce 开发者的开发自定义的 mapper 和 reducer 来处理内建的 mapper 和 reducer 无法完成的复杂的分析工作。
+Hive 没有专门的数据格式。 
+
+Hive 可以很好的工作在 Thrift 之上，控制分隔符，也允许用户指定数据格式。
+
+以下是 Hive 的架构图.
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-7-22/88303132.jpg" width="500px"/>
+
+启动hive服务的命令是`hive --service hiveserver2`，上图表示多种连接方式。这里可以看到是hivesever2，它是由原来的hivesever1进化而来。
+
+> an enhanced Hive server designed for multi-client concurrency and improved authentication that also provides better support for clients connecting through JDBC and ODBC.
+
+hivesever2对应beeline客户端，原来的cli基本上被弃用了。这里需要注意，beeline即使是使用了JDBC，其实也是在thrift协议之上的。
+
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-7-22/98849764.jpg" width="500px"/>
+
+
+

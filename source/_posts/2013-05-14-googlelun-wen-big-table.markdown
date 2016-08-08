@@ -3,7 +3,7 @@ layout: post
 title: "google论文: big table"
 date: 2013-05-14 01:09
 comments: true
-categories: google
+category: Paper Weekend
 tags: [googe, paper, big table]
 ---
 
@@ -239,3 +239,5 @@ filter的很少量的tablet服务器内存空间，都可以极大减少读操�
 filter也意味着，许多针对目前不存在的行或列的查询，根本就不需要访问磁盘。
 
  
+
+

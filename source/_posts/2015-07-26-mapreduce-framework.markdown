@@ -16,7 +16,7 @@ mapReduce 的输入是hdfs上存储的一系列文件集。在hadoop中，这些
 
 过程如图所示，接下来的章节会一一介绍。
 
-![](https://farm3.static.flickr.com/2275/3529146683_c8247ff6db_o.png)
+![](http://7xqfqs.com1.z0.glb.clouddn.com/16-7-3/75294350.jpg)
 
 <!--more-->
 

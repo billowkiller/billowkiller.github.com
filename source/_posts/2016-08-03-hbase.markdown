@@ -1,0 +1,16 @@
+---
+layout: post
+title: "Hbase Introduction"
+date: 2016-7-20 17:23
+comments: true
+category: Big Data
+tags: [hbase, hadoop]
+---
+
+犯懒了，留两篇好文章，基本的东西也都在这文章里面。得空再补补吧。
+
+[深入HBase架构解析（一）](http://www.blogjava.net/DLevin/archive/2015/08/22/426877.html)
+
+[深入HBase架构解析（二）](http://www.blogjava.net/DLevin/archive/2015/08/22/426950.html)
+
+

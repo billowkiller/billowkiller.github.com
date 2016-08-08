@@ -3,7 +3,7 @@ layout: post
 title: "google论文：MapReduce"
 date: 2013-05-14 01:09
 comments: true
-categories: google
+category: Paper Weekend
 tags: [google, paper, mapreduce]
 ---
 
@@ -290,3 +290,5 @@ pair数据的处理顺序是按照key值增量顺序处理的。
  
 
  
+
+

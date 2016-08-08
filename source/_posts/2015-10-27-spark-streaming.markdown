@@ -16,10 +16,11 @@ tags: spark
 5. 容错机制的低开销
 6. 流控
 
-![image](http://spark.apache.org/images/spark-logo.png)
+<img src="https://spark.apache.org/images/spark-logo.png" width="200px"/>
+
 <!--more-->
 
-介绍完了spark后就可以来说说spark streaming，毕竟spark streaming是完全构建在spark之上，熟悉了spark的RDD原理之后就比较容易理解spark streaming。说白了，spark streaming中的流式计算是伪实时的，之所以是伪实时的是因为它将实时的处理变成时间跨度较小的批量处理。没错，就是将一段时间间隔中的数据变成RDD，然后利用spark原有的架构处理这段时间内的数据，接着在时间维度上对这些处理后的RDD进行迭代计算。也就是将流式计算分解为一系列微小的、原子的批量作业，每个微批量作业如果失败则可以重新计算。这种分解的思想可以应用在批量计算框架、也可以应用在流式计算框架上，例如Storm Trident。
+介绍完了spark后就可以来说说spark streaming，毕竟spark streaming是完全构建在spark之上，熟悉了spark的RDD原理之后就比较容易理解spark streaming。说白了，spark streaming中的流式计算是`伪实时`的，之所以是伪实时的是因为它将实时的处理变成时间跨度较小的批量处理。没错，就是`将一段时间间隔中的数据变成RDD`，然后利用spark原有的架构处理这段时间内的数据，接着在时间维度上对这些处理后的RDD进行迭代计算。也就是将流式计算分解为一系列微小的、原子的批量作业，每个微批量作业如果失败则可以重新计算。这种分解的思想可以应用在批量计算框架、也可以应用在流式计算框架上，例如Storm Trident。
 
 这样的处理带来了几个明显的好处：
 
@@ -44,11 +45,12 @@ tags: spark
     counts = ones.runningReduce((a, b) => a+b)
 
 上述代码的作用是根据URL的数量计算访问次数。处理的过程为首先通过HTTP获取到一个pageview事件的RDD，经过*transformation*操作变成(URL, 1), 最后的操作计算相同的URL数目。整个streaming过程可以用下图来表示：
-![](http://img-storage.qiniudn.com/15-10-18/95269436.jpg)
 
-整个的处理过程可以看出，输入流被分成每个都是1秒的batch，经过处理后生成resultRDD，这个resultRDD在每个时间间隔中都会产生一个，并经过reduce迭代计算。在上图中最终的reduce的输入参数就包括上一个时间间隔的resultRDD和这个时间间隔中map操作的结果。上图也可以看出这些RDD的lineage graph，在节点失败的时候，可以根据这个lineage graph以partition的粒度为单位重新执行任务计算丢失的分片，可以看出这些计算的任务都是可以并行执行的。同时，对于慢节点来说，因为计算是无状态的，且每个job的结果是可以确定的，spark streaming可以执行类似于hadoop中的预测模型——在其他节点上计算同样的任务。另外，spark streaming也会有些checkpoint来防止无限制的恢复计算。
+<img src="http://img-storage.qiniudn.com/15-10-18/95269436.jpg" width="500px"/>
 
-对比于其他流式处理的方式，spark streaming在处理失败任务和慢节点上无疑更有效率。它可以从时间和partition两个维度上并行地计算数据来加快恢复速度。而对于像Strom的流式处理来说，往往是通过**上游数据backup**或者**同时复制执行相同的作业**来保证数据处理的可靠性。这两种处理方式对于资源的消耗无疑都是巨大的，且恢复的时间也比较长。
+整个的处理过程可以看出，输入流被分成每个都是1秒的batch，经过处理后生成resultRDD，这个resultRDD在每个时间间隔中都会产生一个，并经过reduce迭代计算。在上图中最终的reduce的输入参数就包括上一个时间间隔的resultRDD和这个时间间隔中map操作的结果。上图也可以看出这些RDD的lineage graph，在节点失败的时候，可以根据这个lineage graph以partition的粒度为单位重新执行任务计算丢失的分片，可以看出这些计算的任务都是可以并行执行的。同时，对于慢节点来说，因为`计算是无状态的`，且每个job的结果是可以确定的，spark streaming可以执行类似于hadoop中的预测模型——在其他节点上计算同样的任务。另外，spark streaming也会有些checkpoint来防止无限制的恢复计算。
+
+对比于其他流式处理的方式，spark streaming在处理失败任务和慢节点上无疑更有效率。它可以从`时间和partition`两个维度上并行地计算数据来加快恢复速度。而对于像Strom的流式处理来说，往往是通过**上游数据backup**或者**同时复制执行相同的作业**来保证数据处理的可靠性。这两种处理方式对于资源的消耗无疑都是巨大的，且恢复的时间也比较长。
 
 * 其中对于前者来说，每个节点都需要保存上一个checkpoing后所发送数据的拷贝，在节点失败时由standby机器重新计算上游节点发送过来的数据，因为这些计算都是有状态的，所以恢复的时间比较长，Storm就只保证“at least once”语义来提高处理速度。Trident之所以能够保证不重不丢是使用了数据库来复制计算状态。
 * 对于后者无疑更加消耗资源，并且需要保证两个数据处理操作接受到的上游数据的顺序是一样的。
@@ -80,7 +82,7 @@ tags: spark
     * 延迟处理，等待一定时间来处理每个batch。
     * 用户的应用程序中保证乱序事件的正确处理。
     
-    以上也说明在批处理的流式计算模型是受限的，很多情况下只能依靠用户的应用程序来做处理，例如实时的统计5s内的pv；其次这种方式也没有很好的流控技术手段，如果有突发的大量数据产生，会导致结果产生的时间更长，甚至是将系统的JVM撑爆。最后实时性也是受限的，只能达到次秒级的处理延迟，毕竟是要等待一个时间batch的处理完成。
+    以上也说明在`批处理的流式计算模型是受限的`，很多情况下只能依靠用户的应用程序来做处理，例如实时的统计5s内的pv；其次这种方式也没有很好的流控技术手段，如果有突发的大量数据产生，会导致结果产生的时间更长，甚至是将系统的JVM撑爆。最后实时性也是受限的，只能达到次秒级的处理延迟，毕竟是要等待一个时间batch的处理完成。
 
 2. **数据一致性问题。**什么是数据一致性，举个栗子，要统计网站中来自各个国家的page view，把不同国家的pv统计放在不同的节点上处理。但是现在统计英国的节点处理速度要慢于法国的，这将导致两个节点上数据的时间状态不一致。在流式处理中，数据的一致性的保证同时意味着资源的消耗。流式处理的数据一致性有三种解决思路，在上文中也有提到，这里概括下：
 
@@ -145,8 +147,19 @@ Spark streaming和Spark的系统结构有些许改动，如上图所示主要包
 	
 	在这个RDD中，有n个partition，n = batch interval / block interval。 `block interval`是spark steaming内部定义的一个变量`spark.streaming.blockInterval`，通常是200ms。上述例子就产生10个partitions。
 	
-	Blocks由一个receiver产生，receiver就是流式数据的接收端，每个receiver被分配到一个host上，所以上述的1-个partitions就由一个node产生，同时被复制到第二个节点上做容错。注意，这里产生了data locality的问题。好的做法是，分配多个receivers接收数据，最后使用union合并数据做processing。当然还可以对Dstream做`repartition`操作提高并行度。
+	Blocks由一个receiver产生，receiver就是流式数据的接收端，每个receiver被分配到一个host上，所以上述的10个partitions就由一个node产生，同时被`复制到第二个节点上做容错`。注意，这里产生了data locality的问题。好的做法是，分配多个receivers接收数据，最后使用union合并数据做processing。当然还可以对Dstream做`repartition`操作提高并行度。
+	
+2. Spark Streaming 的容错性
+	
+	对于文件这样的源数据，这个driver恢复机制足以做到零数据丢失，因为所有的数据都保存在了像HDFS或S3这样的容错文件系统中了。但对于像Kafka和Flume等其它数据源，有些接收到的数据还只缓存在内存中，尚未被处理，它们就有可能会丢失。这是由于Spark应用的分布操作方式引起的。当driver进程失败时，所有在standalone/yarn/mesos集群运行的executor，连同它们在内存中的所有数据，也同时被终止。
+	
+	首先driver会利用checkpoint来保存灾备需要的数据，有两种各类型的checkpoint，Metadata Checkpoint（保存streaming计算相关数据） 和 Data Checkpoint（保存生成RDD数据）
+	
+	对于Spark Streaming来说，从诸如Kafka和Flume的数据源接收到的所有数据，在它们处理完成之前，一直都缓存在executor的内存中。纵然driver重新启动，这些缓存的数据也不能被恢复。为了避免这种数据损失，Spark 1.2发布版本中引进了预写日志（Write Ahead Logs）功能。
+	
+	当启用了预写日志以后，所有收到的数据同时还保存到了容错文件系统的日志文件中。因此即使Spark Streaming失败，这些接收到的数据也不会丢失。另外，接收数据的正确性只在数据被预写到日志以后接收器才会确认，已经缓存但还没有保存的数据可以在driver重新启动之后由数据源再发送一次。这两个机制确保了零数据丢失，即所有的数据或者从日志中恢复，或者由数据源重发。
+	
+	[http://www.csdn.net/article/2015-03-03/2824081](http://www.csdn.net/article/2015-03-03/2824081)
 
-2. 时间窗口和job的关系
 
 

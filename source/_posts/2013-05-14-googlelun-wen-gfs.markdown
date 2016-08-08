@@ -3,7 +3,7 @@ layout: post
 title: "google论文：GFS"
 date: 2013-05-14 01:09
 comments: true
-categories: google
+category: Paper Weekend
 tags: [google,paper,gfs]
 ---
 

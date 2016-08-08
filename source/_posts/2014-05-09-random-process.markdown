@@ -1,9 +1,9 @@
 ---
 layout: post
 title: "Random Process"
-date: 2015-05-09 16:00
+date: 2014-05-09 16:00
 comments: true
-category: "math"
+category: "algorithm"
 tags: [math, random, unfinished]
 ---
 

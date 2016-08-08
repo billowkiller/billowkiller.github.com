@@ -3,7 +3,7 @@ layout: post
 title: "Google PageRank"
 date: 2013-05-14 01:09
 comments: true
-categories: google
+category: Paper Weekend
 tags: [google, page rank, algorithm]
 ---
 
@@ -179,3 +179,5 @@ Brin和Larry Page选择了0.85。
  
 
 ![](http://www.ams.org/featurecolumn/images/december2006/index_54.gif)
+
+

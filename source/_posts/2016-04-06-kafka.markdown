@@ -59,7 +59,12 @@ Topic在逻辑上可以被认为是一个queue，每条消费都必须指定它�
 
 Producer向broker发送消息时，默认情况下一条消息从Producer到broker是确保了 `At least once`，但如果设置Producer为异步发送则实现 `At most once`。`Exactly once`还未实现（生成一种消息主键，幂等重试）。
 
-Consumer在从broker读取消息后，可以选择`autocommit`或`手动commit`。区别在于一个是读完消息先commit再处理消息，一个是读完消息先处理再commit。前者实现 `At most once`，后者实现 `At least once`，但如果消息的处理有幂等性，则可以理解为`Exactly once`。如果要做到严格`Exactly once`，则让offset和操作输入存在同一个地方，保证数据的输出和offset的更新要么都完成，要么都不完成，参考Spark Kafka的DirectAPI的实现。
+Consumer在从broker读取消息后，可以选择`autocommit`或`手动commit`。区别在于一个是读完消息先commit再处理消息，一个是读完消息先处理再commit。前者实现 `At most once`，后者实现 `At least once`，但如果消息的处理有幂等性，则可以理解为`Exactly once`。如果要做到严格`Exactly once`，则让offset和操作输入存在同一个地方，**保证数据的输出和offset的更新要么都完成，要么都不完成**，参考Spark Kafka的`DirectAPI`的实现以及`Druid`。
+
+Kafka允许的`Exactly once`语义其实和它的特性有很大关系：
+* 每条消息有序和不可变的放在partition中，同时分配一个递增的offset。这样通过<partition, offset>就可以确定一条消息，并且它的前辈和后辈都是不变的。
+* 消费者拉数据，从而由消费者自身进行流控。
+* 消费者可以根据<partition, offset>寻找消息，允许message rewind，并且根据消息的metadata可以保证消息接收的不重不丢。
 
 ## High Available
 
