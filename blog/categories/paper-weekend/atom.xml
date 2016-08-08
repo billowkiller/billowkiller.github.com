@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Paper Weekend | Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/blog/categories/paper-weekend/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-08-08T12:14:34+08:00</updated>
+  <updated>2016-08-08T12:18:10+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Column-Stores vs. Row-Stores]]></title>
+    <title type="html"><![CDATA[Mesa: Google's near real-time OLAP warehouse]]></title>
     <link href="http://billowkiller.github.io/blog/2016/08/06/mesa/"/>
     <updated>2016-08-06T17:23:00+08:00</updated>
     <id>http://billowkiller.github.io/blog/2016/08/06/mesa</id>
