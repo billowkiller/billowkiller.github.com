@@ -174,6 +174,59 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-08-06T17:23:00+08:00" pubdate data-updated="true">Aug 6<span>th</span>, 2016</time>
+        
+           | <a href="/blog/2016/08/06/mesa/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2016/08/06/mesa/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2016/08/06/mesa/">Column-Stores vs. Row-Stores</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><blockquote>
+  <p>Ashish et al. VLDB 2014</p>
+</blockquote>
+
+<p>谷歌Mesa是一个服务于谷歌广告业务的近实时分析型数据仓库，主要用于广告主的报表、内部审计和预测服务。作为底层的存储系统，Mesa能处理PB级的数据，每秒百万的行更新，并且需要应对每日上亿的查询请求，因此它需要满足的设计目标是：</p>
+
+<blockquote>
+  <p>near real-time data ingestion and query ability, as well as high availability, reliability, fault tolerance, and scalability for large data and query volumes.</p>
+</blockquote>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2016/08/06/mesa/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-07-31T17:23:00+08:00" pubdate data-updated="true">Jul 31<span>st</span>, 2016</time>
         
            | <a href="/blog/2016/07/31/column-stores-row-stores/#disqus_thread"
@@ -614,55 +667,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-12-01T09:50:00+08:00" pubdate data-updated="true">Dec 1<span>st</span>, 2015</time>
-        
-           | <a href="/blog/2015/12/01/hadoop-tunning/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2015/12/01/hadoop-tunning/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2015/12/01/hadoop-tunning/">Hadoop Tunning</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>Hadoop的调优涉及到整个MapReduce的各个过程，并且要对每个参数的意义和Counter信息有一定的了解。也就是说，根据Counter的信息推测哪些MapReduce阶段可能存在性能瓶颈，并且根据这个瓶颈理解对应的Hadoop 框架中的处理逻辑，进而可以调整相关参数的大小或程序的行为。</p>
-
-<p>从大面上来看，MapReduce的瓶颈可能存在以下图中的各个部分。</p>
-
-<p><img src="http://ww2.sinaimg.cn/large/74311666jw1eyjx8zpfz2j20rq0cegna.jpg" width="500px" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2015/12/01/hadoop-tunning/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -686,6 +690,8 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/08/06/mesa/">Column-Stores vs. Row-Stores</a>
+    
     <a class="list-group-item " href="/blog/2016/07/31/column-stores-row-stores/">Column-Stores vs. Row-Stores</a>
     
     <a class="list-group-item " href="/blog/2016/07/20/hbase/">Hbase Introduction</a>
@@ -693,8 +699,6 @@ body {
     <a class="list-group-item " href="/blog/2016/07/13/realtime-data-processing-at-facebook/">Realtime Data Processing at Facebook</a>
     
     <a class="list-group-item " href="/blog/2016/04/09/rating/">Funny Facts About Rating</a>
-    
-    <a class="list-group-item " href="/blog/2016/04/06/kafka/">Kafka Introduction</a>
     
   </div>
 </section>
@@ -724,7 +728,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/paper-weekend/index.html">
-        <span class="badge">6</span>
+        <span class="badge">7</span>
         Paper Weekend
       </a>
     

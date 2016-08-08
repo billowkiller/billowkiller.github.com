@@ -174,6 +174,76 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-02T02:18:00+08:00" pubdate data-updated="true">Aug 2<span>nd</span>, 2014</time>
+        
+           | <a href="/blog/2014/08/02/probability-problem/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/08/02/probability-problem/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/02/probability-problem/">Probability Problem</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p><strong>概念：贝叶斯公式</strong></p>
+
+<p>贝叶斯定理是关于随机事件$A$和$B$的条件概率（或边缘概率）的一则定理。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/BILLOWKILLER-PC/e824b899a9014c086ec5068f097b02087bf4f419_zps22b92ed4.gif" alt="" /></p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>其中$P(A</td>
+      <td>B)$是在$B$发生的情况下$A$发生的可能性。</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="section">一、抛硬币问题</h2>
+
+<p><strong>问题1 有一苹果，两个人抛硬币来决定谁吃这个苹果，先抛到正面者吃。问先抛这吃到苹果的概率是多少？</strong></p>
+
+<p>假设第一个人吃到苹果的概率是P。第一次抛硬币若为正面则先抛者赢；若为负面且后抛者也为负面，则主动权回到先抛者，回到原问题。</p>
+
+<p>得到关系：P = 1/2 + 1/2 * 1/2 * P  </p>
+
+<p>得出 P = 2/3</p>
+
+<p><strong>问题2 游戏规则为，连续2次抛到硬币朝上，则游戏结束。问平均抛多少次游戏可以结束？</strong></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/08/02/probability-problem/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-22T09:18:00+08:00" pubdate data-updated="true">Jul 22<span>nd</span>, 2014</time>
         
            | <a href="/blog/2014/07/22/network-programming/#disqus_thread"
@@ -680,69 +750,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-05-09T16:00:00+08:00" pubdate data-updated="true">May 9<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/05/09/random-process/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/05/09/random-process/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/09/random-process/">Random Process</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>本文用来记录一些随机过程。随机过程是处理包含时间以及数据序列的概率模型。可用于一下数据序列的建模：</p>
-
-<ul>
-  <li>每天的股票价格数据序列</li>
-  <li>交通网络中的每个点的交通负荷数据序列</li>
-  <li>雷达对飞机的定位数据序列</li>
-</ul>
-
-<p>序列中的每个数据都视为一个随机变量，所以随机序列就是一串有限或无限的随机变量序列，但是更加强调：</p>
-
-<ul>
-  <li>过程中产生的数据序列之间的<strong>相关</strong>关系。比如股票的未来价格与历史价格关系。</li>
-  <li>对整个过程中<strong>长期均值</strong>感兴趣。比如有多大比例的时间机器出于闲置。</li>
-  <li>需要刻画某些<strong>边界事件</strong>的似然或频率。在给定时间内，线路同时出于忙碌的概率，计算机网络中缓冲器数据溢出的频率。</li>
-</ul>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-4-16/62147816.jpg" width="500px" /></p>
-
-<p>下面讨论几个随机过程。</p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/05/09/random-process/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -766,6 +773,8 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/08/06/mesa/">Column-Stores vs. Row-Stores</a>
+    
     <a class="list-group-item " href="/blog/2016/07/31/column-stores-row-stores/">Column-Stores vs. Row-Stores</a>
     
     <a class="list-group-item " href="/blog/2016/07/20/hbase/">Hbase Introduction</a>
@@ -773,8 +782,6 @@ body {
     <a class="list-group-item " href="/blog/2016/07/13/realtime-data-processing-at-facebook/">Realtime Data Processing at Facebook</a>
     
     <a class="list-group-item " href="/blog/2016/04/09/rating/">Funny Facts About Rating</a>
-    
-    <a class="list-group-item " href="/blog/2016/04/06/kafka/">Kafka Introduction</a>
     
   </div>
 </section>
@@ -804,7 +811,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/paper-weekend/index.html">
-        <span class="badge">6</span>
+        <span class="badge">7</span>
         Paper Weekend
       </a>
     
