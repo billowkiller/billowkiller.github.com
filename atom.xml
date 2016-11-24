@@ -4,7 +4,7 @@
   <title><![CDATA[Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-08-08T12:18:10+08:00</updated>
+  <updated>2016-11-24T13:18:00+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,361 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[MillWheel: Fault-Tolerant Stream Processing at Internet Scale]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/11/20/millwheel/"/>
+    <updated>2016-11-20T17:23:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/11/20/millwheel</id>
+    <content type="html"><![CDATA[<h2 id="intro-and-issues">Intro and Issues</h2>
+<p>MillWheel 是 Google 开发的一个低延时的流式处理系统。用户指定计算的 DAG 图，以及图中每个节点的计算代码，MillWheel 负责数据流的计算，保证整个计算过程的分布式以及容错性。从宏观上看，MillWheel 提供了数据计算的幂等性，在用户视角提供不重不丢的语义。</p>
+
+<p>在论文中，还存在一个使用场景。Google 的 Zeitgeist 服务用来监测网络搜索的趋势，输入端是持续不断的搜索内容，经过异常检测，异常检测通过模型预测来排除false positive，输出 spike 或者 dip 的搜索。这要求解决：</p>
+
+<ul>
+  <li>Persistent storage： 模型预测和峰值判断分别依赖于长期和短期的存储。</li>
+  <li>Low Watermarks: 流量低谷的判断需要有一个标志来判断期待时间窗口内的数据都到达。</li>
+  <li>Duplicate Prevention: 在各种情况下用户无需考虑重复流量，系统保证数据传输和处理的 exactly-once 语义。</li>
+</ul>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-22/53383350.jpg" width="600px" /></p>
+
+<p>综合而言，对比于一般的分布式流式系统，存在一些特别的要求：</p>
+
+<ul>
+  <li>处理数据乱序的问题。</li>
+  <li>处理数据到达延时问题。</li>
+  <li>提供 exactly-once 的保证，尤其在 failover 的时候。</li>
+  <li>需要有持久存储，读写权限暴露给用户，提供保证一致性。</li>
+</ul>
+
+<h2 id="big-ideas">Big Ideas</h2>
+
+<p>从对系统的要求来看，有两个重要的概念：<code>low watermark</code> 和 <code>exactly-once</code>。low watermark 解决前两个问题，exactly-once 解决后两个问题。</p>
+
+<h3 id="low-watermark">low watermark</h3>
+
+<p>low watermark 在原文的作用如下：</p>
+
+<blockquote>
+  <p>The low watermark for a computation provides a bound on the timestamps of future 
+records arriving at that computation.</p>
+</blockquote>
+
+<blockquote>
+  <p>Strip away outliers and offer heuristic low watermark values for pipelines that are more interested in speed than accuracy. </p>
+</blockquote>
+
+<p>即时间窗口内所有事件的时间下限，目的是为了让这个窗口可以正常的划出，更快的计算出结果。它其实是提供了一个折衷, 这个折衷就是在watermark这个点认为不会有比 watermark 值更老的数据到来了，本质上是一个barrier, 即系统中所有正在流动的数据的 timestamp 都大于或等于该 watermark。</p>
+
+<p>之所有需要有这个概念，是由于网络环境或者故障导致数据流乱序，窗口无法判断何时数据已经全部到达。这里的时间计算一般是基于eventtime的，即时间发生时间，如logtime。文中也给了一个应用的例子：</p>
+
+<blockquote>
+  <p>In the case of Zeitgeist, our input would be a continuously arriving set of search queries, and our output would be the set of queries that are spiking or dipping.</p>
+</blockquote>
+
+<blockquote>
+  <p>it is important to be able to distinguish whether a flurry of expected Arabic queries at t = 1296167641 is simply delayed on the wire, or actually not there.</p>
+</blockquote>
+
+<p>波谷由于数据量小，对到达的数据比较敏感，所以需要判断是真的到达波谷，还仅仅是由于延迟导致数据还在传输途中。之前的做法是再设置一个安全时间，延迟几分钟再计算，但安全时间如何设置？过长则影响时效性，过短无法奏效。或者采取右端开放窗口的补偿方法，先产出数据，当延迟数据到来时再予以修改，但需要业务场景适用、下游系统支持修改。</p>
+
+<p>除了aggregation计算对时序性有要求外，一些策略计算可能也会要求数据完整、有序。那么 low watermark 的定义如下：</p>
+
+<pre><code>low watermark of A = min(oldest work of A, low watermark of C: C outputs to A)
+If there are no input streams, the low watermark and oldest work values are equivalent.
+</code></pre>
+
+<p>A 点的 low watermark 的值等于 A 点所有待处理的消息的 timestamp 和 A 所有上游 C 的 low watermark 的最小值。这是一个递归的定义，终止条件处于流的源头，即由外围注入的injection或者数据订阅端生成；生成之后会驱动 watermark 传递给下游。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-23/12047055.jpg" width="600px" /></p>
+
+<p>由上图可以看出，low watermark 是根据事件到达后的处理时间递增的，反映的是系统中所有 <em>pending work</em>；并且事件其实并不是有序到达和处理的，但是在某个时间可以确保所有的事件都已经到达了，即在文中所强调的：</p>
+
+<blockquote>
+  <p>By waiting for the low watermark of a computation to advance past a certain value, the user can determine that they have a complete picture of their data up to that time</p>
+</blockquote>
+
+<p>对于处于 low watermark 下的事件，有两种处理方案：抛弃或者更正已有的状态。</p>
+
+<p>low watermark 除了提供系统事件处理的完成情况，还有一个作用，触发trigger（文中用Timer）。trigger 实际是窗口内部累积状态的记录器，根据不同的触发类型来累积状态，达到一定的条件就允许外围触发，将窗口内的数据计算后 emit 给下游。MillWheel 的触发条件有 wall time 和 low watermark value，这个交给用户来定义。</p>
+
+<h3 id="exactly-once">exactly-once</h3>
+
+<p>这个概念涉及两个方面：</p>
+
+<ul>
+  <li>Persistent storage available at all nodes in the stream graph</li>
+  <li>Exactly once delivery semantics.</li>
+</ul>
+
+<p>前者的概念好理解，Persistent state 在 MillWheel 中表现为一个键值对，值是 protobuf 的一个二进制字符串。用户代码可以方便的获取和设置各种状态。常用的状态为窗口数据聚合中保存的 counter，join 要使用的 buffer 等。</p>
+
+<p>MillWheel 的状态存储在 bigtable 或者 Spanner 中，另外它还提供一个 soft state，用于内存 cache 或者 聚合。为了保证可能存在的状态不一致性，对所有的 per-key update 都封装在一个原子的操作中，防止在处理过程中可能出现的各种意外。</p>
+
+<p>但是在 failover 或者 load balancing 的时候，计算会被迁移，这时候可能存在 zombie writer 或者 stale writer。因此，为了保证原子性，需要保证每个 key 只有一个 writer 可以写入。MillWheel 的解决方案是给每个 writer 附带一个 sequencer token，后台存储的协调者在每个写入前会检查 token 的有效性使得新 worker 可以阻止其他的 sequencer 的有效性。这其实就是一个 lease 机制，在一段时间内对于特定的key只有一个worker可以写入。</p>
+
+<p>保证 Exactly Once 语义有个很重要的简化途径是将用户的非幂等操作变成幂等。通过以下措施来保证：</p>
+
+<ul>
+  <li>Exactly Once delivery</li>
+  <li>Strong Production</li>
+</ul>
+
+<p>Exactly Once delivery 通常的方法是保证 at least once 基础上进行去重。MillWheel 也是通过这个方法保证，发送方发送数据后没有接收到 ack 重新发送数据。另外接收方接收到数据会进行 state modificaton，这时候将数据的 unique ID 也一并原子写入到后端存储；接收端为了加速去重，使用 bloom filter，这时候需要考虑 false postive，如果发生 filter miss，需要去后端存储进行比较，如果确认是重复数据，会返回 duplicate ACK 通知发送方。</p>
+
+<p>在发送方发送数据之前可以进行 checkpoint，用于 failover 后恢复原来的状态。在发送的数据被 ACK 后，checkpoint可以删除。这个 <code>Checkpoint-&gt;Delivery-&gt;ACK-&gt;GC</code> 的运行模式在 MillWheel 中称为 <code>Strong Production</code>。即使用户代码不是幂等的，在 Strong Production 中，无论 retry 多少次，用户的运行逻辑都是正确的。</p>
+
+<p>与之对应的是 <code>Weak Production</code>，这时的用户代码是幂等的，无需strong procution，即 checkpointing；无需 exactly once delivery（把 deduplication 逻辑去掉）。这在延迟和资源消耗上无疑更加友好，但是对于取消 checkpointing 有一个 straggler latency 问题。在 strong production中，只要 checkpoint 就可以返回上游表示这个阶段的任务结束，但是现在需要下游返回 ack 才可以保证，并且这是级联的。Millwheel 采用 checkpointing 一部分 straggler 的 pending production 来缓解，如下图：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-23/46647429.jpg" width="400px/" /></p>
+
+<h2 id="other-details">Other Details</h2>
+
+<p>MillWheel 集群可以动态扩缩容，根据 key interval 划分计算，并以此通过 master 进行负载分配、均衡。当监控进程检测到机器的负载过高的时候，会进行 key interval 的重分配：split、merge、move。</p>
+
+<p>failover 时，key interval 被分配到新的 owner，它可以从后端存储中获取计算需要的元数据，包括 heap of pending timers 以及 queue of checkpointed productions。一个节点的例子如下，每个计算都是一个pipeline，即输入计算输出。数据的传输通过RPC。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-24/94589760.jpg" width="400px" /></p>
+
+<p>另外关于 low watermark 的管理和流动，Millwheel 是基于一个全局的订阅发布中央系统。</p>
+
+<ul>
+  <li>每个 processer 将自己持有的所有work（in fly, stored, pending）计算出最小的 timestamp发给中央系统。</li>
+  <li>不同的 processer 在不同的 key interval 下，low watermark 也是根据 key interval 来存储。</li>
+  <li>为了保证计算的准确性，订阅发布系统会查询后台存储，以保证每个 key interval 都有 low watermark。感兴趣的节点会订阅每个发送端的 low watermark，计算所有的最小值作为 low watermark。</li>
+  <li>之所以不在中央系统算最小值是为了保证一致性：中央系统的 low watermark 不能大于节点上的，否则在 failover 后容易出现 low watermark 的回退。在节点上计算最小值则保证中央系统永远不会领先于节点上的。</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[BigData Performance Tunning]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/11/19/bigdata-perf-tunning/"/>
+    <updated>2016-11-19T17:23:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/11/19/bigdata-perf-tunning</id>
+    <content type="html"><![CDATA[<h2 id="section">单节点优化</h2>
+
+<h3 id="section-1">增加并发吞吐</h3>
+<ul>
+  <li>IO密集：多进程，多线程，异步，协程</li>
+  <li>CPU密集：多进程，多线程</li>
+</ul>
+
+<p>异步：回调机制、事件驱动</p>
+
+<p>协程(同步模型开发的方式达到异步效果)：Ucontext(glibc)  Bthread（baidu rpc）</p>
+
+<p>除非资源达到瓶颈，否则不排队</p>
+
+<ul>
+  <li>合适并发模型</li>
+  <li>队伍要均衡</li>
+  <li>过长的队伍，及时柔性处理（可丢服务）</li>
+</ul>
+
+<p><em>socket队列改成request队列</em></p>
+
+<h3 id="section-2">去除不必要动作</h3>
+
+<ul>
+  <li>减少网络重连（长连接）</li>
+  <li>减低连接数（连接池）</li>
+  <li>减少线程切换（线程池）</li>
+  <li>减少内存分配和释放（内存池）</li>
+  <li>减少耗时的操作和运算（memset, 浮点运算，除法，指数，对数运算，慎用stl）</li>
+  <li>在线转离线（离线生成词典）</li>
+</ul>
+
+<h3 id="section-3">避免冲突</h3>
+
+<ul>
+  <li>多线程无锁算法
+    <ul>
+      <li>无锁共享数据</li>
+      <li>copy on write</li>
+    </ul>
+  </li>
+  <li>hash冲突
+    <ul>
+      <li>桶如何分配</li>
+      <li>如何减少hash冲突</li>
+    </ul>
+  </li>
+  <li>合理使用锁
+    <ul>
+      <li>所得时间尽可能短</li>
+      <li>减低冲突概率</li>
+      <li>避免死锁   </li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="io">IO优化</h3>
+
+<p>顺序io 600MB/s VS 随机io 100KB/s</p>
+
+<p>随机修改：</p>
+
+<ul>
+  <li>WAL</li>
+  <li>LSM-Tree</li>
+  <li>批量去重，减低读写次数（后链入库，hold去重）</li>
+</ul>
+
+<p>随机读取：</p>
+
+<ul>
+  <li>减少IOPS</li>
+  <li>优化cache，预热cache（发些虚假的query）</li>
+  <li>SSD</li>
+</ul>
+
+<p>kafka</p>
+
+<ul>
+  <li>顺序写磁盘效率比随机写内存还要高，高吞吐</li>
+  <li>重复利用page cache， 直接内存读取直接发送</li>
+</ul>
+
+<h2 id="section-4">集群优化</h2>
+
+<h3 id="section-5">减低数据传输量</h3>
+<ul>
+  <li>数据压缩，cpu和网络io权衡</li>
+  <li>减少交互次数（数据量也降低 header）</li>
+  <li>打包访问</li>
+  <li>减少跨机io</li>
+</ul>
+
+<h3 id="section-6">均衡</h3>
+
+<ul>
+  <li>负载均衡
+    <ul>
+      <li>RR, Random， locality-aware，hash（固定后端）</li>
+    </ul>
+  </li>
+  <li>热点+打散
+    <ul>
+      <li>自动拆分和融合节点</li>
+      <li>自动伸缩容量，弹性</li>
+    </ul>
+  </li>
+  <li>消除长尾（quorum，预测模式）</li>
+  <li>消峰，限流，缓冲 + 延迟处理（优先级机制）</li>
+  <li>丢弃，降级处理 </li>
+</ul>
+
+<h3 id="cache">cache</h3>
+
+<p>有结果cache、【无结果cache、超时cache】反着玩
+只读、读写cache</p>
+
+<h2 id="section-7">系统优化</h2>
+
+<p>容器+混布</p>
+
+<p>全量模型 增量模型</p>
+
+<p>避免局部瓶颈，每个子系统的扩展性很重要</p>
+
+<p>木桶效应</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Cache]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/11/10/cache/"/>
+    <updated>2016-11-10T17:23:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/11/10/cache</id>
+    <content type="html"><![CDATA[<h3 id="cache">单机cache</h3>
+
+<p>数据类型</p>
+
+<ul>
+  <li>简单KV get key, set key, expire key, del key</li>
+  <li>复杂数据机构， MAP， List, Struct</li>
+</ul>
+
+<p>数据持久化</p>
+
+<ul>
+  <li>全内存， 无持久化 （memcache）</li>
+  <li>内存为主，磁盘为辅，半持久化 (redis 定时dump)</li>
+  <li>内存为主，磁盘为辅，提供完全持久化（leveldb， redis aof, 内存映射）</li>
+  <li>全磁盘，提供完全持久化（ssd db）</li>
+</ul>
+
+<p>数据淘汰</p>
+
+<ul>
+  <li>LRU： hash+list、基于Hazard Pointer的无锁实现 适合访问热点场景（浪费内存，时间等）</li>
+  <li>FIFO: 基于queue实现（磁盘用顺序文件）， 适合访问热度较均衡</li>
+</ul>
+
+<p>数据安全</p>
+
+<ul>
+  <li>快照，存储、恢复、备份
+    <ul>
+      <li>实时全量，实时增量，定时全量</li>
+    </ul>
+  </li>
+</ul>
+
+<p>一致性</p>
+
+<ul>
+  <li>主从复制，保证最终一致性。全量同步，增量同步</li>
+</ul>
+
+<p>存储量</p>
+
+<ul>
+  <li>meta和value隔离存储， 顺序io与随机io
+    <ul>
+      <li>meta：leveldb rocksdb</li>
+      <li>value: index+rawfile</li>
+    </ul>
+  </li>
+</ul>
+
+<p>ssd cache:</p>
+
+<ul>
+  <li>leveldb, rocksdb, ssdb，数据容量限制，value（10K）过大容易引起compaction写放大，阻塞请求</li>
+</ul>
+
+<h3 id="cache-1">分布式cache</h3>
+
+<p>cap base原则</p>
+
+<p>多副本：一致性，可靠性，可扩展，副本数</p>
+
+<p>多租户</p>
+
+<ul>
+  <li>隔离（业务、部署、入口、存储、调度）、审计（成本、使用量、功能）</li>
+</ul>
+
+<p>热点</p>
+
+<ul>
+  <li>拆分、多副本、合适引擎（存储、数据结构、架构）</li>
+</ul>
+
+<p>数据均衡：</p>
+
+<ul>
+  <li>hash缺点 偏静态、成倍扩容、容量预先规划</li>
+  <li>slot：基于数据分片，一个集群包含固定slot数量，每条数据属于某个slot</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Mesa: Google's near real-time OLAP warehouse]]></title>
@@ -2815,497 +3170,6 @@ counts = ones.runningReduce((a, b) =&gt; a+b)
 
 <p><img src="http://img.my.csdn.net/uploads/201301/10/1357790607_3097.jpg" width="500px" /></p>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[mapreduce framework]]></title>
-    <link href="http://billowkiller.github.io/blog/2015/07/26/mapreduce-framework/"/>
-    <updated>2015-07-26T17:23:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2015/07/26/mapreduce-framework</id>
-    <content type="html"><![CDATA[<h2 id="mapreduce">MapReduce框架</h2>
-
-<p>mapReduce 的输入是hdfs上存储的一系列文件集。在hadoop中，这些文件被一种定义了如何分割一个文件成分片的input format来分割，一个分片是一个文件基于字节的可以被一个map任务加载的一个块。</p>
-
-<ul>
-  <li>每个map任务被分为以下阶段：<code>record reader</code>，<code>mapper</code>，<code>combiner</code>，<code>partitioner</code>。Map任务的输出叫中间数据，包括keys和values，发送到reduce端。</li>
-  <li>Reduce任务分为以下阶段：<code>shuffle</code>，<code>sort</code>，<code>reduce</code>，<code>output format</code>。运行map任务的节点会尽量选择数据所在的节点。这种情况下，不会出现网络传输，在本地节点就可以完成计算。</li>
-</ul>
-
-<p>过程如图所示，接下来的章节会一一介绍。</p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-7-3/75294350.jpg" alt="" /></p>
-
-<!--more-->
-
-<h3 id="input-format">Input Format</h3>
-
-<p>Record reader会把根据input fromat生成输入分片翻译成records。Record reader的目的是把数据解析成记录，而不是解析数据本身。它把数据以键值对的形式传递给mapper。通常情况下键是偏移量，值是这条记录的整个字节块。从Input file到map的中间过程如下图所示</p>
-
-<p><img src="http://i12.tietuku.com/691b0fd1648b0497.png" width="450px" /></p>
-
-<p>InputFormat其实做了三件事：</p>
-
-<ul>
-  <li>校验job的input configuration（比如，查看数据是否存在）。</li>
-  <li>split输入的数据文件为逻辑上分片InputSplit，每个InputSplit给接下来的map task处理。</li>
-  <li>创建RecordReader从InputSplit中解析出一个个键值对，这个键值对就是Record。</li>
-</ul>
-
-<p>如果要自定义InputFormat则最重要的是两个方法：</p>
-
-<ul>
-  <li><code>public List&lt;InputSplit&gt; getSplits(JobContext context)</code></li>
-  <li><code>public RecordReader createRecordReader(InputSplit split, TaskAttemptContext context)</code></li>
-</ul>
-
-<p>通常在处理文本文件的时候，为了保证记录的完整性，RecorderReader会读取超过InputSplit边界的数据。</p>
-
-<p><img src="http://i5.tietuku.com/392e9f9f99737b4d.jpg" alt="" /></p>
-
-<p>在上图中共有三个InputSplit，在hadoop中默认的InputSplit大小为HDFS中每个Block的大小，所以共产生三个map task，它们读取数据的情况如下：</p>
-
-<table>
-  <thead>
-    <tr>
-      <th> </th>
-      <th>Start</th>
-      <th>Actual Start</th>
-      <th>End</th>
-      <th>Line(s)</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Mapper1</td>
-      <td>B1:0</td>
-      <td>B1:0</td>
-      <td>B2:150</td>
-      <td>L1, L2, L3</td>
-    </tr>
-    <tr>
-      <td>Mapper2</td>
-      <td>B2:128</td>
-      <td>B2:150</td>
-      <td>B3:300</td>
-      <td>L4, L5, L6</td>
-    </tr>
-    <tr>
-      <td>Mapper3</td>
-      <td>B3:256</td>
-      <td>B3:300</td>
-      <td>B3:300</td>
-      <td>N/A</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>现有的InputFormat包括：</p>
-
-<ul>
-  <li>TextInputFormat，Hadoop中默认的InputFormat，每行都是一个record，以偏移量为key</li>
-  <li>KeyValueTextInputFormat， 可以指定key value分割符的TextInputFormat</li>
-  <li>NLineInputFormat, mapper接受固定行数的记录</li>
-  <li>SequenceFileInputFormat，二进制的KV
-    <ul>
-      <li>SequenceFileAsTextInputFormat，文本形式的KV</li>
-      <li>SequenceFileAsBinaryInputFormat</li>
-      <li>FixedLengthInputFormat</li>
-    </ul>
-  </li>
-  <li>MultipleInputs</li>
-  <li>DBInputFormat</li>
-</ul>
-
-<h3 id="map">Map</h3>
-
-<p>Map阶段，会对每个从RecordReader读取的Record键值对执行用户代码，这些键值对又叫中间键值对。键和值的选择不是任意的，并且对MapReduce job的成功非常重要。键会用来分组，值是reducer端用来分析的数据。。</p>
-
-<h3 id="combiner">Combiner</h3>
-<p>Combiner 是一个map阶段分组数据，可选的，局部reducer。它根据用户提供的方法在一个mapper范围内根据中间键去聚合值。例如：数的总和是各个部分数量的和，你可以先计算中间的数目，最后再把所有中间数目加起来。很多情况下，这样能减少数据的网络传输量。发送（hello world，1）三次很显然要比发送（hello world，3）需要更多的网络传输字节量。</p>
-
-<p><img src="http://i12.tietuku.com/009804b71667c5b9.png" width="500px" /></p>
-
-<p>上图所示就是combiner发生的时机，它发生在map side写入磁盘的时候，可能会发生两次，一次是在Spill的时候，一次是在Merge的时候。在这两个阶段之前，是有一个sort的过程，这是为了最大化地提高combiner效率。其实从结构和作用来看，combiner函数和reducer函数的作用是相同的，很多情况下，Combiner也是直接用Reducer。</p>
-
-<h3 id="partitioner">Partitioner</h3>
-
-<p>Partitioner很简单，它决定哪个reducer接收该mapper数据记录，默认的是一个hash函数，对key进行hash之后取reducer个数的模。Partitioner会获取从mapper（或combiner）来的键值对，并分割成分片，每个reducer一个分片。默认用哈希值，典型使用md5sum。然后partitioner根据reduce的个数执行取余运算：key.hashCode() % (number of reducers)。这样能随即均匀的根据key分发数据到reduce，但仍然要保证不同mapper的相同key要到同一个reduce。Partitioner也可以自定义，使用更高级的样式，例如排序。然而，更改partitioner很少用。Partitioner的每个map的数据会写到本地磁盘，并等待对应的reducer检测，拿走数据。</p>
-
-<h3 id="shuffle-and-sort">Shuffle and sort</h3>
-<p>虽然说这个阶段主要是在Reduce端，但是Map端的一些行为也会影响到Reduce端。</p>
-
-<p><img src="http://i5.tietuku.com/952140624345e77f.png" width="500px" /></p>
-
-<p>上图是Map端的Shuffle过程，从整个过程来看，最重的部分在于Spill和Merge这两个I/O相关的操作，所有的数据需要从磁盘中读取后又重新写入到磁盘中，所以理想情况下是能够将所有mapper的output都装入到内存中。</p>
-
-<p>Reduce任务开始于shuffle和sort阶段，Reduce将会开启多个fetcher从每个节点上的shuffle service中获取数据流。这一阶段获取partitioner的输出文件，并下载到reduce运行的本地机器。在下载的过程中，map的output首先会写入到内存中并进行排序，在数据达到一定量之后spill到磁盘，会有一个后台程序不断merge这些spilled file。最终，所有的output会合并成一个大的文件。这一阶段不能自定义，由框架自动处理。需要做的只是key的选择和可以自定义个用于分组的比较器。整个过程如下图所示。</p>
-
-<p><img src="http://i5.tietuku.com/d11419d045f44d9a.png" width="500px" /></p>
-
-<h3 id="reduce">Reduce</h3>
-<p>Reduce 任务会把分组的数据作为输入并对每个key组执行reduce方法代码。方法会传递key和可以相关的所有值得迭代集合。很多的处理会在这个方法里执行，也就会有很多的模式。一旦reduce方法完成，会发送0或多个键值对到output format。跟map一样，不同的reduce依据不同的逻辑情形而不同。</p>
-
-<h3 id="output-format">Output format</h3>
-<p>Output Format会把reduce阶段的输出键值对根据record writer写到文件里。默认用tab分割键值对，用换行分割不同行。这里也可以自定义为更丰富的输出格式，最后，数据被写到hdfs。整个过程类似于InputFormat。</p>
-
-<p><img src="http://i12.tietuku.com/cbdb549a3e19f898.png" width="500px" /></p>
-
-<p>LazyOutputFormat 用来保证output (part-r-nnnnn) files有数据，不会存在空文件。</p>
-
-<h3 id="output-commiter">Output Commiter</h3>
-
-<p>Hadoop使用<code>OutputCommitter</code>来保证作业和任务的事务性。在旧的API中需要显示的使用<code>setOutputCommitter</code>或者设置<code>mapred.output.committer.class</code>。
-而在新的API中，<code>OutputCommitter</code>是由<code>OutputFormat</code>通过<code>getOutputCommitter()</code>方法决定的。默认的是<code>FileOutputCommitter</code>，它适用于所有的基于文件的MapReduce。</p>
-
-<p><code>OutputCommitter</code>API如下：</p>
-
-<pre><code>public abstract class OutputCommitter {
-	public abstract void setupJob(JobContext jobContext) throws IOException; 
-	public void commitJob(JobContext jobContext) throws IOException { } 
-	public void abortJob(JobContext jobContext, JobStatus.State state) throws IOException { }
-	public abstract void setupTask(TaskAttemptContext taskContext) throws IOException;
-	public abstract boolean needsTaskCommit(TaskAttemptContext taskContext) throws IOException;
-	public abstract void commitTask(TaskAttemptContext taskContext) throws IOException;
-	public abstract void abortTask(TaskAttemptContext taskContext) throws IOException;
-}
-</code></pre>
-
-<p><code>setupJob</code>方法在job运行前就被调用，用来服务于作业的初始化，类似创建作业和task的临时目录。</p>
-
-<p>job成功后会调用<code>commitJob()</code>方法，用于删除临时目录和创建<em>_SUCCESS</em>文件。如果job失败，则调用<code>abortJob()</code>方法
-表示作业失败或者被kill，默认情况下会删除临时目录。</p>
-
-<p>在task级别的操作类似。Hadoop框架会保证在一个task中的多个task attempt中，只有一个会commit，其他abort。有两种情况：</p>
-
-<ul>
-  <li>第一个attempt失败的时候会abort，第二个attempt如果成功则会commit。</li>
-  <li>对于预测任务，只要有一个首先成功的话会commit，另外一个则abort。</li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[PID File Analysis]]></title>
-    <link href="http://billowkiller.github.io/blog/2015/07/26/pid-file-analysis/"/>
-    <updated>2015-07-26T16:57:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2015/07/26/pid-file-analysis</id>
-    <content type="html"><![CDATA[<h1 id="pid-">pid 文件浅析</h1>
-
-<p>在Linux系统的目录/var/run下面一般我们都会看到很多的*.pid文件。而且往往新安装的程序在运行后也会在/var/run目录下面产生自己的pid文件。那么这些pid文件有什么作用呢？它的内容又是什么呢？</p>
-
-<!--more-->
-
-<h3 id="pid">pid文件的内容</h3>
-
-<p>pid文件为文本文件，内容只有一行, 记录了该进程的ID。
-用cat命令可以看到。</p>
-
-<h3 id="pid-1">pid文件的作用</h3>
-
-<p>防止进程启动多个副本。只有获得pid文件固定路径固定文件名)写入权限(F_WRLCK)的进程才能正常启动并把自身的PID写入该文件中。其它同一个程序的多余进程则自动退出。</p>
-
-<h3 id="section">编程技巧</h3>
-
-<p>调用fcntl设置pid文件的锁定F_SETLK状态，其中锁定的标志位F_WRLCK。
-如果成功锁定，则写入进程当前PID，进程继续往下执行。
-如果锁定不成功，说明已经有同样的进程在运行了，当前进程结束退出。</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>pid usage</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="n">lock</span><span class="p">.</span><span class="n">l_type</span> <span class="o">=</span> <span class="n">F_WRLCK</span><span class="p">;</span>
-</span><span class="line"><span class="n">lock</span><span class="p">.</span><span class="n">l_whence</span> <span class="o">=</span> <span class="n">SEEK_SET</span><span class="p">;</span>
-</span><span class="line"><span class="k">if</span> <span class="p">(</span><span class="n">fcntl</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">F_SETLK</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lock</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">){</span>
-</span><span class="line">    <span class="c1">//锁定不成功, 退出......</span>
-</span><span class="line"><span class="p">}</span>
-</span><span class="line"><span class="n">sprintf</span> <span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="s">&quot;%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="n">pid</span><span class="p">);</span>
-</span><span class="line"><span class="n">pidsize</span> <span class="o">=</span> <span class="n">strlen</span><span class="p">(</span><span class="n">buf</span><span class="p">);</span>
-</span><span class="line"><span class="k">if</span> <span class="p">((</span><span class="n">tmp</span> <span class="o">=</span> <span class="n">write</span> <span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="n">pidsize</span><span class="p">))</span> <span class="o">!=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">pidsize</span><span class="p">){</span>
-</span><span class="line">    <span class="c1">//写入不成功, 退出......</span>
-</span><span class="line"><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<h3 id="section-1">一些注意事项：</h3>
-
-<ol>
-  <li>如果进程退出，则该进程加的锁自动失效。</li>
-  <li>如果进程关闭了该文件描述符fd， 则加的锁失效。(整个进程运行期间不能关闭此文件描述符)</li>
-  <li>锁的状态不会被子进程继承。如果进程关闭则锁失效而不管子进程是否在运行。
- (Locks are associated with processes. A process can only have one kind of lock set for each byte of a given file. When any file descriptor for that file is closed by the process, all of the locks that process holds on that file are released, even if the locks were made using other descripors that remain open. Likewise, locks are released when a process exits, and are not inherited by child processes created using fork.)</li>
-</ol>
-
-<h3 id="section-2">其他</h3>
-
-<p><strong>C的fcntl函数：</strong></p>
-
-<pre><code>int fcntl(int fd, int cmd, struct flock *lock);
-</code></pre>
-
-<p>参数cmd代表欲垄断的号召</p>
-
-<ul>
-  <li>F_DUPFD 复制参数fd的文件描写符，厉行获胜则归来新复制的文件描写符，</li>
-  <li>F_GETFD 获得close-on-exec符号，若些符号的FD_CLOEXEC位为0，代表在调用exec()相干函数时文件将不会关闭</li>
-  <li>F_SETFD 设置close-on-exec符号，该符号以参数arg的 FD_CLOEXEC位定夺</li>
-  <li>F_GETFL 获得open()设置的符号</li>
-  <li>F_SETFL 改换open()设置的符号</li>
-  <li>F_GETLK 获得文件锁定的事态，依据lock的描写，定夺是否上文件锁</li>
-  <li>F_SETLK 设置文件锁定的事态，此刻flcok，构造的l_tpye值定然是F_RDLCK、F_WRLCK或F_UNLCK，
-万一无法发生锁定，则归来-1</li>
-  <li>F_SETLKW 是F_SETLK的阻塞版本，在无法获得锁时会进去睡眠事态，万一能够获得锁可能捉拿到信号则归来</li>
-</ul>
-
-<p>参数lock指针为flock构造指针定义如下</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>flock structure</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">struct</span> <span class="n">flock</span> <span class="p">{</span>
-</span><span class="line">	<span class="p">...</span>
-</span><span class="line">	<span class="kt">short</span> <span class="n">l_type</span><span class="p">;</span>
-</span><span class="line">	<span class="kt">short</span> <span class="n">l_whence</span><span class="p">;</span>
-</span><span class="line">	<span class="kt">off_t</span> <span class="n">l_start</span><span class="p">;</span> <span class="err">锁定区域的开关位置</span>
-</span><span class="line">	<span class="kt">off_t</span> <span class="n">l_len</span><span class="p">;</span> <span class="err">锁定区域的大小</span>
-</span><span class="line">	<span class="n">pid_t</span> <span class="n">l_pid</span><span class="p">;</span> <span class="err">锁定动作的历程</span>
-</span><span class="line">	<span class="p">...</span>
-</span><span class="line"><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>1_type有三种事态：</p>
-
-<ul>
-  <li>F_RDLCK读取锁（分享锁）</li>
-  <li>F_WRLCK写入锁（排斥锁）</li>
-  <li>F_UNLCK解锁</li>
-</ul>
-
-<p>l_whence也有三种措施</p>
-
-<ul>
-  <li>SEEK_SET以文件开始为锁定的起始位置</li>
-  <li>SEEK_CUR以现在文件读写位置为锁定的起始位置</li>
-  <li>SEEK_END以文件尾为锁定的起始位置</li>
-</ul>
-
-<p><strong>Python用法:</strong></p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>test_fcntl.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="kn">import</span> <span class="nn">signal</span><span class="o">,</span> <span class="nn">fcntl</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">time</span>
-</span><span class="line">
-</span><span class="line"><span class="k">def</span> <span class="nf">signal_handler</span><span class="p">(</span><span class="n">signum</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
-</span><span class="line">    <span class="n">fcntl</span><span class="o">.</span><span class="n">flock</span><span class="p">(</span><span class="n">pid_file</span><span class="p">,</span> <span class="n">fcntl</span><span class="o">.</span><span class="n">LOCK_UN</span><span class="p">)</span>
-</span><span class="line">    <span class="n">pid_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-</span><span class="line">    <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">pid_path</span><span class="p">)</span>
-</span><span class="line">    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-</span><span class="line">
-</span><span class="line"><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
-</span><span class="line">    <span class="n">pid_path</span> <span class="o">=</span> <span class="s">&#39;test.pid&#39;</span>
-</span><span class="line">    <span class="n">pid_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">pid_path</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
-</span><span class="line">    <span class="n">fcntl</span><span class="o">.</span><span class="n">flock</span><span class="p">(</span><span class="n">pid_file</span><span class="p">,</span> <span class="n">fcntl</span><span class="o">.</span><span class="n">LOCK_EX</span> <span class="o">|</span> <span class="n">fcntl</span><span class="o">.</span><span class="n">LOCK_NB</span><span class="p">)</span>
-</span><span class="line">    <span class="n">pid_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">())</span>
-</span><span class="line">    <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">signal_handler</span><span class="p">)</span>
-</span><span class="line">    <span class="k">while</span><span class="p">(</span><span class="bp">True</span><span class="p">):</span>
-</span><span class="line">        <span class="k">print</span> <span class="s">&quot;Hello World&quot;</span>
-</span><span class="line">        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Java Log4j]]></title>
-    <link href="http://billowkiller.github.io/blog/2015/07/26/java-log4j/"/>
-    <updated>2015-07-26T15:28:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2015/07/26/java-log4j</id>
-    <content type="html"><![CDATA[<h2 id="java-log4j-">Java Log4j 使用记录</h2>
-
-<p>Log4j即为Java的日志记录框架，除了Java语言外，它还支持其他的语言接口：C、C++、.Net和PL/SQL。说道日志框架，其他使用较多的日志框架还包括Logback、SLF4J Simple Logging、Java Util Logging，这些日志框架都是大同小异，目的都是用来记录程序运行的状态。它们的区别主要是在用法和性能上，由于日志通常涉及到IO读写磁盘（或者是阻塞或者是异步），这需要耗费时间，假设应用系统的日志比较庞大，对性能要求比较高，那么就需要好好斟酌下使用的框架。这里有个图可以直观感受下几个框架的区别：</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/log%20comparision_zpstrg3kc1m.png" alt="image" /></p>
-
-<p>上图中的数字是每秒的日志写入行数，<a href="https://docs.google.com/spreadsheet/ccc?key=0Alceaf46X4GPdHBoLTdYQ29nRDh6V1dRY00zT1FwWWc&amp;usp=sharing">点击更详细的信息</a>。</p>
-
-<!--more-->
-
-<h2 id="hello-word-example">Hello Word Example</h2>
-
-<p>示例是使用maven来组织的。maven用的越多，就越觉得它的方便，不用关心jar包的管理，开发、测试和发布都只需要一行命令，还能还IDE完美的融合。</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>pom.xml</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-</pre></td><td class="code"><pre><code class="xml"><span class="line"><span class="nt">&lt;dependency&gt;</span>
-</span><span class="line">    <span class="nt">&lt;groupId&gt;</span>log4j<span class="nt">&lt;/groupId&gt;</span>
-</span><span class="line">    <span class="nt">&lt;artifactId&gt;</span>log4j<span class="nt">&lt;/artifactId&gt;</span>
-</span><span class="line">    <span class="nt">&lt;version&gt;</span>1.2.17<span class="nt">&lt;/version&gt;</span>
-</span><span class="line"><span class="nt">&lt;/dependency&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>创建log4j.properties文件，放在resources文件夹下，这个文件夹的路径是src/main/resources。</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>log4j.properties</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-</pre></td><td class="code"><pre><code class="properties"><span class="line"><span class="c"># Root logger option</span>
-</span><span class="line"><span class="na">log4j.rootLogger</span><span class="o">=</span><span class="s">DEBUG, stdout, file</span>
-</span><span class="line">
-</span><span class="line"><span class="c"># Redirect log messages to console</span>
-</span><span class="line"><span class="na">log4j.appender.stdout</span><span class="o">=</span><span class="s">org.apache.log4j.ConsoleAppender</span>
-</span><span class="line"><span class="na">log4j.appender.stdout.Target</span><span class="o">=</span><span class="s">System.out</span>
-</span><span class="line"><span class="na">log4j.appender.stdout.layout</span><span class="o">=</span><span class="s">org.apache.log4j.PatternLayout</span>
-</span><span class="line"><span class="na">log4j.appender.stdout.layout.ConversionPattern</span><span class="o">=</span><span class="s">%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n</span>
-</span><span class="line">
-</span><span class="line"><span class="c"># Redirect log messages to a log file, support file rolling.</span>
-</span><span class="line"><span class="na">log4j.appender.file</span><span class="o">=</span><span class="s">org.apache.log4j.RollingFileAppender</span>
-</span><span class="line"><span class="na">log4j.appender.file.File</span><span class="o">=</span><span class="s">C:\\log4j-application.log</span>
-</span><span class="line"><span class="na">log4j.appender.file.MaxFileSize</span><span class="o">=</span><span class="s">5MB</span>
-</span><span class="line"><span class="na">log4j.appender.file.MaxBackupIndex</span><span class="o">=</span><span class="s">10</span>
-</span><span class="line"><span class="na">log4j.appender.file.layout</span><span class="o">=</span><span class="s">org.apache.log4j.PatternLayout</span>
-</span><span class="line"><span class="na">log4j.appender.file.layout.ConversionPattern</span><span class="o">=</span><span class="s">%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>说明下ConversionPattern中的符号和参数：</p>
-
-<ol>
-  <li><code>%d{yyyy-MM-dd HH:mm:ss}</code> 日期和时间</li>
-  <li><code>%-5p</code> 日志优先级, 输出DEBUG、ERROR等. <code>-5</code>是可选的, 格式化输出宽度，为了更好的输出效果.</li>
-  <li><code>%c{1}</code> 是日志名称，通过getLogger()设置, 可以参考<a href="http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html">log4j PatternLayout guide</a>.</li>
-  <li><code>%L</code> 打印日志的句子在源文件中的行数.</li>
-  <li><code>%m%n</code> 打印的日志信息和换行符.</li>
-</ol>
-
-<p>上述设置的输出效果是：</p>
-
-<pre><code>2014-07-02 20:52:39 DEBUG className:200 - This is debug message
-2014-07-02 20:52:39 DEBUG className:201 - This is debug message2
-</code></pre>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>HelloExample.java</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-<span class="line-number">29</span>
-<span class="line-number">30</span>
-<span class="line-number">31</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kn">import</span> <span class="nn">org.apache.log4j.Logger</span><span class="o">;</span>
-</span><span class="line">
-</span><span class="line"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloExample</span><span class="o">{</span>
-</span><span class="line">
-</span><span class="line">    <span class="kd">final</span> <span class="kd">static</span> <span class="n">Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="n">HelloExample</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
-</span><span class="line">
-</span><span class="line">    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line">
-</span><span class="line">        <span class="n">HelloExample</span> <span class="n">obj</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HelloExample</span><span class="o">();</span>
-</span><span class="line">        <span class="n">obj</span><span class="o">.</span><span class="na">runMe</span><span class="o">(</span><span class="s">&quot;billowkiller&quot;</span><span class="o">);</span>
-</span><span class="line">    <span class="o">}</span>
-</span><span class="line">
-</span><span class="line">    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">runMe</span><span class="o">(</span><span class="n">String</span> <span class="n">parameter</span><span class="o">){</span>
-</span><span class="line">
-</span><span class="line">        <span class="k">if</span><span class="o">(</span><span class="n">logger</span><span class="o">.</span><span class="na">isDebugEnabled</span><span class="o">())</span> <span class="o">{</span>
-</span><span class="line">            <span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">&quot;This is debug : &quot;</span> <span class="o">+</span> <span class="n">parameter</span><span class="o">);</span>
-</span><span class="line">        <span class="o">}</span>
-</span><span class="line">        <span class="k">if</span><span class="o">(</span><span class="n">logger</span><span class="o">.</span><span class="na">isInfoEnabled</span><span class="o">())</span> <span class="o">{</span>
-</span><span class="line">            <span class="n">logger</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">&quot;This is info : &quot;</span> <span class="o">+</span> <span class="n">parameter</span><span class="o">);</span>
-</span><span class="line">        <span class="o">}</span>
-</span><span class="line">        <span class="n">logger</span><span class="o">.</span><span class="na">warn</span><span class="o">(</span><span class="s">&quot;This is warn : &quot;</span> <span class="o">+</span> <span class="n">parameter</span><span class="o">);</span>
-</span><span class="line">        <span class="n">logger</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">&quot;This is error : &quot;</span> <span class="o">+</span> <span class="n">parameter</span><span class="o">);</span>
-</span><span class="line">        <span class="n">logger</span><span class="o">.</span><span class="na">fatal</span><span class="o">(</span><span class="s">&quot;This is fatal : &quot;</span> <span class="o">+</span> <span class="n">parameter</span><span class="o">);</span>
-</span><span class="line">
-</span><span class="line">        <span class="k">try</span><span class="o">{</span>
-</span><span class="line">            <span class="mi">1</span><span class="o">/</span><span class="mi">0</span><span class="o">;</span>
-</span><span class="line">        <span class="o">}</span><span class="k">catch</span><span class="o">(</span><span class="n">ArithmeticException</span> <span class="n">ex</span><span class="o">){</span>
-</span><span class="line">            <span class="n">logger</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">&quot;Sorry, something wrong!&quot;</span><span class="o">,</span> <span class="n">ex</span><span class="o">);</span>
-</span><span class="line">        <span class="o">}</span>
-</span><span class="line">    <span class="o">}</span>
-</span><span class="line"><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>可以调整配置文件中的<code>log4j.rootLogger</code>设置日志输出的级别和<code>appender</code>，级别从低到高有DEBUG、INFO、WARN、ERROR、FATAL，一般使用INFO和ERROR。</p>
-
-<p>顺便说一句，类似<code>logger.isDebugEnabled()</code>这种句子在源码中实在是不太美观。如果debug中间的信息不影响程序的性能还是不要使用这种句子，因为log4j自己会检查需不需要输出debug信息。</p>
-
-<h3 id="tips">Tips</h3>
-
-<ul>
-  <li>java -calsspath *.jar 加载多个jar包，而多个jar包中可能包含多个log4j.properties的时候，系统自动加载第一个，忽略后面的。也就是说将你想要使用的log4j.properties所包含的jar文件放在classpath的第一个。</li>
-  <li>mvn的package和test可以分别对应两个不同的log4j.properties中，如下：src/main/resources/log4j.properties, src/test/resources/log4j.properties。</li>
-  <li><strong>需要注意程序的输出级别，用户可以定义不同的配置文件来输出不同级别的信息</strong>。这一点尤其重要：
-    <ul>
-      <li>工具是为程序提供服务的，在开发和调试阶段，日志可以帮助我们更好更快地定位bug；在运行维护阶段，日志系统又可以帮我们记录大部分的异常信息，从而帮助我们更好的完善系统。</li>
-      <li>定义好级别和输出的日志信息，配合使用<code>grep</code>等命令行工具，可以更好的帮助我们定位错误。</li>
-      <li>在设计系统之前需要先确定好日志子系统，在什么情况下程序会发生错误，输出什么样的错误信息，在debug和正常运行的时候日志如何调整，error信息是否需要另外打印。</li>
-    </ul>
-  </li>
-</ul>
 ]]></content>
   </entry>
   

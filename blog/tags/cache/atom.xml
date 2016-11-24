@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: cache | Tech Digging and Sharing]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/cache/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2016-11-24T13:18:00+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Cache]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/11/10/cache/"/>
+    <updated>2016-11-10T17:23:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/11/10/cache</id>
+    <content type="html"><![CDATA[<h3 id="cache">单机cache</h3>
+
+<p>数据类型</p>
+
+<ul>
+  <li>简单KV get key, set key, expire key, del key</li>
+  <li>复杂数据机构， MAP， List, Struct</li>
+</ul>
+
+<p>数据持久化</p>
+
+<ul>
+  <li>全内存， 无持久化 （memcache）</li>
+  <li>内存为主，磁盘为辅，半持久化 (redis 定时dump)</li>
+  <li>内存为主，磁盘为辅，提供完全持久化（leveldb， redis aof, 内存映射）</li>
+  <li>全磁盘，提供完全持久化（ssd db）</li>
+</ul>
+
+<p>数据淘汰</p>
+
+<ul>
+  <li>LRU： hash+list、基于Hazard Pointer的无锁实现 适合访问热点场景（浪费内存，时间等）</li>
+  <li>FIFO: 基于queue实现（磁盘用顺序文件）， 适合访问热度较均衡</li>
+</ul>
+
+<p>数据安全</p>
+
+<ul>
+  <li>快照，存储、恢复、备份
+    <ul>
+      <li>实时全量，实时增量，定时全量</li>
+    </ul>
+  </li>
+</ul>
+
+<p>一致性</p>
+
+<ul>
+  <li>主从复制，保证最终一致性。全量同步，增量同步</li>
+</ul>
+
+<p>存储量</p>
+
+<ul>
+  <li>meta和value隔离存储， 顺序io与随机io
+    <ul>
+      <li>meta：leveldb rocksdb</li>
+      <li>value: index+rawfile</li>
+    </ul>
+  </li>
+</ul>
+
+<p>ssd cache:</p>
+
+<ul>
+  <li>leveldb, rocksdb, ssdb，数据容量限制，value（10K）过大容易引起compaction写放大，阻塞请求</li>
+</ul>
+
+<h3 id="cache-1">分布式cache</h3>
+
+<p>cap base原则</p>
+
+<p>多副本：一致性，可靠性，可扩展，副本数</p>
+
+<p>多租户</p>
+
+<ul>
+  <li>隔离（业务、部署、入口、存储、调度）、审计（成本、使用量、功能）</li>
+</ul>
+
+<p>热点</p>
+
+<ul>
+  <li>拆分、多副本、合适引擎（存储、数据结构、架构）</li>
+</ul>
+
+<p>数据均衡：</p>
+
+<ul>
+  <li>hash缺点 偏静态、成倍扩容、容量预先规划</li>
+  <li>slot：基于数据分片，一个集群包含固定slot数量，每条数据属于某个slot</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

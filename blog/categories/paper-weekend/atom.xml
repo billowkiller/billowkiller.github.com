@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Paper Weekend | Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/blog/categories/paper-weekend/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-08-08T12:18:10+08:00</updated>
+  <updated>2016-11-24T13:18:00+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,134 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[MillWheel: Fault-Tolerant Stream Processing at Internet Scale]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/11/20/millwheel/"/>
+    <updated>2016-11-20T17:23:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/11/20/millwheel</id>
+    <content type="html"><![CDATA[<h2 id="intro-and-issues">Intro and Issues</h2>
+<p>MillWheel 是 Google 开发的一个低延时的流式处理系统。用户指定计算的 DAG 图，以及图中每个节点的计算代码，MillWheel 负责数据流的计算，保证整个计算过程的分布式以及容错性。从宏观上看，MillWheel 提供了数据计算的幂等性，在用户视角提供不重不丢的语义。</p>
+
+<p>在论文中，还存在一个使用场景。Google 的 Zeitgeist 服务用来监测网络搜索的趋势，输入端是持续不断的搜索内容，经过异常检测，异常检测通过模型预测来排除false positive，输出 spike 或者 dip 的搜索。这要求解决：</p>
+
+<ul>
+  <li>Persistent storage： 模型预测和峰值判断分别依赖于长期和短期的存储。</li>
+  <li>Low Watermarks: 流量低谷的判断需要有一个标志来判断期待时间窗口内的数据都到达。</li>
+  <li>Duplicate Prevention: 在各种情况下用户无需考虑重复流量，系统保证数据传输和处理的 exactly-once 语义。</li>
+</ul>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-22/53383350.jpg" width="600px" /></p>
+
+<p>综合而言，对比于一般的分布式流式系统，存在一些特别的要求：</p>
+
+<ul>
+  <li>处理数据乱序的问题。</li>
+  <li>处理数据到达延时问题。</li>
+  <li>提供 exactly-once 的保证，尤其在 failover 的时候。</li>
+  <li>需要有持久存储，读写权限暴露给用户，提供保证一致性。</li>
+</ul>
+
+<h2 id="big-ideas">Big Ideas</h2>
+
+<p>从对系统的要求来看，有两个重要的概念：<code>low watermark</code> 和 <code>exactly-once</code>。low watermark 解决前两个问题，exactly-once 解决后两个问题。</p>
+
+<h3 id="low-watermark">low watermark</h3>
+
+<p>low watermark 在原文的作用如下：</p>
+
+<blockquote>
+  <p>The low watermark for a computation provides a bound on the timestamps of future 
+records arriving at that computation.</p>
+</blockquote>
+
+<blockquote>
+  <p>Strip away outliers and offer heuristic low watermark values for pipelines that are more interested in speed than accuracy. </p>
+</blockquote>
+
+<p>即时间窗口内所有事件的时间下限，目的是为了让这个窗口可以正常的划出，更快的计算出结果。它其实是提供了一个折衷, 这个折衷就是在watermark这个点认为不会有比 watermark 值更老的数据到来了，本质上是一个barrier, 即系统中所有正在流动的数据的 timestamp 都大于或等于该 watermark。</p>
+
+<p>之所有需要有这个概念，是由于网络环境或者故障导致数据流乱序，窗口无法判断何时数据已经全部到达。这里的时间计算一般是基于eventtime的，即时间发生时间，如logtime。文中也给了一个应用的例子：</p>
+
+<blockquote>
+  <p>In the case of Zeitgeist, our input would be a continuously arriving set of search queries, and our output would be the set of queries that are spiking or dipping.</p>
+</blockquote>
+
+<blockquote>
+  <p>it is important to be able to distinguish whether a flurry of expected Arabic queries at t = 1296167641 is simply delayed on the wire, or actually not there.</p>
+</blockquote>
+
+<p>波谷由于数据量小，对到达的数据比较敏感，所以需要判断是真的到达波谷，还仅仅是由于延迟导致数据还在传输途中。之前的做法是再设置一个安全时间，延迟几分钟再计算，但安全时间如何设置？过长则影响时效性，过短无法奏效。或者采取右端开放窗口的补偿方法，先产出数据，当延迟数据到来时再予以修改，但需要业务场景适用、下游系统支持修改。</p>
+
+<p>除了aggregation计算对时序性有要求外，一些策略计算可能也会要求数据完整、有序。那么 low watermark 的定义如下：</p>
+
+<pre><code>low watermark of A = min(oldest work of A, low watermark of C: C outputs to A)
+If there are no input streams, the low watermark and oldest work values are equivalent.
+</code></pre>
+
+<p>A 点的 low watermark 的值等于 A 点所有待处理的消息的 timestamp 和 A 所有上游 C 的 low watermark 的最小值。这是一个递归的定义，终止条件处于流的源头，即由外围注入的injection或者数据订阅端生成；生成之后会驱动 watermark 传递给下游。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-23/12047055.jpg" width="600px" /></p>
+
+<p>由上图可以看出，low watermark 是根据事件到达后的处理时间递增的，反映的是系统中所有 <em>pending work</em>；并且事件其实并不是有序到达和处理的，但是在某个时间可以确保所有的事件都已经到达了，即在文中所强调的：</p>
+
+<blockquote>
+  <p>By waiting for the low watermark of a computation to advance past a certain value, the user can determine that they have a complete picture of their data up to that time</p>
+</blockquote>
+
+<p>对于处于 low watermark 下的事件，有两种处理方案：抛弃或者更正已有的状态。</p>
+
+<p>low watermark 除了提供系统事件处理的完成情况，还有一个作用，触发trigger（文中用Timer）。trigger 实际是窗口内部累积状态的记录器，根据不同的触发类型来累积状态，达到一定的条件就允许外围触发，将窗口内的数据计算后 emit 给下游。MillWheel 的触发条件有 wall time 和 low watermark value，这个交给用户来定义。</p>
+
+<h3 id="exactly-once">exactly-once</h3>
+
+<p>这个概念涉及两个方面：</p>
+
+<ul>
+  <li>Persistent storage available at all nodes in the stream graph</li>
+  <li>Exactly once delivery semantics.</li>
+</ul>
+
+<p>前者的概念好理解，Persistent state 在 MillWheel 中表现为一个键值对，值是 protobuf 的一个二进制字符串。用户代码可以方便的获取和设置各种状态。常用的状态为窗口数据聚合中保存的 counter，join 要使用的 buffer 等。</p>
+
+<p>MillWheel 的状态存储在 bigtable 或者 Spanner 中，另外它还提供一个 soft state，用于内存 cache 或者 聚合。为了保证可能存在的状态不一致性，对所有的 per-key update 都封装在一个原子的操作中，防止在处理过程中可能出现的各种意外。</p>
+
+<p>但是在 failover 或者 load balancing 的时候，计算会被迁移，这时候可能存在 zombie writer 或者 stale writer。因此，为了保证原子性，需要保证每个 key 只有一个 writer 可以写入。MillWheel 的解决方案是给每个 writer 附带一个 sequencer token，后台存储的协调者在每个写入前会检查 token 的有效性使得新 worker 可以阻止其他的 sequencer 的有效性。这其实就是一个 lease 机制，在一段时间内对于特定的key只有一个worker可以写入。</p>
+
+<p>保证 Exactly Once 语义有个很重要的简化途径是将用户的非幂等操作变成幂等。通过以下措施来保证：</p>
+
+<ul>
+  <li>Exactly Once delivery</li>
+  <li>Strong Production</li>
+</ul>
+
+<p>Exactly Once delivery 通常的方法是保证 at least once 基础上进行去重。MillWheel 也是通过这个方法保证，发送方发送数据后没有接收到 ack 重新发送数据。另外接收方接收到数据会进行 state modificaton，这时候将数据的 unique ID 也一并原子写入到后端存储；接收端为了加速去重，使用 bloom filter，这时候需要考虑 false postive，如果发生 filter miss，需要去后端存储进行比较，如果确认是重复数据，会返回 duplicate ACK 通知发送方。</p>
+
+<p>在发送方发送数据之前可以进行 checkpoint，用于 failover 后恢复原来的状态。在发送的数据被 ACK 后，checkpoint可以删除。这个 <code>Checkpoint-&gt;Delivery-&gt;ACK-&gt;GC</code> 的运行模式在 MillWheel 中称为 <code>Strong Production</code>。即使用户代码不是幂等的，在 Strong Production 中，无论 retry 多少次，用户的运行逻辑都是正确的。</p>
+
+<p>与之对应的是 <code>Weak Production</code>，这时的用户代码是幂等的，无需strong procution，即 checkpointing；无需 exactly once delivery（把 deduplication 逻辑去掉）。这在延迟和资源消耗上无疑更加友好，但是对于取消 checkpointing 有一个 straggler latency 问题。在 strong production中，只要 checkpoint 就可以返回上游表示这个阶段的任务结束，但是现在需要下游返回 ack 才可以保证，并且这是级联的。Millwheel 采用 checkpointing 一部分 straggler 的 pending production 来缓解，如下图：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-23/46647429.jpg" width="400px/" /></p>
+
+<h2 id="other-details">Other Details</h2>
+
+<p>MillWheel 集群可以动态扩缩容，根据 key interval 划分计算，并以此通过 master 进行负载分配、均衡。当监控进程检测到机器的负载过高的时候，会进行 key interval 的重分配：split、merge、move。</p>
+
+<p>failover 时，key interval 被分配到新的 owner，它可以从后端存储中获取计算需要的元数据，包括 heap of pending timers 以及 queue of checkpointed productions。一个节点的例子如下，每个计算都是一个pipeline，即输入计算输出。数据的传输通过RPC。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-24/94589760.jpg" width="400px" /></p>
+
+<p>另外关于 low watermark 的管理和流动，Millwheel 是基于一个全局的订阅发布中央系统。</p>
+
+<ul>
+  <li>每个 processer 将自己持有的所有work（in fly, stored, pending）计算出最小的 timestamp发给中央系统。</li>
+  <li>不同的 processer 在不同的 key interval 下，low watermark 也是根据 key interval 来存储。</li>
+  <li>为了保证计算的准确性，订阅发布系统会查询后台存储，以保证每个 key interval 都有 low watermark。感兴趣的节点会订阅每个发送端的 low watermark，计算所有的最小值作为 low watermark。</li>
+  <li>之所以不在中央系统算最小值是为了保证一致性：中央系统的 low watermark 不能大于节点上的，否则在 failover 后容易出现 low watermark 的回退。在节点上计算最小值则保证中央系统永远不会领先于节点上的。</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Mesa: Google's near real-time OLAP warehouse]]></title>
@@ -778,494 +906,6 @@ completely rerun</li>
 </tbody>
 </table>
 <p>具体可以看博文<a href="http://www.cnblogs.com/duguguiyu/archive/2009/02/28/1400278.html">http://www.cnblogs.com/duguguiyu/archive/2009/02/28/1400278.html</a></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[google论文：GFS]]></title>
-    <link href="http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-gfs/"/>
-    <updated>2013-05-14T01:09:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-gfs</id>
-    <content type="html"><![CDATA[<p>论文：<a href="http://www.cs.rochester.edu/meetings/sosp2003/papers/p125-ghemawat.pdf">英文版</a>，<a href="http://blademaster.ixiezi.com/2010/03/27/the-google-file-system%E4%B8%AD%E6%96%87%E7%89%88/">中文版</a></p>
-
-<hr />
-
-<ol>
-  <li>
-    <h2 id="section">导论</h2>
-  </li>
-</ol>
-
-<p>先给个定义：GFS是一个可扩展的分布式文件系统，用于大型的、分布式的、对大量数据进行访问的应用。它运行于廉价的普通硬件上，但可以提供容错功能。它可以给大量的用户提供总体性能较高的服务。</p>
-
-<p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/GoogleFileSystemGFS.svg/500px-GoogleFileSystemGFS.svg.png" alt="Google File System. Designed for system-to-system interaction, and not for user-to-system interaction. The chunk servers replicate the data automatically" /></p>
-
-<p><strong>Assumptions in Google File System (GFS)</strong></p>
-
-<ul>
-  <li>GFS should be built with commodity hardware
-    <ul>
-      <li>Inexpensive disks and machines</li>
-    </ul>
-  </li>
-  <li>GSF stores a modest number of large files
-    <ul>
-      <li>GSF stores a modest number of large files
-        <ul>
-          <li>e.g. Big-table, Map-Reduce records</li>
-        </ul>
-      </li>
-      <li>Do not optimize for small files</li>
-    </ul>
-  </li>
-  <li>Workloads
-    <ul>
-      <li>Large streaming reads (1MB or more) and small random reads (a
-few KBs)</li>
-      <li>Sequential appends to files by hundreds of data producers
-        <ul>
-          <li>Utilizing the fact that files are seldom modified again</li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li>High sustained bandwidth is more important than latency
-    <ul>
-      <li>Response time for individual read and write is not critical
-<!--more-->
-<strong>Prerequisite</strong></li>
-    </ul>
-  </li>
-</ul>
-
-<ol>
-  <li>组件失效被认为是常态事件，而不是意外事件。</li>
-  <li>以通常的标准衡量，我们的文件非常巨大。</li>
-  <li>绝大部分文件的修改是采用在文件尾部追加数据，而不是覆盖原有数据的方式。</li>
-  <li>应用程序和文件系统API的协同设计提高了整个系统的灵活性。e.g.
-    <ul>
-      <li>放松了在GFS一致性模型的要求</li>
-      <li>引入了原子性的记录追加操作</li>
-      <li>三个冗余的数据可以不是位一致，但是要求校验和验证</li>
-    </ul>
-  </li>
-  <li>系统的工作负载
-    <ul>
-      <li>读操作
-        <ul>
-          <li>大规模的流式读取</li>
-          <li>小规模的随机读取</li>
-        </ul>
-      </li>
-      <li>写操作
-        <ul>
-          <li>许多大规模的、顺序的、数据追加方式的写操作</li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li>系统必须高效的、行为定义明确的实现多客户端并行追加数据到同一个文件里
-    <ul>
-      <li>使用最小的同步开销来实现的原子的多路追加数据操作是必不可少的</li>
-      <li>文件可以在稍后读取，或者是消费者在追加的操作的同时读取文件</li>
-    </ul>
-  </li>
-  <li>高性能的稳定网络带宽远比低延迟重要
-    <ul>
-      <li>高速率的、大批量的处理数据</li>
-      <li>极少有程序对单一的读写操作有严格的响应时间要求</li>
-    </ul>
-  </li>
-</ol>
-
-<h2 id="section-1"><strong>2. 架构</strong></h2>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/ache_zps14a9a2bc.png" alt="GFS Achitecture" height="300px" /></p>
-
-<ul>
-  <li>Files are divided into chunks</li>
-  <li>Fixed-size chunks (64MB)</li>
-  <li>Replicated over chunkservers, called replicas</li>
-  <li>Unique 64-bit chunk handles</li>
-  <li>
-    <p>Chunks as Linux files</p>
-  </li>
-  <li>
-    <p>Single master</p>
-  </li>
-  <li>Multiple chunkservers
-    <ul>
-      <li>Grouped into Racks</li>
-      <li>Connected through switches</li>
-    </ul>
-  </li>
-  <li>Multiple clients</li>
-  <li>Master/chunkserver coordination
-    <ul>
-      <li>HeartBeat messages</li>
-    </ul>
-  </li>
-</ul>
-
-<p><strong><em>注意逻辑的Master节点和物理的Master服务器的区别</em></strong></p>
-
-<h3 id="master">Master节点</h3>
-
-<p>Master节点管理所有的文件系统元数据。这些元数据包括名字空间、访问控制信息、文件和Chunk的映射信息、以及当前Chunk的位置信息。Master节点还管理着系统范围内的活动，比如，Chunk租用管理、失效Chunk的回收、以及Chunk在Chunk服务器之间的迁移。</p>
-
-<p>单一的Master节点可以通过全局的信息精确定位Chunk的位置以及进行复制决策。另外，我们必须减少对Master节点的读写，避免Master节点成为系统的瓶颈。客户端并不通过Master节点读写文件数据。反之，客户端向Master节点询问它应该联系的Chunk服务器。客户端将这些元数据信息缓存一段时间，后续的操作将直接和Chunk服务器进行数据读写操作。</p>
-
-<h3 id="master-1">Master服务器</h3>
-
-<p>Master服务器存储3种主要类型的元数据，包括：文件和Chunk的命名空间、文件和Chunk的对应关系、每个Chunk副本的存放地点。所有的元数据都保存在Master服务器的内存中。前两种类型的元数据（命名空间、文件和Chunk的对应关系）同时也会以记录变更日志的方式记录在操作系统的系统日志文件中，日志文件存储在本地磁盘上，同时日志会被复制到其它的远程Master服务器上。采用保存变更日志的方式，我们能够简单可靠的更新Master服务器的状态，并且不用担心Master服务器崩溃导致数据不一致的风险。Master服务器不会持久保存Chunk位置信息。Master服务器在启动时，或者有新的Chunk服务器加入时，向各个Chunk服务器轮询它们所存储的Chunk的信息。</p>
-
-<p>Master服务器并不保存持久化保存哪个Chunk服务器存有指定Chunk的副本的信息。Master服务器只是在启动的时候轮询Chunk服务器以获取这些信息。Master服务器能够保证它持有的信息始终是最新的，因为它控制了所有的Chunk位置的分配，而且通过周期性的心跳信息监控Chunk服务器的状态。</p>
-
-<ul>
-  <li>简化了在有Chunk服务器加入集群、离开集群、更名、失效、以及重启的时候，Master服务器和Chunk服务器数据同步的问题。</li>
-  <li>只有Chunk服务器才能最终确定一个Chunk是否在它的硬盘上。Master服务器无需维护一个这些信息的全局视图</li>
-</ul>
-
-<h3 id="section-2">操作日志</h3>
-
-<p>操作日志包含了关键的元数据变更历史记录。这对GFS非常重要。这不仅仅是因为操作日志是元数据唯一的持久化存储记录，它也作为判断同步操作顺序的逻辑时间基线。文件和Chunk，连同它们的版本，都由它们创建的逻辑时间唯一的、永久的标识。</p>
-
-<p>必须确保日志文件的完整，确保只有在元数据的变化被持久化后，日志才对客户端是可见的。把日志复制到多台远程机器，并且只有把相应的日志记录写入到本地以及远程机器的硬盘后，才会响应客户端的操作请求。</p>
-
-<p>为了缩短Master启动的时间，我们必须使日志足够小。Master服务器在日志增长到一定量时对系统状态做一次Checkpoint，将所有的状态数据写入一个Checkpoint文件。在灾难恢复的时候，Master服务器就通过从磁盘上读取这个Checkpoint文件，以及重演Checkpoint之后的有限个日志文件就能够恢复系统。</p>
-
-<p>由于创建一个Checkpoint文件需要一定的时间，所以Master服务器的内部状态被组织为一种格式，这种格式要确保在Checkpoint过程中不会阻塞正在进行的修改操作。</p>
-
-<h3 id="section-3"><strong>一致性模型</strong></h3>
-
-<ul>
-  <li>Relaxed consistency model</li>
-  <li>
-    <p>Two types of mutations</p>
-
-    <ul>
-      <li>Writes
-        <ul>
-          <li>Cause data to be written at an application-specified file
-offset</li>
-        </ul>
-      </li>
-      <li>Record appends
-        <ul>
-          <li>Operations that append data to a file</li>
-          <li>Cause data to be appended atomically at least once</li>
-          <li>Offset chosen by GFS, not by the client</li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>States of a file region after a mutation</p>
-
-    <ul>
-      <li>Consistent
-        <ul>
-          <li>All clients see the same data, regardless which replicas
-they read from</li>
-        </ul>
-      </li>
-      <li>Defined
-        <ul>
-          <li>consistent + all clients see what the mutation writes in its
-entirety</li>
-        </ul>
-      </li>
-      <li>Undefined
-        <ul>
-          <li>consistent +but it may not reflect what any one mutation has
-written</li>
-        </ul>
-      </li>
-      <li>Inconsistent
-        <ul>
-          <li>Clients see different data at different times</li>
-          <li>The client retries the operation</li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-</ul>
-
-<p>经过了一系列的成功的修改操作之后，GFS确保被修改的文件region是已定义的，并且包含最后一次修改操作写入的数据。GFS通过以下措施确保上述行为：（a）
-对Chunk的所有副本的修改操作顺序一致，（b）使用Chunk的版本号来检测副本是否因为它所在的Chunk服务器宕机而错过了修改操作而导致其失效。失效的副本不会再进行任何修改操作，Master服务器也不再返回这个Chunk副本的位置信息给客户端。它们会被垃圾收集系统尽快回收。</p>
-
-<p>使用GFS的应用程序可以利用一些简单技术实现这个宽松的一致性模型，这些技术也用来实现一些其它的目标功能，包括：</p>
-
-<ul>
-  <li>尽量采用追加写入而不是覆盖</li>
-  <li>Checkpoint
-    <ul>
-      <li>to verify how much data has been successfully written</li>
-    </ul>
-  </li>
-  <li>自验证的写入操作
-    <ul>
-      <li>Checksums to detect and remove <em>padding</em></li>
-    </ul>
-  </li>
-  <li>自标识的记录。
-    <ul>
-      <li>Unique Identifiers to identify and discard <em>duplicates</em></li>
-    </ul>
-  </li>
-</ul>
-
-<h2 id="section-4"><strong>3. 系统交互</strong></h2>
-
-<ul>
-  <li>Master uses leases to maintain a consistent mutation order among
-replicas</li>
-  <li>Primary is the chunkserver who is granted a chunk lease</li>
-  <li>All others containing replicas are secondaries</li>
-  <li>Primary defines a mutation order between mutations</li>
-  <li>
-    <p>All secondaries follows this order</p>
-  </li>
-  <li>
-    <p>数据流和控制流分开</p>
-  </li>
-  <li>数据以管道的方式，顺序的沿着一个精心选择的Chunk服务器链推送
-    <ul>
-      <li>Data transfer is pipelined over TCP connections</li>
-      <li>Each machine forwards the data to the “closest” machine</li>
-      <li>全双工的交换网络</li>
-    </ul>
-  </li>
-  <li><strong>Benefits</strong>：Avoid bottle necks and minimize latency</li>
-</ul>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/c_zps5923b611.png" alt="Write control and Data Flow" /></p>
-
-<ol>
-  <li>客户机向Master节点询问哪一个Chunk服务器持有当前的租约，以及其它副本的位置。如果没有一个Chunk持有租约，Master节点就选择其中一个副本建立一个租约。</li>
-  <li>Master节点将主Chunk的标识符以及其它副本（又称为secondary副本、二级副本）的位置返回给客户机。客户机缓存这些数据以便后续的操作。只有在主Chunk不可用，或者主Chunk回复信息表明它已不再持有租约的时候，客户机才需要重新跟Master节点联系。</li>
-  <li>客户机把数据推送到所有的副本上。客户机可以以任意的顺序推送数据。Chunk服务器接收到数据并保存在它的内部LRU缓存中，一直到数据被使用或者过期交换出去。由于数据流的网络传输负载非常高，通过分离数据流和控制流，我们可以基于网络拓扑情况对数据流进行规划，提高系统性能，而不用去理会哪个Chunk服务器保存了主Chunk。</li>
-  <li>当所有的副本都确认接收到了数据，客户机发送写请求到主Chunk服务器。这个请求标识了早前推送到所有副本的数据。主Chunk为接收到的所有操作分配连续的序列号，这些操作可能来自不同的客户机，序列号保证了操作顺序执行。它以序列号的顺序把操作应用到它自己的本地状态中。</li>
-  <li>主Chunk把写请求传递到所有的二级副本。每个二级副本依照主Chunk分配的序列号以相同的顺序执行这些操作。</li>
-  <li>所有的二级副本回复主Chunk，它们已经完成了操作。</li>
-  <li>主Chunk服务器回复客户机。任何副本产生的任何错误都会返回给客户机。在出现错误的情况下，写入操作可能在主Chunk和一些二级副本执行成功。（如果操作在主Chunk上失败了，操作就不会被分配序列号，也不会被传递。）客户端的请求被确认为失败，被修改的region处于不一致的状态。我们的客户机代码通过重复执行失败的操作来处理这样的错误。在从头开始重复执行之前，客户机会先从步骤（3）到步骤（7）做几次尝试。</li>
-</ol>
-
-<h3 id="section-5">记录追加的原子性</h3>
-
-<ul>
-  <li>The client specifies only the data (not file offset)</li>
-  <li>Similar to writes
-    <ul>
-      <li>Mutation order is determined by the primary</li>
-      <li>All secondaries use the same mutation order</li>
-    </ul>
-  </li>
-  <li>GFS appends data to the file at least once atomically
-    <ul>
-      <li>The chunk is padded if appending the record exceeds the maximum
-size –&gt; <em>padding</em></li>
-      <li>If a record append fails at any replica, the client retries the
-operation –&gt; <em>record duplicates</em></li>
-      <li>File region may be defined but interspersed with <em>inconsistent</em></li>
-    </ul>
-  </li>
-</ul>
-
-<h3 id="section-6">快照</h3>
-
-<ul>
-  <li>Goals
-    <ul>
-      <li>To quickly create branch copies of huge data sets</li>
-      <li>To easily checkpoint the current state</li>
-    </ul>
-  </li>
-  <li>Copy-on-write technique
-    <ul>
-      <li>Metadata for the source file or directory tree is duplicated</li>
-      <li>Reference count for chunks are incremented</li>
-      <li>Chunks are copied later at the first write</li>
-    </ul>
-  </li>
-</ul>
-
-<h3 id="master-operation"><strong>Master Operation</strong></h3>
-
-<ul>
-  <li>Namespaces are represented as a lookup table mapping full pathnames
-to metadata</li>
-  <li>Use locks over regions of the namespace to ensure proper
-serialization</li>
-  <li>
-    <p>Each master operation acquires a set of locks before it runs</p>
-  </li>
-  <li>
-    <p>GFS has no directory (i-node) structure</p>
-
-    <ul>
-      <li>Simply uses directory-like file names: /foo, /foo/bar
-        <ul>
-          <li>Thus listing files in a directory is slow</li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li>Concurrent Access
-    <ul>
-      <li>Read lock on a parent path, write lock on the leaf file name
-        <ul>
-          <li>protect delete, rename and snapshot of in-use files</li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li>Rebalancing
-    <ul>
-      <li>Places new replicas on chunk servers with below-average disk
-space utilizations</li>
-    </ul>
-  </li>
-  <li>Re-replication
-    <ul>
-      <li>When the number of replicas falls below 3 (or user-specified
-threshold)
-        <ul>
-          <li>The master assigns the highest priority to copy (clone) such
-chunks</li>
-        </ul>
-      </li>
-      <li>Spread replicas of a chunk across racks</li>
-    </ul>
-  </li>
-</ul>
-
-<p><strong>Example of Locking Mechanism</strong></p>
-
-<p>Preventing /home/user/foo from being created while /home/user is being
-snapshotted to /save/user</p>
-
-<ul>
-  <li>Snapshot operation
-    <ul>
-      <li>Read locks on /home and /save</li>
-      <li>Write locks on /home/user and /save/user</li>
-    </ul>
-  </li>
-  <li>File creation
-    <ul>
-      <li>read locks on /home and /home/user</li>
-      <li>write locks on /home/user/foo</li>
-    </ul>
-  </li>
-  <li>Conflict locks on /home/user</li>
-</ul>
-
-<ol>
-  <li>
-    <h2 id="section-7">其他细节</h2>
-  </li>
-</ol>
-
-<h3 id="section-8"><strong>垃圾回收</strong></h3>
-
-<ul>
-  <li>Deleted files
-    <ul>
-      <li>Deletion operation is logged</li>
-      <li>File is renamed to a hidden name(deferred deletion)， then may be
-removed later or get recovered</li>
-      <li>The master regularly scans and removes hidden files, existed
-more than three days
-        <ul>
-          <li>HeartBeat messages inform chunk servers of deleted chunks</li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li>Orphaned chunks (unreachable chunks)
-    <ul>
-      <li>Identified and removed during a regular scan of the chunk
-namespace</li>
-    </ul>
-  </li>
-  <li>Stale replicas
-    <ul>
-      <li>Chunk version numbering
-        <ul>
-          <li>increases when the master grants a new lease of the chunk</li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-</ul>
-
-<h3 id="replica-operations">Replica Operations</h3>
-
-<ul>
-  <li>Creation
-    <ul>
-      <li>Disk space utilization</li>
-      <li>Number of recent creations on each chunkserver</li>
-      <li>Spread across many racks</li>
-    </ul>
-  </li>
-  <li>Re-replication
-    <ul>
-      <li>Prioritized: How far it is from its replication goal…</li>
-      <li>The highest priority chunk is cloned first by copying the chunk
-data directly from an existing replica</li>
-    </ul>
-  </li>
-  <li>Rebalancing
-    <ul>
-      <li>Periodically</li>
-    </ul>
-  </li>
-</ul>
-
-<h3 id="fault-tolerance">Fault Tolerance</h3>
-
-<ul>
-  <li>Fast Recovery
-    <ul>
-      <li>The master and the chunk server are designed to restore their
-state in seconds no matter how they terminated.</li>
-      <li>Servers are routinely shut down just by killing the process</li>
-    </ul>
-  </li>
-  <li>Master Replications
-    <ul>
-      <li>Master has the maps from file names to chunks</li>
-      <li>One (primary) master manages chunk mutations
-        <ul>
-          <li>Several shadow masters are provided for read-only accesses
-            <ul>
-              <li>Snoop operation logs and apply these operations exactly
-as the primary does</li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li>Data Integrity
-    <ul>
-      <li>Corruption of stored data
-        <ul>
-          <li>High temperature of storage devices causes such errors</li>
-        </ul>
-      </li>
-      <li>Checksums for each 64KB in a chunk
-        <ul>
-          <li>chunk servers verifies the checksum of data before sending
-it to the client or other chunk servers</li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-</ul>
 
 ]]></content>
   </entry>

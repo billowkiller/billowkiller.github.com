@@ -176,6 +176,196 @@ body {
 
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
         
+           | <a href="/blog/2013/05/14/zui-xiao-sheng-cheng-shu/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/zui-xiao-sheng-cheng-shu/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/zui-xiao-sheng-cheng-shu/">最小生成树</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>算法使用的是二叉堆，时间为O(ElgV)。如果V小于E的话，使用Prim更好。</p>
+
+<p>Kruskal算法：</p>
+
+<p>O(ElgE): E&lt;V<sup>2&nbsp;</sup>,所以有 lgE=O(lgV)</p>
+
+<p>集合A是一个森林，加入集合A中的安全边总是图中连接两个不同连通分支的最小权边。</p>
+
+<p>使用不相交集合数据结构。</p>
+
+<p>测试边时，即测试两端点是否在同一棵树上。</p>
+
+<p>若不在则可以对集合进行合并。</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/zui-xiao-sheng-cheng-shu/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/05/14/zui-duan-lu-jing-suan-fa/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/zui-duan-lu-jing-suan-fa/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/zui-duan-lu-jing-suan-fa/">最短路径算法</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p><strong>单源最短路径</strong></p>
+
+<p>​1. Dijkstra</p>
+
+<p>Dijkstra算法解决有向图上带权的单源最短路径问题，要求所有边的权值非负。</p>
+
+<p>用到了顶点的最小优先队列，排序关键字为顶点的d值。即开始出了根为0，其他</p>
+
+<p>顶点为正无穷，后来d值根据松弛算法变化。</p>
+
+<p>总计运行时间为O((V+E)lgV)，如果所有顶点都可达的话，则为O(ElgV)。</p>
+
+<p>​2. Bellman-ford</p>
+
+<p>算法用来解决一般，即边的权值可以为负的单源最短路径问题。算法同时也可以检查</p>
+
+<p>是否有从源点可达的负权回路。</p>
+
+<p>算法的运行时间为O(VE)。</p>
+
+<p></div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/zui-duan-lu-jing-suan-fa/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/zipwen-jian-luan-ma-jie-jue/">Zip文件乱码解决</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>在windows上压缩的文件，是以系统默认编码中文来压缩文件。由于zip文件中没有声明其编码，所以linux上的unzip一般以默认编码解压，中文文件名会出现乱码。</p>
+
+<p>虽然2005年就有人把这报告为bug,
+但是info-zip的官方网站没有把自动识别编码列入计划，可能他们不认为这是个问题。Sun对java中存在N年的zip编码问题，采用了同样的处理方式。</p>
+
+<p>1.1 </p>
+
+<p>通过unzip行命令解压，指定字符集</p>
+
+<pre><code>unzip -O CP936 xxx.zip (用GBK, GB18030也可以)
+</code></pre>
+
+<p>有趣的是unzip的manual中并无这个选项的说明, unzip
+–help对这个参数有一行简单的说明。</p>
+
+<p>1.2 </p>
+
+<p>在环境变量中，指定unzip参数，总是以指定的字符集显示和解压文件</p>
+
+<p>解决办法：</p>
+
+<p>引用</p>
+
+<pre><code>vi /etc/environment
+</code></pre>
+
+<p>再最后加入后面的代码即可</p>
+
+<p>UNZIP=”-O CP936”</p>
+
+<p>ZIPINFO=”-O CP936”</p>
+</div>
+  
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
            | <a href="/blog/2013/05/14/the-film-mona-lisa-smile/#disqus_thread"
              data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/the-film-mona-lisa-smile/">Comments</a>
         
@@ -666,191 +856,6 @@ sudo update-grub2
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/linux-kvmdai-ma-zhi-mei/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/linux-kvmdai-ma-zhi-mei/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/linux-kvmdai-ma-zhi-mei/">Linux KVM代码之美</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p><em>*edited as an essey for *程序语言设计原理</em> **</p>
-
-<hr />
-
-<p>在程序的编写上，我认为编程的难度，也就是可写性是一个次要的角色，而代码的可读性，可维护性一直软件生命周期中的主要部分，尤其是对于大型项目而言，软件的维护绝对是项目管理人员首先要考虑的问题，成本的控制，人月量的降低。在这一点上更为突出表现的我想应该是对于开源项目来说，人员的流动性大，项目时间的不确定性，还有对开发人员的吸引力。开源项目应该关注的不止是软件功能性的强大，思维理念的超前，更应该是代码的可读性，可维护性。毕竟没有人愿意在垃圾场上重新盖一栋漂亮的大楼。所以开源项目应该从一开始就在可读性，可维护性上下工夫，并且需要有一些自己的理念，开发标准在里面，这样可以引导后来的开发人员遵循这些原则，保证代码的可读性，可维护性，避免出现破窗效应。</p>
-
-<p>那么如此看来，代码之美又应该包括哪些方面呢，我想应该需要有程序的可读性，可维护性，另外还需要有一些设计准则。这里就以Linux内核中的KVM代码部分为例，谈谈这些原则。</p>
-
-<h2 id="section">一、可读性、可维护性</h2>
-
-<p>在Github上打开Linux内核代码，涉及KVM的主要有两个目录，virt和arch/x86/kvm，我们主要研究的是arch/x86/kvm。文件夹下的Makefile和Kconfig文件可以将程序的脉络显得极为的清晰。</p>
-
-<p>现在查看的是emulate.c文件，程序大概有4000多行，这也是C语言代码中值得诟病的地方，因为程序代码超过2页屏幕大小后，会影响人们对程序的理解，难于找到需要注意的地方，并且纠结于大量的方法和结构体之间。</p>
-
-<p>emulate.c的文件头注释表明只是一个X86架构（32位或者64位）指令的译码器和模拟器，并且表明程序的作者，来源，程序具体涉及的方面。代码是遵循Linux编码规范的。
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/linux-kvmdai-ma-zhi-mei/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/ji-ge-linuxming-ling/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/ji-ge-linuxming-ling/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/ji-ge-linuxming-ling/">几个linux命令</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>转换文件到pdf </p>
-
-<pre><code>unoconv -f pdf mydocument.odt
-</code></pre>
-
-<p>zip乱码解压 </p>
-
-<pre><code>unzip -O CP936 xx.zip
-</code></pre>
-
-<p>mp3 乱码 </p>
-
-<pre><code>mid3iconv -e gbk \*.mp3 //当前目录下的mp3文件
-</code></pre>
-
-<p>视频转码 </p>
-
-<pre><code>mencoder \*.rmvb -o output.avi -oac mp3lame -lameopts cbr:br=32 -ovc x264 -x264encopts bitrate=440 -vf scale=320:-3
-</code></pre>
-
-<p>linux 声音调节  alsamixer</p>
-
-<p>gedit 乱码：</p>
-
-<pre><code>gsettings set org.gnome.gedit.preferences.encodings auto-detected "['UTF-8','CURRENT','GB18030','ISO-8859-15','UTF-16']"
-</code></pre>
-
-<p>SSH 远程登录：</p>
-
-<pre><code>ssh -l root 192.168.0.150
-</code></pre>
-
-<p>vim 中文乱码：</p>
-
-<p>let &amp;termencoding=&amp;encoding\
-set fileencodings=utf-8,gbk</p>
-</div>
-  
-  
-
-
-        </article>
-      
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/hugo/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/hugo/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/hugo/">Hugo</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>好久没写影评，或者更确切的是观后感了。</p>
-
-<p>呵呵，电影最近是看了蛮多的，一天差不多至少是一部，两个小时吧。喜欢看泰国片，那种小清新的，没有多少压力和内涵，让人放松，给人一种繁忙后的室外桃园。嗯，还有一些日本片，但是日本的这种电影，给人的感觉不像台湾或者泰国那样的悠闲，自在；可能这么说并不是很恰当，但是日本电影它似乎总想把某种思想哲学，对于人生，对于爱情，对于人性的理解加入到其中，看完后会有一些压抑，脑袋里沉浮了一些东西，所以对于日本片来说，我看的并不像泰国片那么频繁。</p>
-
-<p>最近看的是一部叫<em>&lt;恋空&gt;</em>的电影，回想起来，对于其中的剧情和影片想要表述的意思还是可以回味一二，并且有着不小的余音。但那天看完后并没有写一些东西出来，应该是自己的问题，一方面投入的感情并没有想象中的那么多，所以写出来的东西并不会让我很满意；另一方面应该就是太久未能写影评了，看完电影后也不会去深入挖掘，只是偶尔在脑子里溜达一圈也就罢了，想想好笑，也就是前几天才看的电影，忽然又见到其中的主角，而我却叫不出那部影片的名字，惰性思想还是要不得啊！</p>
-
-<p>今天其实也并没有打算写这篇影评的，我已经是关机上床的状态，但是手机在充电，一时半会开不了机，于是就在脑海里想着今天看过的电影。看了两部，今天晚上，第一部是<em>&lt;宿醉&gt;</em>，嗯，纯粹的商业搞笑片，没有太多的感情，属于那种看过就忘的。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/17285214112051.jpg" alt="hugo" height="500" />
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/hugo/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -874,15 +879,15 @@ set fileencodings=utf-8,gbk</p>
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/11/20/millwheel/">MillWheel: Fault-Tolerant Stream Processing at Internet Scale</a>
+    
+    <a class="list-group-item " href="/blog/2016/11/19/bigdata-perf-tunning/">BigData Performance Tunning</a>
+    
+    <a class="list-group-item " href="/blog/2016/11/10/cache/">Cache</a>
+    
     <a class="list-group-item " href="/blog/2016/08/06/mesa/">Mesa: Google&#8217;s Near Real-time OLAP Warehouse</a>
     
     <a class="list-group-item " href="/blog/2016/07/31/column-stores-row-stores/">Column-Stores vs. Row-Stores</a>
-    
-    <a class="list-group-item " href="/blog/2016/07/20/hbase/">Hbase Introduction</a>
-    
-    <a class="list-group-item " href="/blog/2016/07/13/realtime-data-processing-at-facebook/">Realtime Data Processing at Facebook</a>
-    
-    <a class="list-group-item " href="/blog/2016/04/09/rating/">Funny Facts About Rating</a>
     
   </div>
 </section>
@@ -912,7 +917,7 @@ set fileencodings=utf-8,gbk</p>
     
     
     <a class="list-group-item " href="/blog/categories/paper-weekend/index.html">
-        <span class="badge">7</span>
+        <span class="badge">8</span>
         Paper Weekend
       </a>
     
@@ -950,6 +955,12 @@ set fileencodings=utf-8,gbk</p>
     <a class="list-group-item " href="/blog/categories/big-data/index.html">
         <span class="badge">11</span>
         Big Data
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/notebook/index.html">
+        <span class="badge">2</span>
+        NoteBook
       </a>
     
   </div>
