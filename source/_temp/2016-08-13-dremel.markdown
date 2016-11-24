@@ -1,0 +1,82 @@
+---
+layout: post
+title: "Dremel: Interactive Analysis of WebScaleDatasets"
+date: 2016-08-13 17:23
+comments: true
+category: Paper Weekend
+tags: [query, paper，google, dremel]
+---
+
+> Sergey et al. VLDB 2010
+
+
+交互式的查询需求主要是在 data exploration、监控、在线客户支持、快速原型、数据管道诊断和其他任务上。Dremel 是 Google 的交互式数据分析系，类似的系统还有 Apache 开源的 Drill，Facebook 开源的 Presto。
+
+Dremel系统有下面几个主要的特点：
+
+* Dremel是一个大规模系统。在一个PB级别的数据集上面，将任务缩短到`秒级`，无疑需要大量的并发。磁盘的顺序读速度在100MB/S上下，那么在1S内处理1TB数据，意味着至少需要有1万个磁盘的并发读! Google一向是用廉价机器办大事的好手。但是机器越多，出问题概率越大，如此大的集群规模，需要有足够的容错考虑`dealing with stragglers and failures`，保证整个分析的速度不被集群中的个别慢(坏)节点影响。
+* Dremel是MR交互式查询能力不足的补充。和 MapReduce一样，Dremel 也需要和数据运行在一起，将计算移动到数据上面。所以它需要GFS这样的文件系统作为存储层。在设计之初，Dremel并非是MapReduce的替代品，它只是可以执行非常快的分析，在使用的时候，常常用它来处理MapReduce的结果集或者用来建立分析原型。
+* Dremel的数据模型是嵌套(nested)的。互联网数据常常是非关系型的。Dremel还需要有一个灵活的数据模型，这个数据模型至关重要。Dremel支持一个嵌套(nested)的数据模型，类似于 Json。而传统的关系模型，由于不可避免的有大量的Join操作，在处理如此大规模的数据的时候，往往是有心无力的。
+* Dremel中的数据是用列式存储的。使用列式存储，分析的时候，可以只扫描需要的那部分数据的时候，减少CPU和磁盘的访问量。同时列式存储是压缩友好的，使用压缩，可以综合CPU和磁盘，发挥最大的效能。
+* Dremel结合了Web搜索和并行DBMS的技术。首先，他借鉴了Web搜索中的“查询树”的概念，将一个相对巨大复杂的查询，分割成较小较简单的查询，能并发的在大量节点上跑。其次，和并行DBMS类似，Dremel可以提供了一个SQL-like的接口，就像Hive和Pig那样。 
+
+### 存储模型
+
+在Google, 用Protocol Buffer常常作为序列化的方案。以下是一个实例：
+
+	message AddressBook {
+	 required string owner;
+	 repeated string ownerPhoneNumbers;
+	 repeated group contacts {
+	   required string name;
+	   optional string phoneNumber;
+	 }
+	}
+	
+这个schema中每条记录表示一个人的AddressBook。有且只有一个owner，owner可以有0个或者多个ownerPhoneNumbers，owner可以有0个或者多个contacts。每个contact有且只有一个name，这个contact的phoneNumber可有可无。树结构表示如下：
+
+![](http://cdn.infoqstatic.com/statics_s2_20160809-0249u1/resource/articles/in-depth-analysis-of-parquet-column-storage-format/zh/resources/0724052.png)
+
+一个schema的树结构有几个叶子节点，实际的存储中就会有多少column。
+
+![](http://cdn.infoqstatic.com/statics_s2_20160809-0249u1/resource/articles/in-depth-analysis-of-parquet-column-storage-format/zh/resources/0724053.png)
+
+对于嵌套数据类型，我们除了存储数据的value之外还需要两个变量Repetition Level(R), Definition Level(D) 才能存储其完整的信息用于序列化和反序列化嵌套数据类型。
+
+* Definition Level
+
+	嵌套数据类型的特点是有些field可以是空的，也就是没有定义。如果一个field是定义的，那么它的所有的父节点都是被定义的。从根节点开始遍历，当某一个field的路径上的节点开始是空的时候我们记录下当前的深度作为这个field的Definition Level。
+	
+	如果一个field的Definition Level等于这个field的最大Definition Level就说明这个field是有数据的。对于required类型的field必须是有定义的，所以这个Definition Level是不需要的。
+
+* Repetition Level
+
+	记录该field的值是在哪一个深度上重复的。只有repeated类型的field需要Repetition Level，optional 和 required类型的不需要。Repetition Level = 0 表示开始一个新的record。
+	
+上面的例子每个column的最大的Repetion Level和 Definition Level为
+
+![](http://cdn.infoqstatic.com/statics_s2_20160809-0249u1/resource/articles/in-depth-analysis-of-parquet-column-storage-format/zh/resources/0724055.png)
+
+	AddressBook {
+	 owner: "Julien Le Dem",
+	 ownerPhoneNumbers: "555 123 4567",
+	 ownerPhoneNumbers: "555 666 1337",
+	 contacts: {
+	   name: "Dmitriy Ryaboy",
+	   phoneNumber: "555 987 6543",
+	 },
+	 contacts: {
+	   name: "Chris Aniszczyk"
+	 }
+	}
+	AddressBook {
+	 owner: "A. Nonymous"
+	}
+	
+以contacts.phoneNumber这一列为例，"555 987 6543"这个contacts.phoneNumber的Definition Level是最大Definition Level=2。而如果一个contact没有phoneNumber，那么它的Definition Level就是1。如果连contact都没有，那么它的Definition Level就是0。
+
+**参考文献：**
+
+1. http://www.oschina.net/question/12_76159
+2. http://www.infoq.com/cn/articles/in-depth-analysis-of-parquet-column-storage-format/
+

@@ -1,0 +1,68 @@
+---
+layout: post
+title: "Cache"
+date: 2016-11-10 17:23
+comments: true
+category: NoteBook
+tags: [cache]
+---
+
+###单机cache
+
+数据类型
+
+* 简单KV get key, set key, expire key, del key
+* 复杂数据机构， MAP， List, Struct
+
+
+数据持久化
+
+* 全内存， 无持久化 （memcache）
+* 内存为主，磁盘为辅，半持久化 (redis 定时dump)
+* 内存为主，磁盘为辅，提供完全持久化（leveldb， redis aof, 内存映射）
+* 全磁盘，提供完全持久化（ssd db）
+
+数据淘汰
+
+* LRU： hash+list、基于Hazard Pointer的无锁实现 适合访问热点场景（浪费内存，时间等）
+* FIFO: 基于queue实现（磁盘用顺序文件）， 适合访问热度较均衡
+
+数据安全
+
+* 快照，存储、恢复、备份
+    * 实时全量，实时增量，定时全量
+
+一致性
+
+* 主从复制，保证最终一致性。全量同步，增量同步
+
+存储量
+
+* meta和value隔离存储， 顺序io与随机io
+    * meta：leveldb rocksdb
+    * value: index+rawfile
+
+
+ssd cache:
+
+* leveldb, rocksdb, ssdb，数据容量限制，value（10K）过大容易引起compaction写放大，阻塞请求
+
+###分布式cache
+
+cap base原则
+
+多副本：一致性，可靠性，可扩展，副本数
+
+多租户
+
+* 隔离（业务、部署、入口、存储、调度）、审计（成本、使用量、功能）
+
+热点
+
+* 拆分、多副本、合适引擎（存储、数据结构、架构）
+
+数据均衡：
+
+* hash缺点 偏静态、成倍扩容、容量预先规划
+* slot：基于数据分片，一个集群包含固定slot数量，每条数据属于某个slot
+

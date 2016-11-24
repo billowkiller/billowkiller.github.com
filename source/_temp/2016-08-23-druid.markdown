@@ -1,0 +1,15 @@
+---
+layout: post
+title: "Druid: A Real-time Analytical Data Store"
+date: 2016-08-23 17:23
+comments: true
+category: Paper Weekend
+tags: [olap, paper，druid]
+---
+
+## 背景和问题
+
+## 架构
+
+## 特点
+
