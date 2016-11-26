@@ -16,6 +16,8 @@ MillWheel 是 Google 开发的一个低延时的流式处理系统。用户指�
 * Low Watermarks: 流量低谷的判断需要有一个标志来判断期待时间窗口内的数据都到达。
 * Duplicate Prevention: 在各种情况下用户无需考虑重复流量，系统保证数据传输和处理的 exactly-once 语义。
 
+<!--more-->
+
 <img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-22/53383350.jpg" width="600px"/>
 
 综合而言，对比于一般的分布式流式系统，存在一些特别的要求：
