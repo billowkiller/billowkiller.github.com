@@ -174,6 +174,55 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-15T02:18:00+08:00" pubdate data-updated="true">Jul 15<span>th</span>, 2014</time>
+        
+           | <a href="/blog/2014/07/15/linux-epoll-module/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/07/15/linux-epoll-module/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/15/linux-epoll-module/">Linux Epoll Module</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>综合了几个blog以及自己查到的一些资料，总结下Linux中的IO多路复用，主要是<code>epoll</code>模型。</p>
+
+<p><code>select</code>，<code>poll</code>，<code>epoll</code>都是Linux下IO多路复用的机制。Windows下为<code>IOCP</code>模型。I/O多路复用就通过一种机制，可以监视多个描述符，一旦某个文件描述符就绪，能够通知程序进行相应的读写操作。其中文件描述符是一个简单的整数，用以标明每一个被进程所打开的文件和socket，包括<code>filefd</code>、<code>socketfd</code>、<code>signalfd</code>、<code>timerfd</code>、<code>eventfd</code>等。<code>eventfd</code> 是一个比 <code>pipe </code>更高效的线程间事件通知机制。</p>
+
+<p>但<code>select</code>，<code>poll</code>，<code>epoll</code>本质上都是<strong>同步I/O</strong>，因为他们都需要在读写事件就绪后自己负责进行读写，也就是说这个读写过程是阻塞的，而<strong>异步I/O</strong>则无需自己负责进行读写，异步I/O的实现会负责把数据从内核拷贝到用户空间。</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/07/15/linux-epoll-module/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-06-28T04:18:00+08:00" pubdate data-updated="true">Jun 28<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/06/28/signal-and-fork/#disqus_thread"
@@ -675,68 +724,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-12T02:18:00+08:00" pubdate data-updated="true">Apr 12<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/04/12/Inside-Object/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/04/12/Inside-Object/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/12/Inside-Object/">Inside C++ Object</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>modified from <a href="http://blog.csdn.net/eroswang/article/details/1749609">http://blog.csdn.net/eroswang/article/details/1749609</a></p>
-
-<hr />
-
-<h2 id="ooob">面对对象（OO）和基于对象（OB）</h2>
-
-<p>基于对象的数据类型可以展示封装的非多态形式，但是不支持类型的扩充。一个OB设计可能比一个对等的OO设计速度更快而且空间更紧凑。速度快是因为所有的函数引发操作都在编译时期解析完成，对象建构起来时不需要设置virtual机制；空间紧凑则是因为每一个class object不需要负担传统上为了支持virtual机制而需要的额外符合。不过，OB设计比较没有弹性。 </p>
-
-<h2 id="c">C++对象模型</h2>
-
-<p>在C++中，有两种<strong>class data members：static和nonstatic</strong>，以及三种<strong>class member functions：static、nonstatic和virtual</strong>。</p>
-
-<p>Nonstatic data members被配置于每一个class object之内，static data members则被存放在所有的class object之外。Static和nonstatic function members也被放在所有的class object之外，Virtual functions则以两个步骤支持之：</p>
-
-<ul>
-  <li>每一个class产生出一堆指向virtual functions的指针，放在表格之中，这个表格被称为<strong>virtual table（vtbl）</strong>。每一个class所关联的type_info object（用以支持<strong>runtime type identification，RTTI</strong>）也经由virtual table被指出来，通常是放在表格的第一个slot处。</li>
-  <li>每一个class object被添加了一个指针，指向相关的virtual table。通常这个指针被称为<strong>vptr</strong>。</li>
-</ul>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/04/12/Inside-Object/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -760,6 +747,8 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/11/26/photon/">Photon: Fault-tolerant and Scalable Joining of Continuous Data Streams</a>
+    
     <a class="list-group-item " href="/blog/2016/11/20/millwheel/">MillWheel: Fault-Tolerant Stream Processing at Internet Scale</a>
     
     <a class="list-group-item " href="/blog/2016/11/19/bigdata-perf-tunning/">BigData Performance Tunning</a>
@@ -767,8 +756,6 @@ body {
     <a class="list-group-item " href="/blog/2016/11/10/cache/">Cache</a>
     
     <a class="list-group-item " href="/blog/2016/08/06/mesa/">Mesa: Google&#8217;s Near Real-time OLAP Warehouse</a>
-    
-    <a class="list-group-item " href="/blog/2016/07/31/column-stores-row-stores/">Column-Stores vs. Row-Stores</a>
     
   </div>
 </section>
@@ -798,7 +785,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/paper-weekend/index.html">
-        <span class="badge">8</span>
+        <span class="badge">9</span>
         Paper Weekend
       </a>
     

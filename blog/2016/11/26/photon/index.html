@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Photon: fault-tolerant and scalable joining of continuous data streams - Tech Digging and Sharing</title>
+  <meta name="author" content="wutao">
+
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://billowkiller.github.io/blog/2016/11/26/photon">
+  <link href="/favicon.png" type="image/png" rel="icon">
+  <link href="/atom.xml" rel="alternate" title="Tech Digging and Sharing" type="application/atom+xml">
+
+  <link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/javascripts/libs/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<style type="text/css">
+body {
+  font-family: Lucida Grande,Helvetica, arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background-color: white;
+  padding: 30px; }
+
+    table {
+  padding: 0; }
+  table tr {
+    border-top: 1px solid #cccccc;
+    background-color: white;
+    margin: 0;
+    padding: 0; }
+    table tr:nth-child(2n) {
+      background-color: #f8f8f8; }
+    table tr th {
+      font-weight: bold;
+      border: 1px solid #cccccc;
+      text-align: left;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr td {
+      border: 1px solid #cccccc;
+      text-align: left;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr th :first-child, table tr td :first-child {
+      margin-top: 0; }
+    table tr th :last-child, table tr td :last-child {
+      margin-bottom: 0; }
+    }
+</style>
+
+
+  <script src="/javascripts/libs/jquery/jquery-2.0.3.min.js"></script>
+  
+
+</head>
+
+  <body   >
+    <div id="wrap">
+      <header role="banner">
+        <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Tech Digging and Sharing</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="/">Blog</a>
+                </li>
+                <li >
+                    <a href="/blog/archives">Archives</a>
+                </li>
+				<li >
+                    <a href="/blog/tags">Tags</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="subscribe-rss" href="/atom.xml" title="subscribe via RSS">
+                        <span class="visible-xs">RSS</span>
+                        <img class="hidden-xs" src="/images/rss.png" alt="RSS">
+                    </a>
+                </li>
+                
+            </ul>
+            
+                <form class="search navbar-form navbar-right" action="http://google.com/search" method="GET">
+                    <input type="hidden" name="q" value="site:billowkiller.github.io">
+                    <div class="form-group">
+                        <input class="form-control" type="text" name="q" placeholder="Search">
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</nav>
+
+
+      </header>
+      <div id="main" class="container">
+        <div id="content">
+          <div class="row">
+  <div class="page-content col-md-9">
+    <article class="hentry" role="article">
+      
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-11-26T11:23:00+08:00" pubdate data-updated="true">Nov 26<span>th</span>, 2016</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io">Comments</a>
+        
+      </p>
+    
+    
+    <h1 class="entry-title">
+        Photon: Fault-tolerant and Scalable Joining of Continuous Data Streams
+        
+    </h1>
+    
+  </header>
+
+
+<div class="entry-content clearfix"><h2 id="intro-and-issues">Intro and Issues</h2>
+
+<p>Photon 是 Google 的数据流合并的系统，目的是 “perform continuous stream joining in real-time”，例如 query log 和 click log 合并。为什么需要对数据流合并呢？</p>
+
+<p>先看下用户使用的场景：用户先 query 一个搜索词，这时候的日志可以直接通过 Google 的网关服务器直接落盘，这里的日志称为 query log，也就是展示广告，表示发给用户的广告信息；之后的一段时间，用户浏览网页，可能会点击到某一条广告，这时候再将用户的 click log 发到某个 log datacenter。</p>
+
+<p>这两个日志所附带的内容区别很大，query log 可以附带很多的信息，类似于展示位、广告主出价等，而 click log 的内容是受限的：虽然可以把需要的信息附带到广告的 url 上，但是传输量变大增加延迟降低用户体验，另外 url 的长度也是受限的。因此很有必要进行日志的合并以用于后续的计费、报表、模型训练等等。</p>
+
+<p>那么处理这个问题的难点在哪里？</p>
+
+<!--more-->
+
+<ul>
+  <li>Exactly-once semantics: 任意时刻 at-most-once，实时的 near-exact，最终 exactly-once。</li>
+  <li>Automatic datacenter-level fault-tolerance</li>
+  <li>High scalability</li>
+  <li>Low latency</li>
+  <li>unordered streams: 特别的，由于网络或者其他原因，query log 可能会落后于 click log。</li>
+</ul>
+
+<h2 id="big-ideas">Big Ideas</h2>
+
+<p>从对系统的要求来看，有两个重要的概念：</p>
+
+<ul>
+  <li><code>Persistent State Consistency</code></li>
+  <li><code>Exactly Once Eventually</code></li>
+</ul>
+
+<h3 id="persistent-state-consistency">1. Persistent State Consistency</h3>
+
+<p>高可用，容错的系统的最简单方法就是冗余，Photon 也如此。导致的问题是在不同的数据中心可能会处理同一份数据。这时候需要对 Worker 进行协调，保证它们不对同一份数据处理。方案是对处理好的 click_id 存储下来，各个 Worker 处理的时候查询下，并在输出 joined log 之前先存储 click_id 以保证 at most once 语义。</p>
+
+<p>Photon 使用基于 <code>Multi-Paxos</code> 的容错、强一致的 <code>IdRegisty</code>。Paxos 能够保证在大多数副本之间同步状态，实现一致性。如下图是一个 IdRegistry 的架构：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-26/63413408.jpg" width="450px" /></p>
+
+<p>不同的数据中心来回的传输时间可能高达100ms，导致 IdRegistry 的 TPS 最高只有 10，对于每秒需要处理上万日志的 photon 来说是不可以接受的。那么如何增加吞吐呢？有两个措施：<code>server-side batching</code>，<code>sharding</code>。这是两个经典的扩大吞吐量的方法，批量和分治。原文如下：</p>
+
+<blockquote>
+  <p>Server-side batching combine multiple event-level commits into one bigger commit. The registry thread dequeues multiple requests and batches them into a single PaxosDB transaction.</p>
+</blockquote>
+
+<p>但是对于一个批量的 Paxos RPC 怎么区分有冲突的 event_id 原文并没有做过多的说明。</p>
+
+<blockquote>
+  <p>To take advantage of the event_id independence, we partition the event id space handled by the IdRegistry into disjoint shards such that event ids from separate shards are managed by separate IdRegistry servers. </p>
+</blockquote>
+
+<p>sharding 需要 resharding 是比较麻烦的，需要考虑向后兼容性。对于落后的 log 来说它必须在 resharding 之后还能找到原来的 shard，原文称为 “deterministic mapping”。Photon 通过增加时间窗口实现，在 timestamp 在 [0, now + S] 内使用之前的sharding。这个时间会通过 True Time API 校正，这个 API 是 Google 特有的，通过原子时钟校正，不具有普适性。这里不得不感叹 Google 的基础架构之强大。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-26/39260007.jpg" width="500px" /></p>
+
+<h3 id="exactly-once-eventually">2. Exactly Once Eventually</h3>
+
+<p>这个语义和架构有关，所以我们先看下 Photon 的架构，了解里面的组件如何实现 Exactly-once，这里说明下印象比较深的是在 Paper 中， Photon 使用两个非常普遍的技术：<code>异步 PRC</code>, <code>throttling</code>，在提高效率和稳定性方面带来很大的帮助：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-26/70920655.jpg" width="500px" /></p>
+
+<p><strong>Dispatcher</strong></p>
+
+<p>Dispatcher 负责监控日志文件，并将它们及时的传送到系统。需要注意读取文件的状态元数据会保存在GFS上，用于 failover。发送前需要查看 event_id 是否在 IdRegistry 中，这里的 event_id 需要保持唯一，Photon 使用 &lt;ServerIP, ProcessID, Timestamp&gt; 作为 event_id。</p>
+
+<p>Dispatcher 异步的发送日志到 joiner，等待 joiner 的 ack。如果失败，则会将 click log 存入 GFS，稍后使用指数回退算法重试。一旦重试时间超过阈值，则判定日志为 unjoinable。通过这种方式达到 Dispatcher 的 at least once。</p>
+
+<p>另外至少会有两条 Photon 流在运行，即使一个数据中心挂了，另外一个也可以正常工作。并且在恢复之后会执行 backlog，追上 IdRegistry 中已有的信息，需要注意的是追赶时候的 throttling，防止 IdRegistry 压力过大。</p>
+
+<p><strong>joiner</strong></p>
+
+<p>joiner 接收 dispatcher 传来的数据，并且协调 EventStore 和 IdRegistry，执行日志合并的业务逻辑。joiner 解析 click log 的 click_id 和 query_id，异步获取 EventStore 的 query log 进行比较，一旦获取失败或者 dispatcher 发送过多数据，则会导致失败使得dispatcher 进入重试逻辑。这里的 throttling 是用于 joiner 能维持平滑的数据流。</p>
+
+<p>joiner 使用 adaptor 库处理业务逻辑。一旦 join 成功，则异步地注册 click_id 到 IdRegistry，成功注册后才允许下发 joined log 给下游。这两个步骤在 Photon 中并不是事务地进行，所以一旦在下发前宕机或者 ack 丢失就会导致 joined log 丢失。</p>
+
+<p>之所以不进行事务处理，原因应该是想让 joiner <code>无状态</code>，提高可扩展性。导致的风险可以用下面的方法解决。</p>
+
+<p>提交 click_id 给 IdRegistry 时，joiner 会附带自己的 &lt;ServerIP, ProcessID, Timestamp&gt; 信息作为 <code>unique token</code> 一并提交。当 IdRegistry 收到 click_id 的提交信息时，会比较 token，
+相同则说明是上一次没有收到 ack 的那个 joiner 发过来的。IdRegistry 此时返回成功，允许 joiner 下发合并日志。</p>
+
+<p>但此种方法并没有解决宕机带来的不一致。Photon 给的方案是使用另外一个 <code>verification system</code> 作为补充。一旦检测到 IdRegistry 中的 event 并不在 output log 中，则删除 IdRegistry 的 click_id，并重新注入 click log。</p>
+
+<p>以上其实是通过内部机制实现尽力而为的 exactly-once，最后通过类似的 lambda 架构实现最终 exactly-once。</p>
+
+</div>
+
+
+      <footer>
+        <p class="meta text-muted">
+          
+  
+
+<span class="glyphicon glyphicon-user"></span> <span class="byline author vcard">Posted by <span class="fn">wutao</span></span>
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2016-11-26T11:23:00+08:00" pubdate data-updated="true">Nov 26<span>th</span>, 2016</time>
+          
+
+<span class="glyphicon glyphicon-tags"></span>&nbsp;
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/paper-weekend/'>Paper Weekend</a>
+  
+</span>
+
+
+        </p>
+        
+          <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://billowkiller.github.io/blog/2016/11/26/photon/" data-via="" data-counturl="http://billowkiller.github.io/blog/2016/11/26/photon/" >Tweet</a>
+  
+  
+  
+</div>
+
+        
+        
+          <ul class="meta text-muted pager">
+            
+            <li class="previous"><a href="/blog/2016/11/20/millwheel/" title="Previous Post: MillWheel: Fault-Tolerant Stream Processing at Internet Scale">&laquo; MillWheel: Fault-Tolerant Stream Processing at Internet Scale</a></li>
+            
+            
+          </ul>
+        
+      </footer>
+    </article>
+    
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+      </section>
+    
+  </div>
+
+  
+  <aside class="sidebar col-md-3">
+    
+      <section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Recent Posts</h3>
+  </div>
+  
+  <div id="recent_posts" class="list-group">
+    
+    <a class="list-group-item active" href="/blog/2016/11/26/photon/">Photon: Fault-tolerant and Scalable Joining of Continuous Data Streams</a>
+    
+    <a class="list-group-item " href="/blog/2016/11/20/millwheel/">MillWheel: Fault-Tolerant Stream Processing at Internet Scale</a>
+    
+    <a class="list-group-item " href="/blog/2016/11/19/bigdata-perf-tunning/">BigData Performance Tunning</a>
+    
+    <a class="list-group-item " href="/blog/2016/11/10/cache/">Cache</a>
+    
+    <a class="list-group-item " href="/blog/2016/08/06/mesa/">Mesa: Google's Near Real-time OLAP Warehouse</a>
+    
+  </div>
+</section>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Categories</h3>
+  </div>
+  <div class="list-group">
+    
+    
+    <a class="list-group-item " href="/blog/categories/language/index.html">
+        <span class="badge">9</span>
+        language
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/tools/index.html">
+        <span class="badge">7</span>
+        tools
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/book/index.html">
+        <span class="badge">7</span>
+        book
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/paper-weekend/index.html">
+        <span class="badge">9</span>
+        Paper Weekend
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/linux/index.html">
+        <span class="badge">13</span>
+        linux
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/film/index.html">
+        <span class="badge">3</span>
+        film
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/rework/index.html">
+        <span class="badge">12</span>
+        rework
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/algorithm/index.html">
+        <span class="badge">9</span>
+        algorithm
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/machine-learning/index.html">
+        <span class="badge">13</span>
+        Machine Learning
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/big-data/index.html">
+        <span class="badge">11</span>
+        Big Data
+      </a>
+    
+    
+    <a class="list-group-item " href="/blog/categories/notebook/index.html">
+        <span class="badge">2</span>
+        NoteBook
+      </a>
+    
+  </div>
+</section>
+<section class="panel panel-default clearfix">
+  <div class="panel-heading">
+      <h3 class="panel-title">GitHub Repos</h3>
+  </div>
+  
+    <div class="gh-profile-link pull-right text-muted">
+      <a href="https://github.com/billowkiller">@billowkiller</a> on GitHub
+    </div>
+  
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">On Delicious</h3>
+  </div>
+  <div class="panel-body">
+    <div id="delicious"></div>
+    <script type="text/javascript" src="http://feeds.delicious.com/v2/json/billowkiller?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+    <p><a href="http://delicious.com/billowkiller">My Delicious Bookmarks &raquo;</a></p>
+  </div>
+</section>
+
+
+    
+  </aside>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+    <footer role="contentinfo"><div class="container">
+    <p class="text-muted credits">
+  Copyright &copy; 2016 - wutao<br>
+  <small>
+      <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>,
+      <span class="credit">customized with <a href="https://github.com/kAworu/octostrap3">octostrap3</a></span>.
+  </small>
+</p>
+
+</div>
+</footer>
+    <script src="/javascripts/libs/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
+<script src="/javascripts/modernizr-2.0.js"></script>
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'billowkiller';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://billowkiller.github.io/blog/2016/11/26/photon/';
+        var disqus_url = 'http://billowkiller.github.io/blog/2016/11/26/photon/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </body>
+</html>

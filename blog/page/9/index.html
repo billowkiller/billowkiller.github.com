@@ -176,6 +176,68 @@ body {
 
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
         
+           | <a href="/blog/2013/05/14/linuxnei-he-bian-yi-an-zhuang-ji-xie-zai/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/linuxnei-he-bian-yi-an-zhuang-ji-xie-zai/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/linuxnei-he-bian-yi-an-zhuang-ji-xie-zai/">Linux内核编译安装及卸载</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>编译安装：</p>
+
+<p>下载需要的包</p>
+
+<pre><code>apt-get install kernel-package libncurses5-dev fakeroot wget bzip2
+cp linux-3.x.x /usr/src
+cd /usr/src/linux-3.x.x
+make menuconfig
+make modules
+make modules\_install
+make
+make install
+sudo mkinitramfs -o /boot/initrd.img-3.x.x
+sudo update-initramfs -c -k 3.x.x
+sudo update-grub2
+</code></pre>
+
+<hr />
+
+<p></div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/linuxnei-he-bian-yi-an-zhuang-ji-xie-zai/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
            | <a href="/blog/2013/05/14/linux-kvmdai-ma-zhi-mei/#disqus_thread"
              data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/linux-kvmdai-ma-zhi-mei/">Comments</a>
         
@@ -784,76 +846,6 @@ Page的说法，一个网页的重要性不仅仅包括他们自身的重要程�
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/design-pattern-principle/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/design-pattern-principle/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/design-pattern-principle/">Design Pattern&#8211;Principle</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>Head First Design Patterns</p>
-
-<hr />
-
-<p>​1. Identify the aspects of your application that vary and separate them
-from what stays the same.</p>
-
-<p>　　Take the parts that vary and encapsulate them, so that later you can
-alter or extend the parts that vary without affecting those that don’t.</p>
-
-<p>​2. Program to an interface, not an implementation.</p>
-
-<p>　　Our intuition to solve problems is relying on an implementation,
-either in the superclass or in the subclass itself. We were locked into
-using that specific implementation and there was no room for changing
-out the behavior other than writing more code.</p>
-
-<p>　　With a new design, the subclasses will use a behavior represented by
-an interface, so that the actual implementation of the behavior won’t be
-locked.</p>
-
-<p>　　ps: *program to an interface *really means *program to a
-supertype. *In JAVA, it means interface or abstract class.</p>
-
-<p>　　　　Even better, you can assign the concrete implementation object
-at runtime.</p>
-
-<p></div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/design-pattern-principle/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -877,6 +869,8 @@ at runtime.</p>
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/11/26/photon/">Photon: Fault-tolerant and Scalable Joining of Continuous Data Streams</a>
+    
     <a class="list-group-item " href="/blog/2016/11/20/millwheel/">MillWheel: Fault-Tolerant Stream Processing at Internet Scale</a>
     
     <a class="list-group-item " href="/blog/2016/11/19/bigdata-perf-tunning/">BigData Performance Tunning</a>
@@ -884,8 +878,6 @@ at runtime.</p>
     <a class="list-group-item " href="/blog/2016/11/10/cache/">Cache</a>
     
     <a class="list-group-item " href="/blog/2016/08/06/mesa/">Mesa: Google&#8217;s Near Real-time OLAP Warehouse</a>
-    
-    <a class="list-group-item " href="/blog/2016/07/31/column-stores-row-stores/">Column-Stores vs. Row-Stores</a>
     
   </div>
 </section>
@@ -915,7 +907,7 @@ at runtime.</p>
     
     
     <a class="list-group-item " href="/blog/categories/paper-weekend/index.html">
-        <span class="badge">8</span>
+        <span class="badge">9</span>
         Paper Weekend
       </a>
     

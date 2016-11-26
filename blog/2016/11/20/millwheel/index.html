@@ -197,6 +197,8 @@ body {
   <li>Duplicate Prevention: 在各种情况下用户无需考虑重复流量，系统保证数据传输和处理的 exactly-once 语义。</li>
 </ul>
 
+<!--more-->
+
 <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-22/53383350.jpg" width="600px" /></p>
 
 <p>综合而言，对比于一般的分布式流式系统，存在一些特别的要求：</p>
@@ -233,9 +235,7 @@ records arriving at that computation.</p>
   <p>In the case of Zeitgeist, our input would be a continuously arriving set of search queries, and our output would be the set of queries that are spiking or dipping.</p>
 </blockquote>
 
-<blockquote>
-  <p>it is important to be able to distinguish whether a flurry of expected Arabic queries at t = 1296167641 is simply delayed on the wire, or actually not there.</p>
-</blockquote>
+<p>it is important to be able to distinguish whether a flurry of expected Arabic queries at t = 1296167641 is simply delayed on the wire, or actually not there.</p>
 
 <p>波谷由于数据量小，对到达的数据比较敏感，所以需要判断是真的到达波谷，还仅仅是由于延迟导致数据还在传输途中。之前的做法是再设置一个安全时间，延迟几分钟再计算，但安全时间如何设置？过长则影响时效性，过短无法奏效。或者采取右端开放窗口的补偿方法，先产出数据，当延迟数据到来时再予以修改，但需要业务场景适用、下游系统支持修改。</p>
 
@@ -357,6 +357,8 @@ If there are no input streams, the low watermark and oldest work values are equi
             <li class="previous"><a href="/blog/2016/11/19/bigdata-perf-tunning/" title="Previous Post: BigData Performance Tunning">&laquo; BigData Performance Tunning</a></li>
             
             
+            <li class="next"><a href="/blog/2016/11/26/photon/" title="Next Post: Photon: fault-tolerant and scalable joining of continuous data streams">Photon: fault-tolerant and scalable joining of continuous data streams &raquo;</a></li>
+            
           </ul>
         
       </footer>
@@ -380,6 +382,8 @@ If there are no input streams, the low watermark and oldest work values are equi
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/11/26/photon/">Photon: Fault-tolerant and Scalable Joining of Continuous Data Streams</a>
+    
     <a class="list-group-item active" href="/blog/2016/11/20/millwheel/">MillWheel: Fault-Tolerant Stream Processing at Internet Scale</a>
     
     <a class="list-group-item " href="/blog/2016/11/19/bigdata-perf-tunning/">BigData Performance Tunning</a>
@@ -387,8 +391,6 @@ If there are no input streams, the low watermark and oldest work values are equi
     <a class="list-group-item " href="/blog/2016/11/10/cache/">Cache</a>
     
     <a class="list-group-item " href="/blog/2016/08/06/mesa/">Mesa: Google's Near Real-time OLAP Warehouse</a>
-    
-    <a class="list-group-item " href="/blog/2016/07/31/column-stores-row-stores/">Column-Stores vs. Row-Stores</a>
     
   </div>
 </section>
@@ -418,7 +420,7 @@ If there are no input streams, the low watermark and oldest work values are equi
     
     
     <a class="list-group-item " href="/blog/categories/paper-weekend/index.html">
-        <span class="badge">8</span>
+        <span class="badge">9</span>
         Paper Weekend
       </a>
     

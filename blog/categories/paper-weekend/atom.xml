@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Paper Weekend | Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/blog/categories/paper-weekend/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-11-24T13:18:00+08:00</updated>
+  <updated>2016-11-26T11:37:25+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,96 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Photon: fault-tolerant and scalable joining of continuous data streams]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/11/26/photon/"/>
+    <updated>2016-11-26T11:23:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/11/26/photon</id>
+    <content type="html"><![CDATA[<h2 id="intro-and-issues">Intro and Issues</h2>
+
+<p>Photon 是 Google 的数据流合并的系统，目的是 “perform continuous stream joining in real-time”，例如 query log 和 click log 合并。为什么需要对数据流合并呢？</p>
+
+<p>先看下用户使用的场景：用户先 query 一个搜索词，这时候的日志可以直接通过 Google 的网关服务器直接落盘，这里的日志称为 query log，也就是展示广告，表示发给用户的广告信息；之后的一段时间，用户浏览网页，可能会点击到某一条广告，这时候再将用户的 click log 发到某个 log datacenter。</p>
+
+<p>这两个日志所附带的内容区别很大，query log 可以附带很多的信息，类似于展示位、广告主出价等，而 click log 的内容是受限的：虽然可以把需要的信息附带到广告的 url 上，但是传输量变大增加延迟降低用户体验，另外 url 的长度也是受限的。因此很有必要进行日志的合并以用于后续的计费、报表、模型训练等等。</p>
+
+<p>那么处理这个问题的难点在哪里？</p>
+
+<!--more-->
+
+<ul>
+  <li>Exactly-once semantics: 任意时刻 at-most-once，实时的 near-exact，最终 exactly-once。</li>
+  <li>Automatic datacenter-level fault-tolerance</li>
+  <li>High scalability</li>
+  <li>Low latency</li>
+  <li>unordered streams: 特别的，由于网络或者其他原因，query log 可能会落后于 click log。</li>
+</ul>
+
+<h2 id="big-ideas">Big Ideas</h2>
+
+<p>从对系统的要求来看，有两个重要的概念：</p>
+
+<ul>
+  <li><code>Persistent State Consistency</code></li>
+  <li><code>Exactly Once Eventually</code></li>
+</ul>
+
+<h3 id="persistent-state-consistency">1. Persistent State Consistency</h3>
+
+<p>高可用，容错的系统的最简单方法就是冗余，Photon 也如此。导致的问题是在不同的数据中心可能会处理同一份数据。这时候需要对 Worker 进行协调，保证它们不对同一份数据处理。方案是对处理好的 click_id 存储下来，各个 Worker 处理的时候查询下，并在输出 joined log 之前先存储 click_id 以保证 at most once 语义。</p>
+
+<p>Photon 使用基于 <code>Multi-Paxos</code> 的容错、强一致的 <code>IdRegisty</code>。Paxos 能够保证在大多数副本之间同步状态，实现一致性。如下图是一个 IdRegistry 的架构：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-26/63413408.jpg" width="450px" /></p>
+
+<p>不同的数据中心来回的传输时间可能高达100ms，导致 IdRegistry 的 TPS 最高只有 10，对于每秒需要处理上万日志的 photon 来说是不可以接受的。那么如何增加吞吐呢？有两个措施：<code>server-side batching</code>，<code>sharding</code>。这是两个经典的扩大吞吐量的方法，批量和分治。原文如下：</p>
+
+<blockquote>
+  <p>Server-side batching combine multiple event-level commits into one bigger commit. The registry thread dequeues multiple requests and batches them into a single PaxosDB transaction.</p>
+</blockquote>
+
+<p>但是对于一个批量的 Paxos RPC 怎么区分有冲突的 event_id 原文并没有做过多的说明。</p>
+
+<blockquote>
+  <p>To take advantage of the event_id independence, we partition the event id space handled by the IdRegistry into disjoint shards such that event ids from separate shards are managed by separate IdRegistry servers. </p>
+</blockquote>
+
+<p>sharding 需要 resharding 是比较麻烦的，需要考虑向后兼容性。对于落后的 log 来说它必须在 resharding 之后还能找到原来的 shard，原文称为 “deterministic mapping”。Photon 通过增加时间窗口实现，在 timestamp 在 [0, now + S] 内使用之前的sharding。这个时间会通过 True Time API 校正，这个 API 是 Google 特有的，通过原子时钟校正，不具有普适性。这里不得不感叹 Google 的基础架构之强大。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-26/39260007.jpg" width="500px" /></p>
+
+<h3 id="exactly-once-eventually">2. Exactly Once Eventually</h3>
+
+<p>这个语义和架构有关，所以我们先看下 Photon 的架构，了解里面的组件如何实现 Exactly-once，这里说明下印象比较深的是在 Paper 中， Photon 使用两个非常普遍的技术：<code>异步 PRC</code>, <code>throttling</code>，在提高效率和稳定性方面带来很大的帮助：</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-26/70920655.jpg" width="500px" /></p>
+
+<p><strong>Dispatcher</strong></p>
+
+<p>Dispatcher 负责监控日志文件，并将它们及时的传送到系统。需要注意读取文件的状态元数据会保存在GFS上，用于 failover。发送前需要查看 event_id 是否在 IdRegistry 中，这里的 event_id 需要保持唯一，Photon 使用 &lt;ServerIP, ProcessID, Timestamp&gt; 作为 event_id。</p>
+
+<p>Dispatcher 异步的发送日志到 joiner，等待 joiner 的 ack。如果失败，则会将 click log 存入 GFS，稍后使用指数回退算法重试。一旦重试时间超过阈值，则判定日志为 unjoinable。通过这种方式达到 Dispatcher 的 at least once。</p>
+
+<p>另外至少会有两条 Photon 流在运行，即使一个数据中心挂了，另外一个也可以正常工作。并且在恢复之后会执行 backlog，追上 IdRegistry 中已有的信息，需要注意的是追赶时候的 throttling，防止 IdRegistry 压力过大。</p>
+
+<p><strong>joiner</strong></p>
+
+<p>joiner 接收 dispatcher 传来的数据，并且协调 EventStore 和 IdRegistry，执行日志合并的业务逻辑。joiner 解析 click log 的 click_id 和 query_id，异步获取 EventStore 的 query log 进行比较，一旦获取失败或者 dispatcher 发送过多数据，则会导致失败使得dispatcher 进入重试逻辑。这里的 throttling 是用于 joiner 能维持平滑的数据流。</p>
+
+<p>joiner 使用 adaptor 库处理业务逻辑。一旦 join 成功，则异步地注册 click_id 到 IdRegistry，成功注册后才允许下发 joined log 给下游。这两个步骤在 Photon 中并不是事务地进行，所以一旦在下发前宕机或者 ack 丢失就会导致 joined log 丢失。</p>
+
+<p>之所以不进行事务处理，原因应该是想让 joiner <code>无状态</code>，提高可扩展性。导致的风险可以用下面的方法解决。</p>
+
+<p>提交 click_id 给 IdRegistry 时，joiner 会附带自己的 &lt;ServerIP, ProcessID, Timestamp&gt; 信息作为 <code>unique token</code> 一并提交。当 IdRegistry 收到 click_id 的提交信息时，会比较 token，
+相同则说明是上一次没有收到 ack 的那个 joiner 发过来的。IdRegistry 此时返回成功，允许 joiner 下发合并日志。</p>
+
+<p>但此种方法并没有解决宕机带来的不一致。Photon 给的方案是使用另外一个 <code>verification system</code> 作为补充。一旦检测到 IdRegistry 中的 event 并不在 output log 中，则删除 IdRegistry 的 click_id，并重新注入 click log。</p>
+
+<p>以上其实是通过内部机制实现尽力而为的 exactly-once，最后通过类似的 lambda 架构实现最终 exactly-once。</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[MillWheel: Fault-Tolerant Stream Processing at Internet Scale]]></title>
@@ -28,6 +118,8 @@
   <li>Low Watermarks: 流量低谷的判断需要有一个标志来判断期待时间窗口内的数据都到达。</li>
   <li>Duplicate Prevention: 在各种情况下用户无需考虑重复流量，系统保证数据传输和处理的 exactly-once 语义。</li>
 </ul>
+
+<!--more-->
 
 <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-22/53383350.jpg" width="600px" /></p>
 
@@ -65,9 +157,7 @@ records arriving at that computation.</p>
   <p>In the case of Zeitgeist, our input would be a continuously arriving set of search queries, and our output would be the set of queries that are spiking or dipping.</p>
 </blockquote>
 
-<blockquote>
-  <p>it is important to be able to distinguish whether a flurry of expected Arabic queries at t = 1296167641 is simply delayed on the wire, or actually not there.</p>
-</blockquote>
+<p>it is important to be able to distinguish whether a flurry of expected Arabic queries at t = 1296167641 is simply delayed on the wire, or actually not there.</p>
 
 <p>波谷由于数据量小，对到达的数据比较敏感，所以需要判断是真的到达波谷，还仅仅是由于延迟导致数据还在传输途中。之前的做法是再设置一个安全时间，延迟几分钟再计算，但安全时间如何设置？过长则影响时效性，过短无法奏效。或者采取右端开放窗口的补偿方法，先产出数据，当延迟数据到来时再予以修改，但需要业务场景适用、下游系统支持修改。</p>
 
@@ -545,367 +635,6 @@ If there are no input streams, the low watermark and oldest work values are equi
   <li>Streaming versus batch processing does not need to be an either/or decision.</li>
   <li>易用性很重要.</li>
 </ol>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[google论文：MapReduce]]></title>
-    <link href="http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-mapreduce/"/>
-    <updated>2013-05-14T01:09:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-mapreduce</id>
-    <content type="html"><![CDATA[<p>论文：<a href="http://static.googleusercontent.com/external_content/untrusted_dlcp/research.google.com/en//archive/mapreduce-osdi04.pdf">英文版</a>，<a href="http://blademaster.ixiezi.com/2010/03/27/google-mapreduce%E4%B8%AD%E6%96%87%E7%89%88/">中文版</a></p>
-
-<hr />
-
-<ol>
-  <li>
-    <h2 id="section">导论</h2>
-  </li>
-</ol>
-
-<h3 id="section-1">1.1 定义</h3>
-
-<p>先给个定义：
-MapReduce是一个编程模型，也是一个处理和生成超大数据集的算法模型的相关实现。用户首先创建一个Map函数处理一个基于key/value
-pair的数据集合，输出中间的基于key/value
-pair的数据集合；然后再创建一个Reduce函数用来合并所有的具有相同中间key值的中间value值。</p>
-
-<p>使用这个抽象模型，我们只要表述我们想要执行的简单运算即可，而不必关心并行计算、容错、数据分布、负载均衡等复杂的细节，这些问题都被封装在了一个库里面。设计这个抽象模型的灵感来自Lisp和许多其他函数式语言的Map和Reduce的原语。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr2_zps9c617225.png" alt="big picture of MapReduce" /></p>
-
-<!--more-->
-<p>### 1.2 概述</p>
-
-<ul>
-  <li>Programmers must specify:
-    <ul>
-      <li>map (k, v) → &lt;k’, v’&gt;*</li>
-      <li>reduce (k’, v’) → &lt;k’, v’&gt;*
-        <ul>
-          <li>All values with the same key are reduced together</li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li>Optionally, also:
-    <ul>
-      <li>partition (k’, number of partitions) → partition for k’
-        <ul>
-          <li>Often a simple hash of the key, e.g., hash(k’) mod n</li>
-          <li>Divides up key space for parallel reduce operations</li>
-        </ul>
-      </li>
-      <li>combine (k’, v’) → &lt;k’, v’&gt;*
-        <ul>
-          <li>Mini-reducers that run in memory after the map phase</li>
-          <li>Used as an optimization to reduce network traffic</li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li>The execution framework handles everything else…
-    <ul>
-      <li>Scheduling: assigns workers to map and reduce tasks</li>
-      <li>“Data distribution”: moves processes to data</li>
-      <li>Synchronization: gathers, sorts, and shuffles intermediate data</li>
-      <li>Errors and faults: detects worker failures and restarts</li>
-    </ul>
-  </li>
-  <li>Limited control over data and execution flow
-    <ul>
-      <li>All algorithms must expressed in m, r, c, p</li>
-    </ul>
-  </li>
-  <li>You don’t know:
-    <ul>
-      <li>Where mappers and reducers run</li>
-      <li>When a mapper or reducer begins or finishes</li>
-      <li>Which input a particular mapper is processing</li>
-      <li>Which intermediate key a particular reducer is processing</li>
-    </ul>
-  </li>
-</ul>
-
-<ol>
-  <li>
-    <h2 id="section-2">实现</h2>
-  </li>
-</ol>
-
-<h3 id="section-3">2.1 流程</h3>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr1_zps85dad9ca.png" alt="Execution Overview" height="500px" /></p>
-
-<p>上图展示了我们的MapReduce实现中操作的全部流程。</p>
-
-<ol>
-  <li>用户程序首先调用的MapReduce库将输入文件分成M个数据片段，每个数据片段的大小一般从16MB到64MB。然后用户程序在机群中创建大量的程序副本。</li>
-  <li>这些程序副本中的有一个特殊的程序–master。副本中其它的程序都是worker程序，由master分配任务。有M个Map任务和R个Reduce任务将被分配，master将一个Map任务或Reduce任务分配给一个空闲的worker。</li>
-  <li>被分配了map任务的worker程序读取相关的输入数据片段，从输入的数据片段中解析出key/value
-pair，然后把key/value
-pair传递给用户自定义的Map函数，由Map函数生成并输出的中间key/value
-pair，并缓存在内存中。</li>
-  <li>缓存中的key/value
-pair通过分区函数分成R个区域，之后周期性的写入到本地磁盘上。缓存的key/value
-pair在本地磁盘上的存储位置将被回传给master，由master负责把这些存储位置再传送给Reduce
-worker。</li>
-  <li>当Reduce
-worker程序接收到master程序发来的数据存储位置信息后，使用RPC从Map
-worker所在主机的磁盘上读取这些缓存数据。当Reduce
-worker读取了所有的中间数据后，通过对key进行排序后使得具有相同key值的数据聚合在一起。由于许多不同的key值会映射到相同的Reduce任务上，因此必须进行排序。如果中间数据太大无法在内存中完成排序，那么就要在外部进行排序。</li>
-  <li>Reduce
-worker程序遍历排序后的中间数据，对于每一个唯一的中间key值，Reduce
-worker程序将这个key值和它相关的中间value值的集合传递给用户自定义的Reduce函数。Reduce函数的输出被追加到所属分区的输出文件。</li>
-  <li>当所有的Map和Reduce任务都完成之后，master唤醒用户程序。在这个时候，在用户程序里的对MapReduce调用才返回。</li>
-</ol>
-
-<h3 id="mapreduce">2.2 map和Reduce的同步</h3>
-
-<ul>
-  <li>Cleverly-constructed data structures
-    <ul>
-      <li>Bring partial results together</li>
-    </ul>
-  </li>
-  <li>Sort order of intermediate keys
-    <ul>
-      <li>Control order in which reducers process keys</li>
-    </ul>
-  </li>
-  <li>Partitioner
-    <ul>
-      <li>Control which reducer processes which keys</li>
-    </ul>
-  </li>
-  <li>Preserving state in mappers and reducers
-    <ul>
-      <li>Capture dependencies across multiple keys and values</li>
-    </ul>
-  </li>
-</ul>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr3_zps5ead0c7b.png" alt="map和Reduce的同步" height="300px" /></p>
-
-<h3 id="section-4">2.3 本地聚合</h3>
-
-<ul>
-  <li>Ideal scaling characteristics:
-    <ul>
-      <li>Twice the data, twice the running time</li>
-      <li>Twice the resources, half the running time</li>
-    </ul>
-  </li>
-  <li>Why can’t we achieve this?
-    <ul>
-      <li>Synchronization requires communication</li>
-      <li>Communication kills performance</li>
-    </ul>
-  </li>
-  <li>Thus… avoid communication!
-    <ul>
-      <li>Reduce intermediate data via local aggregation</li>
-      <li>Combiners can help</li>
-    </ul>
-  </li>
-</ul>
-
-<h3 id="shuffle-and-sort">2.4 Shuffle and Sort</h3>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/mr4_zps7ee59e35.png" alt="Shuffle and Sort" height="400px" /></p>
-
-<h3 id="master">2.5 Master</h3>
-
-<p>Master持有一些数据结构，它存储每一个Map和Reduce任务的状态（空闲、工作中或完成)，以及Worker机器(非空闲任务的机器)的标识。</p>
-
-<p>Master就像一个数据管道，中间文件存储区域的位置信息通过这个管道从Map传递到Reduce。因此，对于每个已经完成的Map任务，master存储了Map任务产生的R个中间文件存储区域的大小和位置。当Map任务完成时，Master接收到位置和大小的更新信息，这些信息被逐步递增的推送给那些正在工作的Reduce任务。</p>
-
-<p>master周期性的ping每个worker。如果在一个约定的时间范围内没有收到worker返回的信息，master将把这个worker标记为失效。所有由这个失效的worker完成的Map任务被重设为初始的空闲状态，之后这些任务就可以被安排给其他的worker。同样的，worker失效时正在运行的Map或Reduce任务也将被重新置为空闲状态，等待重新调度。</p>
-
-<p>master周期性的将数据写入磁盘，即检查点（checkpoint）。如果这个master任务失效了，可以从最后一个检查点开始启动另一个master进程。然而，由于只有一个master进程，master失效后再恢复是比较麻烦的，因此我们现在的实现是如果master失效，就中止MapReduce运算。客户可以检查到这个状态，并且可以根据需要重新执行MapReduce操作。</p>
-
-<ol>
-  <li>
-    <h2 id="section-5">性能优化</h2>
-  </li>
-</ol>
-
-<h3 id="straggler">3.1 straggler</h3>
-
-<p>影响一个MapReduce的总执行时间最通常的因素是straggler(落伍者)：在运算过程中，如果有一台机器花了很长的时间才完成最后几个Map或Reduce任务，导致MapReduce操作总的执行时间超过预期。</p>
-
-<p>当一个MapReduce操作接近完成的时候，master调度备用（backup）任务进程来执行剩下的、处于处理中状态（in-progress）的任务。无论是最初的执行进程、还是备用（backup）任务进程完成了任务，我们都把这个任务标记成为已经完成。我们调优了这个机制，通常只会占用比正常操作多几个百分点的计算资源。我们发现采用这样的机制对于减少超大MapReduce操作的总处理时间效果显著。</p>
-
-<h3 id="partitioning-function">3.2 分区函数(partitioning function)</h3>
-
-<p>我们在中间key上使用分区函数来对数据进行分区，之后再输入到后续任务执行进程。一个缺省的分区函数是使用hash方法(比如，hash(key)
-mod
-R)进行分区。hash方法能产生非常平衡的分区。然而，有的时候，其它的一些分区函数对key值进行的分区将非常有用。</p>
-
-<p>使用“hash(Hostname(urlkey)) mod
-R”作为分区函数就可以把所有来自同一个主机的URLs保存在同一个输出文件中。</p>
-
-<h3 id="section-6">3.3 顺序保证</h3>
-
-<p>在给定的分区中，中间key/value
-pair数据的处理顺序是按照key值增量顺序处理的。</p>
-
-<h3 id="combiner">3.4 Combiner函数</h3>
-
-<p>用户指定一个可选的combiner函数，combiner函数首先在本地将这些记录进行一次合并，然后将合并的结果再通过网络发送出去。</p>
-
-<p>一般情况下，Combiner和Reduce函数是一样的。Combiner函数和Reduce函数之间唯一的区别是MapReduce库怎样控制函数的输出。</p>
-
-<h3 id="section-7">3.5 跳过损坏的记录</h3>
-
-<ul>
-  <li>Map/Reduce functions sometimes fail for particular inputs
-    <ul>
-      <li>Best solution is to debug &amp; fix
-        <ul>
-          <li>Not always possible \~ third-party source libraries</li>
-        </ul>
-      </li>
-      <li>On segmentation fault:
-        <ul>
-          <li>Send UDP packet to master from signal handler</li>
-          <li>Include sequence number of record being processed</li>
-        </ul>
-      </li>
-      <li>If master sees two failures for same record:
-        <ul>
-          <li>Next worker is told to skip the record</li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-</ul>
-
-<ol>
-  <li>
-    <h2 id="section-8">要点和例子</h2>
-  </li>
-</ol>
-
-<h3 id="points-need-to-be-emphasized">4.1 Points need to be emphasized</h3>
-
-<ul>
-  <li>No reduce can begin until map is complete</li>
-  <li>Master must communicate locations of intermediate files</li>
-  <li>Tasks scheduled based on location of data</li>
-  <li>If map worker fails any time before reduce finishes, task must be
-completely rerun</li>
-  <li>MapReduce library does most of the hard work for us!</li>
-</ul>
-
-<h3 id="section-9">4.2 例子</h3>
-
-<ol>
-  <li>分布式的Grep：Map函数输出匹配某个模式的一行，Reduce函数是一个恒等函数，即把中间数据复制到输出。</li>
-  <li>计算URL访问频率：Map函数处理日志中web页面请求的记录，然后输出(URL,1)。Reduce函数把相同URL的value值都累加起来，产生(URL,记录总数)结果。</li>
-  <li>倒转网络链接图：Map函数在源页面（source）中搜索所有的链接目标（target）并输出为(target,source)。Reduce函数把给定链接目标（target）的链接组合成一个列表，输出(target,list(source))。</li>
-  <li>每个主机的检索词向量：检索词向量用一个(词,频率)列表来概述出现在文档或文档集中的最重要的一些词。Map函数为每一个输入文档输出(主机名,检索词向量)，其中主机名来自文档的URL。Reduce函数接收给定主机的所有文档的检索词向量，并把这些检索词向量加在一起，丢弃掉低频的检索词，输出一个最终的(主机名,检索词向量)。</li>
-  <li>倒排索引：Map函数分析每个文档输出一个(词,文档号)的列表，Reduce函数的输入是一个给定词的所有（词，文档号），排序所有的文档号，输出(词,list（文档号）)。所有的输出集合形成一个简单的倒排索引，它以一种简单的算法跟踪词在文档中的位置。</li>
-  <li>
-    <p>分布式排序：Map函数从每个记录提取key，输出(key,record)。Reduce函数不改变任何的值。这个运算依赖分区机制(在4.1描述)和排序属性(在4.2描述)。</p>
-  </li>
-  <li>
-    <h2 id="hadoop">Hadoop</h2>
-  </li>
-</ol>
-
-<p><strong>术语对照</strong></p>
-
-<table border="1" cellspacing="0" cellpadding="0">
-<tbody>
-<tr>
-<td width="109">
-<p class="TableContents" align="center"><span style="font-size: 14px;"><strong>翻译</strong></span></p>
-</td>
-<td width="136">
-<p class="TableContents" align="center"><span style="font-size: 14px;"><strong>Hadoop</strong><strong>术语</strong></span></p>
-</td>
-<td width="142">
-<p class="TableContents" align="center"><span style="font-size: 14px;"><strong>Google</strong><strong>术语</strong></span></p>
-</td>
-<td width="277">
-<p class="TableContents" align="center"><span style="font-size: 14px;"><strong>相关解释</strong></span></p>
-</td>
-</tr>
-<tr>
-<td width="109">
-<p class="TableContents" align="center"><span style="font-size: 14px;">作业</span></p>
-</td>
-<td width="136">
-<p class="TableContents" align="center"><span style="font-size: 14px;">Job</span></p>
-</td>
-<td width="142">
-<p class="TableContents" align="center"><span style="font-size: 14px;">Job</span></p>
-</td>
-<td width="277">
-<p class="TableContents"><span style="font-size: 14px;">用户的每一个计算请求，就称为一个作业。</span></p>
-</td>
-</tr>
-<tr>
-<td width="109">
-<p class="TableContents" align="center"><span style="font-size: 14px;">作业服务器</span></p>
-</td>
-<td width="136">
-<p class="TableContents" align="center"><span style="font-size: 14px;">JobTracker</span></p>
-</td>
-<td width="142">
-<p class="TableContents" align="center"><span style="font-size: 14px;">Master</span></p>
-</td>
-<td width="277">
-<p class="TableContents"><span style="font-size: 14px;">用户提交作业的服务器，同时，它还负责各个作业任务的分配，管理所有的任务服务器。</span></p>
-</td>
-</tr>
-<tr>
-<td width="109">
-<p class="TableContents" align="center"><span style="font-size: 14px;">任务服务器</span></p>
-</td>
-<td width="136">
-<p class="TableContents" align="center"><span style="font-size: 14px;">TaskTracker</span></p>
-</td>
-<td width="142">
-<p class="TableContents" align="center"><span style="font-size: 14px;">Worker</span></p>
-</td>
-<td width="277">
-<p class="TableContents"><span style="font-size: 14px;">任劳任怨的工蜂，负责执行具体的任务。</span></p>
-</td>
-</tr>
-<tr>
-<td width="109">
-<p class="TableContents" align="center"><span style="font-size: 14px;">任务</span></p>
-</td>
-<td width="136">
-<p class="TableContents" align="center"><span style="font-size: 14px;">Task</span></p>
-</td>
-<td width="142">
-<p class="TableContents" align="center"><span style="font-size: 14px;">Task</span></p>
-</td>
-<td width="277">
-<p class="TableContents"><span style="font-size: 14px;">每一个作业，都需要拆分开了，交由多个服务器来完成，拆分出来的执行单位，就称为任务。</span></p>
-</td>
-</tr>
-<tr>
-<td width="109">
-<p class="TableContents" align="center"><span style="font-size: 14px;">备份任务</span></p>
-</td>
-<td width="136">
-<p class="TableContents" align="center"><span style="font-size: 14px;">Speculative Task</span></p>
-</td>
-<td width="142">
-<p class="TableContents" align="center"><span style="font-size: 14px;">Buckup Task</span></p>
-</td>
-<td width="277">
-<p class="TableContents"><span style="font-size: 14px;">每一个任务，都有可能执行失败或者缓慢，为了降低为此付出的代价，系统会未雨绸缪的实现在另外的任务服务器上执行同样一个任务，这就是备份任务。</span></p>
-</td>
-</tr>
-</tbody>
-</table>
-<p>具体可以看博文<a href="http://www.cnblogs.com/duguguiyu/archive/2009/02/28/1400278.html">http://www.cnblogs.com/duguguiyu/archive/2009/02/28/1400278.html</a></p>
 
 ]]></content>
   </entry>

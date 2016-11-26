@@ -174,6 +174,60 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-03-01T14:00:00+08:00" pubdate data-updated="true">Mar 1<span>st</span>, 2015</time>
+        
+           | <a href="/blog/2015/03/01/klr-svr/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2015/03/01/klr-svr/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2015/03/01/klr-svr/">Kernel Logistic Regression Versus SVM</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>Logistic Regression和SVM都是分类方法，它们定义线性决策边界（linear decision boundaries）作为划分的依据。但二者在motivation方便完全不同，区别如下</p>
+
+<ul>
+  <li>LR初衷是为了让linear regression能够输出二元分类，估计一个实例属于某一类的概率；线性决策边界也只是回归函数的结果，在回归函数中使用阈值作为分类的标准，一般是0.5。决策边界在SVM中来的更为重要，整个模型的目标就是为了获得最优的决策边界。</li>
+  <li>每个训练样本都对LR的过程有一定的影响，但SVM只依赖于在决策边界附近的某些点。</li>
+  <li>LR适应于低维空间，并且由于使用最大似然估计，所以对噪声不敏感；SVM更适应于高维空间</li>
+  <li>没有正规化的LR无法保证获得最好的分离超平面，只能获得margin附近的较高的置信度; SVM则能获得最优的分离超平面。</li>
+</ul>
+
+<p>那么二者会有什么联系呢，SVM的kernel function又是如何应用到LR模型的呢？</p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2015/03/01/klr-svr/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-02-27T14:00:00+08:00" pubdate data-updated="true">Feb 27<span>th</span>, 2015</time>
         
            | <a href="/blog/2015/02/27/svm/#disqus_thread"
@@ -617,59 +671,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-14T02:18:00+08:00" pubdate data-updated="true">Aug 14<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/08/14/linux-memory-management/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/08/14/linux-memory-management/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/14/linux-memory-management/">Linux Memory Management</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>reprint from <a href="http://www.kerneltravel.net/journal/v/mem.htm">http://www.kerneltravel.net/journal/v/mem.htm</a></p>
-
-<hr />
-
-<p>看到一篇介绍linux内存管理的好文，忍不住转载，做个记录。内容作了部分删改。</p>
-
-<h2 id="section">摘要</h2>
-
-<p>本章首先以应用程序开发者的角度审视Linux的进程内存管理，在此基础上逐步深入到内核中讨论系统物理内存管理和内核内存的使用方法。力求从外到内、水到渠成地引导网友分析Linux的内存管理与使用。在本章最后，我们给出一个内存映射的实例，帮助网友们理解内核内存管理与用户内存管理之间的关系，希望大家最终能驾驭Linux内存管理。</p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/08/14/linux-memory-management/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -693,6 +694,8 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/11/26/photon/">Photon: Fault-tolerant and Scalable Joining of Continuous Data Streams</a>
+    
     <a class="list-group-item " href="/blog/2016/11/20/millwheel/">MillWheel: Fault-Tolerant Stream Processing at Internet Scale</a>
     
     <a class="list-group-item " href="/blog/2016/11/19/bigdata-perf-tunning/">BigData Performance Tunning</a>
@@ -700,8 +703,6 @@ body {
     <a class="list-group-item " href="/blog/2016/11/10/cache/">Cache</a>
     
     <a class="list-group-item " href="/blog/2016/08/06/mesa/">Mesa: Google&#8217;s Near Real-time OLAP Warehouse</a>
-    
-    <a class="list-group-item " href="/blog/2016/07/31/column-stores-row-stores/">Column-Stores vs. Row-Stores</a>
     
   </div>
 </section>
@@ -731,7 +732,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/paper-weekend/index.html">
-        <span class="badge">8</span>
+        <span class="badge">9</span>
         Paper Weekend
       </a>
     

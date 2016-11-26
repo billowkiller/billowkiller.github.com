@@ -174,6 +174,68 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-12T02:18:00+08:00" pubdate data-updated="true">Apr 12<span>th</span>, 2014</time>
+        
+           | <a href="/blog/2014/04/12/Inside-Object/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/04/12/Inside-Object/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/12/Inside-Object/">Inside C++ Object</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>modified from <a href="http://blog.csdn.net/eroswang/article/details/1749609">http://blog.csdn.net/eroswang/article/details/1749609</a></p>
+
+<hr />
+
+<h2 id="ooob">面对对象（OO）和基于对象（OB）</h2>
+
+<p>基于对象的数据类型可以展示封装的非多态形式，但是不支持类型的扩充。一个OB设计可能比一个对等的OO设计速度更快而且空间更紧凑。速度快是因为所有的函数引发操作都在编译时期解析完成，对象建构起来时不需要设置virtual机制；空间紧凑则是因为每一个class object不需要负担传统上为了支持virtual机制而需要的额外符合。不过，OB设计比较没有弹性。 </p>
+
+<h2 id="c">C++对象模型</h2>
+
+<p>在C++中，有两种<strong>class data members：static和nonstatic</strong>，以及三种<strong>class member functions：static、nonstatic和virtual</strong>。</p>
+
+<p>Nonstatic data members被配置于每一个class object之内，static data members则被存放在所有的class object之外。Static和nonstatic function members也被放在所有的class object之外，Virtual functions则以两个步骤支持之：</p>
+
+<ul>
+  <li>每一个class产生出一堆指向virtual functions的指针，放在表格之中，这个表格被称为<strong>virtual table（vtbl）</strong>。每一个class所关联的type_info object（用以支持<strong>runtime type identification，RTTI</strong>）也经由virtual table被指出来，通常是放在表格的第一个slot处。</li>
+  <li>每一个class object被添加了一个指针，指向相关的virtual table。通常这个指针被称为<strong>vptr</strong>。</li>
+</ul>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/04/12/Inside-Object/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-03-12T02:18:00+08:00" pubdate data-updated="true">Mar 12<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/03/12/string-copy-on-write/#disqus_thread"
@@ -612,65 +674,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-06-02T13:49:00+08:00" pubdate data-updated="true">Jun 2<span>nd</span>, 2013</time>
-        
-           | <a href="/blog/2013/06/02/probabilistic-graphical-models/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/06/02/probabilistic-graphical-models/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/06/02/probabilistic-graphical-models/">Probabilistic Graphical Models</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><h3 id="pgm">1. PGM介绍</h3>
-
-<p>GM(graphical model)，图模型首先它是一个概率模型，用的是图的数据结构，用来表示随机变量之间的以来关系。
-因为是涉及到变量之间的关系，于是在概率理论特别是统计部分得到很长远的应用，另外还包括机器学习。</p>
-
-<p><img src="http://www.stanford.edu/~montanar/TEACHING/Stat375/graph.jpg" width="400px" /></p>
-
-<p>可以看的出来，概率图模型是综合了统计和计算机技术：</p>
-
-<ul>
-  <li>统计方面提供了概率基础，包括概率分布的分析，不确定性的处理，决策判定等等。</li>
-  <li>计算机方面可以将概率中的条件概率置于高维空间中，用图来表示它们的数据结构，并使用高效的算法计算。</li>
-</ul>
-
-<p>使用现实中得到的知识数据来表述图模型，作为declarative representation，它与我们所要使用的算法是
-松耦合的，可以将不同的算法应用到图模型上，在图模型中可以加入专家知识，和从其他数据中学习到的知识。
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/06/02/probabilistic-graphical-models/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -694,6 +697,8 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/11/26/photon/">Photon: Fault-tolerant and Scalable Joining of Continuous Data Streams</a>
+    
     <a class="list-group-item " href="/blog/2016/11/20/millwheel/">MillWheel: Fault-Tolerant Stream Processing at Internet Scale</a>
     
     <a class="list-group-item " href="/blog/2016/11/19/bigdata-perf-tunning/">BigData Performance Tunning</a>
@@ -701,8 +706,6 @@ body {
     <a class="list-group-item " href="/blog/2016/11/10/cache/">Cache</a>
     
     <a class="list-group-item " href="/blog/2016/08/06/mesa/">Mesa: Google&#8217;s Near Real-time OLAP Warehouse</a>
-    
-    <a class="list-group-item " href="/blog/2016/07/31/column-stores-row-stores/">Column-Stores vs. Row-Stores</a>
     
   </div>
 </section>
@@ -732,7 +735,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/paper-weekend/index.html">
-        <span class="badge">8</span>
+        <span class="badge">9</span>
         Paper Weekend
       </a>
     

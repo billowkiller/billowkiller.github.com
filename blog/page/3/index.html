@@ -176,6 +176,185 @@ body {
 
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-07-26T17:23:00+08:00" pubdate data-updated="true">Jul 26<span>th</span>, 2015</time>
         
+           | <a href="/blog/2015/07/26/mr-design-pattern/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2015/07/26/mr-design-pattern/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/26/mr-design-pattern/">Design Patterns for MapReduce Algorithms</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>参考《MapReduce设计模式》，做个总结。</p>
+
+<h2 id="section">概要模式</h2>
+
+<h3 id="section-1">数值概要</h3>
+
+<p><strong>问题描述：</strong>求一堆数据的一个高层次展示，平均值，中位数，最大，最小，标准差这类的特征值。</p>
+
+<p>假设θ是我们想要执行的聚合方法，要计算的值是列表values（v1, v2, v3,…, vn)），要想求出聚合值λ， 令：λ=θ(v1, v2, v3, …, vn) 。</p>
+
+<p><strong>解决方案：</strong></p>
+
+<ul>
+  <li>
+    <p>使用combiner</p>
+
+    <p>如果函数θ满足结合律和交换律，那么就可以使用combiner来减少中间数据的传输量。</p>
+
+    <p>为了得到最终要的那个统计值，是否一定要把所有的数据都传递给reduce，是不是可以先小范围的做些汇总。比如求最大值。 得出每一part的最大值后，再比较得出最大值。那么任意打乱顺序（交换律），任意将数据组成part（结合律），都不会影响最终结果</p>
+
+    <p>再比如算中位数，那么可能就无法使用combiner优化了。中位数不满足交换律和结合律。比如θ函数表示求中位数，那么显然 （1,1,1,1,1,2,2,3,3）这组数据不同的组合结果不同：</p>
+
+    <pre><code>  θ( θ(1,1,1), θ(1,2,2), θ(1,3,3) ) = 2
+  θ( θ(1,1,1), θ(1,1,2), θ(2,3,3) ) = 1
+</code></pre>
+  </li>
+  <li>
+    <p>定制partition</p>
+
+    <p>数据倾斜严重的会造成reduce处理的数据量差异很大。建议采样分析或者根据之前的经验重新实现partition。</p>
+
+    <p>该策略也适用于其他任何mapreduce程序，线上也时常能碰到partition分桶严重不均的情况，曾经发现一个任务其余reduce都是在秒级跑完，而其中一个reduce跑了10几个小时，查看该任务的partition分布，发现这个reduce处理的量比其他的多好几个数量级。</p>
+  </li>
+  <li>
+    <p>内存优化版的中位数和标准差程序</p>
+
+    <p>前面提到，求中位数的函数不满足交换律和结合律。 因此无法简单的使用combiner。因此就设计了一种新的存储方式。</p>
+
+    <p>(1,1,1,1,2,2,3,4,5,5,5)这样的数据集合可以存储为：(1→4, 2→2, 3→1, 4→1, 5→3)</p>
+
+    <p>实际情况下，这种优化在数据重复率高的情况下，收益明显。另外，考虑到reduce端需要排序，而combiner内排序无意义，因此重新实现下combiner用hashmap来存储上面的数据结构。（reduce端用SortedMapWritable）</p>
+  </li>
+</ul>
+
+<h2 id="section-2">过滤模式</h2>
+
+<h3 id="section-3">过滤</h3>
+
+<p><strong>问题描述：</strong>针对每一条记录，基于某个条件作出判断，决定这条记录是应该保留还是放弃。</p>
+
+<p><strong>解决方案：</strong></p>
+
+<ul>
+  <li>
+    <p>可以不使用reduce</p>
+
+    <p>如果只是为了过滤，那么可以不加reduce。结果会输出多个part-m-文件。</p>
+
+    <p>但是，如果保留下的数据量很小，就会造成大量小文件。如果是永久存储的，为了节省inode以及后续处理这些文件时不至于浪费大量map去处理。那么可以考虑用一定数量的reduce收集结果。</p>
+  </li>
+  <li>
+    <p>布隆过滤</p>
+
+    <p>利用布隆过滤器来替代字典，每条记录查询布隆过滤器来决定去留。</p>
+
+    <p>其优点是省内存。缺点或者说特点是：只能判断no或者maybe，但是不能判断yes。(有一定概率的fase-positive)</p>
+
+    <p>而对于线上实际，可以采用分层的架构，在布隆过滤器下游再加一个精确的过滤来处理。如果需求仅仅是要判断不存在或可以容忍fase-positive，那就可以直接使用。</p>
+
+    <p>布隆过滤器训练的结果如果不是经常变更，那么可以保存下来每次复用。然后将该结果作为分布式cache分发到各个map端。</p>
+  </li>
+</ul>
+
+<h3 id="top10">Top10</h3>
+
+<p><strong>问题描述：</strong>求一个大数据集合的的top 10的数据。</p>
+
+<p><strong>解决方案：</strong></p>
+
+<ul>
+  <li>
+    <p>key设置为null，每个map数据拼接到一行。</p>
+
+    <p>mapper遍历数据拿到top 10之后，将这10个数据拼接，组成一个value, 然后设置key为null。这样，key都是null，节省了shuffle排序的开销。 </p>
+  </li>
+</ul>
+
+<p><strong>性能分析：</strong></p>
+
+<ul>
+  <li>由于reduce只能有一个，因此这个单点在数据不断增长的情况下迟早会成为瓶颈。</li>
+  <li>对于 Top K的模型，K值很大时，reduce会更快的达到瓶颈。</li>
+  <li>可以多跑几轮map的逻辑。比如reduce设置多个，每个也是产出top 10，然后再起一轮mapreduce。</li>
+  <li>ChainMapper/ChainReducer</li>
+  <li>使用全排序，运行成本要看具体情况</li>
+</ul>
+
+<h3 id="section-4">去重</h3>
+
+<p><strong>解决方案：</strong></p>
+
+<pre><code>	map(key,record):
+	emit record,null
+	reduce(key,records):
+	emit key
+</code></pre>
+
+<p>这种去重方法是无法保持数据原来的顺序的</p>
+
+<h2 id="section-5">连接模式</h2>
+
+<h3 id="reduce">reduce端连接</h3>
+<p>就是在reduce端执行各种连接操作，map会将所有数据传给reduce。该操作耗带宽，io等资源。</p>
+
+<p>但是，这种方式的可伸缩性强，数据集大的情况下，通过增加reduce个数就可以处理。甚至，在所有的数据集都非常大的情况下，这种方式可能是唯一的选择。</p>
+
+<p>在map端使用布隆过滤器来减少传递给reduce的量.</p>
+
+<p><img src="http://img.my.csdn.net/uploads/201301/09/1357709896_1263.jpg" width="500px" /></p>
+
+<h3 id="replicated-join">Replicated Join</h3>
+
+<p>复制join是一种特殊的join，用于一个大数据和许多小数据集map端执行的情况。能够消除reduce阶段的shuffle。</p>
+
+<p>如果其中一个数据集很小，可以全部放入内存，那么只要将这个文件作为分布式cache分发即可。因此，这种情况值适用于内连接和大数据集在左边的左外连接。</p>
+
+<p><img src="http://img.my.csdn.net/uploads/201301/10/1357790552_4334.jpg" width="300px" /></p>
+
+<h3 id="composite-join">Composite Join</h3>
+
+<p>复合join是一种特殊的join操作用来执行map端的很多大数据集的join。该模式对数据有一定的要求。就是需要连接的两份数据已经按照相同的标尺切分好了，并且是排好序的.</p>
+
+<p><img src="http://img.my.csdn.net/uploads/201301/10/1357790574_9671.jpg" width="350px" /></p>
+
+<h3 id="section-6">笛卡尔积</h3>
+
+<p>数据集中的每条记录都与另个数据集的每条记录两两匹配。这是一个非常重型的操作。假设两个数据集都是1万条数据，那么将匹配1亿次。随着数据量的增长，算法复杂度指数级增长。</p>
+
+<p><img src="http://img.my.csdn.net/uploads/201301/10/1357790607_3097.jpg" width="500px" /></p>
+
+</div>
+  
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-07-26T17:23:00+08:00" pubdate data-updated="true">Jul 26<span>th</span>, 2015</time>
+        
            | <a href="/blog/2015/07/26/mapreduce-framework/#disqus_thread"
              data-disqus-identifier="http://billowkiller.github.io/blog/2015/07/26/mapreduce-framework/">Comments</a>
         
@@ -754,60 +933,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-03-01T14:00:00+08:00" pubdate data-updated="true">Mar 1<span>st</span>, 2015</time>
-        
-           | <a href="/blog/2015/03/01/klr-svr/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2015/03/01/klr-svr/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2015/03/01/klr-svr/">Kernel Logistic Regression Versus SVM</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>Logistic Regression和SVM都是分类方法，它们定义线性决策边界（linear decision boundaries）作为划分的依据。但二者在motivation方便完全不同，区别如下</p>
-
-<ul>
-  <li>LR初衷是为了让linear regression能够输出二元分类，估计一个实例属于某一类的概率；线性决策边界也只是回归函数的结果，在回归函数中使用阈值作为分类的标准，一般是0.5。决策边界在SVM中来的更为重要，整个模型的目标就是为了获得最优的决策边界。</li>
-  <li>每个训练样本都对LR的过程有一定的影响，但SVM只依赖于在决策边界附近的某些点。</li>
-  <li>LR适应于低维空间，并且由于使用最大似然估计，所以对噪声不敏感；SVM更适应于高维空间</li>
-  <li>没有正规化的LR无法保证获得最好的分离超平面，只能获得margin附近的较高的置信度; SVM则能获得最优的分离超平面。</li>
-</ul>
-
-<p>那么二者会有什么联系呢，SVM的kernel function又是如何应用到LR模型的呢？</p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2015/03/01/klr-svr/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -831,6 +956,8 @@ body {
   
   <div id="recent_posts" class="list-group">
     
+    <a class="list-group-item " href="/blog/2016/11/26/photon/">Photon: Fault-tolerant and Scalable Joining of Continuous Data Streams</a>
+    
     <a class="list-group-item " href="/blog/2016/11/20/millwheel/">MillWheel: Fault-Tolerant Stream Processing at Internet Scale</a>
     
     <a class="list-group-item " href="/blog/2016/11/19/bigdata-perf-tunning/">BigData Performance Tunning</a>
@@ -838,8 +965,6 @@ body {
     <a class="list-group-item " href="/blog/2016/11/10/cache/">Cache</a>
     
     <a class="list-group-item " href="/blog/2016/08/06/mesa/">Mesa: Google&#8217;s Near Real-time OLAP Warehouse</a>
-    
-    <a class="list-group-item " href="/blog/2016/07/31/column-stores-row-stores/">Column-Stores vs. Row-Stores</a>
     
   </div>
 </section>
@@ -869,7 +994,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/paper-weekend/index.html">
-        <span class="badge">8</span>
+        <span class="badge">9</span>
         Paper Weekend
       </a>
     
