@@ -4,7 +4,7 @@
   <title><![CDATA[tags: cache | Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/blog/tags/cache/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-11-26T11:37:25+08:00</updated>
+  <updated>2016-11-26T14:34:57+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -35,6 +35,8 @@
   <li>内存为主，磁盘为辅，提供完全持久化（leveldb， redis aof, 内存映射）</li>
   <li>全磁盘，提供完全持久化（ssd db）</li>
 </ul>
+
+<!--more-->
 
 <p>数据淘汰</p>
 
