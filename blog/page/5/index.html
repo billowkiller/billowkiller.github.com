@@ -174,6 +174,76 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-22T02:18:00+08:00" pubdate data-updated="true">Aug 22<span>nd</span>, 2014</time>
+        
+           | <a href="/blog/2014/08/22/design-pattern/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/08/22/design-pattern/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/22/design-pattern/">Design Pattern Abstraction</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>本文是对设计模式的一个备忘录，仅是做了些摘要，具体的设计模式学习还得看GOF。</p>
+
+<p>这儿也有一个还不错的博客<a href="http://blog.csdn.net/zhengzhb/article/category/926691">http://blog.csdn.net/zhengzhb/article/category/926691</a>。</p>
+
+<hr />
+
+<p>面向对象设计（OOD）核心原则是<strong>高内聚低耦合</strong>。</p>
+
+<ul>
+  <li><em>高内聚</em>是指某个特定模块（程序，类型）都应完成一系列相关功能，描述了不同程序，类型中方法，方法中不同操作描述的逻辑之间的距离相近。高内聚意味可维护性，可重新性，因为模块对外部的依赖少（功能的完备性）。</li>
+  <li><em>耦合</em>是描述模块之间的依赖程度。低耦合是我们的设计目的，但不是不存在耦合不存依赖，依赖是必须的，因为模块之间必须通信交互，不过应该设计依赖于不变或者不易变的接口，无需了解模块的具体实现（OO封装性）。</li>
+</ul>
+
+<p>使用<strong>设计模式</strong>是为了提高代码的工程化，提供更加高内聚、低耦合的代码。同时可重用代码、让代码更容易被他人理解、保证代码可靠性。套用一句话就是：</p>
+
+<blockquote>
+  <p>每个模式描述了一个在我们周围不断重复发生的问题，已经该问题的解决方案的核心。这样我们就能一次又一次地使用该方案而不必做重复劳动。</p>
+</blockquote>
+
+<p>设计模式分为三种类型，共23种。</p>
+
+<ul>
+  <li><strong>创建型模式：</strong>单例模式、抽象工厂模式、建造者模式、工厂模式、原型模式。</li>
+  <li><strong>结构型模式：</strong>适配器模式、桥接模式、装饰模式、组合模式、外观模式、享元模式、代理模式。</li>
+  <li><strong>行为型模式：</strong>模版方法模式、命令模式、迭代器模式、观察者模式、中介者模式、备忘录模式、解释器模式、状态模式、策略模式、职责链模式、访问者模式。</li>
+</ul>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/08/22/design-pattern/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-08-14T02:18:00+08:00" pubdate data-updated="true">Aug 14<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/08/14/linux-memory-management/#disqus_thread"
@@ -682,74 +752,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-15T06:18:00+08:00" pubdate data-updated="true">Jul 15<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/07/15/linux-reentrant-function/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/07/15/linux-reentrant-function/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/15/linux-reentrant-function/">Linux Reentrant Function</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>这种情况出现在多任务系统当中，在任务执行期间捕捉到信号并对其进行处理时，进程正在执行的指令序列就被信号处理程序临时中断。如果从信号处理程序返回，则继续执行进程断点处的正常指令序列，从重新恢复到断点重新执行的过程中，函数所依赖的环境没有发生改变，就说这个函数是可重入的，反之就是不可重入的。简单来说，<strong>可重入函数可以被中断的函数</strong>。</p>
-
-<p>在进程中断期间，系统会保存和恢复进程的上下文，然而恢复的上下文仅限于返回地址，cpu寄存器等之类的少量上下文，而函数内部使用的诸如全局或静态变量，buffer等并不在保护之列，所以如果这些值在函数被中断期间发生了改变，那么当函数回到断点继续执行时，其结果就不可预料了。打个比方，比如<code>malloc</code>，将如一个进程此时正在执行<code>malloc</code>分配堆空间，此时程序捕捉到信号发生中断，执行信号处理程序中恰好也有一个<code>malloc</code>，这样就会对进程的环境造成破坏，因为malloc通常为它所分配的存储区维护一个链接表，插入执行信号处理函数时，进程可能正在对这张表进行操作，而信号处理函数的调用刚好覆盖了进程的操作，造成错误。</p>
-
-<p><strong>基本上下面的函数是不可重入的：</strong></p>
-
-<ul>
-  <li>函数体内使用了静态的数据结构；</li>
-  <li>函数体内调用了malloc()或者free()函数；</li>
-  <li>函数体内调用了标准I/O函数。</li>
-  <li>进行了浮点运算。许多的处理器/编译器中，浮点一般都是不可重入的 （浮点运算大多使用协处理器或者软件模拟来实现）。</li>
-</ul>
-
-<p><strong>两种情况需要考虑：</strong></p>
-
-<ol>
-  <li>信号处理程序A内外都调用了同一个不可重入函数B；B在执行期间被信号打断，进入A (A中调用了B),完事之后返回B被中断点继续执行，这时B函数的环境可能改变，其结果就不可预料了。</li>
-  <li>多线程共享进程内部的资源，如果两个线程A，B调用同一个不可重入函数F，A线程进入F后，线程调度，切换到B，B也执行了F，那么当再次切换到线程A时，其调用F的结果也是不可预料的。</li>
-</ol>
-
-<p><strong>在信号处理程序中即使调用可重入函数也有问题要注意</strong>。作为一个通用的规则，当在信号处理程序中调用可重入函数时，应当在其前保存<code>errno</code>，并在其后恢复<code>errno</code>。（<strong>因为每个线程只有一个errno变量，信号处理函数可能会修改其值，要了解经常被捕捉到的信号是SIGCHLD，其信号处理程序通常要调用一种wait函数，而各种wait函数都能改变errno。</strong>）</p>
-
-<p>如果一个函数对多个线程来说是可重入的，则说这个函数是<strong>线程安全的</strong>。但这并不能说明对信号处理程序来说该函数也是可重入的。如果函数对异步信号处理程序的重入是安全的，那么就可以说函数式<strong>异步-信号安全的</strong>。</p>
-
-<p>一下是来自<em>《深入理解计算机系统》</em>的摘抄：</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/threadsafe1_zps14eaee56.png" alt="" />
-<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/threadsafe2_zpsb753bebc.png" alt="" />
-<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/threadsafe3_zps6a9ec8f8.png" alt="" /></p>
-</div>
-  
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -781,7 +783,7 @@ body {
     
     <a class="list-group-item " href="/blog/2016/11/10/cache/">Cache</a>
     
-    <a class="list-group-item " href="/blog/2016/08/06/mesa/">Mesa: Google&#8217;s Near Real-time OLAP Warehouse</a>
+    <a class="list-group-item " href="/blog/2016/09/23/paxos-raft/">Paxos and Raft</a>
     
   </div>
 </section>
@@ -847,7 +849,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/big-data/index.html">
-        <span class="badge">11</span>
+        <span class="badge">12</span>
         Big Data
       </a>
     

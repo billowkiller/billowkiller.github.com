@@ -395,6 +395,10 @@
         <lastmod>2016-08-08T12:18:02+08:00</lastmod>
     </url>
     <url>
+        <loc>http://billowkiller.github.io/blog/2016/09/23/paxos-raft/</loc>
+        <lastmod>2016-11-27T19:39:58+08:00</lastmod>
+    </url>
+    <url>
         <loc>http://billowkiller.github.io/blog/2016/11/10/cache/</loc>
         <lastmod>2016-11-26T14:33:24+08:00</lastmod>
     </url>
@@ -412,23 +416,23 @@
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/archives/</loc>
-        <lastmod>2016-11-26T14:34:36+08:00</lastmod>
+        <lastmod>2016-11-27T19:39:58+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/categories/</loc>
-        <lastmod>2016-11-26T14:34:36+08:00</lastmod>
+        <lastmod>2016-11-27T19:39:58+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/category/</loc>
-        <lastmod>2016-11-26T14:34:36+08:00</lastmod>
+        <lastmod>2016-11-27T19:39:58+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/blog/tags/</loc>
-        <lastmod>2016-11-26T14:34:36+08:00</lastmod>
+        <lastmod>2016-11-27T19:39:58+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/</loc>
-        <lastmod>2016-11-26T14:34:36+08:00</lastmod>
+        <lastmod>2016-11-27T19:39:58+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/components.html</loc>
@@ -450,7 +454,7 @@
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/</loc>
-        <lastmod>2016-11-26T14:34:36+08:00</lastmod>
+        <lastmod>2016-11-27T19:39:58+08:00</lastmod>
     </url>
     <url>
         <loc>http://billowkiller.github.io/javascripts/libs/bootstrap-3.0.0/javascript.html</loc>

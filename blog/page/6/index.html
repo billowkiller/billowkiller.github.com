@@ -174,6 +174,74 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-15T06:18:00+08:00" pubdate data-updated="true">Jul 15<span>th</span>, 2014</time>
+        
+           | <a href="/blog/2014/07/15/linux-reentrant-function/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/07/15/linux-reentrant-function/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/15/linux-reentrant-function/">Linux Reentrant Function</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>这种情况出现在多任务系统当中，在任务执行期间捕捉到信号并对其进行处理时，进程正在执行的指令序列就被信号处理程序临时中断。如果从信号处理程序返回，则继续执行进程断点处的正常指令序列，从重新恢复到断点重新执行的过程中，函数所依赖的环境没有发生改变，就说这个函数是可重入的，反之就是不可重入的。简单来说，<strong>可重入函数可以被中断的函数</strong>。</p>
+
+<p>在进程中断期间，系统会保存和恢复进程的上下文，然而恢复的上下文仅限于返回地址，cpu寄存器等之类的少量上下文，而函数内部使用的诸如全局或静态变量，buffer等并不在保护之列，所以如果这些值在函数被中断期间发生了改变，那么当函数回到断点继续执行时，其结果就不可预料了。打个比方，比如<code>malloc</code>，将如一个进程此时正在执行<code>malloc</code>分配堆空间，此时程序捕捉到信号发生中断，执行信号处理程序中恰好也有一个<code>malloc</code>，这样就会对进程的环境造成破坏，因为malloc通常为它所分配的存储区维护一个链接表，插入执行信号处理函数时，进程可能正在对这张表进行操作，而信号处理函数的调用刚好覆盖了进程的操作，造成错误。</p>
+
+<p><strong>基本上下面的函数是不可重入的：</strong></p>
+
+<ul>
+  <li>函数体内使用了静态的数据结构；</li>
+  <li>函数体内调用了malloc()或者free()函数；</li>
+  <li>函数体内调用了标准I/O函数。</li>
+  <li>进行了浮点运算。许多的处理器/编译器中，浮点一般都是不可重入的 （浮点运算大多使用协处理器或者软件模拟来实现）。</li>
+</ul>
+
+<p><strong>两种情况需要考虑：</strong></p>
+
+<ol>
+  <li>信号处理程序A内外都调用了同一个不可重入函数B；B在执行期间被信号打断，进入A (A中调用了B),完事之后返回B被中断点继续执行，这时B函数的环境可能改变，其结果就不可预料了。</li>
+  <li>多线程共享进程内部的资源，如果两个线程A，B调用同一个不可重入函数F，A线程进入F后，线程调度，切换到B，B也执行了F，那么当再次切换到线程A时，其调用F的结果也是不可预料的。</li>
+</ol>
+
+<p><strong>在信号处理程序中即使调用可重入函数也有问题要注意</strong>。作为一个通用的规则，当在信号处理程序中调用可重入函数时，应当在其前保存<code>errno</code>，并在其后恢复<code>errno</code>。（<strong>因为每个线程只有一个errno变量，信号处理函数可能会修改其值，要了解经常被捕捉到的信号是SIGCHLD，其信号处理程序通常要调用一种wait函数，而各种wait函数都能改变errno。</strong>）</p>
+
+<p>如果一个函数对多个线程来说是可重入的，则说这个函数是<strong>线程安全的</strong>。但这并不能说明对信号处理程序来说该函数也是可重入的。如果函数对异步信号处理程序的重入是安全的，那么就可以说函数式<strong>异步-信号安全的</strong>。</p>
+
+<p>一下是来自<em>《深入理解计算机系统》</em>的摘抄：</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/threadsafe1_zps14eaee56.png" alt="" />
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/threadsafe2_zpsb753bebc.png" alt="" />
+<img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/threadsafe3_zps6a9ec8f8.png" alt="" /></p>
+</div>
+  
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-07-15T02:18:00+08:00" pubdate data-updated="true">Jul 15<span>th</span>, 2014</time>
         
            | <a href="/blog/2014/07/15/linux-epoll-module/#disqus_thread"
@@ -664,66 +732,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-17T02:18:00+08:00" pubdate data-updated="true">Apr 17<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/04/17/Effective/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2014/04/17/Effective/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/17/Effective/">Effective C++ Rework</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><h2 id="c">让自己习惯C++</h2>
-
-<h3 id="item-01-view-c-as-a-federation-of-languages">Item 01： View C++ as a federation of languages</h3>
-
-<p>C++同时支持过程形式、面对对象形式、函数形式、泛型形式、元编程形式。</p>
-
-<p>次语言有</p>
-
-<ul>
-  <li>C</li>
-  <li>Object-Oriented C++</li>
-  <li>Template C++</li>
-  <li>STL</li>
-</ul>
-
-<p>C++高效编程守则视状况而变化，取决于你使用C++的那一部分。</p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2014/04/17/Effective/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -755,7 +763,7 @@ body {
     
     <a class="list-group-item " href="/blog/2016/11/10/cache/">Cache</a>
     
-    <a class="list-group-item " href="/blog/2016/08/06/mesa/">Mesa: Google&#8217;s Near Real-time OLAP Warehouse</a>
+    <a class="list-group-item " href="/blog/2016/09/23/paxos-raft/">Paxos and Raft</a>
     
   </div>
 </section>
@@ -821,7 +829,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/big-data/index.html">
-        <span class="badge">11</span>
+        <span class="badge">12</span>
         Big Data
       </a>
     

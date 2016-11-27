@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[tags: consensus | Tech Digging and Sharing]]></title>
+  <link href="http://billowkiller.github.io/blog/tags/consensus/atom.xml" rel="self"/>
+  <link href="http://billowkiller.github.io/"/>
+  <updated>2016-11-27T19:40:04+08:00</updated>
+  <id>http://billowkiller.github.io/</id>
+  <author>
+    <name><![CDATA[wutao]]></name>
+    <email><![CDATA[billowkiller@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Paxos and Raft]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/09/23/paxos-raft/"/>
+    <updated>2016-09-23T17:23:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/09/23/paxos-raft</id>
+    <content type="html"><![CDATA[<h2 id="distributed-consensus">1. Distributed Consensus</h2>
+
+<p>分布式一致性是指在一组process里对一个value达成的一致。这个value可以是任何操作，例如“修改某个变量的值”，“设置某个节点为primary”等等。为什么需要分布式一致性呢，因为在分布式系统里，组件是不可靠的，无论是网络问题还是组件自身的问题，我们希望在这些不可靠组件构成的系统中得到一个可靠的系统。</p>
+
+<p>一致性协议就是为了解决这些不可靠组件如何对外提供一致的value。具体说来可以认为多个process可以提供不同的value，一致性协议能迫使这些组件互相协作得到一个一致的结论，并且允许有少量的process出现失败或重启。</p>
+
+<p>一致性协议可以应用的场景包括节点中状态机的复制，分布式的键值存储，分布式序号生成等等，任意节点都可以接收消息，但是对外提供的确是一致的value。</p>
+
+<!--more-->
+
+<p>在分布式系统中，基础复制方法有以下几种：</p>
+
+<ul>
+  <li>主从异步复制（磁盘在复制前损毁，则造成数据丢失）</li>
+  <li>主从同步复制（一个失联节点会造成整个系统不可用）</li>
+  <li>主从版同步复制（可能任何从库都不完整，需要多数派读写）</li>
+  <li>多数派读写</li>
+</ul>
+
+<h2 id="paxos">2. Paxos</h2>
+
+<p>Paxos算法是Lamport于1990年提出的一种基于消息传递的一致性算法，一开始并未引起人们注意，直到06年google的chubby锁服务使用paxos作为chubby cell中的一致性算法，paxos的人气从此一路狂飙。</p>
+
+<p>Paxos有两个原则：</p>
+
+<ul>
+  <li>安全原则—保证不能做错的事
+    <ul>
+      <li>只能有一个值被批准，不能出现第二个值把第一个覆盖的情况</li>
+      <li>每个节点只能学习到已经被批准的值，不能学习没有被批准的值</li>
+    </ul>
+  </li>
+  <li>存活原则—只要有多数服务器存活并且彼此间可以通信最终都要做到的事
+    <ul>
+      <li>最终会批准某个被提议的值</li>
+      <li>一个值被批准了，其他服务器最终会学习到这个值 </li>
+    </ul>
+  </li>
+</ul>
+
+<p>Paxos有两个角色：</p>
+
+<ul>
+  <li>Proposer：提议发起者，处理客户端请求，将客户端的请求发送到集群中，以便决定这个值是否可以被批准。</li>
+  <li>Acceptor：提议批准者，负责处理接收到的提议，他们的回复就是一次投票。会存储一些状态来决定是否接收一个值。</li>
+</ul>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-9-20/80935469.jpg" width="700px" /></p>
+
+<h3 id="paxos-1">2.1 Paxos过程</h3>
+
+<p>下面介绍Paxos协议过程，以及解决的一些问题。</p>
+
+<p><strong>1、第一阶段 Prepare</strong></p>
+
+<p><strong>P1a：Proposer 发送 Prepare</strong></p>
+
+<p>Proposer 生成全局唯一且递增的提案 ID（Proposalid，以高位时间戳 + 低位机器 IP 可以保证唯一性和递增性），向 Paxos 集群的所有机器发送 PrepareRequest，这里无需携带提案内容，只携带 Proposalid 即可。</p>
+
+<p><strong>P1b：Acceptor 应答 Prepare</strong></p>
+
+<p>Acceptor 收到 PrepareRequest 后，做出“两个承诺，一个应答”。</p>
+
+<p>两个承诺：</p>
+
+<ul>
+  <li>第一，不再应答 Proposalid <code>小于等于</code>（注意：这里是 &lt;= ）当前请求的 PrepareRequest；</li>
+  <li>第二，不再应答 Proposalid <code>小于</code>（注意：这里是 &lt; ）当前请求的 AcceptRequest</li>
+</ul>
+
+<p>一个应答：</p>
+
+<ul>
+  <li>返回自己已经 Accept 过的提案中 ProposalID 最大的那个提案的内容，如果没有则返回空值;</li>
+</ul>
+
+<p><strong>注意：这“两个承诺”中，蕴含两个要点：</strong></p>
+
+<ul>
+  <li>就是应答当前请求前，也要按照“两个承诺”检查是否会违背之前处理 PrepareRequest 时做出的承诺；</li>
+  <li>应答前要在本地持久化当前 Propsalid。</li>
+</ul>
+
+<p><strong>2、第二阶段 Accept</strong></p>
+
+<p><strong>P2a：Proposer 发送 Accept</strong></p>
+
+<p>“提案生成规则”：Proposer 收集到多数派应答的 PrepareResponse 后，从中选择proposalid最大的提案内容，作为要发起 Accept 的提案，如果这个提案为空值，则可以自己随意决定提案内容。然后携带上当前 Proposalid，向 Paxos 集群的所有机器发送 AccpetRequest。</p>
+
+<p><strong>P2b：Acceptor 应答 Accept</strong></p>
+
+<p>Accpetor 收到 AccpetRequest 后，检查不违背自己之前作出的“两个承诺”情况下，持久化当前 Proposalid 和提案内容。最后 Proposer 收集到多数派应答的 AcceptResponse 后，形成决议。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-9-20/9823122.jpg" width="600px" /></p>
+
+<h3 id="section">2.2 核心思想</h3>
+
+<ul>
+  <li>Optimistic concurrency control. Hold a <code>preemptible lock</code> first, try updating, restart on denial.</li>
+  <li>Quorum as a logical unit of acceptor for Choose operation. A value is chosen iff it’s accepted by a quorum, which implies from the proposer’s perspective the Choose operation is <code>atomic</code>, it’s all or nothing, it’s either accepted by a quorum or it isn’t.</li>
+</ul>
+
+<h3 id="section-1">2.3 协议推导</h3>
+
+<p>Paxos 协议利用了 Quorum 机制，选择的 W=R=N/2+1。简单而言，协议就是 Proposer 更新 Acceptor 的过程，一旦某个 Proposer 成功更新了超过半数的 Acceptor，则更新成功。Learner 按 Quorum 去读取 Acceptor，一旦某个 value在超过半数的 Acceptor 上被成功读取，则说明这是一个被批准的 value。协议通过引入轮次，使得高轮次的议抢占低轮次的提议来避免死锁。</p>
+
+<p>协议的关键点是如何满足“在一次Paxos算法实例过程中只批准一个Value”，称这个约束为“约束条件 1”，推到过程就是不断推到出“约束条件 1”的充分不必要条件。</p>
+
+<ul>
+  <li>“约束条件 2” =&gt; “约束条件 1”：一旦一个 value 获得超过半数的 Acceptor 批准,之后 Paxos 协议实例只能批准这个 value。</li>
+  <li>“约束条件 3” =&gt; “约束条件 2”：一旦一个 value 获得超过半数的 Acceptor 批准,之后任何 Acceptor 只能批准这个 value。</li>
+  <li>“约束条件 4” &lt;=&gt; “约束条件 3”: 一旦一个 value v 获得超过半数的 Acceptor 批准,之后 Proposer  议的 value 只能是 v。</li>
+  <li>“约束条件 5” =&gt; “约束条件 4”：Proposer 提议一个 value v 前,要么之前没有任何一个 value 被批准,要么存在一个大小为 N/2+1 的 Acceptor 集合,这个集合内的各个 Acceptor 批准过的轮数最大的 value 是 v。</li>
+</ul>
+
+<p>可以用反证法证明“约束条件 5”.</p>
+
+<h3 id="section-2">2.4 问题</h3>
+
+<ol>
+  <li>
+    <p>这里可以看到paxos使用了多acceptor，为什么？</p>
+
+    <p>为了解决Acceptor crash的问题，必须要用到一种多数选择的方法。</p>
+  </li>
+  <li>
+    <p>如何保证批准的提案无法改变？</p>
+
+    <p>假设Proposer以更高的序号发提案，但已经批准的提案必然被一半以上的Acceptor接受，那么Acceptor返回应答必然包含这个已经批准的提案，所以此时Proposer发起的Accept消息必然是（高序号，已经批准的提案）这么一个组合。所以一旦一个提案被批准，以后永远只能批准这个提案。</p>
+  </li>
+  <li>
+    <p>paxos中是否存在死锁和活锁？</p>
+
+    <p>虽然paxos协议过程类似于”占坑“，需要value抢占超过半数的”坑“，但是高轮数的提案可以抢占低轮数的提案，所以可以避免死锁的发生。但是这种设计可能导致”活锁“，即Proposer互相不断以更高的轮数提出提案，使得每轮paxos过程都无法完成。一种解决方案是Proposer重新提案之前等待随机时间，让上一个提案有时间进行第二阶段的accept。</p>
+
+    <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-9-27/70209540.jpg" width="500px" /></p>
+  </li>
+  <li>
+    <p>如果某个提案之后又另外一个提案跟进会发生什么情况？</p>
+
+    <p>如果前一个提案已经被多数派接受，那新的提案会看到和使用前一个提案作为它的value；如果前一个提案没有被多数派接受，但新提案发现这个提案，那新提案也会使用它作为value；如果前一个提案没有被多数派接受，并且新提案没有发现，则新提案会使用自己的value，旧的提案不会被block。</p>
+
+    <p>&lt;img src=“http://7xqfqs.com1.z0.glb.clouddn.com/16-9-27/38064842.jpg” width=”500px”/&gt;
+ <img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-9-27/41211772.jpg" width="500px" />
+<img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-9-27/4176188.jpg" width="500px" /></p>
+  </li>
+  <li>
+    <p>server如何知道提案的value？</p>
+
+    <p>只有Proposer自己知道自己选择的提案，别的server如果想要知道必须发起一个paxos instance。</p>
+  </li>
+  <li>
+    <p>在 P2a 阶段，为什么Proposer发起的提案需要使用旧的value和更高的proposalID？</p>
+
+    <p>是受“在一次paxos instance中只批准一个value”的约束。即使读取了N/2+1的acceptor状态，由于没有读取所有acceptor，Proposer也无法判断value是否批准了。这时候选择proposalID更高的旧value，可以保证，要么此时Paxos还没有批准任何一个value，要么只能是旧的value。</p>
+  </li>
+  <li>
+    <p>如果提案被多数派接受后，一个acceptor宕机了，导致多数派不成立，会有什么问题？ </p>
+
+    <p>不会有问题，因为新的Proposer选择的quorum一定包括接受上一次提案的那台机器(接受的机器数至少是N/2)，这时候会使用更高的proposalID提交旧的value。</p>
+  </li>
+</ol>
+
+<h3 id="zab">2.5 Zab</h3>
+
+<p>Zookeeper 使用一种修改后的 Paxos 协议，称为 Zab。</p>
+
+<p>在 zookeeper 中，始终分为两种场景：</p>
+
+<ul>
+  <li>Leader activation：leader 选举，数据同步</li>
+  <li>Active messaging：leader 接收 client 更新请求，同步到各个 follower</li>
+</ul>
+
+<p>在两种场景中，zk都依赖于一个全局版本号：zxid。zxid 由 (epoch, count) 组成，epoch 是选举编号，每次提议进行leader选举时 epoch 都会增加，count 是 leader 为每个更新操作决定给的序号。从全局看，一个 zxid 代表了一个更新操作的全局序号（版本号）。</p>
+
+<p>每个 zookeeper 节点都有各自最后 commit 的 zxid，表示这个 zookeeper 节点上最近成功执行的更新操作，也代表了这个节点的数据版本。在 Leader activation 阶段，每个 zk 节点都以自己的 zxid 作为 proposalID 发起 paxos instance，设置自己为leader (value)。每个节点既是 Proposer 也是 Acceptor。通过 Paxos 协议，某个超过 quorum 半数的节点中持有最大的 zxid 节点会成为新的leader。实际上 proposalID 会是 (zxid，nodeid)，这是当 zxid 相同时， zk 会选择节点编号较大的成为 leader。成为新的 leader 需要与 follower 进行同步，数据同步过程可能会涉及删除 follower 上的最后一条脏数据。</p>
+
+<p>当与至少半数节点完成数据同步后，leader 更新 epoch，在各个 follower 上以 (epoch + 1, 0) 为 zxid 写一条没有数据的更新操作。这个更新操作称为 NEW_LEADER 消息，是为了在各个节点上更新 leader 信息，当收到超过半数的 follower 对 NEW_LEADER 的确认后，leader 发起对 NEW_LEADER 的 COMMIT 操作，并进入 Active messaging 阶段。</p>
+
+<p>进入 active messaging 状态的 leader 会接收从客户端发来的更新操作，为每个更新操作生成递增的 count，组成递增的 zxid。Leader 将更新操作以 zxid 的顺序发送给各个 follower (包括leader本身, 一个 leader 同时也是 follower，当收到超过半数的 follower 的确认后，Leader 发送针对该更新操作的 COMMIT 消息给各个 follower。这个更新操作的过程很类似两阶段交，只是 leader 永远不会对更新操作做 abort 操作。</p>
+
+<p>如果 leader 不能更新超过半数的 follower，此时可以发起新的 leader 选举。最后一条更新操作处于“中间状态”，其是否生效取决于选举出的新 leader 是否有该条更新操作。</p>
+
+<p>Zookeeper 通过 zxid 将两个场景阶段较好的结合起来，且能保证全局的强一致性。由于同一时刻只有一个 zookeeper 节点能获得超过半数的 follower，所以同一时刻最多只存在唯一的 leader；每个 leader 利用 TCP 带来的消息 FIFO 特点以 zxid 顺序更新各个 follower，只有成功完成前一个更新操作的才会进行下一个更新操作。在同一个 leader 任期内，数据在全局满足 quorum 约束的强一致，即读超过半数的节点一定可以读到最新已提交的数据；每个成功的更新操作都至少被超过半数的节点确认，使得新选举的 leader 一定可以包括最新的已成功提交的数据。</p>
+
+<h2 id="multi-paxos">3. Multi Paxos</h2>
+
+<h2 id="raft">4. Raft</h2>
+
+<h2 id="discussion">5. Discussion</h2>
+
+<h2 id="ref">Ref</h2>
+
+<p><a href="https://docs.google.com/presentation/d/1y2lbLzSmZdd3OVzXpxAvmvWt4Hhn_WljQiU4x30Cst4/edit?usp=sharing">A Beginner’s Guide to Paxos</a></p>
+
+<p><a href="https://ramcloud.stanford.edu/~ongaro/userstudy/">Raft user sutdy</a></p>
+
+<p><a href="https://raft.github.io/">The Raft Consensus</a></p>
+
+]]></content>
+  </entry>
+  
+</feed>

@@ -174,6 +174,58 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-10-12T16:12:00+08:00" pubdate data-updated="true">Oct 12<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/10/12/deep-c-and-c-plus-plus/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/10/12/deep-c-and-c-plus-plus/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/10/12/deep-c-and-c-plus-plus/">Deep C and C++</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>摘自<a href="http://share.csdn.net/#/detail/1050">CSDN Share</a></p>
+
+<p>花了一个上午的时间看了下这个PPT，觉得收获颇多。
+特别是这个PPT的组织方式，采用两个程序员面试对比的方式，非常的实用，也很有触动和感悟。已经很久没见到这样精彩的PPT了。</p>
+
+<p>本PPT介绍了作为普通的程序员和高级的程序员如何看待C与C++，从编译、链接、运行的角度来介绍，有非常多的干货，也许不是很系统，但确实是非常的实用；特别是在回答面试官的提问上，需要认真思考，从<code>不同的角度</code>、<code>深层次</code>地回答技术官的问话。也许两个程序员的功力差不多，但是在回答技术问题的方法上也许对面试官有很大的影响，最终也就是面试是否成功的关键。</p>
+
+<p><img src="http://www.atmel.com/zh/cn/Images/compiler.jpg" alt="" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/10/12/deep-c-and-c-plus-plus/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-06-02T13:49:00+08:00" pubdate data-updated="true">Jun 2<span>nd</span>, 2013</time>
         
            | <a href="/blog/2013/06/02/probabilistic-graphical-models/#disqus_thread"
@@ -760,99 +812,6 @@ name of the output file:</p>
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/linuxnei-he-dai-ma-feng-ge/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/linuxnei-he-dai-ma-feng-ge/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/linuxnei-he-dai-ma-feng-ge/">Linux内核代码风格</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>Chinese translated version of Documentation/CodingStyle</p>
-
-<p>If you have any comment or update to the content, please post to LKML
-directly.</p>
-
-<p>However, if you have problem communicating in English you can also ask
-the</p>
-
-<p>Chinese maintainer for help. Contact the Chinese maintainer, if this</p>
-
-<p>translation is outdated or there is problem with translation.</p>
-
-<p>Chinese maintainer: Zhang Le &lt;r0bertz@gentoo.org&gt;</p>
-
-<hr />
-
-<p>Documentation/CodingStyle的中文翻译</p>
-
-<p>如果想评论或更新本文的内容，请直接发信到LKML。如果你使用英文交流有困难的话，也可</p>
-
-<p>以向中文版维护者求助。如果本翻译更新不及时或者翻译存在问题，请联系中文版维护者。</p>
-
-<p>中文版维护者： 张乐 Zhang Le <a href="&#109;&#097;&#105;&#108;&#116;&#111;:&#114;&#048;&#098;&#101;&#114;&#116;&#122;&#064;&#103;&#101;&#110;&#116;&#111;&#111;&#046;&#111;&#114;&#103;">&#114;&#048;&#098;&#101;&#114;&#116;&#122;&#064;&#103;&#101;&#110;&#116;&#111;&#111;&#046;&#111;&#114;&#103;</a></p>
-
-<p>中文版翻译者： 张乐 Zhang Le <a href="&#109;&#097;&#105;&#108;&#116;&#111;:&#114;&#048;&#098;&#101;&#114;&#116;&#122;&#064;&#103;&#101;&#110;&#116;&#111;&#111;&#046;&#111;&#114;&#103;">&#114;&#048;&#098;&#101;&#114;&#116;&#122;&#064;&#103;&#101;&#110;&#116;&#111;&#111;&#046;&#111;&#114;&#103;</a></p>
-
-<p>中文版校译者： 王聪 Wang Cong <a href="&#109;&#097;&#105;&#108;&#116;&#111;:&#120;&#105;&#121;&#111;&#117;&#046;&#119;&#097;&#110;&#103;&#099;&#111;&#110;&#103;&#064;&#103;&#109;&#097;&#105;&#108;&#046;&#099;&#111;&#109;">&#120;&#105;&#121;&#111;&#117;&#046;&#119;&#097;&#110;&#103;&#099;&#111;&#110;&#103;&#064;&#103;&#109;&#097;&#105;&#108;&#046;&#099;&#111;&#109;</a></p>
-
-<pre><code>        wheelz &lt;kernel.zeng@gmail.com&gt;
-
-        管旭东 Xudong Guan &lt;xudong.guan@gmail.com&gt;
-
-        Li Zefan &lt;lizf@cn.fujitsu.com&gt;
-
-        Wang Chen &lt;wangchen@cn.fujitsu.com&gt;
-</code></pre>
-
-<p>以下为正文</p>
-
-<hr />
-
-<p>Linux内核代码风格</p>
-
-<p>这是一个简短的文档，描述了linux内核的首选代码风格。代码风格是因人而异的，而且我</p>
-
-<p>不愿意把我的观点强加给任何人，不过这里所讲述的是我必须要维护的代码所遵守的风格，</p>
-
-<p>并且我也希望绝大多数其他代码也能遵守这个风格。请在写代码时至少考虑一下本文所述的</p>
-
-<p>风格。
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/linuxnei-he-dai-ma-feng-ge/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -884,7 +843,7 @@ the</p>
     
     <a class="list-group-item " href="/blog/2016/11/10/cache/">Cache</a>
     
-    <a class="list-group-item " href="/blog/2016/08/06/mesa/">Mesa: Google&#8217;s Near Real-time OLAP Warehouse</a>
+    <a class="list-group-item " href="/blog/2016/09/23/paxos-raft/">Paxos and Raft</a>
     
   </div>
 </section>
@@ -950,7 +909,7 @@ the</p>
     
     
     <a class="list-group-item " href="/blog/categories/big-data/index.html">
-        <span class="badge">11</span>
+        <span class="badge">12</span>
         Big Data
       </a>
     
