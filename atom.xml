@@ -4,7 +4,7 @@
   <title><![CDATA[Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-11-27T20:56:02+08:00</updated>
+  <updated>2016-11-29T09:57:06+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -1823,7 +1823,7 @@ For each topic T that C_i subscribes to {
 
 <h2 id="section">应用场景举例</h2>
 
-<p>百度的IDMapping接入层每天的PV达到上亿，每天产生的日志量达到100GB，日志中的信息包括用户的访问IP、访问时间、响应时间、用户请求、应答内容等。IDMapping由10台nginx服务器构成、分别部署在不同的服务器上。其中的日志格式如下：</p>
+<p>公司的IDMapping接入层每天的PV达到上亿，每天产生的日志量达到100GB，日志中的信息包括用户的访问IP、访问时间、响应时间、用户请求、应答内容等。IDMapping由10台nginx服务器构成、分别部署在不同的服务器上。其中的日志格式如下：</p>
 
 <p>数据格式如下：</p>
 
@@ -1866,7 +1866,50 @@ vim $FLUME_HOME/conf/flume-conf.properties
 $FLUME_HOME/bin/flume-ng agent --conf conf --conf-file $FLUME_HOME/conf/flume-conf.properties --name agent
 </code></pre>
 
-<p>以上的命令分别表示获取flume、编辑配置文件、运行flume agent。其中配置文件参考<a href="http://wiki.baidu.com/pages/viewpage.action?pageId=158727265">http://wiki.baidu.com/pages/viewpage.action?pageId=158727265</a>，将<code>agent.sources.s.command</code>改为<code>tail $NGINX_HOME/logs/access.log</code>。</p>
+<p>以上的命令分别表示获取flume、编辑配置文件、运行flume agent。其中配置文件如下，将<code>agent.sources.s.command</code>改为<code>tail $NGINX_HOME/logs/access.log</code>。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">1.	#agent section
+</span><span class="line">2.	agent.sources = s
+</span><span class="line">3.	agent.channels = c
+</span><span class="line">4.	agent.sinks = r
+</span><span class="line">5.	
+</span><span class="line">6.	#exec source
+</span><span class="line">7.	agent.sources.s.type = exec
+</span><span class="line">8.	agent.sources.s.command = /usr/bin/vmstat 1
+</span><span class="line">9.	agent.sources.s.fileHeader = true
+</span><span class="line">10.	agent.sources.s.batchSize = 100
+</span><span class="line">11.	agent.sources.s.channels = c
+</span><span class="line">12.	
+</span><span class="line">13.	# Kafka Sink
+</span><span class="line">14.	agent.sinks.r.type =  org.apache.flume.sink.kafka.KafkaSink
+</span><span class="line">15.	agent.sinks.r.brokerList = host1:port1,host2:port2...     #推荐填写两个或以上
+</span><span class="line">16.	agent.sinks.r.topic = topic
+</span><span class="line">17.	agent.sinks.r.channel = c
+</span><span class="line">18.	
+</span><span class="line">19.	# Each channel's type is defined.
+</span><span class="line">20.	agent.channels.c.type = memory
+</span><span class="line">21.	agent.channels.c.capacity = 1000</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <h3 id="step-3-">Step 3 数据处理</h3>
 <p>建立新的spark集群，当然在测试阶段您也可以直接使用kafka集群中的spark进行处理，在实际应用中推荐使用新的spark集群。</p>

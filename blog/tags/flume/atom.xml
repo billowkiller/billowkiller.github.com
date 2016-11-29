@@ -4,7 +4,7 @@
   <title><![CDATA[tags: flume | Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/blog/tags/flume/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-11-27T20:56:02+08:00</updated>
+  <updated>2016-11-29T09:57:06+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -32,7 +32,7 @@
 
 <h2 id="section">应用场景举例</h2>
 
-<p>百度的IDMapping接入层每天的PV达到上亿，每天产生的日志量达到100GB，日志中的信息包括用户的访问IP、访问时间、响应时间、用户请求、应答内容等。IDMapping由10台nginx服务器构成、分别部署在不同的服务器上。其中的日志格式如下：</p>
+<p>公司的IDMapping接入层每天的PV达到上亿，每天产生的日志量达到100GB，日志中的信息包括用户的访问IP、访问时间、响应时间、用户请求、应答内容等。IDMapping由10台nginx服务器构成、分别部署在不同的服务器上。其中的日志格式如下：</p>
 
 <p>数据格式如下：</p>
 
@@ -75,7 +75,31 @@ vim $FLUME_HOME/conf/flume-conf.properties
 $FLUME_HOME/bin/flume-ng agent --conf conf --conf-file $FLUME_HOME/conf/flume-conf.properties --name agent
 </code></pre>
 
-<p>以上的命令分别表示获取flume、编辑配置文件、运行flume agent。其中配置文件参考<a href="http://wiki.baidu.com/pages/viewpage.action?pageId=158727265">http://wiki.baidu.com/pages/viewpage.action?pageId=158727265</a>，将<code>agent.sources.s.command</code>改为<code>tail $NGINX_HOME/logs/access.log</code>。</p>
+<p>以上的命令分别表示获取flume、编辑配置文件、运行flume agent。其中配置文件如下，将<code>agent.sources.s.command</code>改为<code>tail $NGINX_HOME/logs/access.log</code>。</p>
+
+<p><code>
+	1.	#agent section
+	2.	agent.sources = s
+	3.	agent.channels = c
+	4.	agent.sinks = r
+	5.	
+	6.	#exec source
+	7.	agent.sources.s.type = exec
+	8.	agent.sources.s.command = /usr/bin/vmstat 1
+	9.	agent.sources.s.fileHeader = true
+	10.	agent.sources.s.batchSize = 100
+	11.	agent.sources.s.channels = c
+	12.	
+	13.	# Kafka Sink
+	14.	agent.sinks.r.type =  org.apache.flume.sink.kafka.KafkaSink
+	15.	agent.sinks.r.brokerList = host1:port1,host2:port2...     #推荐填写两个或以上
+	16.	agent.sinks.r.topic = topic
+	17.	agent.sinks.r.channel = c
+	18.	
+	19.	# Each channel's type is defined.
+	20.	agent.channels.c.type = memory
+	21.	agent.channels.c.capacity = 1000
+</code></p>
 
 <h3 id="step-3-">Step 3 数据处理</h3>
 <p>建立新的spark集群，当然在测试阶段您也可以直接使用kafka集群中的spark进行处理，在实际应用中推荐使用新的spark集群。</p>
