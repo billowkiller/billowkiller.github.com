@@ -4,7 +4,7 @@
   <title><![CDATA[Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-11-30T09:58:27+08:00</updated>
+  <updated>2016-11-30T10:22:07+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -467,7 +467,9 @@ If there are no input streams, the low watermark and oldest work values are equi
     <link href="http://billowkiller.github.io/blog/2016/10/23/zk/"/>
     <updated>2016-10-23T17:23:00+08:00</updated>
     <id>http://billowkiller.github.io/blog/2016/10/23/zk</id>
-    <content type="html"><![CDATA[<p>看到一篇不错的zookeeper应用介绍[](http://blog.csdn.net/ldds_520/article/details/51679071)，记录下。</p>
+    <content type="html"><![CDATA[<p>看到一篇不错的zookeeper应用介绍[http://blog.csdn.net/ldds<em>520/article/details/51679071](http://blog.csdn.net/ldds</em>520/article/details/51679071)，记录下。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-30/15982256.jpg" width="600px" /></p>
 
 <!--more-->
 
