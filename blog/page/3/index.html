@@ -174,6 +174,53 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-10-27T21:00:00+08:00" pubdate data-updated="true">Oct 27<span>th</span>, 2015</time>
+        
+           | <a href="/blog/2015/10/27/spark-introduction/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2015/10/27/spark-introduction/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2015/10/27/spark-introduction/">Spark Introduction</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>简单介绍下Spark。Spark是分布式的<code>内存计算模型</code>，对于两类计算形式能够极大地提升处理的效率：<code>迭代计算</code>，和<code>交互式的数据挖掘工具</code>。迭代计算例如PageRank、K-means聚类、逻辑回归等要求计算结果的重新利用，交互式的数据挖掘例如针对一份的数据集进行多次特定查询也要求原始数据的重复利用。对比于MR作业，<strong>它不需要外部存储的介入，从而提升处理速度</strong>。接下来将会从Spark的数据模型、编程模型和架构来介绍Spark。</p>
+
+<p><img src="https://spark.apache.org/images/spark-logo.png" width="200px" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2015/10/27/spark-introduction/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-09-18T13:34:00+08:00" pubdate data-updated="true">Sep 18<span>th</span>, 2015</time>
         
            | <a href="/blog/2015/09/18/compression-format-introduction/#disqus_thread"
@@ -875,57 +922,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2015-03-19T14:00:00+08:00" pubdate data-updated="true">Mar 19<span>th</span>, 2015</time>
-        
-           | <a href="/blog/2015/03/19/hmm/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2015/03/19/hmm/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2015/03/19/hmm/">Hidden Markov Model</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>隐马尔可夫模型（Hidden Markov Model，HMM）是统计模型，它用来描述一个含有隐含未知参数的马尔可夫过程（Markov process）。HMM 被用来对有序的序列数据建模，例如句子中的单词，基因中的基本序列，所以常被应用在语音识别、信息提取、基因测序、股票预测等领域。</p>
-
-<p>在 HMM 中，马尔可夫过程是一类随机过程，原始模型是马尔可夫链。它包含一个状态的有限集，状态的变化只依赖于上一个时间点，而与再之前的时间无任何关系，且状态的轮换是有一定的概率发生。所以可以把马尔可夫过程当成是一个有限状态自动机的概率变种。PageRank 其实也是一种马尔可夫过程。</p>
-
-<p>但是在 HMM 中，状态是未知的，这就是 hidden 的由来，我们只能看到观察值，也就是由状态产生的结果。下图是一个 HMM 的例子。</p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-19/24496294.jpg" width="300px" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2015/03/19/hmm/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -957,7 +953,7 @@ body {
     
     <a class="list-group-item " href="/blog/2016/11/10/cache/">Cache</a>
     
-    <a class="list-group-item " href="/blog/2016/10/23/zk/">Zookeeper Roles</a>
+    <a class="list-group-item " href="/blog/2016/10/27/distribute-design/">Distributed System Design</a>
     
   </div>
 </section>
@@ -1023,7 +1019,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/big-data/index.html">
-        <span class="badge">13</span>
+        <span class="badge">14</span>
         Big Data
       </a>
     

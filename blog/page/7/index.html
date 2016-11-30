@@ -174,6 +174,63 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-23T02:18:00+08:00" pubdate data-updated="true">Apr 23<span>rd</span>, 2014</time>
+        
+           | <a href="/blog/2014/04/23/Template/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2014/04/23/Template/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/23/Template/">C++ Template</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>modified from <a href="http://www.cnblogs.com/assemble8086/archive/2011/10/02/2198308.html">http://www.cnblogs.com/assemble8086/archive/2011/10/02/2198308.html</a></p>
+
+<h2 id="section">模版</h2>
+
+<p><code>template</code> 是声明类模板的关键字，表示声明一个模板，模板参数可以是一个，也可以是多个，可以是<strong>类型参数</strong> ，也可以是<strong>非类型参数</strong>。类型参数由关键字<code>class</code>或<code>typename</code>及其后面的标识符构成。非类型参数由一个普通参数构成，代表模板定义中的一个常量。</p>
+
+<p><strong>类模板什么时候会被实例化呢？</strong></p>
+
+<ol>
+  <li>当使用了类模板实例的名字，并且上下文环境要求存在类的定义时。</li>
+  <li>对象类型是一个类模板实例，当对象被定义时。此点被称作类的实例化点。</li>
+  <li>一个指针或引用指向一个类模板实例，当检查这个指针或引用所指的对象时。</li>
+</ol>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2014/04/23/Template/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2014-04-22T02:18:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2014</time>
         
            | <a href="/blog/2014/04/22/byte-alignment/#disqus_thread"
@@ -637,53 +694,6 @@ body {
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-11-14T00:16:00+08:00" pubdate data-updated="true">Nov 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/11/14/nginx-architecture-2-event-driven/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-2-event-driven/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/11/14/nginx-architecture-2-event-driven/">Nginx architecture(2)&#8211;Event Driven</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>Nginx是一个事件驱动架构的Web服务器。在Linux中，<code>epoll</code>是目前最强大的事件管理机制(I/O多路复用)，定时器事件也是由<code>epoll</code>等事件模块触发的，它是由红黑树实现的。并且Nginx很好的解决多个<code>worker</code>子进程监听同一个端口引起的惊群问题，以及对<code>worker</code>进行负载平衡。最后会讨论下linux内核中的文件异步I/O。</p>
-
-<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx-logo_zpsabde8e46.png" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/11/14/nginx-architecture-2-event-driven/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -715,7 +725,7 @@ body {
     
     <a class="list-group-item " href="/blog/2016/11/10/cache/">Cache</a>
     
-    <a class="list-group-item " href="/blog/2016/10/23/zk/">Zookeeper Roles</a>
+    <a class="list-group-item " href="/blog/2016/10/27/distribute-design/">Distributed System Design</a>
     
   </div>
 </section>
@@ -781,7 +791,7 @@ body {
     
     
     <a class="list-group-item " href="/blog/categories/big-data/index.html">
-        <span class="badge">13</span>
+        <span class="badge">14</span>
         Big Data
       </a>
     

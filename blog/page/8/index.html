@@ -174,6 +174,53 @@ body {
 
 
 
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-11-14T00:16:00+08:00" pubdate data-updated="true">Nov 14<span>th</span>, 2013</time>
+        
+           | <a href="/blog/2013/11/14/nginx-architecture-2-event-driven/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/11/14/nginx-architecture-2-event-driven/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/14/nginx-architecture-2-event-driven/">Nginx architecture(2)&#8211;Event Driven</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>Nginx是一个事件驱动架构的Web服务器。在Linux中，<code>epoll</code>是目前最强大的事件管理机制(I/O多路复用)，定时器事件也是由<code>epoll</code>等事件模块触发的，它是由红黑树实现的。并且Nginx很好的解决多个<code>worker</code>子进程监听同一个端口引起的惊群问题，以及对<code>worker</code>进行负载平衡。最后会讨论下linux内核中的文件异步I/O。</p>
+
+<p><img src="http://i1113.photobucket.com/albums/k512/billowkiller/LinkSource/nginx-logo_zpsabde8e46.png" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/11/14/nginx-architecture-2-event-driven/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-10-13T00:28:00+08:00" pubdate data-updated="true">Oct 13<span>th</span>, 2013</time>
         
            | <a href="/blog/2013/10/13/nginx-architecture-1-overview/#disqus_thread"
@@ -702,88 +749,6 @@ sequence)</strong> ：对sequence中的item依次执行function(item)，见执�
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/pandoc-example/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/pandoc-example/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/pandoc-example/">Pandoc Example</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>from <a href="http://johnmacfarlane.net/pandoc/demos.html">pondoc </a></p>
-
-<hr />
-
-<p>To see the output created by each of the commands below, click on the
-name of the output file:</p>
-
-<ol>
-  <li>
-    <p>HTML fragment:</p>
-
-    <pre><code>pandoc README -o example1.html
-</code></pre>
-  </li>
-  <li>
-    <p>Standalone HTML file:</p>
-
-    <pre><code>pandoc -s README -o example2.html
-</code></pre>
-  </li>
-  <li>
-    <p>HTML with smart quotes, table of contents, CSS, and custom footer:</p>
-
-    <pre><code>pandoc -s -S --toc -c pandoc.css -A footer.html README -o example3.html
-</code></pre>
-  </li>
-  <li>
-    <p>LaTeX:</p>
-
-    <pre><code>pandoc -s README -o example4.tex
-</code></pre>
-  </li>
-  <li>
-    <p>From LaTeX to markdown:</p>
-
-    <pre><code>pandoc -s example4.tex -o example5.text
-</code></pre>
-  </li>
-  <li>
-    <p>reStructuredText:</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/pandoc-example/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -815,7 +780,7 @@ name of the output file:</p>
     
     <a class="list-group-item " href="/blog/2016/11/10/cache/">Cache</a>
     
-    <a class="list-group-item " href="/blog/2016/10/23/zk/">Zookeeper Roles</a>
+    <a class="list-group-item " href="/blog/2016/10/27/distribute-design/">Distributed System Design</a>
     
   </div>
 </section>
@@ -881,7 +846,7 @@ name of the output file:</p>
     
     
     <a class="list-group-item " href="/blog/categories/big-data/index.html">
-        <span class="badge">13</span>
+        <span class="badge">14</span>
         Big Data
       </a>
     

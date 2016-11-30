@@ -176,6 +176,95 @@ body {
 
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
         
+           | <a href="/blog/2013/05/14/googlelun-wen-gfs/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-gfs/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/googlelun-wen-gfs/">google论文：GFS</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>论文：<a href="http://www.cs.rochester.edu/meetings/sosp2003/papers/p125-ghemawat.pdf">英文版</a>，<a href="http://blademaster.ixiezi.com/2010/03/27/the-google-file-system%E4%B8%AD%E6%96%87%E7%89%88/">中文版</a></p>
+
+<hr />
+
+<ol>
+  <li>
+    <h2 id="section">导论</h2>
+  </li>
+</ol>
+
+<p>先给个定义：GFS是一个可扩展的分布式文件系统，用于大型的、分布式的、对大量数据进行访问的应用。它运行于廉价的普通硬件上，但可以提供容错功能。它可以给大量的用户提供总体性能较高的服务。</p>
+
+<p><img src="http://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/GoogleFileSystemGFS.svg/500px-GoogleFileSystemGFS.svg.png" alt="Google File System. Designed for system-to-system interaction, and not for user-to-system interaction. The chunk servers replicate the data automatically" /></p>
+
+<p><strong>Assumptions in Google File System (GFS)</strong></p>
+
+<ul>
+  <li>GFS should be built with commodity hardware
+    <ul>
+      <li>Inexpensive disks and machines</li>
+    </ul>
+  </li>
+  <li>GSF stores a modest number of large files
+    <ul>
+      <li>GSF stores a modest number of large files
+        <ul>
+          <li>e.g. Big-table, Map-Reduce records</li>
+        </ul>
+      </li>
+      <li>Do not optimize for small files</li>
+    </ul>
+  </li>
+  <li>Workloads
+    <ul>
+      <li>Large streaming reads (1MB or more) and small random reads (a
+few KBs)</li>
+      <li>Sequential appends to files by hundreds of data producers
+        <ul>
+          <li>Utilizing the fact that files are seldom modified again</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>High sustained bandwidth is more important than latency
+    <ul>
+      <li>Response time for individual read and write is not critical
+</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/googlelun-wen-gfs/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
            | <a href="/blog/2013/05/14/googlelun-wen-big-table/#disqus_thread"
              data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-big-table/">Comments</a>
         
@@ -862,62 +951,11 @@ Survey”放在大脑中提醒自己。</p>
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-13T02:18:00+08:00" pubdate data-updated="true">May 13<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/13/python-dict-sorted/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/13/python-dict-sorted/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/13/python-dict-sorted/">Python Dict Sorted</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p><i><strong>from</strong> <a href="http://www.cnblogs.com/linyawen/archive/2012/03/15/2398292.html">http://www.cnblogs.com/linyawen/archive/2012/03/15/2398292.html</a></i></p>
-
-<hr />
-
-<p>我们知道Python的内置dictionary数据类型是无序的，通过key来获取对应的value。可是有时我们需要对dictionary中
-的item进行排序输出，可能根据key，也可能根据value来排。到底有多少种方法可以实现对dictionary的内容进行排序输出呢？下面摘取了
-一些精彩的解决办法。 </p>
-
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/13/python-dict-sorted/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
       
-        <li class="previous disabled"><a href="#">&larr;&nbsp;Older</a></li>
+        <li class="previous"><a href="/blog/page/11/">&larr;&nbsp;Older</a></li>
       
       <li><a href="/blog/archives">Blog Archives</a></li>
       
@@ -944,7 +982,7 @@ Survey”放在大脑中提醒自己。</p>
     
     <a class="list-group-item " href="/blog/2016/11/10/cache/">Cache</a>
     
-    <a class="list-group-item " href="/blog/2016/10/23/zk/">Zookeeper Roles</a>
+    <a class="list-group-item " href="/blog/2016/10/27/distribute-design/">Distributed System Design</a>
     
   </div>
 </section>
@@ -1010,7 +1048,7 @@ Survey”放在大脑中提醒自己。</p>
     
     
     <a class="list-group-item " href="/blog/categories/big-data/index.html">
-        <span class="badge">13</span>
+        <span class="badge">14</span>
         Big Data
       </a>
     

@@ -4,7 +4,7 @@
   <title><![CDATA[tags: system | Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/blog/tags/system/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-11-30T10:22:07+08:00</updated>
+  <updated>2016-11-30T23:48:57+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,22 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Distributed System Design]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/10/27/distribute-design/"/>
+    <updated>2016-10-27T17:23:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/10/27/distribute-design</id>
+    <content type="html"><![CDATA[<p>分布式系统原理的脑图.</p>
+
+<p>TODO: 先mark，以后再添加内容。</p>
+
+<!--more-->
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-30/42661393.jpg" width="900px" /></p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[PID File Analysis]]></title>
