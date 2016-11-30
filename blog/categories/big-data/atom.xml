@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Big Data | Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/blog/categories/big-data/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-11-29T11:06:49+08:00</updated>
+  <updated>2016-11-30T09:58:27+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -12,6 +12,165 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Zookeeper Roles]]></title>
+    <link href="http://billowkiller.github.io/blog/2016/10/23/zk/"/>
+    <updated>2016-10-23T17:23:00+08:00</updated>
+    <id>http://billowkiller.github.io/blog/2016/10/23/zk</id>
+    <content type="html"><![CDATA[<p>看到一篇不错的zookeeper应用介绍[](http://blog.csdn.net/ldds_520/article/details/51679071)，记录下。</p>
+
+<!--more-->
+
+<table cellspacing="0" cellpadding="0" style="margin:1em 0px 2em; padding:0px; width:607px; border-collapse:collapse; border-spacing:0px; color:rgb(51,51,51); font-family:'Segoe UI',Calibri,'Myriad Pro',Myriad,'Trebuchet MS',Helvetica,Arial,sans-serif; font-size:13px; border-style:solid">
+<tbody>
+<tr>
+<td valign="top" bgcolor="#8CEA00" width="909" style="margin:0px; padding:5px; border:2px solid rgb(255,255,255); font-size:18px; background:rgb(239,239,239)">
+<strong>数据发布与订阅（配置中心）</strong></td>
+</tr>
+<tr>
+<td valign="top" bgcolor="#C2C287" width="909" style="margin:0px; padding:5px; border:2px solid rgb(255,255,255); background:rgb(239,239,239)">
+发布与订阅模型，即所谓的配置中心，顾名思义就是发布者将数据发布到ZK节点上，供订阅者动态获取数据，实现配置信息的集中式管理和动态更新。例如全局的配置信息，服务式服务框架的服务地址列表等就非常适合使用。</td>
+</tr>
+<tr>
+<td valign="top" bgcolor="#D0D0D0" width="909" style="margin:0px; padding:5px; border:2px solid rgb(255,255,255); background:rgb(239,239,239)">
+<ul style="margin:0px 0px 10px 15px; padding:0px; list-style-position:outside; line-height:19.5px">
+<li style="margin:0px; padding:0px">应用中用到的一些配置信息放到ZK上进行集中管理。这类场景通常是这样：应用在启动的时候会主动来获取一次配置，同时，在节点上注册一个Watcher，这样一来，以后每次配置有更新的时候，都会实时通知到订阅的客户端，从来达到获取最新配置信息的目的。</li><li style="margin:0px; padding:0px">分布式搜索服务中，索引的元信息和服务器集群机器的节点状态存放在ZK的一些指定节点，供各个客户端订阅使用。</li><li style="margin:0px; padding:0px">分布式日志收集系统。这个系统的核心工作是收集分布在不同机器的日志。收集器通常是按照应用来分配收集任务单元，因此需要在ZK上创建一个以应用名作为path的节点P，并将这个应用的所有机器ip，以子节点的形式注册到节点P上，这样一来就能够实现机器变动的时候，能够实时通知到收集器调整任务分配。</li><li style="margin:0px; padding:0px">系统中有些信息需要动态获取，并且还会存在人工手动去修改这个信息的发问。通常是暴露出接口，例如JMX接口，来获取一些运行时的信息。引入ZK之后，就不用自己实现一套方案了，只要将这些信息存放到指定的ZK节点上即可。</li></ul>
+<p style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+<strong>注意</strong>：在上面提到的应用场景中，有个默认前提是：数据量很小，但是数据更新可能会比较快的场景。</p>
+</td>
+</tr>
+<tr>
+<td valign="top" bgcolor="#8CEA00" width="909" style="margin:0px; padding:5px; border:2px solid rgb(255,255,255); font-size:18px; background:rgb(239,239,239)">
+<strong>负载均衡</strong></td>
+</tr>
+<tr>
+<td valign="top" bgcolor="#C2C287" width="909" style="margin:0px; padding:5px; border:2px solid rgb(255,255,255); background:rgb(239,239,239)">
+这里说的负载均衡是指软负载均衡。在分布式环境中，为了保证高可用性，通常同一个应用或同一个服务的提供方都会部署多份，达到对等服务。而消费者就须要在这些对等的服务器中选择一个来执行相关的业务逻辑，其中比较典型的是消息中间件中的生产者，消费者负载均衡。<strong></strong></td>
+</tr>
+<tr>
+<td valign="top" bgcolor="#D0D0D0" width="909" style="margin:0px; padding:5px; border:2px solid rgb(255,255,255); background:rgb(239,239,239)">
+消息中间件中发布者和订阅者的负载均衡，linkedin开源的KafkaMQ和阿里开源的<a target="_blank" href="http://metaq.taobao.org/" style="color:rgb(45,138,199); text-decoration:none; outline:none">metaq</a>都是通过zookeeper来做到生产者、消费者的负载均衡。这里以metaq为例如讲下：<br />
+<strong>生产者负载均衡</strong>：metaq发送消息的时候，生产者在发送消息的时候必须选择一台broker上的一个分区来发送消息，因此metaq在运行过程中，会把所有broker和对应的分区信息全部注册到ZK指定节点上，默认的策略是一个依次轮询的过程，生产者在通过ZK获取分区列表之后，会按照brokerId和partition的顺序排列组织成一个有序的分区列表，发送的时候按照从头到尾循环往复的方式选择一个分区来发送消息。
+<p style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+</p>
+<p style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+<strong>消费负载均衡：</strong></p>
+<p style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+在消费过程中，一个消费者会消费一个或多个分区中的消息，但是一个分区只会由一个消费者来消费。MetaQ的消费策略是：</p>
+<ul style="margin:0px 0px 10px 15px; padding:0px; list-style-position:outside; line-height:19.5px">
+<li style="margin:0px; padding:0px">每个分区针对同一个group只挂载一个消费者。</li><li style="margin:0px; padding:0px">如果同一个group的消费者数目大于分区数目，则多出来的消费者将不参与消费。</li><li style="margin:0px; padding:0px">如果同一个group的消费者数目小于分区数目，则有部分消费者需要额外承担消费任务。</li></ul>
+<p style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+在某个消费者故障或者重启等情况下，其他消费者会感知到这一变化（通过 zookeeper watch消费者列表），然后重新进行负载均衡，保证所有的分区都有消费者进行消费。</p>
+</td>
+</tr>
+<tr>
+<td valign="top" bgcolor="#8CEA00" width="909" style="margin:0px; padding:5px; border:2px solid rgb(255,255,255); font-size:18px; background:rgb(239,239,239)">
+<strong>命名服务(Naming Service)</strong></td>
+</tr>
+<tr>
+<td valign="top" bgcolor="#C2C287" width="909" style="margin:0px; padding:5px; border:2px solid rgb(255,255,255); background:rgb(239,239,239)">
+命名服务也是分布式系统中比较常见的一类场景。在分布式系统中，通过使用命名服务，客户端应用能够根据指定名字来获取资源或服务的地址，提供者等信息。被命名的实体通常可以是集群中的机器，提供的服务地址，远程对象等等——这些我们都可以统称他们为名字（Name）。其中较为常见的就是一些分布式服务框架中的服务地址列表。通过调用ZK提供的创建节点的API，能够很容易创建一个全局唯一的path，这个path就可以作为一个名称。<strong></strong></td>
+</tr>
+<tr>
+<td valign="top" bgcolor="#D0D0D0" width="909" style="margin:0px; padding:5px; border:2px solid rgb(255,255,255); background:rgb(239,239,239)">
+阿里巴巴集团开源的分布式服务框架Dubbo中使用ZooKeeper来作为其命名服务，维护全局的服务地址列表，<a target="_blank" href="http://code.alibabatech.com/wiki/display/dubbo/Home" style="color:rgb(45,138,199); text-decoration:none; outline:none">点击这里</a>查看Dubbo开源项目。在Dubbo实现中：
+<p style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+</p>
+<p style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+<strong>服务提供者</strong>在启动的时候，向ZK上的指定节点/dubbo/${serviceName}/providers目录下写入自己的URL地址，这个操作就完成了服务的发布。</p>
+<p style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+<strong>服务消费者</strong>启动的时候，订阅/dubbo/${serviceName}/providers目录下的提供者URL地址， 并向/dubbo/${serviceName} /consumers目录下写入自己的URL地址。</p>
+<p style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+<strong>注意</strong>，所有向ZK上注册的地址都是临时节点，这样就能够保证服务提供者和消费者能够自动感应资源的变化。</p>
+<p style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+另外，Dubbo还有针对服务粒度的监控，方法是订阅/dubbo/${serviceName}目录下所有提供者和消费者的信息。</p>
+</td>
+</tr>
+<tr>
+<td valign="top" bgcolor="#8CEA00" width="909" style="margin:0px; padding:5px; border:2px solid rgb(255,255,255); font-size:18px; background:rgb(239,239,239)">
+<strong>分布式通知/协调</strong></td>
+</tr>
+<tr>
+<td valign="top" bgcolor="#C2C287" width="909" style="margin:0px; padding:5px; border:2px solid rgb(255,255,255); background:rgb(239,239,239)">
+ZooKeeper中特有watcher注册与异步通知机制，能够很好的实现分布式环境下不同系统之间的通知与协调，实现对数据变更的实时处理。使用方法通常是不同系统都对ZK上同一个znode进行注册，监听znode的变化（包括znode本身内容及子节点的），其中一个系统update了znode，那么另一个系统能够收到通知，并作出相应处理</td>
+</tr>
+<tr>
+<td valign="top" bgcolor="#D0D0D0" width="909" style="margin:0px; padding:5px; border:2px solid rgb(255,255,255); background:rgb(239,239,239)">
+<ul style="margin:0px 0px 10px 15px; padding:0px; list-style-position:outside; line-height:19.5px">
+<li style="margin:0px; padding:0px">另一种心跳检测机制：检测系统和被检测系统之间并不直接关联起来，而是通过zk上某个节点关联，大大减少系统耦合。</li><li style="margin:0px; padding:0px">另一种系统调度模式：某系统有控制台和推送系统两部分组成，控制台的职责是控制推送系统进行相应的推送工作。管理人员在控制台作的一些操作，实际上是修改了ZK上某些节点的状态，而ZK就把这些变化通知给他们注册Watcher的客户端，即推送系统，于是，作出相应的推送任务。</li><li style="margin:0px; padding:0px">另一种工作汇报模式：一些类似于任务分发系统，子任务启动后，到zk来注册一个临时节点，并且定时将自己的进度进行汇报（将进度写回这个临时节点），这样任务管理者就能够实时知道任务进度。</li></ul>
+<p style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+总之，使用zookeeper来进行分布式通知和协调能够大大降低系统之间的耦合</p>
+</td>
+</tr>
+<tr>
+<td valign="top" bgcolor="#8CEA00" width="909" style="margin:0px; padding:5px; border:2px solid rgb(255,255,255); font-size:18px; background:rgb(239,239,239)">
+<strong>集群管理与Master选举</strong></td>
+</tr>
+<tr>
+<td valign="top" bgcolor="#C2C287" width="909" style="margin:0px; padding:5px; border:2px solid rgb(255,255,255); background:rgb(239,239,239)">
+<ul style="margin:0px 0px 10px 15px; padding:0px; list-style-position:outside; line-height:19.5px">
+<li style="margin:0px; padding:0px">集群机器监控：这通常用于那种对集群中机器状态，机器在线率有较高要求的场景，能够快速对集群中机器变化作出响应。这样的场景中，往往有一个监控系统，实时检测集群机器是否存活。过去的做法通常是：监控系统通过某种手段（比如ping）定时检测每个机器，或者每个机器自己定时向监控系统汇报“我还活着”。 这种做法可行，但是存在两个比较明显的问题：</li></ul>
+<ol style="margin:0px 0px 10px 15px; padding:0px; list-style-type:disc; list-style-position:outside; line-height:19.5px">
+<li style="margin:0px; padding:0px">集群中机器有变动的时候，牵连修改的东西比较多。</li><li style="margin:0px; padding:0px">有一定的延时。</li></ol>
+<p align="left" style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+利用ZooKeeper有两个特性，就可以实时另一种集群机器存活性监控系统：</p>
+<ol style="margin:0px 0px 10px 15px; padding:0px; list-style-type:disc; list-style-position:outside; line-height:19.5px">
+<li style="margin:0px; padding:0px">客户端在节点 x 上注册一个Watcher，那么如果 x?的子节点变化了，会通知该客户端。</li><li style="margin:0px; padding:0px">创建EPHEMERAL类型的节点，一旦客户端和服务器的会话结束或过期，那么该节点就会消失。</li></ol>
+<p align="left" style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+例如，监控系统在 /clusterServers 节点上注册一个Watcher，以后每动态加机器，那么就往 /clusterServers 下创建一个 EPHEMERAL类型的节点：/clusterServers/{hostname}. 这样，监控系统就能够实时知道机器的增减情况，至于后续处理就是监控系统的业务了。</p>
+<ul style="margin:0px 0px 10px 15px; padding:0px; list-style-position:outside; line-height:19.5px">
+<li style="margin:0px; padding:0px">Master选举则是zookeeper中最为经典的应用场景了。</li></ul>
+<p align="left" style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+在分布式环境中，相同的业务应用分布在不同的机器上，有些业务逻辑（例如一些耗时的计算，网络I/O处理），往往只需要让整个集群中的某一台机器进行执行，其余机器可以共享这个结果，这样可以大大减少重复劳动，提高性能，于是这个master选举便是这种场景下的碰到的主要问题。</p>
+<p align="left" style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+利用ZooKeeper的强一致性，能够保证在分布式高并发情况下节点创建的全局唯一性，即：同时有多个客户端请求创建 /currentMaster 节点，最终一定只有一个客户端请求能够创建成功。利用这个特性，就能很轻易的在分布式环境中进行集群选取了。</p>
+<p align="left" style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+另外，这种场景演化一下，就是动态Master选举。这就要用到?EPHEMERAL_SEQUENTIAL类型节点的特性了。</p>
+<p align="left" style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+上文中提到，所有客户端创建请求，最终只有一个能够创建成功。在这里稍微变化下，就是允许所有请求都能够创建成功，但是得有个创建顺序，于是所有的请求最终在ZK上创建结果的一种可能情况是这样： /currentMaster/{sessionId}-1 ,?/currentMaster/{sessionId}-2 ,?/currentMaster/{sessionId}-3 ….. 每次选取序列号最小的那个机器作为Master，如果这个机器挂了，由于他创建的节点会马上小时，那么之后最小的那个机器就是Master了。</p>
+</td>
+</tr>
+<tr>
+<td valign="top" bgcolor="#D0D0D0" width="909" style="margin:0px; padding:5px; border:2px solid rgb(255,255,255); background:rgb(239,239,239)">
+<ul style="margin:0px 0px 10px 15px; padding:0px; list-style-position:outside; line-height:19.5px">
+<li style="margin:0px; padding:0px">在搜索系统中，如果集群中每个机器都生成一份全量索引，不仅耗时，而且不能保证彼此之间索引数据一致。因此让集群中的Master来进行全量索引的生成，然后同步到集群中其它机器。另外，Master选举的容灾措施是，可以随时进行手动指定master，就是说应用在zk在无法获取master信息时，可以通过比如http方式，向一个地方获取master。</li><li style="margin:0px; padding:0px">在Hbase中，也是使用ZooKeeper来实现动态HMaster的选举。在Hbase实现中，会在ZK上存储一些ROOT表的地址和HMaster的地址，HRegionServer也会把自己以临时节点（Ephemeral）的方式注册到Zookeeper中，使得HMaster可以随时感知到各个HRegionServer的存活状态，同时，一旦HMaster出现问题，会重新选举出一个HMaster来运行，从而避免了HMaster的单点问题</li></ul>
+</td>
+</tr>
+<tr>
+<td valign="top" bgcolor="#8CEA00" width="909" style="margin:0px; padding:5px; border:2px solid rgb(255,255,255); font-size:18px; background:rgb(239,239,239)">
+<strong>分布式锁</strong></td>
+</tr>
+<tr>
+<td valign="top" bgcolor="#C2C287" width="909" style="margin:0px; padding:5px; border:2px solid rgb(255,255,255); background:rgb(239,239,239)">
+分布式锁，这个主要得益于ZooKeeper为我们保证了数据的强一致性。锁服务可以分为两类，一个是<strong>保持独占</strong>，另一个是<strong>控制时序</strong>。
+<p style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+</p>
+<ul style="margin:0px 0px 10px 15px; padding:0px; list-style-position:outside; line-height:19.5px">
+<li style="margin:0px; padding:0px">所谓保持独占，就是所有试图来获取这个锁的客户端，最终只有一个可以成功获得这把锁。通常的做法是把zk上的一个znode看作是一把锁，通过create znode的方式来实现。所有客户端都去创建 /distribute_lock 节点，最终成功创建的那个客户端也即拥有了这把锁。</li><li style="margin:0px; padding:0px">控制时序，就是所有视图来获取这个锁的客户端，最终都是会被安排执行，只是有个全局时序了。做法和上面基本类似，只是这里 /distribute_lock 已经预先存在，客户端在它下面创建临时有序节点（这个可以通过节点的属性控制：CreateMode.EPHEMERAL_SEQUENTIAL来指定）。Zk的父节点（/distribute_lock）维持一份sequence,保证子节点创建的时序性，从而也形成了每个客户端的全局时序。</li></ul>
+</td>
+</tr>
+<tr>
+<td valign="top" bgcolor="#8CEA00" width="909" style="margin:0px; padding:5px; border:2px solid rgb(255,255,255); font-size:18px; background:rgb(239,239,239)">
+<strong>分布式队列</strong></td>
+</tr>
+<tr>
+<td valign="top" bgcolor="#C2C287" width="909" style="margin:0px; padding:5px; border:2px solid rgb(255,255,255); background:rgb(239,239,239)">
+队列方面，简单地讲有两种，一种是常规的先进先出队列，另一种是要等到队列成员聚齐之后的才统一按序执行。对于第一种先进先出队列，和分布式锁服务中的控制时序场景基本原理一致，这里不再赘述。
+<p style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+</p>
+<p style="margin-top:0.25em; margin-bottom:0.75em; padding-top:0px; padding-bottom:0px; line-height:19.5px">
+第二种队列其实是在FIFO队列的基础上作了一个增强。通常可以在 /queue 这个znode下预先建立一个/queue/num 节点，并且赋值为n（或者直接给/queue赋值n），表示队列大小，之后每次有队列成员加入后，就判断下是否已经到达队列大小，决定是否可以开始执行了。这种用法的典型场景是，分布式环境中，一个大任务Task A，需要在很多子任务完成（或条件就绪）情况下才能进行。这个时候，凡是其中一个子任务完成（就绪），那么就去 /taskList 下建立自己的临时时序节点（CreateMode.EPHEMERAL_SEQUENTIAL），当
+ /taskList 发现自己下面的子节点满足指定个数，就可以进行下一步按序进行处理了。</p>
+<div><br />
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Paxos and Raft]]></title>
@@ -719,189 +878,6 @@ For each topic T that C_i subscribes to {
 <p>Spark sorted the same data <strong>3X faster using 10X fewer machines</strong>. All the sorting took place on disk (HDFS), without using Spark’s in-memory cache. </p>
 
 <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-7-1/9096505.jpg" width="600px" /></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Extract-Transform-Load Application Scenarios]]></title>
-    <link href="http://billowkiller.github.io/blog/2016/01/13/etl/"/>
-    <updated>2016-01-13T14:00:00+08:00</updated>
-    <id>http://billowkiller.github.io/blog/2016/01/13/etl</id>
-    <content type="html"><![CDATA[<h1 id="etl">实时流ETL应用场景</h1>
-
-<p>现有的企业级数据量在不断增大，用户也在寻求大数据解决方案来处理这些日益增长的数据。那么什么是大数据处理的架构呢。Cloudera总结的很好，大数据架构是建立在一系列开发可靠、可扩张、完整的自动化data pipeline上，下面的一张图给了很好的解释：</p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-1-25/11725472.jpg" width="500px" /></p>
-
-<!--more-->
-
-<p>data pipeline目的在于获取数据并能够发掘其中的价值。数据工程师决定数据从何处来，如何进入数据处理层，以及如何处理，如何存储和进一步展示。当然还需要包括必不可少的集群设计、系统调优等。上图中后端的分析工具通常为BI展示或其他分析工具，中间的处理通常由Spark、Hadoop进行，前端的数据获取包括批量和实时的两种。</p>
-
-<p>在BMR中，我们已经为您处理了底层的集群设计、系统调优，打通数据交互层等工作，您只需要专注于如何在业务上挖掘数据潜在的价值即可。</p>
-
-<h2 id="section">应用场景举例</h2>
-
-<p>公司的IDMapping接入层每天的PV达到上亿，每天产生的日志量达到100GB，日志中的信息包括用户的访问IP、访问时间、响应时间、用户请求、应答内容等。IDMapping由10台nginx服务器构成、分别部署在不同的服务器上。其中的日志格式如下：</p>
-
-<p>数据格式如下：</p>
-
-<pre><code>$remote_addr - [$time_local] "$request" $status $body_bytes_sent "$http_referer"  $http_cookie" $remote_user "$http_user_agent" $request_time  $host $msec
-</code></pre>
-
-<p>下面是一条具体日志：</p>
-
-<pre><code>10.81.78.220 - [04/Oct/2015:21:31:22 +0800] "GET /u2bmp.html?dm=37no6.com/003&amp;ac=1510042131161237772&amp;v=y88j6-1.0&amp;rnd=1510042131161237772&amp;ext_y88j6_tid=003&amp;ext_y88j6_uid=1510042131161237772 HTTP/1.1" 200 54 "-" "-" 9CA13069CB4D7B836DC0B8F8FD06F8AF "ImgoTV-iphone/4.5.3.150815 CFNetwork/672.1.13 Darwin/14.0.0" 0.004 test.com.org 1443965482.737
-</code></pre>
-
-<p>负责人希望能够通过这些日志信息实时地获取服务的PV、UV等统计信息以及访问用户IP的所在地信息等，并且希望可以查询任意时间的用户访问信息，以此满足日常运营的需求，后续还可能添加告警和日运营报表等功能。</p>
-
-<h2 id="section-1">解决方案</h2>
-
-<p>在BMR中我们集成了Flume、Kafka、Spark、Hbase组件，可以很好的满足应用场景中IDMapping负责人的集群需求。我们设计了如下的大数据处理的pipeline。</p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-1-26/97268179.jpg" width="750px" /></p>
-
-<p>每台机器上的日志数据通过flume实时地推送到Kafka集群中，在spark集群中订阅这些日志数据，经过ETL处理后存储到Hbase中。前端展示系统可以通过Hbase的Restful接口实时的获取数据。同时，可以提交新的spark streaming application修改原有的数据处理模型，也可以在后端也可以对数据进一步加工：通过集群内部的mahout、spark mllib或对接其他的BI系统，例如Palo、Saiku。</p>
-
-<p>以下是前端获取数据后的展示效果图：</p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-1-24/88317070.jpg" width="350px" /></p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-3-23/77070404.jpg" width="400px" /></p>
-
-<p>接下来通过三步骤对这个解决方案在BMR中的实现进行详细的阐述。</p>
-
-<h3 id="step-1-">Step 1 创建集群</h3>
-
-<p>创建包括Spark和Streaming组件的集群。在生产环境中建议分别创建Kafka和Spark集群。可以参考<a href="https://bce.baidu.com/doc/BMR/GettingStarted.html#.E5.88.9B.E5.BB.BA.E9.9B.86.E7.BE.A4">文档</a>。</p>
-
-<h3 id="step-2-">Step 2 数据准备</h3>
-
-<p>数据获取表示如何将nginx产生的日志通过flume导入到BMR集群中。我们执行下面的命令：</p>
-
-<pre><code>wget http://bmr.bj.bcebos.com/tools/flume/flume-1.6.0.tar.gz
-vim $FLUME_HOME/conf/flume-conf.properties
-$FLUME_HOME/bin/flume-ng agent --conf conf --conf-file $FLUME_HOME/conf/flume-conf.properties --name agent
-</code></pre>
-
-<p>以上的命令分别表示获取flume、编辑配置文件、运行flume agent。其中配置文件如下，将<code>agent.sources.s.command</code>改为<code>tail $NGINX_HOME/logs/access.log</code>。</p>
-
-<p><code>
-	1.	#agent section
-	2.	agent.sources = s
-	3.	agent.channels = c
-	4.	agent.sinks = r
-	5.	
-	6.	#exec source
-	7.	agent.sources.s.type = exec
-	8.	agent.sources.s.command = /usr/bin/vmstat 1
-	9.	agent.sources.s.fileHeader = true
-	10.	agent.sources.s.batchSize = 100
-	11.	agent.sources.s.channels = c
-	12.	
-	13.	# Kafka Sink
-	14.	agent.sinks.r.type =  org.apache.flume.sink.kafka.KafkaSink
-	15.	agent.sinks.r.brokerList = host1:port1,host2:port2...     #推荐填写两个或以上
-	16.	agent.sinks.r.topic = topic
-	17.	agent.sinks.r.channel = c
-	18.	
-	19.	# Each channel's type is defined.
-	20.	agent.channels.c.type = memory
-	21.	agent.channels.c.capacity = 1000
-</code></p>
-
-<h3 id="step-3-">Step 3 数据处理</h3>
-<p>建立新的spark集群，当然在测试阶段您也可以直接使用kafka集群中的spark进行处理，在实际应用中推荐使用新的spark集群。</p>
-
-<ol>
-  <li>下载spark streaming代码，进行编译，将编译结果<code>bmr-spark-kafka-samples-1.0-SNAPSHOT-jar-with-dependencies.jar</code>放到bos中。</li>
-  <li>
-    <p>从console页面进去到对应集群的作业列表页面，然后点击“添加作业”，如果使用系统提供的输入数据和jar包，可以按照如下方式填写参数：</p>
-
-    <blockquote>
-      <p>作业类型：Spark</p>
-    </blockquote>
-
-    <blockquote>
-      <p>名称：FKSTest</p>
-    </blockquote>
-
-    <blockquote>
-      <p>bos输入地址： bos://${PATH}/bmr-spark-kafka-samples-1.0-SNAPSHOT-jar-with-dependencies.jar</p>
-    </blockquote>
-
-    <blockquote>
-      <p>失败后操作：继续</p>
-    </blockquote>
-
-    <blockquote>
-      <p>Spark-submit: –class com.baidubce.bmr.sample.DirectFKSTest</p>
-    </blockquote>
-
-    <blockquote>
-      <p>应用程序参数：ng1889b62-master-instance-f5lvbago topic</p>
-    </blockquote>
-
-    <p>其中应用程序参数分别代表集群master的hostname和kafka topic。 </p>
-  </li>
-  <li>
-    <p>您可以通过集群页面的<code>Resource Manager Web UI</code>查看spark UI查看作业运行的状态。（进入页面所需要的用户名密码会通过短信形式发送到您手机上）
- <img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-1-25/49196148.jpg" alt="" /></p>
-  </li>
-  <li>
-    <p>查看hbase中的数据：</p>
-
-    <pre><code> hbase(main):001:0&gt; list
- hbase(main):002:0&gt; scan 'PVUV', {COLUMN=&gt;['statistics:PV:toInt', 'statistics:UV:toInt']}
-</code></pre>
-  </li>
-</ol>
-
-<h2 id="spark-streaming">关于Spark Streaming中实时流的说明建议</h2>
-
-<p>在Spark Streaming中有两种API用于处理与kafka之间的交互。</p>
-
-<ul>
-  <li>一种是spark1.2.0引进的<code>KafkaUtils.createStream</code>，这种方式可以将kafka或其他流式输入先写入磁盘再分片处理，防止重启driver造成数据丢失。换句话说，可以保证At least Once语义，前提是开启<code>Write Ahead Logs</code>，方法如下
-    <ul>
-      <li>在代码中通过<code>streamingContext.checkpoint</code>配置checkpoint目录</li>
-      <li>配置<code>spark.streaming.receiver.writeAheadLog.enable</code>为<code>true</code></li>
-    </ul>
-  </li>
-  <li>另外一种则是spark1.3.0引进的Direct API。这种方式保证的是<code>Exactly Once</code>语义，解决上种方式中<code>consumer offset</code>和数据Logs存储不一致性造成的数据重复计算。这种方式通过将<code>offset</code>存入
-checkpoints中，来保证接收数据的一致性。</li>
-</ul>
-
-<p>使用<code>KafkaUtils.createStream</code>需要有一下两种考虑：</p>
-
-<ul>
-  <li>提高streaming的吞吐量，我们通常会使用多个consumer来并行的获取数据，每个consumer分配到一个executor的单核上，最后将所有得到的Stream进行<code>Union</code>操作。
-如果不进行<code>Union</code>则会导致<code>Transformation</code>数量增多<code>#consumer</code>倍。</li>
-  <li>另外也要考虑RDD中partition的数量，减少partition数量有助于减少task个数以及调度时间。partition的数量是由batchInterval和spark.streaming.blockInterval共同决定的，根据spark官方指导，通常partition数目
-为cores的2到3倍比较合适，所以可以调整适当的参数控制partition的个数。</li>
-</ul>
-
-<p>而在DirectAPI中会自动定期的根据kafka的topic+partition查询最新的offset，定义需要处理的offset范围。所以不需要考虑创建多少receivers，也不需要考虑partition的数量。在API中每个kafka partition都是自动地并行读取，并且对应每个RDD partition，从而简化Streaming处理的并行模式。</p>
-
-<p>但是DirectAPI并不会在zookeeper中更新offset，所以基于zookeeper的kafka监控工具无法查看日志处理的进度。但您也可以查询checkpoint，将offset写入zookeeper中。</p>
-
-<p>这两种使用方式在Sample中都有详细的例子可以参考，分别是<code>com.baidubce.bmr.sample.FKSTest</code>和<code>com.baidubce.bmr.sample.DirectFKSTest</code>。</p>
-
-<h2 id="section-2">总结</h2>
-
-<p>虽然针对不同的目标和业务案例使用流式处理的方式也不同，但其主要场景包括：</p>
-
-<ul>
-  <li>流ETL——将数据推入存储系统之前对其进行清洗和聚合。</li>
-  <li>触发器——实时检测异常行为并触发相关的处理逻辑。</li>
-  <li>数据浓缩——将实时数据与静态数据浓缩成更为精炼的数据以用于实时分析。</li>
-  <li>复杂会话和持续学习——将与实时会话相关的事件组合起来进行分析。</li>
-</ul>
-
-<p>在上述例子中我们介绍了BMR中流ETL的场景。
-在BMR中，我们提供了Hadoop生态圈中的全栈组件包括Hadoop、Spark、Hbase、Hive、Pig、Kafka、Mahout等，
-您可以根据自己的业务场景灵活地选择不同的组件。</p>
 
 ]]></content>
   </entry>

@@ -176,6 +176,85 @@ body {
 
 <span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
         
+           | <a href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/#disqus_thread"
+             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/">Comments</a>
+        
+      </p>
+    
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/">Linux下解决中文乱码——文件，标签</a></h1>
+    
+  </header>
+
+
+  <div class="entry-content clearfix"><p>文件是在WIndows 下创建的,Windows
+的文件名中文编码默认为GBK,而Linux中默认文件名编码为UTF8,由于编码不一致所以导致了文件名乱码的问题，解决这个问题需要对文件名进行转码。</p>
+
+<ul>
+  <li><strong>文件与文件夹乱码，使用convmv来解决</strong></li>
+</ul>
+
+<p>convmv 使用方法：</p>
+
+<p>convmv -f 源编码 -t 新编码 [选项] 文件名</p>
+
+<p>常用参数：</p>
+
+<ul>
+  <li>-r 递归处理子文件夹</li>
+  <li>–notest 真正进行操作，默认情况下是不对文件进行真实操作</li>
+  <li>–list 显示所有支持的编码</li>
+  <li>–unescap 可以做一下转义，比如把%20变成空格</li>
+</ul>
+
+<p>举例：</p>
+
+<p>在当前目录下</p>
+
+<pre><code>convmv -f GBK -t UTF-8 --notest * //所有文件转gbk为utf8
+</code></pre>
+
+<ul>
+  <li><strong>转换 mp3 标签编码，使用mutagen</strong></li>
+</ul>
+
+<p>安装：</p>
+
+<pre><code>sudo apt-get install python-mutagen
+</code></pre>
+
+<p>举例：</div>
+  
+  
+    <footer>
+      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/linuxxia-jie-jue-zhong-wen-luan-ma-wen-jian-biao-qian/">Read on &rarr;</a>
+    </footer>
+  
+
+
+        </article>
+      
+      
+        <article class="post">
+          
+  <header class="page-header">
+    
+      <p class="meta text-muted text-uppercase">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
+        
            | <a href="/blog/2013/05/14/linuxnei-he-dai-ma-feng-ge/#disqus_thread"
              data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/linuxnei-he-dai-ma-feng-ge/">Comments</a>
         
@@ -810,74 +889,6 @@ few KBs)</li>
 
         </article>
       
-      
-        <article class="post">
-          
-  <header class="page-header">
-    
-      <p class="meta text-muted text-uppercase">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="glyphicon glyphicon-calendar"></span> <time datetime="2013-05-14T01:09:00+08:00" pubdate data-updated="true">May 14<span>th</span>, 2013</time>
-        
-           | <a href="/blog/2013/05/14/googlelun-wen-big-table/#disqus_thread"
-             data-disqus-identifier="http://billowkiller.github.io/blog/2013/05/14/googlelun-wen-big-table/">Comments</a>
-        
-      </p>
-    
-    
-      <h1 class="entry-title"><a href="/blog/2013/05/14/googlelun-wen-big-table/">Google论文: Big Table</a></h1>
-    
-  </header>
-
-
-  <div class="entry-content clearfix"><p>论文：<a href="http://static.googleusercontent.com/external_content/untrusted_dlcp/research.google.com/en//archive/bigtable-osdi06.pdf">英文版</a>，
-<a href="http://dblab.xmu.edu.cn/sites/default/files/20120508_172346_207.pdf">中文版</a></p>
-
-<hr />
-
-<h3 id="section">1. 导论</h3>
-
-<p>BigTable is a compressed, high performance, and proprietary data storage
-system built on Google File System, Chubby Lock Service, SSTable
-(log-structured storage like LevelDB) and a few other Google
-technologies.（这句是wikipedia摘抄的定义）</p>
-
-<p>构成：</p>
-
-<ul>
-  <li>Scheduler</li>
-  <li><a href="http://www.cnblogs.com/billowkiller/archive/2013/04/10/3012085.html">GFS</a></li>
-  <li>Chubby Lock service</li>
-  <li>Sawzall</li>
-  <li><a href="http://www.cnblogs.com/billowkiller/archive/2013/04/15/3022035.html">MapReduce</a></li>
-  <li>SSTable</li>
-  <li>some compression algorithms</li>
-</ul>
-
-<p>先通俗几个名词：
-</div>
-  
-  
-    <footer>
-      <a class="btn btn-default" rel="full-article" href="/blog/2013/05/14/googlelun-wen-big-table/">Read on &rarr;</a>
-    </footer>
-  
-
-
-        </article>
-      
     </div>
 
     <ul class="pager">
@@ -909,7 +920,7 @@ technologies.（这句是wikipedia摘抄的定义）</p>
     
     <a class="list-group-item " href="/blog/2016/11/10/cache/">Cache</a>
     
-    <a class="list-group-item " href="/blog/2016/09/23/paxos-raft/">Paxos and Raft</a>
+    <a class="list-group-item " href="/blog/2016/10/23/zk/">Zookeeper Roles</a>
     
   </div>
 </section>
@@ -975,7 +986,7 @@ technologies.（这句是wikipedia摘抄的定义）</p>
     
     
     <a class="list-group-item " href="/blog/categories/big-data/index.html">
-        <span class="badge">12</span>
+        <span class="badge">13</span>
         Big Data
       </a>
     
