@@ -25,6 +25,8 @@ tags: [tunning]
 
 *socket队列改成request队列*
 
+<!--more-->
+
 ### 去除不必要动作
 
 * 减少网络重连（长连接）

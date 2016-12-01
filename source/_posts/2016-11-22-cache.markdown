@@ -22,6 +22,8 @@ tags: [cache]
 * 内存为主，磁盘为辅，提供完全持久化（leveldb， redis aof, 内存映射）
 * 全磁盘，提供完全持久化（ssd db）
 
+<!--more-->
+
 数据淘汰
 
 * LRU： hash+list、基于Hazard Pointer的无锁实现 适合访问热点场景（浪费内存，时间等）

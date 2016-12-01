@@ -21,7 +21,7 @@ data pipeline目的在于获取数据并能够发掘其中的价值。数据工�
 
 ## 应用场景举例
 
-百度的IDMapping接入层每天的PV达到上亿，每天产生的日志量达到100GB，日志中的信息包括用户的访问IP、访问时间、响应时间、用户请求、应答内容等。IDMapping由10台nginx服务器构成、分别部署在不同的服务器上。其中的日志格式如下：
+公司的IDMapping接入层每天的PV达到上亿，每天产生的日志量达到100GB，日志中的信息包括用户的访问IP、访问时间、响应时间、用户请求、应答内容等。IDMapping由10台nginx服务器构成、分别部署在不同的服务器上。其中的日志格式如下：
 
 数据格式如下：
 
@@ -63,7 +63,31 @@ data pipeline目的在于获取数据并能够发掘其中的价值。数据工�
     vim $FLUME_HOME/conf/flume-conf.properties
     $FLUME_HOME/bin/flume-ng agent --conf conf --conf-file $FLUME_HOME/conf/flume-conf.properties --name agent
     
-以上的命令分别表示获取flume、编辑配置文件、运行flume agent。其中配置文件参考[http://wiki.baidu.com/pages/viewpage.action?pageId=158727265](http://wiki.baidu.com/pages/viewpage.action?pageId=158727265)，将`agent.sources.s.command`改为`tail $NGINX_HOME/logs/access.log`。
+以上的命令分别表示获取flume、编辑配置文件、运行flume agent。其中配置文件如下，将`agent.sources.s.command`改为`tail $NGINX_HOME/logs/access.log`。
+
+```
+	1.	#agent section
+	2.	agent.sources = s
+	3.	agent.channels = c
+	4.	agent.sinks = r
+	5.	
+	6.	#exec source
+	7.	agent.sources.s.type = exec
+	8.	agent.sources.s.command = /usr/bin/vmstat 1
+	9.	agent.sources.s.fileHeader = true
+	10.	agent.sources.s.batchSize = 100
+	11.	agent.sources.s.channels = c
+	12.	
+	13.	# Kafka Sink
+	14.	agent.sinks.r.type =  org.apache.flume.sink.kafka.KafkaSink
+	15.	agent.sinks.r.brokerList = host1:port1,host2:port2...     #推荐填写两个或以上
+	16.	agent.sinks.r.topic = topic
+	17.	agent.sinks.r.channel = c
+	18.	
+	19.	# Each channel's type is defined.
+	20.	agent.channels.c.type = memory
+	21.	agent.channels.c.capacity = 1000
+```
 
 ###Step 3 数据处理
 建立新的spark集群，当然在测试阶段您也可以直接使用kafka集群中的spark进行处理，在实际应用中推荐使用新的spark集群。

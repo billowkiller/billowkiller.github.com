@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Paxos and Raft"
-date: 2016-08-23 17:23
+date: 2016-09-23 17:23
 comments: true
 category: "Big Data"
 tags: [consensus]
@@ -14,6 +14,8 @@ tags: [consensus]
 一致性协议就是为了解决这些不可靠组件如何对外提供一致的value。具体说来可以认为多个process可以提供不同的value，一致性协议能迫使这些组件互相协作得到一个一致的结论，并且允许有少量的process出现失败或重启。
 
 一致性协议可以应用的场景包括节点中状态机的复制，分布式的键值存储，分布式序号生成等等，任意节点都可以接收消息，但是对外提供的确是一致的value。
+
+<!--more-->
 
 在分布式系统中，基础复制方法有以下几种：
 
