@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Big Data | Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/blog/categories/big-data/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-12-01T10:24:56+08:00</updated>
+  <updated>2016-12-05T09:55:29+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -18,9 +18,9 @@
     <link href="http://billowkiller.github.io/blog/2016/10/27/distribute-design/"/>
     <updated>2016-10-27T17:23:00+08:00</updated>
     <id>http://billowkiller.github.io/blog/2016/10/27/distribute-design</id>
-    <content type="html"><![CDATA[<p>分布式系统原理的脑图.</p>
+    <content type="html"><![CDATA[<p>分布式系统原理的脑图。</p>
 
-<p><code>TODO:</code> 先mark，以后再添加内容。</p>
+<p><code>TODO:</code> 先mark，以后再添加内容。（怎么搞脑图的展现，每次更新都截图上传到图床，太麻烦了）</p>
 
 <!--more-->
 

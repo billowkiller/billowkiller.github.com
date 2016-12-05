@@ -4,7 +4,7 @@
   <title><![CDATA[Category: NoteBook | Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/blog/categories/notebook/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-12-01T10:24:56+08:00</updated>
+  <updated>2016-12-05T09:55:29+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -59,7 +59,7 @@
   <li>多线程无锁算法
     <ul>
       <li>无锁共享数据</li>
-      <li>copy on write</li>
+      <li>copy on write （多读少写）</li>
     </ul>
   </li>
   <li>hash冲突
@@ -239,6 +239,17 @@
 <ul>
   <li>hash缺点 偏静态、成倍扩容、容量预先规划</li>
   <li>slot：基于数据分片，一个集群包含固定slot数量，每条数据属于某个slot</li>
+</ul>
+
+<h3 id="section">缓存更新</h3>
+
+<p><a href="http://coolshell.cn/articles/17416.html">coolshell.cn</a> 里有一篇缓存更新的套路很不错，为什么先删除缓存，然后再更新数据库的逻辑是错的，可以看看里面的分析。大致分为以下四种：</p>
+
+<ul>
+  <li>Cache aside</li>
+  <li>Read through</li>
+  <li>Write through</li>
+  <li>Write behind caching</li>
 </ul>
 
 ]]></content>

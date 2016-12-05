@@ -271,6 +271,17 @@ body {
   <li>slot：基于数据分片，一个集群包含固定slot数量，每条数据属于某个slot</li>
 </ul>
 
+<h3 id="section">缓存更新</h3>
+
+<p><a href="http://coolshell.cn/articles/17416.html">coolshell.cn</a> 里有一篇缓存更新的套路很不错，为什么先删除缓存，然后再更新数据库的逻辑是错的，可以看看里面的分析。大致分为以下四种：</p>
+
+<ul>
+  <li>Cache aside</li>
+  <li>Read through</li>
+  <li>Write through</li>
+  <li>Write behind caching</li>
+</ul>
+
 </div>
 
 
