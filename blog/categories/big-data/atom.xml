@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Big Data | Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/blog/categories/big-data/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-12-07T13:27:32+08:00</updated>
+  <updated>2016-12-07T15:29:21+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -337,13 +337,16 @@ ZooKeeper中特有watcher注册与异步通知机制，能够很好的实现分�
     <p>如果某个提案之后又另外一个提案跟进会发生什么情况？</p>
 
     <p>如果前一个提案已经被多数派接受，那新的提案会看到和使用前一个提案作为它的value；如果前一个提案没有被多数派接受，但新提案发现这个提案，那新提案也会使用它作为value；如果前一个提案没有被多数派接受，并且新提案没有发现，则新提案会使用自己的value，旧的提案不会被block。</p>
-
-    <p>&lt;img src=“http://7xqfqs.com1.z0.glb.clouddn.com/16-9-27/38064842.jpg” width=”500px”/&gt;</p>
-
-    <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-9-27/41211772.jpg" width="500px" /></p>
-
-    <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-9-27/4176188.jpg" width="500px" /></p>
   </li>
+</ol>
+
+<p>&lt;img src=“http://7xqfqs.com1.z0.glb.clouddn.com/16-9-27/38064842.jpg” width=”500px”/&gt;</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-9-27/41211772.jpg" width="500px" /></p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-9-27/4176188.jpg" width="500px" /></p>
+
+<ol>
   <li>
     <p>server如何知道提案的value？</p>
 
@@ -372,17 +375,24 @@ ZooKeeper中特有watcher注册与异步通知机制，能够很好的实现分�
   <li>Active messaging：leader 接收 client 更新请求，同步到各个 follower</li>
 </ul>
 
-<p>在两种场景中，zk都依赖于一个全局版本号：zxid。zxid 由 (epoch, count) 组成，epoch 是选举编号，每次提议进行leader选举时 epoch 都会增加，count 是 leader 为每个更新操作决定给的序号。从全局看，一个 zxid 代表了一个更新操作的全局序号（版本号）。</p>
+<p>在两种场景中，zk都依赖于一个全局版本号：zxid。zxid 由 (epoch, count) 组成，<code>epoch</code> 是选举编号，每次提议进行leader选举时 epoch 都会增加，<code>count</code> 是 leader 为每个更新操作决定给的序号。从全局看，<strong>一个 zxid 代表了一个更新操作的全局序号（版本号）</strong>。</p>
 
-<p>每个 zookeeper 节点都有各自最后 commit 的 zxid，表示这个 zookeeper 节点上最近成功执行的更新操作，也代表了这个节点的数据版本。在 Leader activation 阶段，每个 zk 节点都以自己的 zxid 作为 proposalID 发起 paxos instance，设置自己为leader (value)。每个节点既是 Proposer 也是 Acceptor。通过 Paxos 协议，某个超过 quorum 半数的节点中持有最大的 zxid 节点会成为新的leader。实际上 proposalID 会是 (zxid，nodeid)，这是当 zxid 相同时， zk 会选择节点编号较大的成为 leader。成为新的 leader 需要与 follower 进行同步，数据同步过程可能会涉及删除 follower 上的最后一条脏数据。</p>
+<p>每个 zookeeper 节点都有各自最后 commit 的 zxid，表示这个 zookeeper 节点上最近成功执行的更新操作，也代表了这个节点的数据版本。在 Leader activation 阶段，<strong>每个 zk 节点都以自己的 zxid 作为 proposalID 发起 paxos instance，设置自己为leader (value)</strong>。每个节点既是 Proposer 也是 Acceptor。通过 Paxos 协议，某个超过 quorum 半数的节点中持有最大的 zxid 节点会成为新的leader。实际上 proposalID 会是 (zxid，nodeid)，这是当 zxid 相同时，zk 会选择节点编号较大的成为 leader。成为新的 leader 需要与 follower 进行同步，数据同步过程可能会涉及删除 follower 上的最后一条脏数据。</p>
 
-<p>当与至少半数节点完成数据同步后，leader 更新 epoch，在各个 follower 上以 (epoch + 1, 0) 为 zxid 写一条没有数据的更新操作。这个更新操作称为 NEW_LEADER 消息，是为了在各个节点上更新 leader 信息，当收到超过半数的 follower 对 NEW_LEADER 的确认后，leader 发起对 NEW_LEADER 的 COMMIT 操作，并进入 Active messaging 阶段。</p>
+<p>当与至少半数节点完成数据同步后，leader 更新 epoch，在各个 follower 上以 (epoch + 1, 0) 为 zxid 写一条没有数据的更新操作。这个更新操作称为 <code>NEW_LEADER</code> 消息，是为了在各个节点上更新 leader 信息，当收到超过半数的 follower 对 NEW_LEADER 的确认后，leader 发起对 NEW_LEADER 的 COMMIT 操作，并进入 Active messaging 阶段。</p>
 
-<p>进入 active messaging 状态的 leader 会接收从客户端发来的更新操作，为每个更新操作生成递增的 count，组成递增的 zxid。Leader 将更新操作以 zxid 的顺序发送给各个 follower (包括leader本身, 一个 leader 同时也是 follower，当收到超过半数的 follower 的确认后，Leader 发送针对该更新操作的 COMMIT 消息给各个 follower。这个更新操作的过程很类似两阶段交，只是 leader 永远不会对更新操作做 abort 操作。</p>
+<p>进入 active messaging 状态的 leader 会接收从客户端发来的更新操作，为每个更新操作生成递增的 count，组成递增的 zxid。Leader 将更新操作以 zxid 的顺序发送给各个 follower (包括leader本身, 一个 leader 同时也是 follower，当收到超过半数的 follower 的确认后，Leader 发送针对该更新操作的 COMMIT 消息给各个 follower。这个更新操作的过程很类似<code>两阶段提交</code>，只是 leader 永远不会对更新操作做 abort 操作。</p>
 
 <p>如果 leader 不能更新超过半数的 follower，此时可以发起新的 leader 选举。最后一条更新操作处于“中间状态”，其是否生效取决于选举出的新 leader 是否有该条更新操作。</p>
 
-<p>Zookeeper 通过 zxid 将两个场景阶段较好的结合起来，且能保证全局的强一致性。由于同一时刻只有一个 zookeeper 节点能获得超过半数的 follower，所以同一时刻最多只存在唯一的 leader；每个 leader 利用 TCP 带来的消息 FIFO 特点以 zxid 顺序更新各个 follower，只有成功完成前一个更新操作的才会进行下一个更新操作。在同一个 leader 任期内，数据在全局满足 quorum 约束的强一致，即读超过半数的节点一定可以读到最新已提交的数据；每个成功的更新操作都至少被超过半数的节点确认，使得新选举的 leader 一定可以包括最新的已成功提交的数据。</p>
+<p>Zookeeper 通过 zxid 将两个场景阶段较好的结合起来，且能保证全局的强一致性。</p>
+
+<ul>
+  <li>由于同一时刻只有一个 zookeeper 节点能获得超过半数的 follower，所以同一时刻最多只存在唯一的 leader；</li>
+  <li>每个 leader 利用 TCP 带来的消息 FIFO 特点以 zxid 顺序更新各个 follower，只有成功完成前一个更新操作的才会进行下一个更新操作；</li>
+  <li>在同一个 leader 任期内，数据在全局满足 quorum 约束的强一致，即读超过半数的节点一定可以读到最新已提交的数据；</li>
+  <li>每个成功的更新操作都至少被超过半数的节点确认，使得新选举的 leader 一定可以包括最新的已成功提交的数据。</li>
+</ul>
 
 <h2 id="raft">4. Raft</h2>
 
