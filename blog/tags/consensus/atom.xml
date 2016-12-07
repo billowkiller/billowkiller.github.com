@@ -4,7 +4,7 @@
   <title><![CDATA[tags: consensus | Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/blog/tags/consensus/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-12-07T12:06:07+08:00</updated>
+  <updated>2016-12-07T12:09:33+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -231,7 +231,7 @@
 
 <p>Raft 中 Follower 长时间没有接受到心跳就会转为 Candidate 状态，收到多数投票应答之后可以转为 Leader，Leader 会定期向其他节点发送心跳。当 Leader 和 Candidate 接收到更高版本的消息后，转为 Follower。</p>
 
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-12-7/64890697.jpg" width="600px" /></p>
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-12-7/64890697.jpg" width="700px" /></p>
 
 <h3 id="leader-election">4.2 Leader Election</h3>
 
