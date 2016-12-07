@@ -68,3 +68,12 @@ cap base原则
 * hash缺点 偏静态、成倍扩容、容量预先规划
 * slot：基于数据分片，一个集群包含固定slot数量，每条数据属于某个slot
 
+### 缓存更新
+
+[coolshell.cn](http://coolshell.cn/articles/17416.html) 里有一篇缓存更新的套路很不错，为什么先删除缓存，然后再更新数据库的逻辑是错的，可以看看里面的分析。大致分为以下四种：
+
+* Cache aside
+* Read through
+* Write through
+* Write behind caching
+

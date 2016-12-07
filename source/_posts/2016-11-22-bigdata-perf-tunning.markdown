@@ -40,7 +40,7 @@ tags: [tunning]
 
 * 多线程无锁算法
     * 无锁共享数据
-    * copy on write
+    * copy on write （多读少写）
     
 * hash冲突
     * 桶如何分配
