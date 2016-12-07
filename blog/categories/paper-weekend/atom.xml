@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Paper Weekend | Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/blog/categories/paper-weekend/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-12-07T15:29:21+08:00</updated>
+  <updated>2016-12-07T17:14:38+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -18,7 +18,11 @@
     <link href="http://billowkiller.github.io/blog/2016/11/19/photon/"/>
     <updated>2016-11-19T11:23:00+08:00</updated>
     <id>http://billowkiller.github.io/blog/2016/11/19/photon</id>
-    <content type="html"><![CDATA[<h2 id="intro-and-issues">Intro and Issues</h2>
+    <content type="html"><![CDATA[<blockquote>
+  <p>R Ananthanarayanan et al. SIGMOD 2013</p>
+</blockquote>
+
+<h2 id="intro-and-issues">Intro and Issues</h2>
 
 <p>Photon 是 Google 的数据流合并的系统，目的是 “perform continuous stream joining in real-time”，例如 query log 和 click log 合并。为什么需要对数据流合并呢？</p>
 
@@ -108,7 +112,11 @@
     <link href="http://billowkiller.github.io/blog/2016/11/13/millwheel/"/>
     <updated>2016-11-13T17:23:00+08:00</updated>
     <id>http://billowkiller.github.io/blog/2016/11/13/millwheel</id>
-    <content type="html"><![CDATA[<h2 id="intro-and-issues">Intro and Issues</h2>
+    <content type="html"><![CDATA[<blockquote>
+  <p>T Akidau et al. VLDB 2013</p>
+</blockquote>
+
+<h2 id="intro-and-issues">Intro and Issues</h2>
 <p>MillWheel 是 Google 开发的一个低延时的流式处理系统。用户指定计算的 DAG 图，以及图中每个节点的计算代码，MillWheel 负责数据流的计算，保证整个计算过程的分布式以及容错性。从宏观上看，MillWheel 提供了数据计算的幂等性，在用户视角提供不重不丢的语义。</p>
 
 <p>在论文中，还存在一个使用场景。Google 的 Zeitgeist 服务用来监测网络搜索的趋势，输入端是持续不断的搜索内容，经过异常检测，异常检测通过模型预测来排除false positive，输出 spike 或者 dip 的搜索。这要求解决：</p>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Big Data | Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/blog/categories/big-data/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-12-07T15:29:21+08:00</updated>
+  <updated>2016-12-07T17:14:38+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -396,7 +396,9 @@ ZooKeeper中特有watcher注册与异步通知机制，能够很好的实现分�
 
 <h2 id="raft">4. Raft</h2>
 
-<p>鉴于 paxos 的难以理解，standford 开发另外一个一致性算法 Raft。一般来说一致性算法有两种：</p>
+<p>Paxos 相比 Raft 比较复杂和难以理解。角色扮演和流程比 Raft 都要啰嗦。比如 Agreement 这个流程，在 Paxos 里边：Client 发起请求举荐 Proposer 成为 Leader，Proposer 然后向全局 Acceptors 寻求确认，Acceptors 全部同意 Proposer 后，Proposer 的 Leader 地位得已承认，Acceptors 还得再向Learners 进行全局广播来同步。鉴于 paxos 的难以理解，standford 开发另外一个一致性算法 Raft。</p>
+
+<p>一般来说一致性算法有两种：</p>
 
 <ul>
   <li>节点同质，leader-less</li>
@@ -471,7 +473,7 @@ ZooKeeper中特有watcher注册与异步通知机制，能够很好的实现分�
   <li>Leader-Change修复主要是在保证Leader切换前后数据的一致性。
     <ul>
       <li>通过上面Raft的选主可以看出，每次选举出来的Leader一定包含已经committed的数据（<strong>抽屉原理</strong>：选举出来的Leader是多数中数据最新的，一定包含已经在多数节点上commit的数据），新的Leader将会覆盖其他节点上不一致的数据。</li>
-      <li>虽然新选举出来的Leader一定包括上一个Term的Leader已经Committed的Log Entry，但是可能也包含上一个Term的Leader未Committed的Log Entry。这部分Log Entry需要转变为Committed，相对比较麻烦，需要考虑Leader多次切换且未完成Log Recovery。解决方案如下：</li>
+      <li>虽然新选举出来的Leader一定包括上一个Term的Leader已经Committed的Log Entry，但是<em>可能也包含上一个Term的Leader未Committed的Log Entry</em>。这部分Log Entry需要转变为Committed，相对比较麻烦，需要考虑Leader多次切换且未完成Log Recovery。解决方案如下：</li>
     </ul>
 
     <p>Raft中增加了一个约束：<strong>对于之前Term的未Committed数据，修复到多数节点，且在新的Term下至少有一条新的Log Entry被复制或修复到多数节点之后，才能认为之前未Committed的Log Entry转为Committed</strong>。下图就是一个Leader-Change场景下的Log Recovery过程：</p>
@@ -485,7 +487,7 @@ ZooKeeper中特有watcher注册与异步通知机制，能够很好的实现分�
   <li>S5被S3、S4和S5选为Term3的Leader，并只写入一条LogEntry到本地，然后Crash。</li>
   <li>S1被S1、S2和S3选为Term4的Leader，并将2号位置的数据修复到S3，达到多数；并在本地写入一条Log Entry，然后Crash。</li>
   <li>
-    <p>这个时候2号位置的Log Entry虽然已经被复制到多数节点上，但是并不是Committed。</p>
+    <p>这个时候2号位置的Log Entry虽然已经被复制到多数节点上，但是并不是Committed。这时候可能会产生两种情况：</p>
 
     <ul>
       <li>S5被S3、S4和S5选为Term5的Leader，将本地2号位置Term3写入的数据复制到其他节点，覆盖S1、S2、S3上Term2写入的数据</li>
