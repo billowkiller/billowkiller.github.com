@@ -4,7 +4,7 @@
   <title><![CDATA[tags: consensus | Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/blog/tags/consensus/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-12-07T17:14:38+08:00</updated>
+  <updated>2016-12-13T20:36:51+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -160,16 +160,13 @@
     <p>如果某个提案之后又另外一个提案跟进会发生什么情况？</p>
 
     <p>如果前一个提案已经被多数派接受，那新的提案会看到和使用前一个提案作为它的value；如果前一个提案没有被多数派接受，但新提案发现这个提案，那新提案也会使用它作为value；如果前一个提案没有被多数派接受，并且新提案没有发现，则新提案会使用自己的value，旧的提案不会被block。</p>
+
+    <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-9-27/38064842.jpg" width="500px" /></p>
+
+    <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-9-27/41211772.jpg" width="500px" /></p>
+
+    <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-9-27/4176188.jpg" width="500px" /></p>
   </li>
-</ol>
-
-<p>&lt;img src=“http://7xqfqs.com1.z0.glb.clouddn.com/16-9-27/38064842.jpg” width=”500px”/&gt;</p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-9-27/41211772.jpg" width="500px" /></p>
-
-<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-9-27/4176188.jpg" width="500px" /></p>
-
-<ol>
   <li>
     <p>server如何知道提案的value？</p>
 

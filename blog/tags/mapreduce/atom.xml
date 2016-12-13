@@ -4,7 +4,7 @@
   <title><![CDATA[tags: mapreduce | Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/blog/tags/mapreduce/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-12-07T17:14:38+08:00</updated>
+  <updated>2016-12-13T20:36:51+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -132,6 +132,8 @@
 <p>假设θ是我们想要执行的聚合方法，要计算的值是列表values（v1, v2, v3,…, vn)），要想求出聚合值λ， 令：λ=θ(v1, v2, v3, …, vn) 。</p>
 
 <p><strong>解决方案：</strong></p>
+
+<!--more-->
 
 <ul>
   <li>
