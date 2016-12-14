@@ -4,7 +4,7 @@
   <title><![CDATA[Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-12-13T20:36:51+08:00</updated>
+  <updated>2016-12-14T10:12:24+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -197,13 +197,17 @@
 
 <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-26/63413408.jpg" width="450px" /></p>
 
-<p>不同的数据中心来回的传输时间可能高达100ms，导致 IdRegistry 的 TPS 最高只有 10，对于每秒需要处理上万日志的 photon 来说是不可以接受的。那么如何增加吞吐呢？有两个措施：<code>server-side batching</code>，<code>sharding</code>。这是两个经典的扩大吞吐量的方法，批量和分治。原文如下：</p>
+<p>不同的数据中心来回的传输时间可能高达100ms，导致 IdRegistry 的 TPS 最高只有 10，对于每秒需要处理上万日志的 photon 来说是不可以接受的。那么如何增加吞吐呢？有两个措施：<code>server-side batching</code>，<code>sharding</code>。这是两个经典的扩大吞吐量的方法，<code>批量</code>和<code>分治</code>。</p>
+
+<p><strong>批量：</strong></p>
 
 <blockquote>
   <p>Server-side batching combine multiple event-level commits into one bigger commit. The registry thread dequeues multiple requests and batches them into a single PaxosDB transaction.</p>
 </blockquote>
 
-<p>但是对于一个批量的 Paxos RPC 怎么区分有冲突的 event_id 原文并没有做过多的说明。</p>
+<p>在上图中，Registry thread 会取多个队列中的 request，把request中的 event_id 打包成一个 paxos 请求。这里会提供一个简单的冲突检测，针对打包的 event_id。 对于批量的id注册，有点类似 Mesa 里的 <code>MVCC</code>，对多个操作原子提交。</p>
+
+<p><strong>分治：</strong></p>
 
 <blockquote>
   <p>To take advantage of the event_id independence, we partition the event id space handled by the IdRegistry into disjoint shards such that event ids from separate shards are managed by separate IdRegistry servers. </p>
@@ -992,6 +996,19 @@ ZooKeeper中特有watcher注册与异步通知机制，能够很好的实现分�
 <p>为了避免同时有两个节点变更正在进行，在有未committed的change正在进行的时候，不允许进行节点变更。节点变更有一个问题，对一个只有两个节点的Cluster，发起RemovePeer。这个时候一个节点挂掉，另外一个节点没有收到RemovePeer请求，这样系统将停止工作。因此强烈建议集群节点数&gt;=3个。</p>
 
 <h2 id="multi-paxos">3. Multi Paxos</h2>
+
+<p>终于到了最后的 <code>Multi Paxos</code>，这篇文章断断续续写了也快3个月了。在实践中验证的分布式一致性算法包括，Paxos、ZAB、Multi Paxos，其实还有 <code>Viewstamped</code>，不过再这篇文章中将不会再补充，因为用的实在是太少了。Multi Paxos也一样，还没有有影响力的开源实现，据我说知，阿里的 OceanBase 和 Google 的不少产品都有用到。下图是一个总结，可以看到开源的软件大多数都使用 Zookeeper 作为满足一致性要求。</p>
+
+<p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/16-12-13/96999766-file_1481634011735_c025.png" width="600px" /></p>
+
+<p>下面就介绍 Multi Paxos。我们向来分析下 Paxos 的缺点。</p>
+
+<ul>
+  <li>Paxos 中每选中一个 value，都需要经过两轮 RPC (prepare, accept)。</li>
+  <li>当并发的 Proposer 数量增加的时候，冲突和重启数也会增加。</li>
+</ul>
+
+<p>那么参照 Raft，我们可以用 leader-based 的方法来解决。这里的 multi 也就代表一次 prepare 可以进行多次 accept，从而提高性能。</p>
 
 <h2 id="discussion">5. Discussion</h2>
 
