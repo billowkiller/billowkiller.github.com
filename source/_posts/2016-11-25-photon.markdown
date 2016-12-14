@@ -7,6 +7,8 @@ category: Paper Weekend
 tags: [paper，streaming, google]
 ---
 
+> R Ananthanarayanan et al. SIGMOD 2013
+
 ## Intro and Issues
 
 Photon 是 Google 的数据流合并的系统，目的是 “perform continuous stream joining in real-time”，例如 query log 和 click log 合并。为什么需要对数据流合并呢？
@@ -40,11 +42,15 @@ Photon 使用基于 `Multi-Paxos` 的容错、强一致的 `IdRegisty`。Paxos �
 
 <img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-26/63413408.jpg" width="450px"/>
 
-不同的数据中心来回的传输时间可能高达100ms，导致 IdRegistry 的 TPS 最高只有 10，对于每秒需要处理上万日志的 photon 来说是不可以接受的。那么如何增加吞吐呢？有两个措施：`server-side batching`，`sharding`。这是两个经典的扩大吞吐量的方法，批量和分治。原文如下：
+不同的数据中心来回的传输时间可能高达100ms，导致 IdRegistry 的 TPS 最高只有 10，对于每秒需要处理上万日志的 photon 来说是不可以接受的。那么如何增加吞吐呢？有两个措施：`server-side batching`，`sharding`。这是两个经典的扩大吞吐量的方法，`批量`和`分治`。
+
+**批量：**
 
 > Server-side batching combine multiple event-level commits into one bigger commit. The registry thread dequeues multiple requests and batches them into a single PaxosDB transaction.
 
-但是对于一个批量的 Paxos RPC 怎么区分有冲突的 event_id 原文并没有做过多的说明。
+在上图中，Registry thread 会取多个队列中的 request，把request中的 event_id 打包成一个 paxos 请求。这里会提供一个简单的冲突检测，针对打包的 event_id。 对于批量的id注册，有点类似 Mesa 里的 `MVCC`，对多个操作原子提交。
+
+**分治：**
 
 > To take advantage of the event_id independence, we partition the event id space handled by the IdRegistry into disjoint shards such that event ids from separate shards are managed by separate IdRegistry servers. 
 

@@ -7,6 +7,8 @@ category: Paper Weekend
 tags: [paper，streaming, google]
 ---
 
+> T Akidau et al. VLDB 2013
+
 ## Intro and Issues
 MillWheel 是 Google 开发的一个低延时的流式处理系统。用户指定计算的 DAG 图，以及图中每个节点的计算代码，MillWheel 负责数据流的计算，保证整个计算过程的分布式以及容错性。从宏观上看，MillWheel 提供了数据计算的幂等性，在用户视角提供不重不丢的语义。
 
