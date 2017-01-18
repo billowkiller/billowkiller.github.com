@@ -51,7 +51,6 @@
 Querying 应该是在这四个里面比重占据最大的一块，因为之前的一切处理都是为了查询服务的。查询的主要
 
 
-
 ![](http://imply.io/image/blog-assets/radstack.png)
 
 

@@ -278,4 +278,6 @@ Log Recovery 这里分为 `Leader-Alive` 和 `Leader-Change`。
 
 [The Raft Consensus](https://raft.github.io/)
 
+[Can’t we all just agree?](https://blog.acolyer.org/2015/03/01/cant-we-all-just-agree/)
+
 

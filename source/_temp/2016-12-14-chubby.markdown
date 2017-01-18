@@ -1,0 +1,11 @@
+---
+layout: post
+title: "Chubby"
+date: 2016-08-23 17:23
+comments: true
+category: Paper Weekend
+tags: [paper，chubby]
+---
+
+> M Burrows. OSDI 2016
+
