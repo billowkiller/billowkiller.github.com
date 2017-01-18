@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Paper Weekend | Tech Digging and Sharing]]></title>
   <link href="http://billowkiller.github.io/blog/categories/paper-weekend/atom.xml" rel="self"/>
   <link href="http://billowkiller.github.io/"/>
-  <updated>2016-12-14T10:15:37+08:00</updated>
+  <updated>2017-01-18T16:43:59+08:00</updated>
   <id>http://billowkiller.github.io/</id>
   <author>
     <name><![CDATA[wutao]]></name>
@@ -53,13 +53,13 @@
 
 <h3 id="persistent-state-consistency">1. Persistent State Consistency</h3>
 
-<p>高可用，容错的系统的最简单方法就是冗余，Photon 也如此。导致的问题是在不同的数据中心可能会处理同一份数据。这时候需要对 Worker 进行协调，保证它们不对同一份数据处理。方案是对处理好的 click_id 存储下来，各个 Worker 处理的时候查询下，并在输出 joined log 之前先存储 click_id 以保证 at most once 语义。</p>
+<p>高可用，容错的系统的最简单方法就是冗余，Photon 也如此。冗余的问题是，在不同的数据中心可能会处理同一份数据，非幂等操作会导致不一致。这时候需要对 Worker 进行协调，保证它们不对同一份数据处理。方案是对处理好的 click_id 存储下来，各个 Worker 处理的时候查询下；并在输出 joined log 之前先存储 click_id。敏感的人可能已经发现这里存在的问题了，对，这里是 <code>at most once</code> 语义，在下一节进行进一步说明，这节关注 click_id 的存储。</p>
 
-<p>Photon 使用基于 <code>Multi-Paxos</code> 的容错、强一致的 <code>IdRegisty</code>。Paxos 能够保证在大多数副本之间同步状态，实现一致性。如下图是一个 IdRegistry 的架构：</p>
+<p>Photon 使用基于 <code>Multi-Paxos</code> 的容错、强一致的 <code>IdRegisty</code>。<code>IdRegisty</code> 能够保证在大多数副本之间同步状态，实现一致性。如下图是一个 IdRegistry 的架构：</p>
 
 <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-26/63413408.jpg" width="450px" /></p>
 
-<p>不同的数据中心来回的传输时间可能高达100ms，导致 IdRegistry 的 TPS 最高只有 10，对于每秒需要处理上万日志的 photon 来说是不可以接受的。那么如何增加吞吐呢？有两个措施：<code>server-side batching</code>，<code>sharding</code>。这是两个经典的扩大吞吐量的方法，<code>批量</code> 和 <code>分治</code>。</p>
+<p>使用<code>Multi-Paxos</code>方案解决副本一致性是完美的，但问题还是存在：不同的数据中心来回的传输时间可能高达 100ms，导致 IdRegistry 的 TPS 最高只有 10，对于每秒需要处理上万日志的 photon 来说是不可以接受的。那么如何增加吞吐呢？有两个措施：<code>server-side batching</code>，<code>sharding</code>。对应两个经典的扩大吞吐量的方法，<code>批量</code> 和 <code>分治</code>。</p>
 
 <u>批量：</u>
 
@@ -67,7 +67,7 @@
   <p>Server-side batching combine multiple event-level commits into one bigger commit. The registry thread dequeues multiple requests and batches them into a single PaxosDB transaction.</p>
 </blockquote>
 
-<p>在上图中，Registry thread 会取多个队列中的 request，把request中的 event_id 打包成一个 paxos 请求。这里会提供一个简单的冲突检测，针对打包的 event_id。 对于批量的id注册，有点类似 Mesa 里的 <code>MVCC</code>，对多个操作原子提交。</p>
+<p>在上图中，Registry thread 会取多个队列中的 request，把request中的 event_id 打包成一个 paxos 请求。photon 会提供一个简单的单机冲突检测，针对打包的 event_id。 对于批量的id注册，有点类似 Mesa 里的 <code>MVCC</code>，对多个操作原子提交。</p>
 
 <u>分治：</u>
 
@@ -75,19 +75,19 @@
   <p>To take advantage of the event_id independence, we partition the event id space handled by the IdRegistry into disjoint shards such that event ids from separate shards are managed by separate IdRegistry servers. </p>
 </blockquote>
 
-<p>sharding 需要 resharding 是比较麻烦的，需要考虑向后兼容性。对于落后的 log 来说它必须在 resharding 之后还能找到原来的 shard，原文称为 “deterministic mapping”。Photon 通过增加时间窗口实现，在 timestamp 在 [0, now + S] 内使用之前的sharding。这个时间会通过 True Time API 校正，这个 API 是 Google 特有的，通过原子时钟校正，不具有普适性。这里不得不感叹 Google 的基础架构之强大。</p>
+<p>sharding 需要 resharding 是比较麻烦的，需要考虑向后兼容性。对于落后的 log 来说它必须在 resharding 之后还能找到原来的 shard，原文称为 “deterministic mapping”。Photon 通过增加时间维度实现，在 timestamp 在 [0, now + S] 内使用之前的sharding。这个时间会通过 True Time API 校正，这个 API 是 Google 特有的，通过原子时钟校正，不具有普适性。这里不得不感叹 Google 的基础架构之强大。</p>
 
 <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-26/39260007.jpg" width="500px" /></p>
 
 <h3 id="exactly-once-eventually">2. Exactly Once Eventually</h3>
 
-<p>这个语义和架构有关，所以我们先看下 Photon 的架构，了解里面的组件如何实现 Exactly-once，这里说明下印象比较深的是在 Paper 中， Photon 使用两个非常普遍的技术：<code>异步 PRC</code>, <code>throttling</code>，在提高效率和稳定性方面带来很大的帮助：</p>
+<p>这个语义和架构强相关，所以我们先看下 Photon 的架构，了解里面的组件如何实现 Exactly-once，这里顺便说下印象比较深的是在 Paper 中， Photon 使用两个非常普遍的技术：<code>异步 PRC</code>, <code>throttling</code>，在提高效率和稳定性方面带来很大的帮助：</p>
 
 <p><img src="http://7xqfqs.com1.z0.glb.clouddn.com/public/16-11-26/70920655.jpg" width="500px" /></p>
 
 <p><strong>Dispatcher</strong></p>
 
-<p>Dispatcher 负责监控日志文件，并将它们及时的传送到系统。需要注意读取文件的状态元数据会保存在GFS上，用于 failover。发送前需要查看 event_id 是否在 IdRegistry 中，这里的 event_id 需要保持唯一，Photon 使用 &lt;ServerIP, ProcessID, Timestamp&gt; 作为 event_id。</p>
+<p>Dispatcher 负责监控日志文件，并将它们及时的传送到系统。需要注意读取文件的状态元数据会保存在 GFS 上，用于 failover（不明白为什么将这些小文件存储在 GFS，按照 Millwheel 的论文阐述，Google 应该是有类似内存 table 的东西）。发送前需要查看 event_id 是否在 IdRegistry 中，这里的 event_id 需要保持唯一，Photon 使用 &lt;ServerIP, ProcessID, Timestamp&gt; 作为 event_id（应该不会绝对唯一，私网 ip 应该有很多重复的吧）。</p>
 
 <p>Dispatcher 异步的发送日志到 joiner，等待 joiner 的 ack。如果失败，则会将 click log 存入 GFS，稍后使用指数回退算法重试。一旦重试时间超过阈值，则判定日志为 unjoinable。通过这种方式达到 Dispatcher 的 at least once。</p>
 
@@ -97,16 +97,25 @@
 
 <p>joiner 接收 dispatcher 传来的数据，并且协调 EventStore 和 IdRegistry，执行日志合并的业务逻辑。joiner 解析 click log 的 click_id 和 query_id，异步获取 EventStore 的 query log 进行比较，一旦获取失败或者 dispatcher 发送过多数据，则会导致失败使得dispatcher 进入重试逻辑。这里的 throttling 是用于 joiner 能维持平滑的数据流。</p>
 
-<p>joiner 使用 adaptor 库处理业务逻辑。一旦 join 成功，则异步地注册 click_id 到 IdRegistry，成功注册后才允许下发 joined log 给下游。这两个步骤在 Photon 中并不是事务地进行，所以一旦在下发前宕机或者 ack 丢失就会导致 joined log 丢失。</p>
+<p>joiner 使用 adaptor 库处理业务逻辑。一旦 join 成功，则异步地注册 click_id 到 IdRegistry，成功注册后才允许下发 joined log 给下游。这两个步骤在 Photon 中并不是事务地进行，所以一旦在下发前宕机或者 ack 丢失就会导致 joined log 丢失，这也是上一节说的 <code>at most once</code> 原因。</p>
 
-<p>之所以不进行事务处理，原因应该是想让 joiner <code>无状态</code>，提高可扩展性。导致的风险可以用下面的方法解决。</p>
+<p>之所以不进行事务处理，原因应该是想让 joiner <code>高吞吐</code> 和 <code>无状态</code>。设想下事务的实现：</p>
+
+<p><code>
+BEGIN WORK
+REG(IdRegistry, click_id)
+SEND(joined_log)
+COMMIT WORK
+</code></p>
+
+<p>事务的实现可以有<code>扁平事务</code>和<code>带有保存点的扁平事务</code>，分别要求 IdRegistry 实现 Rollback 和 joiner 带状态。这两种方法带来的代价都很大，所以 photon 将这两个步骤拆开来做。导致的风险可以用下面的方法解决。</p>
 
 <p>提交 click_id 给 IdRegistry 时，joiner 会附带自己的 &lt;ServerIP, ProcessID, Timestamp&gt; 信息作为 <code>unique token</code> 一并提交。当 IdRegistry 收到 click_id 的提交信息时，会比较 token，
 相同则说明是上一次没有收到 ack 的那个 joiner 发过来的。IdRegistry 此时返回成功，允许 joiner 下发合并日志。</p>
 
 <p>但此种方法并没有解决宕机带来的不一致。Photon 给的方案是使用另外一个 <code>verification system</code> 作为补充。一旦检测到 IdRegistry 中的 event 并不在 output log 中，则删除 IdRegistry 的 click_id，并重新注入 click log。</p>
 
-<p>以上其实是通过内部机制实现尽力而为的 exactly-once，最后通过类似的 lambda 架构实现最终 exactly-once。</p>
+<p><strong>以上方案其实是通过内部机制实现尽力而为的 exactly-once，最后通过类似的 lambda 架构实现最终 exactly-once。</strong></p>
 
 ]]></content>
   </entry>
